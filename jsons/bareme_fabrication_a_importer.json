@@ -1,0 +1,4324 @@
+[
+  {
+    "_id": "item:Croupon_epais",
+    "type": "item",
+    "nom": "Croupon épais",
+    "icon": "🟫",
+    "description": "Le dos de la peau, la partie la plus épaisse, tannée lentement au chêne. Le tanneur la garde pour qui veut un cuir qui encaisse.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure",
+      "cuir"
+    ],
+    "poids": 1.0,
+    "valeur": [
+      {
+        "cu": 60
+      },
+      {
+        "cu": 110
+      }
+    ],
+    "fabrication": {
+      "nom": "de croupon",
+      "modificateurs": {
+        "bonus_pa": 3,
+        "poids": {
+          "facteur": 1.1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Cuir_bouilli",
+    "type": "item",
+    "nom": "Cuir bouilli",
+    "icon": "🟫",
+    "description": "Peau trempée dans la poix chaude puis mise en forme sur un moule de bois. En refroidissant, elle devient dure comme de la corne.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure",
+      "cuir"
+    ],
+    "poids": 0.4,
+    "fabrication": {
+      "nom": "en cuir bouilli",
+      "modificateurs": {
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 1.05
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Cuir_fume",
+    "type": "item",
+    "nom": "Cuir fumé",
+    "icon": "🟫",
+    "description": "Un cuir pendu dans la fumée jusqu'à prendre la couleur du tabac. L'eau perle dessus, et il garde une souplesse de gant.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure",
+      "cuir"
+    ],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 35
+      },
+      {
+        "cu": 70
+      }
+    ],
+    "fabrication": {
+      "nom": "de cuir fumé",
+      "modificateurs": {
+        "effets": {
+          "esquive": 1
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Cuir_tanne_au_chene",
+    "type": "item",
+    "nom": "Cuir tanné au chêne",
+    "icon": "🟫",
+    "description": "Des mois dans les fosses à tan, couche de peau, couche d'écorce : le cuir en ressort ferme, brun et presque imputrescible.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure",
+      "cuir"
+    ],
+    "poids": 0.6,
+    "valeur": [
+      {
+        "cu": 40
+      },
+      {
+        "cu": 80
+      }
+    ],
+    "fabrication": {
+      "nom": "en cuir de chêne",
+      "modificateurs": {
+        "bonus_pa": 2,
+        "bonus": {
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Peau_chamoisee",
+    "type": "item",
+    "nom": "Peau chamoisée",
+    "icon": "🟨",
+    "description": "Peau foulée à la graisse jusqu'à devenir douce comme une étoffe. Elle se plie, se lave et ne craque jamais.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure",
+      "cuir"
+    ],
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 30
+      },
+      {
+        "cu": 60
+      }
+    ],
+    "fabrication": {
+      "nom": "doublé de chamois",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Poudre_amethyste",
+    "type": "item",
+    "nom": "Poudre d'améthyste",
+    "sous_categorie": "",
+    "icon": "💜",
+    "description": "Améthyste broyée en poudre violette, réputée apaiser l'esprit et attirer la magie.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "gemme"
+    ],
+    "fabrication": {
+      "nom": "d’Améthyste",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:brume_gwyn_ap_nudd",
+    "type": "item",
+    "nom": "Brume de Gwyn ap Nudd",
+    "icon": "🌫️",
+    "description": "Brume de Gwyn ap Nudd, préparée par une grande maison à partir de la bête. Le roi de l'Annwn mène la Chasse sauvage ; ce qu'il laisse derrière lui se tisse comme de la soie.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 0.5,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur",
+      "tissu"
+    ],
+    "fabrication": {
+      "nom": "à la Brume de Gwyn ap Nudd",
+      "modificateurs": {
+        "bonus": {
+          "Int": 3,
+          "Cha": 1
+        },
+        "effets": {
+          "esquive": 1,
+          "canalisation": 1
+        },
+        "bonus_pm": 16,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 25734
+      },
+      {
+        "cu": 38601
+      }
+    ],
+    "source_espece": "espece:gwyn_ap_nudd"
+  },
+  {
+    "_id": "item:carapace_tarasque",
+    "type": "item",
+    "nom": "Éclats de carapace de la Tarasque",
+    "icon": "🐢",
+    "description": "Éclats de carapace de la Tarasque, préparée par une grande maison à partir de la bête. Les riverains du Rhône jurent que rien de ce qui l'a frappée ne l'a jamais percée.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de la Tarasque",
+      "modificateurs": {
+        "bonus": {
+          "R": 2
+        },
+        "bonus_pv": 6,
+        "bonus_pa": 1,
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 1670
+      },
+      {
+        "cu": 2505
+      }
+    ],
+    "source_espece": "espece:tarasque"
+  },
+  {
+    "_id": "item:cendre_demon_destinee",
+    "type": "item",
+    "nom": "Cendre du Démon majeur de la Destinée",
+    "icon": "🌑",
+    "description": "Cendre du Démon majeur de la Destinée, préparée par une grande maison à partir de la bête. Une poignée de cendre tiède qui ne retombe jamais tout à fait au fond du flacon.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 0.5,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_catalyseur",
+      "fabrication_consommable"
+    ],
+    "fabrication": {
+      "nom": "à la Cendre du Démon majeur de la Destinée",
+      "modificateurs": {
+        "bonus": {
+          "F": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "canalisation": 1,
+          "pm": 20
+        },
+        "bonus_pm": 4,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 4318
+      },
+      {
+        "cu": 6477
+      }
+    ],
+    "source_espece": "espece:demon_majeur_de_la_destinee"
+  },
+  {
+    "_id": "item:cendre_demon_destruction",
+    "type": "item",
+    "nom": "Cendre du Démon majeur de la Destruction",
+    "icon": "🌋",
+    "description": "Cendre du Démon majeur de la Destruction, préparée par une grande maison à partir de la bête. Elle noircit le verre qui la contient ; les alchimistes la manient avec des pinces.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 0.5,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_catalyseur",
+      "fabrication_consommable"
+    ],
+    "fabrication": {
+      "nom": "à la Cendre du Démon majeur de la Destruction",
+      "modificateurs": {
+        "bonus": {
+          "F": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "canalisation": 1,
+          "pm": 20
+        },
+        "bonus_pm": 4,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 14018
+      },
+      {
+        "cu": 21027
+      }
+    ],
+    "source_espece": "espece:demon_majeur_de_la_destruction"
+  },
+  {
+    "_id": "item:cendre_prince_demon",
+    "type": "item",
+    "nom": "Cendre du Prince Démon",
+    "icon": "🔥",
+    "description": "Cendre du Prince Démon, préparée par une grande maison à partir de la bête. Une cendre qui sent le soufre, et que la lumière du jour ne parvient pas à éclaircir.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 0.5,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_catalyseur",
+      "fabrication_consommable"
+    ],
+    "fabrication": {
+      "nom": "à la Cendre du Prince Démon",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Vol": 1
+        },
+        "effets": {
+          "canalisation": 1,
+          "pm": 25
+        },
+        "bonus_pm": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 27399
+      },
+      {
+        "cu": 41098
+      }
+    ],
+    "source_espece": "espece:prince_demon"
+  },
+  {
+    "_id": "item:cuir",
+    "type": "item",
+    "nom": "Cuir",
+    "sous_categorie": "cuir",
+    "icon": "🟫",
+    "description": "Cuir tanné, prêt à être coupé et cousu.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.5,
+    "fabrication": {
+      "nom": "à garniture de cuir",
+      "modificateurs": {
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    },
+    "tags": [
+      "cuir"
+    ]
+  },
+  {
+    "_id": "item:cuir_bete_apocalypse",
+    "type": "item",
+    "nom": "Cuir de la Bête de l'Apocalypse",
+    "icon": "🐲",
+    "description": "Cuir de la Bête de l'Apocalypse, préparée par une grande maison à partir de la bête. Sept têtes, dix cornes, disent les visions ; le cuir, lui, ne ment pas sur sa dureté.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "au Cuir de la Bête de l'Apocalypse",
+      "modificateurs": {
+        "bonus": {
+          "F": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 4,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 19711
+      },
+      {
+        "cu": 29566
+      }
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse"
+  },
+  {
+    "_id": "item:cuir_brut",
+    "type": "item",
+    "nom": "Cuir brut",
+    "sous_categorie": "cuir_brut",
+    "icon": "🟫",
+    "description": "Peau fraîchement écorchée, qui doit encore passer chez le tanneur.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.6,
+    "fabrication": {
+      "nom": "de la Peau",
+      "modificateurs": {
+        "bonus_pv": 1,
+        "bonus": {
+          "R": 1
+        },
+        "poids": {
+          "facteur": 0.95
+        },
+        "valeur": {
+          "facteur": 1.05
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "cuir"
+    ]
+  },
+  {
+    "_id": "item:ecailles_balaur",
+    "type": "item",
+    "nom": "Écailles du Balaur",
+    "icon": "🐉",
+    "description": "Écailles du Balaur, préparée par une grande maison à partir de la bête. Le dragon des Carpates aux têtes multiples : c'est un balaur, sorti d'un donjon, qui ravagea les terres de Vlad.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Balaur",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 16752
+      },
+      {
+        "cu": 25129
+      }
+    ],
+    "source_espece": "espece:balaur"
+  },
+  {
+    "_id": "item:ecailles_dragon",
+    "type": "item",
+    "nom": "Écailles de Dragon",
+    "icon": "🐲",
+    "description": "Écailles de Dragon, préparée par une grande maison à partir de la bête. Sigurd se serait baigné dans le sang d'un dragon ; ses écailles, elles, se portent.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Dragon",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 20058
+      },
+      {
+        "cu": 30087
+      }
+    ],
+    "source_espece": "espece:dragon"
+  },
+  {
+    "_id": "item:ecailles_dragon_blanc",
+    "type": "item",
+    "nom": "Écailles du Dragon blanc",
+    "icon": "❄️",
+    "description": "Écailles du Dragon blanc, préparée par une grande maison à partir de la bête. Le dragon blanc des récits bretons, que Merlin vit combattre le rouge sous la colline.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Dragon blanc",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 39596
+      },
+      {
+        "cu": 59395
+      }
+    ],
+    "source_espece": "espece:dragon_blanc"
+  },
+  {
+    "_id": "item:ecailles_dragon_empereur",
+    "type": "item",
+    "nom": "Écailles du Dragon Empereur",
+    "icon": "🐉",
+    "description": "Écailles du Dragon Empereur, préparée par une grande maison à partir de la bête. Plus vieux que les Anthropes, disent certains ; d'autres jurent qu'il n'en reste aucun.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Dragon Empereur",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 69912
+      },
+      {
+        "cu": 104868
+      }
+    ],
+    "source_espece": "espece:dragon_empereur"
+  },
+  {
+    "_id": "item:ecailles_dragon_hydre",
+    "type": "item",
+    "nom": "Écailles du Dragon-hydre",
+    "icon": "🐲",
+    "description": "Écailles du Dragon-hydre, préparée par une grande maison à partir de la bête. Plusieurs cous, un seul souffle : ses écailles repoussent quand on les arrache.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Dragon-hydre",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 4732
+      },
+      {
+        "cu": 7098
+      }
+    ],
+    "source_espece": "espece:dragon_hydre"
+  },
+  {
+    "_id": "item:ecailles_dragon_rouge",
+    "type": "item",
+    "nom": "Écailles du Dragon rouge",
+    "icon": "🔥",
+    "description": "Écailles du Dragon rouge, préparée par une grande maison à partir de la bête. Le dragon rouge que Merlin vit vaincre le blanc sous la colline de Dinas Emrys.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Dragon rouge",
+      "modificateurs": {
+        "bonus": {
+          "F": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 47819
+      },
+      {
+        "cu": 71728
+      }
+    ],
+    "source_espece": "espece:dragon_rouge"
+  },
+  {
+    "_id": "item:ecailles_grand_dragon",
+    "type": "item",
+    "nom": "Écailles du Grand Dragon",
+    "icon": "🐲",
+    "description": "Écailles du Grand Dragon, préparée par une grande maison à partir de la bête. Fáfnir couvait son or ; celui-ci couvait des donjons, à en croire ceux qui en sont revenus.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Grand Dragon",
+      "modificateurs": {
+        "bonus": {
+          "F": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 36854
+      },
+      {
+        "cu": 55281
+      }
+    ],
+    "source_espece": "espece:grand_dragon"
+  },
+  {
+    "_id": "item:ecailles_grootslang",
+    "type": "item",
+    "nom": "Écailles du Grootslang",
+    "icon": "🐍",
+    "description": "Écailles du Grootslang, préparée par une grande maison à partir de la bête. Le serpent-éléphant des gouffres du Richtersveld, gardien de diamants, disent les chercheurs.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Grootslang",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 2712
+      },
+      {
+        "cu": 4069
+      }
+    ],
+    "source_espece": "espece:grootslang"
+  },
+  {
+    "_id": "item:ecailles_hydre",
+    "type": "item",
+    "nom": "Écailles de l'Hydre",
+    "icon": "🐍",
+    "description": "Écailles de l'Hydre, préparée par une grande maison à partir de la bête. Coupez une tête, deux repoussent : on ne vient à bout d'une hydre que par le feu.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de l'Hydre",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_pv": 6,
+        "bonus_pa": 1,
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 2540
+      },
+      {
+        "cu": 3811
+      }
+    ],
+    "source_espece": "espece:hydre"
+  },
+  {
+    "_id": "item:ecailles_illuyanka",
+    "type": "item",
+    "nom": "Écailles d'Illuyanka",
+    "icon": "🐉",
+    "description": "Écailles d'Illuyanka, préparée par une grande maison à partir de la bête. Le serpent d'Anatolie qui vainquit le dieu de l'orage avant d'être pris au piège d'un festin.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles d'Illuyanka",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 4284
+      },
+      {
+        "cu": 6427
+      }
+    ],
+    "source_espece": "espece:illuyanka"
+  },
+  {
+    "_id": "item:ecailles_ladon",
+    "type": "item",
+    "nom": "Écailles de Ladon",
+    "icon": "🐍",
+    "description": "Écailles de Ladon, préparée par une grande maison à partir de la bête. Le gardien du jardin des Hespérides, né de Cétô ou d'Échidna : les récits se disputent.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de Ladon",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 4284
+      },
+      {
+        "cu": 6427
+      }
+    ],
+    "source_espece": "espece:ladon"
+  },
+  {
+    "_id": "item:ecailles_leviathan",
+    "type": "item",
+    "nom": "Écailles du Léviathan",
+    "icon": "🌊",
+    "description": "Écailles du Léviathan, préparée par une grande maison à partir de la bête. Sa carapace est faite de boucliers serrés, dit le vieux texte, et le fer n'y entre pas.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Léviathan",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 10152
+      },
+      {
+        "cu": 15228
+      }
+    ],
+    "source_espece": "espece:leviathan"
+  },
+  {
+    "_id": "item:ecailles_serpent_de_marcel",
+    "type": "item",
+    "nom": "Écailles du Serpent de Marcel",
+    "icon": "🐍",
+    "description": "Écailles du Serpent de Marcel, préparée par une grande maison à partir de la bête. Le serpent qui terrorisait Lutecia jusqu'à ce que l'évêque Marcel le chasse, selon les récits du faubourg.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Serpent de Marcel",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "bonus_pa": 3,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 4385
+      },
+      {
+        "cu": 6578
+      }
+    ],
+    "source_espece": "espece:serpent_de_marcel"
+  },
+  {
+    "_id": "item:ecailles_yamata_no_orochi",
+    "type": "item",
+    "nom": "Écailles de Yamata no Orochi",
+    "icon": "🐍",
+    "description": "Écailles de Yamata no Orochi, préparée par une grande maison à partir de la bête. Huit têtes, huit queues, enivrées par Susanoo à Izumo ; dans l'une d'elles dormait une épée.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de Yamata no Orochi",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 7878
+      },
+      {
+        "cu": 11817
+      }
+    ],
+    "source_espece": "espece:yamata_no_orochi"
+  },
+  {
+    "_id": "item:ecailles_zmey_gorynych",
+    "type": "item",
+    "nom": "Écailles de Zmeï Gorynytch",
+    "icon": "🐉",
+    "description": "Écailles de Zmeï Gorynytch, préparée par une grande maison à partir de la bête. Le dragon à trois têtes du pont Kalinov, sur la rivière de feu des contes russes.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 4.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de Zmeï Gorynytch",
+      "modificateurs": {
+        "bonus": {
+          "F": 4
+        },
+        "bonus_pv": 10,
+        "bonus_pa": 5,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 29240
+      },
+      {
+        "cu": 43860
+      }
+    ],
+    "source_espece": "espece:zmey_gorynych"
+  },
+  {
+    "_id": "item:fourrure_cath_palug",
+    "type": "item",
+    "nom": "Fourrure de Cath Palug",
+    "icon": "🐈‍⬛",
+    "description": "Fourrure de Cath Palug, préparée par une grande maison à partir de la bête. Le chat monstrueux d'Anglesey, né, dit-on, d'une truie de Cornouailles.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "au Cuir de Cath Palug",
+      "modificateurs": {
+        "bonus": {
+          "F": 2
+        },
+        "bonus_pv": 6,
+        "effets": {
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 6035
+      },
+      {
+        "cu": 9052
+      }
+    ],
+    "source_espece": "espece:cath_palug"
+  },
+  {
+    "_id": "item:gemmes",
+    "type": "item",
+    "nom": "Gemme brute",
+    "description": "Pierre de couleur tirée du gravier d'une rivière ou du fond d'une mine, encore mate. Il faudra la tailler avant qu'elle ne prenne feu.",
+    "icon": "💎",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "gemmes",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_catalyseur",
+      "gemme"
+    ],
+    "poids": 0.05,
+    "valeur": [
+      {
+        "cu": 80
+      }
+    ],
+    "fabrication": {
+      "nom": "serti d'une gemme",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 1,
+          "Vol": 2
+        },
+        "effets": {
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:os_geant_de_ad",
+    "type": "item",
+    "nom": "Os du Géant de ʿĀd",
+    "icon": "🦴",
+    "description": "Os du Géant de ʿĀd, préparée par une grande maison à partir de la bête. Le peuple de ʿĀd bâtissait des colonnes à sa taille ; le désert en a gardé les os.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 5.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_arme",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Os du Géant de ʿĀd",
+      "modificateurs": {
+        "bonus": {
+          "R": 2
+        },
+        "bonus_pa": 2,
+        "bonus_degats": 2,
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 3991
+      },
+      {
+        "cu": 5986
+      }
+    ],
+    "source_espece": "espece:geant_de_ad"
+  },
+  {
+    "_id": "item:os_geant_du_mont_saint_michel",
+    "type": "item",
+    "nom": "Os du Géant du Mont-Saint-Michel",
+    "icon": "🦴",
+    "description": "Os du Géant du Mont-Saint-Michel, préparée par une grande maison à partir de la bête. Arthur l'aurait affronté sur le mont, au récit des vieux conteurs bretons.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 5.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_arme",
+      "fabrication_armure_metal"
+    ],
+    "fabrication": {
+      "nom": "aux Os du Géant du Mont-Saint-Michel",
+      "modificateurs": {
+        "bonus": {
+          "R": 2
+        },
+        "bonus_pa": 2,
+        "bonus_degats": 2,
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 13603
+      },
+      {
+        "cu": 20404
+      }
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel"
+  },
+  {
+    "_id": "item:peau_bete_glatissante",
+    "type": "item",
+    "nom": "Peau de la Bête glatissante",
+    "icon": "🦌",
+    "description": "Peau de la Bête glatissante, préparée par une grande maison à partir de la bête. Pellinore l'a traquée toute sa vie ; de son ventre montait le bruit d'une meute.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "au Cuir de la Bête glatissante",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 10674
+      },
+      {
+        "cu": 16011
+      }
+    ],
+    "source_espece": "espece:bete_glatissante"
+  },
+  {
+    "_id": "item:peau_kraken",
+    "type": "item",
+    "nom": "Peau du Kraken",
+    "icon": "🐙",
+    "description": "Peau du Kraken, préparée par une grande maison à partir de la bête. Les marins de Norvège l'ont pris pour une île ; certains y ont même accosté.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "à la Peau du Kraken",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 3531
+      },
+      {
+        "cu": 5296
+      }
+    ],
+    "source_espece": "espece:kraken"
+  },
+  {
+    "_id": "item:peau_kraken_polaire",
+    "type": "item",
+    "nom": "Peau du Kraken polaire",
+    "icon": "🦑",
+    "description": "Peau du Kraken polaire, préparée par une grande maison à partir de la bête. Pris sous la banquise, il remonte quand la glace craque, et la mer gèle sur son passage.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "à la Peau du Kraken polaire",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 3531
+      },
+      {
+        "cu": 5296
+      }
+    ],
+    "source_espece": "espece:polar_kraken"
+  },
+  {
+    "_id": "item:peau_vers_des_sables",
+    "type": "item",
+    "nom": "Peau des Vers des Sables",
+    "icon": "🪱",
+    "description": "Peau des Vers des Sables, préparée par une grande maison à partir de la bête. Le désert tremble avant qu'ils ne surgissent ; leur peau ne craint ni le sable ni le soleil.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "à la Peau des Vers des Sables",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 3531
+      },
+      {
+        "cu": 5296
+      }
+    ],
+    "source_espece": "espece:vers_des_sables"
+  },
+  {
+    "_id": "item:pelage_bete_du_gevaudan",
+    "type": "item",
+    "nom": "Pelage de la Bête du Gévaudan",
+    "icon": "🐺",
+    "description": "Pelage de la Bête du Gévaudan, préparée par une grande maison à partir de la bête. Loup, loup-garou ou autre chose : dans le Gévaudan, personne n'a jamais su.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "au Cuir de la Bête du Gévaudan",
+      "modificateurs": {
+        "bonus": {
+          "F": 2
+        },
+        "bonus_pv": 6,
+        "effets": {
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 2024
+      },
+      {
+        "cu": 3037
+      }
+    ],
+    "source_espece": "espece:bete_du_gevaudan"
+  },
+  {
+    "_id": "item:perles",
+    "type": "item",
+    "nom": "Perle",
+    "description": "Perle d'eau douce, ronde et laiteuse. Il en faut un plein cordon pour un sautoir, et une huître sur mille pour une perle.",
+    "icon": "⚪",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "perles",
+    "slots": [],
+    "tags": [
+      "gemme"
+    ],
+    "poids": 0.02,
+    "valeur": [
+      {
+        "cu": 60
+      }
+    ],
+    "fabrication": {
+      "nom": "perlé",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Cha": 3,
+          "Vol": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:plumes_archange_de_l_ordre",
+    "type": "item",
+    "nom": "Plumes de l'Archange de l'Ordre",
+    "icon": "🪶",
+    "description": "Plumes de l'Archange de l'Ordre, préparée par une grande maison à partir de la bête. Ce qui vient du ciel ne dit pas d'où il vient ; ses plumes ne ternissent pas.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 1.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur",
+      "tissu"
+    ],
+    "fabrication": {
+      "nom": "aux Plumes de l'Archange de l'Ordre",
+      "modificateurs": {
+        "bonus": {
+          "Vol": 2,
+          "Int": 1
+        },
+        "effets": {
+          "esquive": 1,
+          "canalisation": 1
+        },
+        "bonus_pm": 10,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 38668
+      },
+      {
+        "cu": 58003
+      }
+    ],
+    "source_espece": "espece:archange_de_l_ordre"
+  },
+  {
+    "_id": "item:plumes_archange_du_savoir",
+    "type": "item",
+    "nom": "Plumes de l'Archange du Savoir",
+    "icon": "🪶",
+    "description": "Plumes de l'Archange du Savoir, préparée par une grande maison à partir de la bête. Les érudits qui en possèdent une affirment lire plus vite à sa lueur. D'autres en rient.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 1.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur",
+      "tissu"
+    ],
+    "fabrication": {
+      "nom": "aux Plumes de l'Archange du Savoir",
+      "modificateurs": {
+        "bonus": {
+          "Vol": 2,
+          "Int": 1
+        },
+        "effets": {
+          "esquive": 1,
+          "canalisation": 1
+        },
+        "bonus_pm": 10,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 9813
+      },
+      {
+        "cu": 14720
+      }
+    ],
+    "source_espece": "espece:archange_du_savoir"
+  },
+  {
+    "_id": "item:plumes_grand_phenix",
+    "type": "item",
+    "nom": "Plumes du Grand Phénix",
+    "icon": "🔥",
+    "description": "Plumes du Grand Phénix, préparée par une grande maison à partir de la bête. Elles restent tièdes, et nul ne sait si elles se consumeront un jour pour renaître ailleurs.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 1.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur",
+      "tissu"
+    ],
+    "fabrication": {
+      "nom": "aux Plumes du Grand Phénix",
+      "modificateurs": {
+        "bonus": {
+          "F": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "esquive": 1,
+          "canalisation": 1
+        },
+        "bonus_pm": 10,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 11580
+      },
+      {
+        "cu": 17371
+      }
+    ],
+    "source_espece": "espece:grand_phenix"
+  },
+  {
+    "_id": "item:plumes_seraphin",
+    "type": "item",
+    "nom": "Plumes du Séraphin",
+    "icon": "🪽",
+    "description": "Plumes du Séraphin, préparée par une grande maison à partir de la bête. Six ailes, disent les prophètes : deux pour voler, deux pour se voiler la face, deux pour les pieds.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 1.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur",
+      "tissu"
+    ],
+    "fabrication": {
+      "nom": "aux Plumes du Séraphin",
+      "modificateurs": {
+        "bonus": {
+          "Vol": 3,
+          "Int": 1
+        },
+        "effets": {
+          "esquive": 1,
+          "canalisation": 1
+        },
+        "bonus_pm": 16,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 56864
+      },
+      {
+        "cu": 85296
+      }
+    ],
+    "source_espece": "espece:seraphin"
+  },
+  {
+    "_id": "item:poussiere_avatar",
+    "type": "item",
+    "nom": "Poussière de l'Avatar",
+    "icon": "✨",
+    "description": "Poussière de l'Avatar, préparée par une grande maison à partir de la bête. Ce qui reste d'un dieu incarné tient dans une fiole, et pèse plus lourd qu'il ne devrait.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 0.5,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_catalyseur",
+      "fabrication_consommable"
+    ],
+    "fabrication": {
+      "nom": "à la Cendre de l'Avatar",
+      "modificateurs": {
+        "bonus": {
+          "Vol": 3,
+          "Int": 1
+        },
+        "effets": {
+          "canalisation": 1,
+          "pm": 25
+        },
+        "bonus_pm": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 16212
+      },
+      {
+        "cu": 24318
+      }
+    ],
+    "source_espece": "espece:avatar"
+  },
+  {
+    "_id": "item:soies_twrch_trwyth",
+    "type": "item",
+    "nom": "Soies de Twrch Trwyth",
+    "icon": "🐗",
+    "description": "Soies de Twrch Trwyth, préparée par une grande maison à partir de la bête. Le sanglier-roi qu'Arthur poursuivit d'Irlande en Cornouailles, entre ses oreilles un peigne et des ciseaux.",
+    "categorie": "composant",
+    "sous_categorie": "matiere_legendaire",
+    "slots": [],
+    "poids": 3.0,
+    "tags": [
+      "commandable",
+      "legendaire",
+      "fabrication_armure_cuir",
+      "cuir"
+    ],
+    "fabrication": {
+      "nom": "au Cuir de Twrch Trwyth",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    },
+    "valeur": [
+      {
+        "cu": 8124
+      },
+      {
+        "cu": 12187
+      }
+    ],
+    "source_espece": "espece:twrch_trwyth"
+  },
+  {
+    "_id": "item:Arc_long_composite_4b849907",
+    "type": "item",
+    "nom": "Arc long composite Bestial des Profondeurs en orichalque",
+    "icon": "🏹",
+    "categorie": "arme",
+    "sous_categorie": "arc",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "tir"
+    ],
+    "deux_mains": true,
+    "description": "Arc long fait de bois, de corne et de nerf collés : plus puissant qu'un arc d'if. Façonné sur mesure : Fiole de sang de bête, Patte de Bunyip, Lingot d'orichalque.",
+    "bonus_degats": 6,
+    "bonus_degats_dice": "1D6+1D6+1D6",
+    "bonus_cd": 7,
+    "portee": 9,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1,
+      "R": 1,
+      "Int": 2,
+      "Vol": 2
+    },
+    "effets": {
+      "canalisation": 1
+    },
+    "restriction": {
+      "Ag": 23,
+      "F": 14
+    },
+    "rarete": "tres_rare",
+    "poids": [
+      1.47,
+      2.31
+    ],
+    "valeur": [
+      {
+        "cu": 96592
+      },
+      {
+        "cu": 316560
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Arc_long_composite",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:bunyip_patte",
+          "quantite": 1
+        },
+        {
+          "item": "item:orichalque",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Arc_long_composite_4b849907",
+      "cree_at": 1794291021,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Arc_long_composite_b725d2d1",
+    "type": "item",
+    "nom": "Arc long composite Bestial en adamantite des Profondeurs",
+    "icon": "🏹",
+    "categorie": "arme",
+    "sous_categorie": "arc",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "tir"
+    ],
+    "deux_mains": true,
+    "description": "Arc long fait de bois, de corne et de nerf collés : plus puissant qu'un arc d'if. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Patte de Bunyip.",
+    "bonus_degats": 6,
+    "bonus_degats_dice": "1D6+1D8+1D6",
+    "bonus_cd": 7,
+    "portee": 9,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1,
+      "R": 4
+    },
+    "restriction": {
+      "Ag": 23,
+      "F": 14
+    },
+    "rarete": "legendaire",
+    "poids": [
+      1.76,
+      2.77
+    ],
+    "valeur": [
+      {
+        "cu": 206592
+      },
+      {
+        "cu": 646560
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Arc_long_composite",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:bunyip_patte",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Arc_long_composite_b725d2d1",
+      "cree_at": 1794262633,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Armure_cuir_runee_664dcaad",
+    "type": "item",
+    "nom": "Armure de cuir gravée de runes encensé Hanté en adamantite",
+    "icon": "🧥",
+    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit. Façonné sur mesure : Encens, Fragments d'âme, Lingot d'adamantite.",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "bonus_pa": 7,
+    "bonus_pm": 15,
+    "bonus": {
+      "Int": 4,
+      "Vol": 3,
+      "R": 3
+    },
+    "effets": {
+      "regen_pm": 1
+    },
+    "restriction": {
+      "Int": 20,
+      "Vol": 20
+    },
+    "rarete": "legendaire",
+    "poids": [
+      3.6,
+      6.0
+    ],
+    "valeur": [
+      {
+        "cu": 216310
+      },
+      {
+        "cu": 745650
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_runee",
+      "matieres": [
+        {
+          "item": "item:Encens",
+          "quantite": 1
+        },
+        {
+          "item": "item:Fragments_ame",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_runee_664dcaad",
+      "cree_at": 1790538787,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Armure_cuir_runee_8f60cd9b",
+    "type": "item",
+    "nom": "Armure de cuir gravée de runes Bestial en adamantite vivante",
+    "icon": "🧥",
+    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Débris animés.",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "bonus_pa": 7,
+    "bonus_pm": 10,
+    "bonus": {
+      "Int": 3,
+      "F": 1,
+      "V": 1,
+      "R": 3,
+      "Ag": 1
+    },
+    "restriction": {
+      "Int": 20,
+      "Vol": 20
+    },
+    "rarete": "legendaire",
+    "poids": [
+      3.6,
+      6.0
+    ],
+    "valeur": [
+      {
+        "cu": 216164
+      },
+      {
+        "cu": 745212
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_runee",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_runee_8f60cd9b",
+      "cree_at": 1790457275,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Armure_cuir_souple_N_620022e7",
+    "type": "item",
+    "nom": "Armure de cuir souple noire Bestial",
+    "icon": "🥷",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "description": "Armure de cuir souple teint en noir, qui ne craque ni ne brille. Façonné sur mesure : Fiole de sang de bête.",
+    "bonus_pa": 5,
+    "bonus": {
+      "F": 1,
+      "V": 1
+    },
+    "rarete": "commun",
+    "poids": [
+      2.0,
+      4.0
+    ],
+    "valeur": [
+      {
+        "cu": 284
+      },
+      {
+        "cu": 929
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_souple_N",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_souple_N_620022e7",
+      "cree_at": 1794055910,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Armure_cuir_souple_N_62f728ea",
+    "type": "item",
+    "nom": "Armure de cuir souple noire en cuir de chêne Hanté damasquiné",
+    "icon": "🥷",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "description": "Armure de cuir souple teint en noir, qui ne craque ni ne brille. Façonné sur mesure : Cuir tanné au chêne, Fragments d'âme, Acier plissé.",
+    "bonus_pa": 7,
+    "bonus_pm": 3,
+    "bonus": {
+      "R": 1,
+      "Int": 1,
+      "Vol": 2
+    },
+    "effets": {
+      "regen_pm": 1
+    },
+    "rarete": "rare",
+    "poids": [
+      2.1,
+      4.2
+    ],
+    "valeur": [
+      {
+        "cu": 2543
+      },
+      {
+        "cu": 9495
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_souple_N",
+      "matieres": [
+        {
+          "item": "item:Cuir_tanne_au_chene",
+          "quantite": 1
+        },
+        {
+          "item": "item:Fragments_ame",
+          "quantite": 1
+        },
+        {
+          "item": "item:acier_plisse",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_souple_N_62f728ea",
+      "cree_at": 1794345033,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Armure_cuir_souple_N_b86ac927",
+    "type": "item",
+    "nom": "Armure de cuir souple noire Bestial en mithril en orichalque",
+    "icon": "🥷",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "description": "Armure de cuir souple teint en noir, qui ne craque ni ne brille. Façonné sur mesure : Fiole de sang de bête, Lingot de mithril, Lingot d'orichalque.",
+    "bonus_pa": 7,
+    "bonus_cc": 2,
+    "bonus_pm": 4,
+    "bonus": {
+      "F": 1,
+      "V": 1,
+      "Ag": 2,
+      "Int": 2,
+      "Vol": 2
+    },
+    "effets": {
+      "canalisation": 1
+    },
+    "rarete": "tres_rare",
+    "poids": [
+      1.2,
+      2.4
+    ],
+    "valeur": [
+      {
+        "cu": 130346
+      },
+      {
+        "cu": 392944
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_souple_N",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        },
+        {
+          "item": "item:orichalque",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_souple_N_b86ac927",
+      "cree_at": 1794054075,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Armure_cuir_souple_N_c6274915",
+    "type": "item",
+    "nom": "Armure de cuir souple noire en cuir de chêne doublé de chamois vivante",
+    "icon": "🥷",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "description": "Armure de cuir souple teint en noir, qui ne craque ni ne brille. Façonné sur mesure : Cuir tanné au chêne, Peau chamoisée, Débris animés.",
+    "bonus_pa": 6,
+    "bonus": {
+      "R": 1,
+      "Ag": 2
+    },
+    "effets": {
+      "esquive": 1
+    },
+    "rarete": "peu_commun",
+    "poids": [
+      1.9,
+      3.8
+    ],
+    "valeur": [
+      {
+        "cu": 404
+      },
+      {
+        "cu": 1799
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Armure_cuir_souple_N",
+      "matieres": [
+        {
+          "item": "item:Cuir_tanne_au_chene",
+          "quantite": 1
+        },
+        {
+          "item": "item:Peau_chamoisee",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Armure_cuir_souple_N_c6274915",
+      "cree_at": 1794345379,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Bandouliere_a_fioles_68548d41",
+    "type": "item",
+    "nom": "Bandoulière à fioles d’Améthyste en adamantite Relique",
+    "icon": "🧪",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [
+      "armure_tissu"
+    ],
+    "description": "Une rangée de gaines cousues au poitrail, chacune à la taille d'un flacon. L'alchimiste y compte ses doses sans baisser les yeux.",
+    "bonus_pa": 3,
+    "bonus_pm": 9,
+    "bonus_pv": 2,
+    "bonus": {
+      "Vol": 3,
+      "R": 3
+    },
+    "effets": {
+      "regen_pm": 1,
+      "pv": 5,
+      "pm": 5,
+      "duree": 3
+    },
+    "rarete": "legendaire",
+    "poids": 0.6,
+    "valeur": [
+      {
+        "cu": 200396
+      },
+      {
+        "cu": 602164
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Bandouliere_a_fioles",
+      "matieres": [
+        {
+          "item": "item:Poudre_amethyste",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:relique",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Bandouliere_a_fioles_68548d41",
+      "cree_at": 1790457586,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Bottes_cuir_epais_68a277fa",
+    "type": "item",
+    "nom": "Bottes de cuir épais Bestial Hanté en adamantite",
+    "icon": "👢",
+    "description": "Bottes de cuir épais, imperméables et faites pour durer. Façonné sur mesure : Fiole de sang de bête, Fragments d'âme, Lingot d'adamantite.",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "pieds"
+    ],
+    "bonus_pa": 4,
+    "bonus_pm": 3,
+    "bonus": {
+      "F": 1,
+      "V": 1,
+      "Int": 1,
+      "Vol": 2,
+      "R": 3
+    },
+    "effets": {
+      "regen_pm": 1
+    },
+    "rarete": "legendaire",
+    "poids": 1.44,
+    "valeur": [
+      {
+        "cu": 200523
+      },
+      {
+        "cu": 603429
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Bottes_cuir_epais",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Fragments_ame",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Bottes_cuir_epais_68a277fa",
+      "cree_at": 1790457611,
+      "lieu": "lieu:la_grande_megisserie"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Calotte_cuir_rune_8b192a23",
+    "type": "item",
+    "nom": "Calotte de cuir runé d’Améthyste en adamantite Relique",
+    "icon": "🎓",
+    "description": "Calotte de cuir gravée de runes, qui garde la tête froide et l'esprit clair. Façonné sur mesure : Poudre d'améthyste, Lingot d'adamantite, Relique.",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "tete"
+    ],
+    "bonus_pa": 3,
+    "bonus_pm": 6,
+    "bonus_pv": 2,
+    "bonus": {
+      "Int": 1,
+      "Vol": 3,
+      "R": 3
+    },
+    "effets": {
+      "regen_pm": 1,
+      "pv": 5,
+      "pm": 5,
+      "duree": 3
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 10
+    },
+    "rarete": "legendaire",
+    "poids": 0.36,
+    "valeur": [
+      {
+        "cu": 215888
+      },
+      {
+        "cu": 741594
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Calotte_cuir_rune",
+      "matieres": [
+        {
+          "item": "item:Poudre_amethyste",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:relique",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Calotte_cuir_rune_8b192a23",
+      "cree_at": 1790457342,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Casque_cornu_6c103bda",
+    "type": "item",
+    "nom": "Casque cornu Bestial en adamantite vivante",
+    "icon": "🐂",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "tete"
+    ],
+    "tags": [
+      "armure_cuir"
+    ],
+    "description": "Le crâne d'un Minotaure, cornes comprises, évidé et doublé de cuir, cerclé de fer à la nuque. On baisse la tête pour le porter, et l'on garde l'habitude de foncer. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Débris animés.",
+    "bonus_pa": 4,
+    "bonus_pv": 4,
+    "bonus": {
+      "F": 3,
+      "V": 1,
+      "R": 3,
+      "Ag": 1
+    },
+    "rarete": "legendaire",
+    "poids": 3.6,
+    "valeur": [
+      {
+        "cu": 201574
+      },
+      {
+        "cu": 606847
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Casque_cornu",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Casque_cornu_6c103bda",
+      "cree_at": 1793345037,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Ceinturon_de_maitre_sellier_cc54f09a",
+    "type": "item",
+    "nom": "Ceinturon de maître sellier Envoûté Hanté en mithril",
+    "icon": "🧷",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "ceinture"
+    ],
+    "tags": [],
+    "description": "Trois épaisseurs poissées, cousues au fil de sellier. On y pend une journée de marche sans que la boucle bouge d'un cran.",
+    "bonus_pa": 4,
+    "bonus_pm": 5,
+    "bonus": {
+      "F": 2,
+      "Vol": 3,
+      "Int": 1,
+      "Ag": 2
+    },
+    "effets": {
+      "buffs": {
+        "Vol": -1
+      },
+      "duree": 2,
+      "regen_pm": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.6,
+    "valeur": [
+      {
+        "cu": 43508
+      },
+      {
+        "cu": 149170
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Ceinturon_de_maitre_sellier",
+      "matieres": [
+        {
+          "item": "item:Fetiche_envoutement",
+          "quantite": 1
+        },
+        {
+          "item": "item:Fragments_ame",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Ceinturon_de_maitre_sellier_cc54f09a",
+      "cree_at": 1790535411,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Dague_3275292a",
+    "type": "item",
+    "nom": "Dague Bestial en adamantite des Profondeurs",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Patte de Bunyip.",
+    "bonus_degats": 4,
+    "bonus_degats_dice": "1D4+1D8+1D6",
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1,
+      "R": 4
+    },
+    "rarete": "legendaire",
+    "poids": 0.38,
+    "valeur": [
+      {
+        "cu": 203368
+      },
+      {
+        "cu": 617544
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:bunyip_patte",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_3275292a",
+      "cree_at": 1794261672,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_5f96ac46",
+    "type": "item",
+    "nom": "Dague Bestial Empoisonné Ténébreux",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sel noir.",
+    "bonus_degats": 3,
+    "bonus_degats_dice": "1D4+1D4",
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "F": 1,
+      "V": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Int": -1
+      }
+    },
+    "rarete": "peu_commun",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 893
+      },
+      {
+        "cu": 1333
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sel_noir",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_5f96ac46",
+      "cree_at": 1794082227,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_65c53764",
+    "type": "item",
+    "nom": "Dague Bestial en mithril",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot de mithril.",
+    "bonus_degats": 3,
+    "bonus_degats_dice": "1D4+1D6",
+    "bonus_cc": 8,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.18,
+    "valeur": [
+      {
+        "cu": 10828
+      },
+      {
+        "cu": 11148
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_65c53764",
+      "cree_at": 1794047515,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_79b420fd",
+    "type": "item",
+    "nom": "Dague Bestial des Profondeurs en mithril",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Patte de Bunyip, Lingot de mithril.",
+    "bonus_degats": 4,
+    "bonus_degats_dice": "1D4+1D6+1D6",
+    "bonus_cc": 8,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 7,
+      "F": 1,
+      "V": 1,
+      "R": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.19,
+    "valeur": [
+      {
+        "cu": 43368
+      },
+      {
+        "cu": 137544
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:bunyip_patte",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_79b420fd",
+      "cree_at": 1794145801,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_954797f8",
+    "type": "item",
+    "nom": "Dague Bestial des Eaux Sombres en mithril",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Queue de Bunyip, Lingot de mithril.",
+    "bonus_degats": 4,
+    "bonus_degats_dice": "1D4+1D6+1D6",
+    "bonus_cc": 8,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1,
+      "R": 2
+    },
+    "effets": {
+      "buffs": {
+        "Ag": -1
+      },
+      "duree": 2
+    },
+    "rarete": "tres_rare",
+    "poids": 0.18,
+    "valeur": [
+      {
+        "cu": 43668
+      },
+      {
+        "cu": 138444
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:bunyip_queue",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_954797f8",
+      "cree_at": 1794145781,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_aa3f9aa7",
+    "type": "item",
+    "nom": "Dague Bestial en orichalque",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot d'orichalque.",
+    "bonus_degats": 3,
+    "bonus_degats_dice": "1D4+1D6",
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus_pm": 4,
+    "bonus": {
+      "Ag": 3,
+      "F": 1,
+      "V": 1,
+      "Int": 2,
+      "Vol": 2
+    },
+    "effets": {
+      "canalisation": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 20828
+      },
+      {
+        "cu": 21148
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:orichalque",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_aa3f9aa7",
+      "cree_at": 1794047576,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_ac8fbfec",
+    "type": "item",
+    "nom": "Dague Bestial Empoisonné Démoniaque",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sang de démon séché.",
+    "bonus_degats": 4,
+    "bonus_degats_dice": "1D4+1D6",
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "F": 2,
+      "V": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "rarete": "rare",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 898
+      },
+      {
+        "cu": 1338
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_ac8fbfec",
+      "cree_at": 1794082206,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_15cea185",
+    "type": "item",
+    "nom": "Dague de scène de la Chimère",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Chimere.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus_cd": 2,
+    "bonus": {
+      "Ag": 4
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 2
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 4684
+      },
+      {
+        "cu": 16076
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:chimere_queue",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_15cea185",
+      "cree_at": 1794378714,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_1ad56aa5",
+    "type": "item",
+    "nom": "Dague de scène du Basilic",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Basilic.",
+    "bonus_degats": 1,
+    "bonus_degats_dice": "1D2+1D4",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3
+    },
+    "effets": {
+      "regen_pv": -3,
+      "duree": 2
+    },
+    "rarete": "peu_commun",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 1401
+      },
+      {
+        "cu": 4961
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:basilic_queue",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_1ad56aa5",
+      "cree_at": 1794594094,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_2aa00d95",
+    "type": "item",
+    "nom": "Dague de scène à la Mandragore",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Extrait de mandragore.",
+    "bonus_degats": 1,
+    "bonus_degats_dice": "1D2+1D4",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3
+    },
+    "effets": {
+      "regen_pv": -3,
+      "duree": 2
+    },
+    "rarete": "peu_commun",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 994
+      },
+      {
+        "cu": 3740
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:Extrait_de_mandragore",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_2aa00d95",
+      "cree_at": 1794255348,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_2fa8d6e9",
+    "type": "item",
+    "nom": "Dague de scène des Trois Visages",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Chimere.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 4,
+      "F": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "buffs": {
+        "Vol": -1
+      },
+      "duree": 2
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 6604
+      },
+      {
+        "cu": 21836
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:chimere_tete",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_2fa8d6e9",
+      "cree_at": 1794378725,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_3804ff4a",
+    "type": "item",
+    "nom": "Dague de scène Ténébreux",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Sel noir.",
+    "bonus_degats": 1,
+    "bonus_degats_dice": "1D2+1D4",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "Vol": 1
+    },
+    "effets": {
+      "buffs": {
+        "Int": -1
+      },
+      "duree": 2
+    },
+    "rarete": "peu_commun",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 854
+      },
+      {
+        "cu": 3320
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:Sel_noir",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_3804ff4a",
+      "cree_at": 1794255431,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_3a34cd3d",
+    "type": "item",
+    "nom": "Dague de scène des Profondeurs",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Patte de Bunyip.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 5,
+      "R": 1
+    },
+    "rarete": "rare",
+    "poids": 0.21,
+    "valeur": [
+      {
+        "cu": 2944
+      },
+      {
+        "cu": 10856
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:bunyip_patte",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_3a34cd3d",
+      "cree_at": 1794260836,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_5700d463",
+    "type": "item",
+    "nom": "Dague de scène Démoniaque",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Sang de démon séché.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "F": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "buffs": {
+        "Vol": -1
+      },
+      "duree": 2
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 859
+      },
+      {
+        "cu": 4601
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_5700d463",
+      "cree_at": 1794255423,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_5dbb1bf0",
+    "type": "item",
+    "nom": "Dague de scène de la Fureur",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Patte de Chimere.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 5,
+    "portee": 1,
+    "bonus": {
+      "Ag": 4,
+      "F": 1
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 4204
+      },
+      {
+        "cu": 14636
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:chimere_patte",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_5dbb1bf0",
+      "cree_at": 1794378707,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_63a6e646",
+    "type": "item",
+    "nom": "Dague de scène des Eaux Sombres",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Bunyip.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "R": 2
+    },
+    "effets": {
+      "buffs": {
+        "Ag": -1
+      },
+      "duree": 2
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 3244
+      },
+      {
+        "cu": 11756
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:bunyip_queue",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_63a6e646",
+      "cree_at": 1794260876,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_7019860f",
+    "type": "item",
+    "nom": "Dague de scène des Marais",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Bunyip.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "R": 2
+    },
+    "rarete": "rare",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 4444
+      },
+      {
+        "cu": 15356
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:bunyip_tete",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_7019860f",
+      "cree_at": 1794260862,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_b58720dc",
+    "type": "item",
+    "nom": "Dague de scène du Regard Mortel",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Basilic.",
+    "bonus_degats": 1,
+    "bonus_degats_dice": "1D2+1D4",
+    "bonus_cc": 4,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "Vol": 2
+    },
+    "effets": {
+      "buffs": {
+        "R": -1
+      },
+      "duree": 2
+    },
+    "rarete": "peu_commun",
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 1401
+      },
+      {
+        "cu": 4961
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:basilic_tete",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_b58720dc",
+      "cree_at": 1794594084,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene_cf1b3804",
+    "type": "item",
+    "nom": "Dague de scène en mithril",
+    "icon": "🗡️",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Lingot de mithril.",
+    "bonus_degats": 2,
+    "bonus_degats_dice": "1D2+1D6",
+    "bonus_cc": 6,
+    "portee": 1,
+    "bonus": {
+      "Ag": 5
+    },
+    "rarete": "tres_rare",
+    "poids": 0.12,
+    "valeur": [
+      {
+        "cu": 40844
+      },
+      {
+        "cu": 126328
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague_de_scene",
+      "matieres": [
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_de_scene_cf1b3804",
+      "cree_at": 1794255646,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Fouet_31f6c52c",
+    "type": "item",
+    "nom": "Fouet Empoisonné Démoniaque en adamantite",
+    "icon": "➰",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot d'adamantite.",
+    "bonus_degats_dice": "1D2+1D8+1D6",
+    "bonus_cc": 4,
+    "portee": 2,
+    "bonus_degats": 3,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "R": 3
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "legendaire",
+    "poids": 1.2,
+    "valeur": [
+      {
+        "cu": 200370
+      },
+      {
+        "cu": 200535
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Fouet",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Fouet_31f6c52c",
+      "cree_at": 1792613232,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Gants_de_courroyeur_d109be91",
+    "type": "item",
+    "nom": "Gants de courroyeur Envoûté Bestial en mithril",
+    "icon": "🧤",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "mains"
+    ],
+    "tags": [
+      "armure_cuir"
+    ],
+    "description": "Cuir corroyé deux fois, paume renforcée d'une chute de sanglerie.",
+    "bonus_pa": 4,
+    "bonus_pm": 2,
+    "bonus": {
+      "Ag": 3,
+      "Vol": 1,
+      "F": 1,
+      "V": 1
+    },
+    "effets": {
+      "buffs": {
+        "Vol": -1
+      },
+      "duree": 2
+    },
+    "rarete": "tres_rare",
+    "poids": 0.24,
+    "valeur": [
+      {
+        "cu": 44273
+      },
+      {
+        "cu": 156999
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Gants_de_courroyeur",
+      "matieres": [
+        {
+          "item": "item:Fetiche_envoutement",
+          "quantite": 1
+        },
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Gants_de_courroyeur_d109be91",
+      "cree_at": 1790535339,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Glaive_croc_de_basilic_7b8dc027",
+    "type": "item",
+    "nom": "Glaive-croc de Basilic Démoniaque en adamantite aux Crocs du Dragon",
+    "icon": "🐍",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "deux_mains": true,
+    "description": "Un croc de basilic emmanché au bout d'une hampe, à la place du fer. Le regard de la bête n'y est plus, mais ce qu'il entaille se raidit encore. Façonné sur mesure : Sang de démon séché, Lingot d'adamantite, Tête de Dragon.",
+    "bonus_degats": 9,
+    "bonus_degats_dice": "1D6+1D8+1D8+1D6",
+    "bonus_cc": 1,
+    "portee": 2,
+    "effets": {
+      "buffs": {
+        "Ag": -2,
+        "Vol": -1,
+        "R": -1
+      },
+      "duree": 6
+    },
+    "bonus": {
+      "F": 4,
+      "Vol": 2,
+      "R": 3
+    },
+    "restriction": {
+      "F": 19
+    },
+    "rarete": "legendaire",
+    "poids": 3.6,
+    "valeur": [
+      {
+        "cu": 214225
+      },
+      {
+        "cu": 648045
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Glaive_croc_de_basilic",
+      "matieres": [
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:dragon_tete",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Glaive_croc_de_basilic_7b8dc027",
+      "cree_at": 1794681601,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Jupe_lanieres_cuir_3a8e491d",
+    "type": "item",
+    "nom": "Jupe de lanières de cuir en cuir de chêne doublé de chamois du Courage",
+    "icon": "🧣",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "jambes"
+    ],
+    "description": "Jupe de lanières de cuir, qui laisse les jambes libres et protège un peu. Façonné sur mesure : Cuir tanné au chêne, Peau chamoisée, Cœur.",
+    "bonus_pa": 2,
+    "bonus_pv": 2,
+    "bonus": {
+      "R": 1,
+      "Ag": 1,
+      "V": 1
+    },
+    "effets": {
+      "esquive": 1,
+      "pv": 5,
+      "regen_pv": 1,
+      "duree": 3
+    },
+    "rarete": "peu_commun",
+    "poids": 0.47,
+    "valeur": [
+      {
+        "cu": 386
+      },
+      {
+        "cu": 1730
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Jupe_lanieres_cuir",
+      "matieres": [
+        {
+          "item": "item:Cuir_tanne_au_chene",
+          "quantite": 1
+        },
+        {
+          "item": "item:Peau_chamoisee",
+          "quantite": 1
+        },
+        {
+          "item": "item:coeur",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Jupe_lanieres_cuir_3a8e491d",
+      "cree_at": 1794377599,
+      "lieu": "lieu:la_grande_megisserie"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Katana_a89c2d89",
+    "type": "item",
+    "nom": "Katana Empoisonné Démoniaque en mithril",
+    "icon": "🌸",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "description": "Sabre courbe des îles du Levant à la lame repliée cent fois ; son tranchant est légendaire. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
+    "bonus_degats": 6,
+    "bonus_degats_dice": "1D8+1D6+1D6",
+    "bonus_cc": 6,
+    "bonus_initiative": 2,
+    "portee": 1,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "Ag": 2
+    },
+    "restriction": {
+      "F": 14,
+      "Ag": 17
+    },
+    "rarete": "tres_rare",
+    "poids": 0.66,
+    "valeur": [
+      {
+        "cu": 72047
+      },
+      {
+        "cu": 407999
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Katana",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Katana_a89c2d89",
+      "cree_at": 1794645092,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Lance_rituelle_26b48628",
+    "type": "item",
+    "nom": "Lance rituelle des Sépultures en adamantite vivante",
+    "icon": "🔱",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer. Façonné sur mesure : Sel des sépultures, Lingot d'adamantite, Débris animés.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "bonus_degats": 3,
+    "bonus_degats_dice": "1D3+1D8+1D6",
+    "portee": 2,
+    "bonus_cc": 2,
+    "bonus_cd": 1,
+    "bonus": {
+      "Int": 2,
+      "Vol": 3,
+      "R": 3,
+      "Ag": 1
+    },
+    "effets": {
+      "buffs": {
+        "R": -1
+      },
+      "duree": 2
+    },
+    "restriction": {
+      "Int": 15,
+      "Vol": 10
+    },
+    "rarete": "legendaire",
+    "poids": 2.4,
+    "valeur": [
+      {
+        "cu": 203016
+      },
+      {
+        "cu": 625788
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Lance_rituelle",
+      "matieres": [
+        {
+          "item": "item:Sel_des_sepultures",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Lance_rituelle_26b48628",
+      "cree_at": 1790458613,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Masse_a_brides_c97e3203",
+    "type": "item",
+    "nom": "Masse d'armes à brides Empoisonné Démoniaque en mithril",
+    "icon": "⚙️",
+    "description": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "cible": "ennemi",
+    "bonus_degats": 6,
+    "bonus_degats_dice": "1D6+1D6+1D6",
+    "bonus_cc": 3,
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "R": -4,
+        "Vol": -1
+      },
+      "duree": 6,
+      "regen_pv": -2
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "Ag": 2
+    },
+    "restriction": {
+      "F": 13
+    },
+    "rarete": "tres_rare",
+    "poids": 1.08,
+    "valeur": [
+      {
+        "cu": 44139
+      },
+      {
+        "cu": 156829
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Masse_a_brides",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Masse_a_brides_c97e3203",
+      "cree_at": 1790288846,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Pelta_c20f289e",
+    "type": "item",
+    "nom": "Pelta du Courage vivante en mithril",
+    "icon": "🌙",
+    "description": "Petit bouclier léger en croissant, celui des tirailleurs. Façonné sur mesure : Cœur, Débris animés, Lingot de mithril.",
+    "categorie": "armure",
+    "sous_categorie": "bouclier",
+    "slots": [
+      "main_gauche"
+    ],
+    "bonus_cc": 6,
+    "bonus_pa": 6,
+    "bonus_pv": 2,
+    "bonus": {
+      "Ag": 4,
+      "V": 1
+    },
+    "effets": {
+      "pv": 5,
+      "regen_pv": 1,
+      "duree": 3
+    },
+    "restriction": {
+      "F": 15
+    },
+    "rarete": "tres_rare",
+    "poids": [
+      0.6,
+      1.2
+    ],
+    "valeur": [
+      {
+        "cu": 40487
+      },
+      {
+        "cu": 124251
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Pelta",
+      "matieres": [
+        {
+          "item": "item:coeur",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Pelta_c20f289e",
+      "cree_at": 1790289218,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Souliers_cuir_5cd6b926",
+    "type": "item",
+    "nom": "Souliers de cuir de croupon",
+    "icon": "👞",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "pieds"
+    ],
+    "description": "Souliers de cuir bas, pour la ville. Façonné sur mesure : Croupon épais.",
+    "bonus_pa": 2,
+    "rarete": "peu_commun",
+    "poids": 0.44,
+    "valeur": [
+      {
+        "cu": 185
+      },
+      {
+        "cu": 598
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Souliers_cuir",
+      "matieres": [
+        {
+          "item": "item:Croupon_epais",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Souliers_cuir_5cd6b926",
+      "cree_at": 1794577169,
+      "lieu": "lieu:la_grande_megisserie"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Souliers_cuir_ff95537c",
+    "type": "item",
+    "nom": "Souliers de cuir en cuir de chêne",
+    "icon": "👞",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "pieds"
+    ],
+    "description": "Souliers de cuir bas, pour la ville. Façonné sur mesure : Cuir tanné au chêne.",
+    "bonus_pa": 2,
+    "bonus": {
+      "R": 1
+    },
+    "rarete": "peu_commun",
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 165
+      },
+      {
+        "cu": 568
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Souliers_cuir",
+      "matieres": [
+        {
+          "item": "item:Cuir_tanne_au_chene",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Souliers_cuir_ff95537c",
+      "cree_at": 1794577181,
+      "lieu": "lieu:la_grande_megisserie"
+    },
+    "tags": [
+      "armure_cuir"
+    ]
+  },
+  {
+    "_id": "item:Wakizashi_2aecd276",
+    "type": "item",
+    "nom": "Wakizashi Bestial Empoisonné Démoniaque",
+    "icon": "🌸",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Sabre court qui accompagne le katana, forgé de la même manière. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sang de démon séché.",
+    "bonus_degats": 5,
+    "bonus_degats_dice": "1D6+1D6",
+    "bonus_cc": 5,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "F": 2,
+      "Vol": 1,
+      "V": 1
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "rare",
+    "poids": 0.9,
+    "valeur": [
+      {
+        "cu": 4128
+      },
+      {
+        "cu": 26625
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Wakizashi",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Wakizashi_2aecd276",
+      "cree_at": 1794692575,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Wakizashi_636b3fbf",
+    "type": "item",
+    "nom": "Wakizashi Empoisonné Démoniaque en mithril",
+    "icon": "🌸",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Sabre court qui accompagne le katana, forgé de la même manière. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
+    "bonus_degats": 5,
+    "bonus_degats_dice": "1D6+1D6+1D6",
+    "bonus_cc": 7,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "Ag": 2
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "tres_rare",
+    "poids": 0.54,
+    "valeur": [
+      {
+        "cu": 44100
+      },
+      {
+        "cu": 156480
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Wakizashi",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Wakizashi_636b3fbf",
+      "cree_at": 1794645127,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  }
+]

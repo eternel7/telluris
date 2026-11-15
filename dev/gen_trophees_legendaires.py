@@ -54,6 +54,9 @@ MAISON_SORTE = {
 	"cendre": ("grand_laboratoire_alchimique", [("reactif_brut", 1)], 0.5),
 }
 SOUS_CATEGORIE_MATIERE = "matiere_legendaire"   # consommée par AUCUNE recette : jamais livrée
+# Famille de la matière nommée (`fabrication.TAGS_FAMILLE` : une seule par pièce), selon sa sorte.
+# Écailles, os et cendres n'en ont pas : seule leur rareté peut les classer (`legendaire`).
+FAMILLE_SORTE = {"cuir": "cuir", "peau": "cuir", "plumes": "tissu", "soie": "tissu"}
 
 # Pouvoirs : sorts et compétences EXISTANTS, restriction lue BRUTE.
 def _pouvoir(cap_id, **restriction):
@@ -576,7 +579,8 @@ def matiere_nommee(esp: str) -> tuple[dict, str, list, str]:
 	doc = {"_id": "item:" + slug, "type": "item", "nom": nom, "icon": icon,
 		   "description": "%s, préparée par une grande maison à partir de la bête. %s" % (nom, evocation),
 		   "categorie": "composant", "sous_categorie": SOUS_CATEGORIE_MATIERE, "slots": [],
-		   "poids": poids, "tags": ["commandable", "legendaire"]}
+		   "poids": poids, "source_espece": esp,
+		   "tags": ["commandable", "legendaire"] + ([FAMILLE_SORTE[sorte]] if sorte in FAMILLE_SORTE else [])}
 	return doc, maison, intrants, slug
 
 

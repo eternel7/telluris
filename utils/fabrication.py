@@ -58,6 +58,9 @@ CLES_ADDITIVES = (
 	"bonus_pa", "bonus_pm", "bonus_pv", "bonus_initiative", "bonus_malus_depl",
 	"portee",
 )
+# ⚠️ `bonus_degats_dice` est dans la liste blanche mais NE s'additionne PAS : les dés des
+# matières s'AJOUTENT à ceux de la pièce en notation (« 1D8+1D6 », cf. `appliquer_modificateurs`).
+CLE_DES = "bonus_degats_dice"
 CLES_FUSIONNEES = ("bonus", "effets")
 # Exception à la FUSION de `bonus` : la Vitesse se compose par MAX (cf. `appliquer_modificateurs`).
 CARACT_VITESSE = "V"
@@ -138,6 +141,13 @@ def borner_hors_famille(base_doc, valeurs: dict) -> dict:
 			else:
 				valeurs.pop("bonus")
 			continue
+		if cle == CLE_DES:
+			# Des dés hors famille ne se « plafonnent » pas : la pièce garde ceux de son base.
+			if base.get(CLE_DES) is None:
+				valeurs.pop(cle)
+			else:
+				valeurs[cle] = base[CLE_DES]
+			continue
 		borne = _borne(base.get(cle), valeurs[cle], plafond)
 		if borne is None:
 			valeurs.pop(cle)
@@ -169,9 +179,11 @@ def proprietes_matiere(item_doc) -> dict:
 	if not isinstance(bloc, dict):
 		return {"nom": "", "modificateurs": {}}
 	mods = bloc.get("modificateurs")
+	filtres = {k: v for k, v in mods.items() if k in CLES_MODIFIABLES} if isinstance(mods, dict) else {}
 	return {
 		"nom": str(bloc.get("nom") or "").strip(),
-		"modificateurs": {k: v for k, v in mods.items() if k in CLES_MODIFIABLES} if isinstance(mods, dict) else {},
+		# Dégâts et PA au barème de la rareté (cf. `BAREME_DEGATS`) : SEUL point de lecture.
+		"modificateurs": _appliquer_bareme(filtres, rarete_matiere(item_doc)),
 	}
 
 
@@ -209,6 +221,110 @@ def metaux_combines(matieres_docs: list) -> list:
 	metaux = [(doc, q) for doc, q in (matieres_docs or []) if est_metal(doc)]
 	total = sum(max(0, int(q or 0)) for _doc, q in metaux)
 	return [doc for doc, _q in metaux] if total > MATIERES_METAL_MAX else []
+
+
+# ── Une matière par FAMILLE, une partie par CRÉATURE ─────────────────────────────
+# Règle de l'Auteur (15/11) : au plus UNE matière de chaque famille dans une pièce, et jamais
+# deux parties d'une même créature (`queue` + `queue_morceau`, `patte` + `queue`). Familles lues
+# dans la DONNÉE, aucune matière nommée ici :
+#   - tags `metal` / `cuir` / `tissu` / `gemme` (posés par `dev/gen_bareme_fabrication.py`) ;
+#   - `carcasse` : la sous-catégorie des parties de créatures ;
+#   - `legendaire` : la rareté EFFECTIVE de la matière (`rarete_matiere`) — une patte de dragon
+#     légendaire est donc à la fois carcasse ET légendaire.
+# La créature se lit sur `source_espece` (parties de carcasse, matières nommées légendaires).
+TAGS_FAMILLE = (TAG_METAL, "cuir", "tissu", "gemme")
+FAMILLE_CARCASSE = "carcasse"
+FAMILLE_LEGENDAIRE = "legendaire"
+MATIERES_PAR_FAMILLE_MAX = 1   # règle de jeu voulue, comme `MATIERES_METAL_MAX`
+LIBELLES_FAMILLE = {
+	TAG_METAL: "métal", "cuir": "cuir", "tissu": "tissu", "gemme": "gemme ou perle",
+	FAMILLE_CARCASSE: "partie de créature", FAMILLE_LEGENDAIRE: "matière légendaire",
+}
+
+
+def familles_matiere(item_doc) -> list:
+	"""Familles de la matière, dans l'ordre de `LIBELLES_FAMILLE` (stable pour l'affichage)."""
+	doc = item_doc or {}
+	tags = set(doc.get("tags") or [])
+	familles = {t for t in TAGS_FAMILLE if t in tags}
+	if doc.get("sous_categorie") == FAMILLE_CARCASSE:
+		familles.add(FAMILLE_CARCASSE)
+	if rarete_matiere(doc) == FAMILLE_LEGENDAIRE:
+		familles.add(FAMILLE_LEGENDAIRE)
+	return [f for f in LIBELLES_FAMILLE if f in familles]
+
+
+def creature_matiere(item_doc) -> str:
+	"""Espèce dont la matière est tirée (`source_espece`), ou "" si elle n'en vient pas."""
+	return str((item_doc or {}).get("source_espece") or "")
+
+
+def conflits_combinaison(matieres_docs: list) -> list:
+	"""Règles de combinaison enfreintes par `[(item_doc, quantite), …]` :
+	`[{"motif": "famille"|"creature", "cle": str, "docs": [item_doc, …]}, …]`, vide si la pièce
+	est permise. La quantité compte (deux exemplaires = deux matières), comme pour le métal."""
+	par_famille: dict = {}
+	par_creature: dict = {}
+	for doc, q in (matieres_docs or []):
+		n = max(0, int(q or 0))
+		for f in familles_matiere(doc):
+			par_famille.setdefault(f, []).append((doc, n))
+		creature = creature_matiere(doc)
+		if creature:
+			par_creature.setdefault(creature, []).append((doc, n))
+	conflits = []
+	for motif, groupes in (("famille", par_famille), ("creature", par_creature)):
+		for cle, lignes in groupes.items():
+			if sum(n for _d, n in lignes) > MATIERES_PAR_FAMILLE_MAX:
+				conflits.append({"motif": motif, "cle": cle, "docs": [d for d, _n in lignes]})
+	return conflits
+
+
+# ── Barème des dégâts et des PA d'une matière ────────────────────────────────────
+# Règle de l'Auteur (15/11) : ce qu'une matière apporte en dégâts et en PA ne dépend plus du
+# chiffre de sa donnée mais de sa RARETÉ (`rarete_matiere`). Un `bonus_degats` (ou un
+# `bonus_degats_dice`) positif dans la donnée dit seulement « cette matière renforce le coup » ;
+# un `bonus_pa` positif, « elle protège ». Les malus (valeurs négatives) restent tels quels.
+# Dégâts : un DÉ ajouté à ceux de la pièce (tous les dés s'additionnent, `appliquer_modificateurs`)
+# plus un fixe — +6 fixe et 1D20 restent hors de portée d'UNE matière. PA : fixes (dés − PA).
+# Appliqué à la LECTURE (`proprietes_matiere`) : les tables des générateurs restent la source du
+# « quoi », le barème du « combien » — aucune migration des matières.
+BAREME_DEGATS = {
+	"commun": ("", 1),
+	"peu_commun": ("1D4", 0),
+	"rare": ("1D6", 1),
+	"tres_rare": ("1D8", 1),
+	"legendaire": ("1D10", 2),
+}
+BAREME_PA = {"commun": 1, "peu_commun": 1, "rare": 2, "tres_rare": 2, "legendaire": 3}
+RARETE_PAR_DEFAUT = "commun"
+
+
+def rarete_matiere(item_doc) -> str:
+	"""Rareté qui règle le barème : celle du doc, sinon celle qu'il confère à la pièce (les
+	matières nommées légendaires n'en portent pas d'autre), sinon `RARETE_PAR_DEFAUT`."""
+	doc = item_doc or {}
+	if doc.get("rarete") in BAREME_DEGATS:
+		return doc["rarete"]
+	bloc = doc.get("fabrication") if isinstance(doc.get("fabrication"), dict) else {}
+	mods = bloc.get("modificateurs") if isinstance(bloc.get("modificateurs"), dict) else {}
+	return mods["rarete"] if mods.get("rarete") in BAREME_DEGATS else RARETE_PAR_DEFAUT
+
+
+def _appliquer_bareme(mods: dict, rarete: str) -> dict:
+	"""Remplace dégâts et PA POSITIFS de `mods` (mutés et rendus) par ceux du barème."""
+	des_donnee = character_stats.normalize_dice(mods.get(CLE_DES))
+	if _nombre(mods.get("bonus_degats")) > 0 or (des_donnee and not des_donnee.startswith("-")):
+		mods.pop("bonus_degats", None)
+		mods.pop(CLE_DES, None)
+		des, fixe = BAREME_DEGATS[rarete]
+		if des:
+			mods[CLE_DES] = des
+		if fixe:
+			mods["bonus_degats"] = fixe
+	if _nombre(mods.get("bonus_pa")) > 0:
+		mods["bonus_pa"] = BAREME_PA[rarete]
+	return mods
 
 
 def _rang_rarete(rarete) -> float:
@@ -298,6 +414,28 @@ def _nettoyer(val: dict) -> dict:
 	return sortie
 
 
+def _faces(notation: str) -> int:
+	try:
+		return int(notation.upper().split("D", 1)[1])
+	except (IndexError, ValueError):
+		return 0
+
+
+def _composer_des(des_base, des_matieres: list):
+	"""Dés de la pièce finie : ceux du base, puis TOUS ceux des matières, du plus gros au plus
+	petit (ordre indépendant de la saisie). Sans dé de matière, la valeur du base telle quelle
+	(un nombre de faces borné à `DICE_MAX`, comme avant). `None` = aucun dé."""
+	if not des_matieres:
+		if des_base is None:
+			return None
+		if isinstance(des_base, (int, float)) and not isinstance(des_base, bool):
+			return max(0, min(DICE_MAX, int(round(des_base))))
+		return des_base
+	base = character_stats.normalize_dice(des_base)
+	termes = ([base] if base else []) + sorted(des_matieres, key=lambda d: (-_faces(d), d))
+	return "+".join(termes)
+
+
 def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 	"""Champs de l'objet fini = champs du base + apport de chaque matière, selon la règle de
 	composition du champ (cf. en-tête). Déterministe : mêmes entrées ⇒ mêmes sorties, quel que
@@ -310,7 +448,9 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 	"""
 	sortie = {}
 
-	additifs = {k: _nombre((base_doc or {}).get(k)) for k in CLES_ADDITIVES if (base_doc or {}).get(k) is not None}
+	additifs = {k: _nombre((base_doc or {}).get(k)) for k in CLES_ADDITIVES
+				if k != CLE_DES and (base_doc or {}).get(k) is not None}
+	des_matieres = []   # notations des dés apportés, une par exemplaire
 	fusions = {k: _copie((base_doc or {}).get(k)) for k in CLES_FUSIONNEES
 			   if isinstance((base_doc or {}).get(k), dict)}
 	maxima = {k: _copie((base_doc or {}).get(k)) for k in CLES_MAX
@@ -330,7 +470,11 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 		mods = proprietes_matiere(item_doc)["modificateurs"]
 		qte = max(1, int(quantite or 1))
 		for cle, val in mods.items():
-			if cle in CLES_ADDITIVES:
+			if cle == CLE_DES:
+				notation = character_stats.normalize_dice(val)
+				if notation:
+					des_matieres += [notation] * qte
+			elif cle in CLES_ADDITIVES:
 				additifs[cle] = additifs.get(cle, 0.0) + _nombre(val) * qte
 			elif cle == "bonus" and isinstance(val, dict) and _nombre(val.get(CARACT_VITESSE)) > 0:
 				v_max = max(v_max, _nombre(val[CARACT_VITESSE]))
@@ -352,10 +496,10 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 		bonus[CARACT_VITESSE] = _nombre(bonus.get(CARACT_VITESSE)) + v_max
 
 	for cle, val in additifs.items():
-		arrondi = int(round(val))
-		if cle == "bonus_degats_dice":
-			arrondi = max(0, min(DICE_MAX, arrondi))
-		sortie[cle] = arrondi
+		sortie[cle] = int(round(val))
+	des = _composer_des((base_doc or {}).get(CLE_DES), des_matieres)
+	if des is not None:
+		sortie[CLE_DES] = des
 	for cle, val in list(fusions.items()) + list(maxima.items()):
 		nettoye = _nettoyer(val)
 		if nettoye:
