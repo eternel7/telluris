@@ -59,3 +59,13 @@ def test_jetons_d_arme_tires_de_l_id_des_tags_et_de_la_sous_categorie():
 	assert {"arc", "long", "tir"} <= jetons_armes([ARC])
 	assert {"hache", "guerre"} <= jetons_armes([{"_id": "item:Hache_de_guerre"}])
 	assert jetons_armes([None, {}]) == set()
+
+
+def test_webp_reconnu_et_prefere_au_png_du_meme_nom():
+	# Transition PNG → WebP : une image déjà convertie ne compte qu'une fois, en .webp ; une fiche
+	# encore en .png trouve les .webp de sa base.
+	fichiers = ["loup_transparent.png", "loup_transparent.webp", "loup_transparent01.png", "loup_transparent_arc.webp"]
+	vus, choix = _candidats()
+	choisir_image("loup_transparent.png", fichiers, [PIQUE], choix_fn=choix)
+	assert vus == [["loup_transparent.webp", "loup_transparent01.png"]]
+	assert choisir_image("loup_transparent.webp", fichiers, [ARC]) == "loup_transparent_arc.webp"
