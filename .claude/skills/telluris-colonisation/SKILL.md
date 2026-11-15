@@ -33,6 +33,12 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 - Ventes : `objets_du_metier` (`site.ventes_du_site`) — bûcheron : rondin de l'essence de chaque arbre du site (`bois.item_de_l_essence`), seul ; carrier : `produit.items` + minerais du site. Repli sur `produit.items`. `echanger(..., site=, find_docs_fn=)`.
 - Menace : une espèce rencontrable des zones du site, tirée à la fondation.
 
+#### Icône sur la carte du pays
+- Fichiers `towns/<palier>_icon[_<variante>].<ext>` (`icones_du_palier`) : sans variante ou `_generique[NN]` ⇒ générique, en tête ; variante commençant par une région de `rules:regions` ⇒ son nom (logique des logements) ; un même nom en plusieurs formats compte une fois (webp > png > jpg).
+- `imp.icone_carte` : fichier choisi, `""` = aucune, absent = jamais choisie. `icone_affichee` relit le palier COURANT : choix valable ⇒ lui ; sinon générique (à défaut la 1re) si imposée (`icones.obligatoire_des`, défaut `bourg`) ou si une icône était voulue à un palier précédent ; sinon rien.
+- Fondateur seul : section 🏷️ de l'onglet Site (`colIconeHtml`), `POST /colonisation/icone` (`choisir_icone`, « Aucune » refusée une fois imposée).
+- `/play` sur une carte de pays : `colonie_icones` (`icones_carte`, `find_docs` projeté des implantations du pays) → `<img class="colonie-icone">` dans `#carte-calque`, TOUJOURS visible (pas de rayon), 3 cases de large, centrée sur la case d'origine, transparente aux clics.
+
 #### Dans l'implantation
 - `/play` : bouton « 🏕️ » → panneau `#colonie-panel` (`scripts/colonisation.js`), onglets Site · Population · Bâtiments · Défense ; le visiteur n'a que la lecture (site en mots, besoins, dons, demande d'association).
 - **Rôles** (`role_de`) : fondateur · associé · soutien (a donné) · visiteur. Seul le personnage PRINCIPAL : aucune route ne lit `compagnon_id`.

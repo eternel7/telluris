@@ -243,6 +243,23 @@ def test_le_visiteur_lit_en_mots_donne_et_ne_decide_de_rien(monde):
 	assert any("Milo donne Pain" in j["texte"] for j in carnet)
 
 
+def test_le_fondateur_choisit_l_icone_de_la_carte_le_visiteur_non(monde, monkeypatch):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	palier = monde["docs"][imp_id]["palier"]
+	monkeypatch.setattr(rc, "fichiers_towns", lambda: [f"{palier}_icon.webp", f"{palier}_icon_feu.webp"])
+	rep = _appel(monde, fondateur, rc.ici, None)
+	assert rep["icone_carte"]["courante"] is None and len(rep["icone_carte"]["choix"]) == 2
+	rep = _appel(monde, fondateur, rc.icone, None, {"fichier": f"{palier}_icon_feu.webp"})
+	assert rep["icone_carte"]["courante"] == f"{palier}_icon_feu.webp"
+	assert monde["docs"][imp_id]["icone_carte"] == f"{palier}_icon_feu.webp"
+	assert _refus(monde, fondateur, rc.icone, None, {"fichier": "autre_icon.webp"}) == 409
+	visiteur = _perso("v", lieu=imp_id, position=dict(fondateur["position"]))
+	assert "icone_carte" not in _appel(monde, visiteur, rc.ici, None)
+	assert _refus(monde, visiteur, rc.icone, None, {"fichier": None}) == 403
+
+
 def test_association_demande_reponse_et_financement_d_un_chantier(monde):
 	rc = monde["rc"]
 	fondateur = _perso()

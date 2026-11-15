@@ -171,6 +171,18 @@ def image_sous_lieu(categorie: str, prefixe: str | None = None, images_villes: d
 	return (images_villes if images_villes is not None else _images_des_villes()).get(categorie, "")
 
 
+def fichiers_towns() -> list:
+	"""Noms du dossier des images de lieux (icônes de carte comprises)."""
+	try:
+		return os.listdir(TOWNS_IMAGES_PATH)
+	except OSError:
+		return []
+
+
+def regions_du_monde() -> dict:
+	return (get_doc("rules:regions") or {}).get("regions") or {}
+
+
 def categories_disponibles() -> list:
 	"""Métiers achetables comme en ville : le marchand générique `pnj:marchand_<cat>` existe (il
 	tient la boutique) et une image d'intérieur aussi. L'auberge s'y ajoute (sans tenancier)."""
@@ -195,6 +207,9 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	payload["dons_possibles"] = _dons_possibles(character, reg)
 	payload["reperes"] = colonisation.reperes_carte(imp, reg)
 	payload["guilde"] = _vue_guilde(character, imp, reg, employes)
+	if role == colonisation.FONDATEUR:
+		# Sélecteur 🏷️ de l'icône montrée sur la carte du pays.
+		payload["icone_carte"] = colonisation.vue_icone(imp, reg, fichiers_towns(), regions_du_monde())
 	if role == colonisation.FONDATEUR and colonisation.chantier_pret(imp) \
 			and imp["chantier"]["genre"] == colonisation.CHANTIER_STATUT:
 		# § 12.5 : le choix du modèle est reproposé — celui qui partage le plus de tags avec
@@ -380,6 +395,19 @@ async def feu(current_user: Annotated[dict, Depends(get_current_user)], body: di
 	_exiger(role, colonisation.FONDATEUR)
 	if colonisation.regler_feu(imp, reg, body.get("reglage")):
 		_sauver(imp)
+	return _payload(character, imp, reg, role)
+
+
+@colonisation_router.post("/colonisation/icone")
+async def icone(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le fondateur choisit l'icône de l'implantation sur la carte du pays, ou n'en met aucune
+	(`fichier` vide) tant qu'elle n'est pas imposée."""
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	ok, raison = colonisation.choisir_icone(imp, reg, fichiers_towns(), body.get("fichier"), regions_du_monde())
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(imp)
 	return _payload(character, imp, reg, role)
 
 

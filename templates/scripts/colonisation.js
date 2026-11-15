@@ -226,8 +226,26 @@ function colSousLieuxHtml(d) {
 	return l ? `<section class="prop-section"><h3>🚪 Où entrer</h3><div class="prop-caps">${l}</div></section>` : '';
 }
 
+// 🏷️ Icône sur la carte du pays (fondateur, pure) : `d.icone_carte = {courante, choix, obligatoire}`.
+// « Aucune » n'est offerte que tant que l'icône n'est pas imposée (serveur : `choisir_icone`).
+function colIconeHtml(ic) {
+	if (!ic) return '';
+	const choix = ic.choix || [];
+	const corps = choix.length ? `<div class="prop-images">`
+		+ (ic.obligatoire ? '' : `<button type="button" class="prop-image" data-fichier="" aria-pressed="${!ic.courante}" onclick="colIcone(this)">
+			<span style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:1.6em;">∅</span><span>Aucune</span></button>`)
+		+ choix.map(c => `<button type="button" class="prop-image" data-fichier="${_colE(c.fichier)}" aria-pressed="${c.fichier === ic.courante}" onclick="colIcone(this)">
+			<img src="/towns/${encodeURIComponent(c.fichier)}" alt="" loading="lazy" style="object-fit:contain;"><span>${_colE(c.label)}</span></button>`).join('')
+		+ `</div>` : `<div class="sell-empty">Aucune icône n'existe encore pour ce palier.</div>`;
+	const note = ic.obligatoire ? 'À ce palier, une icône est toujours montrée.' : 'Facultative : vous pouvez ne pas en montrer.';
+	return `<section class="prop-section"><h3>🏷️ Icône sur la carte du pays</h3>
+		<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">Elle situe votre implantation pour tous les voyageurs. ${note}</span></div></div>
+		${corps}</section>`;
+}
+
 function colOngletSiteHtml(d) {
 	let html = colSiteHtml(d.site, _colGere(d)) + colSousLieuxHtml(d) + colBesoinsHtml(d) + colDonsHtml(d) + colAssociationHtml(d);
+	if (d.role === 'fondateur') html += colIconeHtml(d.icone_carte);
 	if (_colGere(d)) html += `<section class="prop-section"><div class="prop-ligne"><div class="prop-txt">
 		<span class="q-desc">Entrepôt commun${d.role === 'associe' ? ' et votre petit coffre' : ''}.</span></div>
 		<button class="sh-drop-btn" onclick="openColonieRangements()">📦 Rangements</button></div></section>`;
@@ -471,6 +489,11 @@ function colNegociant(seance) {
 function colPoser(btn) {
 	// La carte porte les repères : on recharge pour voir l'icône à sa case.
 	_colAction('api/colonisation/poser', { batiment: btn.dataset.batiment }, () => { window.location.reload(); });
+}
+function colIcone(btn) {
+	if (btn.getAttribute('aria-pressed') === 'true') return;
+	_colAction('api/colonisation/icone', { fichier: btn.dataset.fichier || null },
+		() => showToast('🏷️ Icône de la carte changée.'));
 }
 function colReparer(btn) { _colAction('api/colonisation/reparer', { batiment: btn.dataset.batiment }); }
 function _colGuildeRendre(d) {

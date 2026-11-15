@@ -367,6 +367,47 @@ def test_normaliser_entrees_refuse_ce_qui_ecarterait_le_modele():
 	assert col.modele_valide(m)
 
 
+def test_icones_du_palier_generique_en_tete_un_format_par_nom():
+	fichiers = ["hameau_icon.png", "hameau_icon.webp", "hameau_icon_europe02.png", "hameau_icon_feu.jpg",
+				"hameau_europe01.jpg", "campement_icon_generique.webp", "hameau_icon.gif"]
+	regions = {"europe": {"nom": "Europe"}}
+	assert col.icones_du_palier("hameau", fichiers, regions) == [
+		{"fichier": "hameau_icon.webp", "label": "Générique", "generique": True},   # webp avant png
+		{"fichier": "hameau_icon_europe02.png", "label": "Europe 2", "generique": False},
+		{"fichier": "hameau_icon_feu.jpg", "label": "Feu", "generique": False}]
+	assert [c["fichier"] for c in col.icones_du_palier("campement", fichiers)] == ["campement_icon_generique.webp"]
+	assert col.icones_du_palier("village", fichiers) == []
+
+
+def test_icone_facultative_avant_le_bourg_imposee_ensuite():
+	reg = _reg()
+	ids = [p["id"] for p in col.paliers(reg)]
+	seuil = reg["icones"]["obligatoire_des"]
+	avant, apres = ids[ids.index(seuil) - 1], seuil
+	fichiers = [f"{avant}_icon.webp", f"{avant}_icon_feu.webp", f"{apres}_icon_generique.webp"]
+	imp = {"palier": avant}
+	assert not col.icone_obligatoire(imp, reg) and col.icone_affichee(imp, reg, fichiers) is None   # jamais choisie
+	assert col.choisir_icone(imp, reg, fichiers, f"{avant}_icon_feu.webp") == (True, "")
+	assert col.icone_affichee(imp, reg, fichiers) == f"{avant}_icon_feu.webp"
+	assert col.choisir_icone(imp, reg, fichiers, f"{apres}_icon_generique.webp")[0] is False        # autre palier
+	assert col.choisir_icone(imp, reg, fichiers, None) == (True, "") and imp["icone_carte"] == ""
+	assert col.icone_affichee(imp, reg, fichiers) is None
+	# Monté au palier imposé : le générique s'affiche, « aucune » est refusée
+	imp["palier"] = apres
+	assert col.icone_obligatoire(imp, reg) and col.icone_affichee(imp, reg, fichiers) == f"{apres}_icon_generique.webp"
+	assert col.choisir_icone(imp, reg, fichiers, "")[0] is False
+	# une icône voulue à un palier précédent : le générique du nouveau la remplace
+	imp2 = {"palier": avant, "icone_carte": f"{avant}_icon_feu.webp"}
+	imp2["palier"] = ids[0] if ids[0] != avant else ids[1]
+	fichiers2 = fichiers + [f"{imp2['palier']}_icon.webp"]
+	assert col.icone_affichee(imp2, reg, fichiers2) == f"{imp2['palier']}_icon.webp"
+	# imposée mais aucune icône pour ce palier : rien
+	assert col.icone_affichee({"palier": ids[-1]}, reg, fichiers) is None
+	carte = col.icones_carte([{"palier": apres, "label": "Ici", "origine": {"pos": [4, 5]}},
+							  {"palier": avant, "origine": {"pos": [1, 1]}}], reg, fichiers)
+	assert carte == [{"x": 4, "y": 5, "fichier": f"{apres}_icon_generique.webp", "label": "Ici"}]
+
+
 def test_le_generateur_n_ajoute_que_ce_qui_manque():
 	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS}
 	assert gen.generer(dump) == []                                        # idempotent

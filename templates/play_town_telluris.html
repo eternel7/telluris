@@ -1766,6 +1766,20 @@
 			pointer-events: auto;   /* le calque est transparent aux clics, pas son infobulle */
 			cursor: help;
 		}
+		/* Icône d'une implantation sur la carte du pays (`colonie_icones`) : TOUJOURS visible, centrée
+		   sur sa case, `--colonie-cases` cases de large ; transparente aux clics (déplacement au clic). */
+		.colonie-icone {
+			--colonie-cases: 3;
+			position: absolute;
+			left: calc((var(--px) + 0.5) * var(--cell-w));
+			top: calc((var(--py) + 0.5) * var(--cell-h));
+			width: calc(var(--colonie-cases) * var(--cell-w));
+			height: auto;
+			max-width: none;
+			transform: translate(-50%, -50%);
+			pointer-events: none;
+			filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+		}
 		/* Seuls les passages à ≤ RAYON_PASSAGE (2 en ville, 1 ailleurs) du personnage sont montrés (`.proche`). */
 		.passage-marque:not(.proche) { display: none; }
 		.passage-marque::before {
@@ -4810,6 +4824,8 @@
 	// Seul le halo suit la position (`_majHaloPassages`).
 	const CARTE_VOILE = {{ carte_voile | tojson | safe }};
 	const PASSAGES = {{ passages | tojson | safe }} || [];
+	// Icônes des implantations du pays (`colonisation.icones_carte`) : `[{x, y, fichier, label}]`.
+	const COLONIE_ICONES = {{ colonie_icones | default([]) | tojson | safe }} || [];
 	// Rayon de VISIBILITÉ d'un passage, en cases (Tchebychev) : un marqueur n'apparaît (et ne
 	// pulse) que sur les cases voisines du personnage — le joueur découvre les passages en
 	// longeant la frontière, la carte n'en est pas constellée. 2 dans une ville, 1 ailleurs
@@ -4963,7 +4979,23 @@
 		_traceCle = t.cle;
 		showToast(t.texte);
 	}
+	// Sous les marqueurs de passage (posées AVANT : même calque, ordre du DOM).
+	function _poserIconesColonies() {
+		const calque = document.getElementById('carte-calque');
+		if (!calque) return;
+		COLONIE_ICONES.forEach(c => {
+			const img = document.createElement('img');
+			img.className = 'colonie-icone';
+			img.src = '/towns/' + encodeURIComponent(c.fichier);
+			img.alt = c.label || '';
+			img.decoding = 'async';
+			img.style.setProperty('--px', c.x);
+			img.style.setProperty('--py', c.y);
+			calque.appendChild(img);
+		});
+	}
 	_dessinerVoile();
+	_poserIconesColonies();
 	_poserPassages();
 	// Après le chargement : `showToast` est défini dans un script plus bas.
 	window.addEventListener('load', _majHaloPassages);

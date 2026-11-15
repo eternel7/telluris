@@ -22,6 +22,7 @@ colons escortés, coffre d'associé."""
 
 import math
 import random
+import re
 import time
 import uuid
 
@@ -63,6 +64,8 @@ OR = 10000
 
 DEFAUTS = {
 	"temps": {"passe_s": 3600},
+	# Icône de l'implantation sur la carte du pays : facultative avant ce palier, imposée ensuite.
+	"icones": {"obligatoire_des": "bourg"},
 	"stocks_depart": {"nourriture": 12, "bois": 12, "materiaux": 0, "medicaments": 0},
 	"stocks_labels": {"nourriture": "Nourriture", "bois": "Bois", "materiaux": "Matériaux",
 					  "medicaments": "Médicaments"},
@@ -805,6 +808,110 @@ def normaliser_entrees(lieu_doc: dict, brut) -> tuple[list, str]:
 			return [], f"La case [{x}, {y}] n'est pas marchable (terrain ≠ 1) ou hors de la grille."
 		out.append([x, y])
 	return out, ""
+
+
+# ── Icône sur la carte du pays ───────────────────────────────────────────────────────
+# Fichiers de `towns/` nommés `<palier>_icon[_<variante>].<ext>` : sans variante ou `_generique[NN]`
+# ⇒ GÉNÉRIQUE ; une variante qui commence par une région (`hameau_icon_europe01`) prend son
+# nom, comme les images des logements. Un même nom en plusieurs formats compte une fois
+# (webp, puis png, puis jpg). Le choix du fondateur (`imp.icone_carte`) : un fichier, `""` =
+# « aucune », absent = jamais choisi ; RELU contre le palier courant à chaque lecture.
+
+EXT_ICONES = (".webp", ".png", ".jpg", ".jpeg")
+VARIANTE_GENERIQUE = "generique"
+
+
+def icones_du_palier(palier_id, fichiers, regions: dict | None = None) -> list[dict]:
+	"""`[{fichier, label, generique}]` des icônes offertes à ce palier, générique en tête."""
+	if not palier_id:
+		return []
+	motif = re.compile(r"^" + re.escape(str(palier_id)) + r"_icon(?:_([a-z0-9_]+))?(\.[a-z]+)$")
+	regions = regions or {}
+	par_nom = {}
+	for f in fichiers or []:
+		m = motif.match(f)
+		if not m or m.group(2) not in EXT_ICONES:
+			continue
+		variante = m.group(1) or ""
+		rang = EXT_ICONES.index(m.group(2))
+		if variante not in par_nom or rang < par_nom[variante][0]:
+			par_nom[variante] = (rang, f)
+	out = []
+	for variante, (_r, f) in par_nom.items():
+		generique = bool(re.fullmatch(r"(?:" + VARIANTE_GENERIQUE + r"\d*)?", variante))
+		num = re.sub(r"\D", "", variante)
+		out.append({"fichier": f, "label": (f"Générique {int(num)}" if num else "Générique") if generique
+					else _label_variante(variante, regions), "generique": generique})
+	# générique en tête (le premier, s'il y en a deux : `hameau_icon` et `hameau_icon_generique`)
+	out.sort(key=lambda c: (not c["generique"], c["fichier"]))
+	return out
+
+
+def _label_variante(variante: str, regions: dict) -> str:
+	"""`europe01` → « Europe 1 », `europe_rome02` → « Europe · Rome 2 », `feu` → « Feu »."""
+	m = re.match(r"^(.*?)(\d*)$", variante)
+	corps, num = m.group(1).strip("_"), m.group(2)
+	rid = next((r for r in sorted(regions, key=len, reverse=True)
+				if corps == r or corps.startswith(r + "_")), None)
+	parts = [(regions.get(rid) or {}).get("nom") or rid] if rid else []
+	reste = corps[len(rid):].strip("_") if rid else corps
+	if reste:
+		parts.append(reste.replace("_", " ").title() if rid else reste.replace("_", " ").capitalize())
+	return " · ".join(parts) + (f" {int(num)}" if num else "")
+
+
+def icone_obligatoire(imp: dict, reg: dict) -> bool:
+	"""L'icône est imposée à partir du palier `icones.obligatoire_des` (inconnu ⇒ jamais)."""
+	seuil = (reg.get("icones") or {}).get("obligatoire_des")
+	if not seuil or palier_def(reg, seuil) is None:
+		return False
+	return rang_palier(reg, (imp or {}).get("palier")) >= rang_palier(reg, seuil)
+
+
+def icone_affichee(imp: dict, reg: dict, fichiers, regions: dict | None = None) -> str | None:
+	"""Fichier d'icône à montrer sur la carte du pays, ou None. Le choix du fondateur s'il vaut
+	pour le palier courant ; sinon le générique (à défaut la première icône) dès que l'icône est
+	imposée, ou que le fondateur en voulait une (choix d'un palier précédent)."""
+	choix = (imp or {}).get("icone_carte")
+	offertes = icones_du_palier((imp or {}).get("palier"), fichiers, regions)
+	if choix and any(c["fichier"] == choix for c in offertes):
+		return choix
+	if not offertes or (not choix and not icone_obligatoire(imp, reg)):
+		return None
+	return offertes[0]["fichier"]
+
+
+def choisir_icone(imp: dict, reg: dict, fichiers, fichier, regions: dict | None = None) -> tuple[bool, str]:
+	"""Le fondateur choisit l'icône (`fichier`) ou n'en veut aucune (`None` / `""`), refusé
+	quand elle est imposée. Mute sans sauver."""
+	if not fichier:
+		if icone_obligatoire(imp, reg):
+			return False, "À ce palier, l'implantation doit montrer une icône sur la carte."
+		imp["icone_carte"] = ""
+		return True, ""
+	if not any(c["fichier"] == fichier for c in icones_du_palier(imp.get("palier"), fichiers, regions)):
+		return False, "Cette icône ne convient pas à ce palier."
+	imp["icone_carte"] = fichier
+	return True, ""
+
+
+def icones_carte(implantations, reg: dict, fichiers, regions: dict | None = None) -> list[dict]:
+	"""Icônes à poser sur la carte d'un pays : `[{x, y, fichier, label}]`, une par implantation
+	qui en montre une, à sa case d'origine. Vues de TOUS (le lien l'est déjà dès le Campement)."""
+	out = []
+	for imp in implantations or []:
+		pos = list(((imp or {}).get("origine") or {}).get("pos") or [])
+		fichier = icone_affichee(imp, reg, fichiers, regions)
+		if fichier and len(pos) >= 2:
+			out.append({"x": _int(pos[0]), "y": _int(pos[1]), "fichier": fichier, "label": imp.get("label", "")})
+	return out
+
+
+def vue_icone(imp: dict, reg: dict, fichiers, regions: dict | None = None) -> dict:
+	"""Bloc du sélecteur 🏷️ (fondateur) : `{courante, choix, obligatoire}`."""
+	return {"courante": icone_affichee(imp, reg, fichiers, regions),
+			"choix": icones_du_palier(imp.get("palier"), fichiers, regions),
+			"obligatoire": icone_obligatoire(imp, reg)}
 
 
 # ── Fonder (§ 2) ─────────────────────────────────────────────────────────────────────

@@ -1077,6 +1077,15 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			for n in conn.get("nodes") or []))
 	# Bâtiments posés d'une implantation : pictogramme et halo des REPÈRES (on n'y entre pas).
 	passages += colonie_reperes
+	# Icônes des implantations du pays (choisies par leur fondateur, imposées dès le Bourg) :
+	# toujours visibles, au-dessus de leur case — elles localisent la colonie de loin.
+	colonie_icones = []
+	if grid_doc.get("categorie") == CATEGORIE_PAYS:
+		_imps = find_docs({"type": colonisation_util.TYPE_DOC, "lieu_parent": lieu},
+						  ["_id", "label", "palier", "icone_carte", "origine"]) or []
+		if _imps:
+			colonie_icones = colonisation_util.icones_carte(_imps, colonisation_util.regles(get_doc),
+				colonisation_routes.fichiers_towns(), colonisation_routes.regions_du_monde())
 	# Rayon de visibilité des marqueurs (Tchebychev) : 2 cases dans une ville (rues denses,
 	# boutiques serrées), 1 ailleurs.
 	rayon_passage = 2 if grid_doc.get("categorie") == "ville" else 1
@@ -1288,6 +1297,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"access" : access,
 			"carte_voile": carte_voile,
 			"passages": passages,
+			"colonie_icones": colonie_icones,
 			"rayon_passage": rayon_passage,
 			# Déplacement au clic (mode ⚙️) : la grille ENTIÈRE, car le client calcule chemin et
 			# cases joignables (aucune règle de marche côté serveur, scripts/deplacement.js).

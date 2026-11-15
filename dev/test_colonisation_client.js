@@ -201,4 +201,19 @@ test('boutiques : une ligne « Acheter » par métier, sans bois ni matériaux, 
 	assert.ok(!html.includes('col-categorie'), 'plus de sélecteur de métier');
 });
 
+test('🏷️ icône de carte : au fondateur seul, « Aucune » tant qu’elle n’est pas imposée', () => {
+	const choix = [{ fichier: 'hameau_icon.webp', label: 'Générique', generique: true },
+		{ fichier: 'hameau_icon_x".webp', label: MECHANT, generique: false }];
+	const libre = colOngletSiteHtml(gerant('fondateur', { icone_carte: { courante: null, choix, obligatoire: false } }));
+	assert.ok(libre.includes('Icône sur la carte du pays') && !libre.includes('<script>'));
+	assert.ok(/data-fichier="" aria-pressed="true"/.test(libre), '« Aucune » cochée sans icône');
+	assert.ok(libre.includes('data-fichier="hameau_icon_x&quot;.webp"'), 'nom de fichier échappé');
+	const imposee = colOngletSiteHtml(gerant('fondateur', { icone_carte: { courante: 'hameau_icon.webp', choix, obligatoire: true } }));
+	assert.ok(!imposee.includes('data-fichier=""') && /data-fichier="hameau_icon.webp" aria-pressed="true"/.test(imposee));
+	const vide = colIconeHtml({ courante: null, choix: [], obligatoire: true });
+	assert.ok(vide.includes("Aucune icône n'existe encore"));
+	for (const role of ['associe', 'visiteur'])
+		assert.ok(!colOngletSiteHtml(gerant(role, { icone_carte: { courante: null, choix, obligatoire: false } })).includes('Icône sur la carte'));
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);
