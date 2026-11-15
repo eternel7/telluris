@@ -473,6 +473,45 @@ def test_livre_images_presentes(livre):
 		assert os.path.exists(os.path.join(racine, t["image"])), t["image"]
 
 
+# ── Image du bien : choix parmi les images de son type ───────────────────────────
+
+REGIONS = {"europe": {"nom": "Europe"}, "grand_nord": {"nom": "Grand Nord"},
+		   "afrique_du_nord": {"nom": "Afrique du Nord et Orient"}, "afrique": {"nom": "Afrique subsaharienne"}}
+TYPE_MAISON_IMG = {"id": "maison", "image": "maison.jpg"}
+
+
+def test_images_du_type_exige_type_et_region():
+	fichiers = ["maison.jpg", "maison_europe02.jpg", "maison_europe01.jpg", "maison_grand_nord01.png",
+				"maison_afrique_du_nord01.jpg", "maison_afrique01.jpg", "maison_europe_lutecia01.jpg",
+				# Pas une Maison : une grande maison de commerce, un autre type, une région inconnue.
+				"maison_des_conserves_europe01.jpg", "demeure_europe01.jpg", "maison_mars01.jpg",
+				"maison_europe01.txt", "maison_europe.jpg"]
+	choix = proprietes.images_du_type(TYPE_MAISON_IMG, fichiers, REGIONS)
+	assert [c["fichier"] for c in choix] == [
+		"maison.jpg", "maison_europe01.jpg", "maison_europe02.jpg", "maison_europe_lutecia01.jpg",
+		"maison_grand_nord01.png", "maison_afrique_du_nord01.jpg", "maison_afrique01.jpg"]
+	assert [c["region"] for c in choix][4:] == ["grand_nord", "afrique_du_nord", "afrique"]
+	assert choix[3]["label"] == "Europe · Lutecia 1"
+
+
+def test_images_du_type_sans_regions_ne_garde_que_l_image_du_type():
+	assert [c["fichier"] for c in proprietes.images_du_type(TYPE_MAISON_IMG, ["maison.jpg", "maison_europe01.jpg"], {})] \
+		== ["maison.jpg"]
+	# Image du type absente du disque : elle n'est pas offerte.
+	assert proprietes.images_du_type(TYPE_MAISON_IMG, ["maison_europe01.jpg"], REGIONS)[0]["fichier"] == "maison_europe01.jpg"
+
+
+def test_changer_image_refuse_celle_d_un_autre_type_et_ne_touche_pas_au_type():
+	prop = {"type_propriete": "maison", "image": "maison.jpg"}
+	fichiers = ["maison.jpg", "maison_europe01.jpg", "demeure_europe01.jpg"]
+	ok, _ = proprietes.changer_image(prop, TYPE_MAISON_IMG, fichiers, REGIONS, "demeure_europe01.jpg")
+	assert not ok and prop["image"] == "maison.jpg"
+	ok, _ = proprietes.changer_image(prop, TYPE_MAISON_IMG, fichiers, REGIONS, "maison_europe01.jpg")
+	assert ok and prop == {"type_propriete": "maison", "image": "maison_europe01.jpg"}
+	ok, _ = proprietes.changer_image(prop, TYPE_MAISON_IMG, fichiers, REGIONS, "maison.jpg")
+	assert ok and prop["image"] == "maison.jpg"
+
+
 # ── Prix d'achat : voisinage marchand + occupation de la case ─────────────────────
 # Coefficients RELUS depuis `PRIX_ACHAT_DEFAUT` : retoucher les défauts ne casse rien ici.
 

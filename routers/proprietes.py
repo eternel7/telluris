@@ -11,6 +11,7 @@
 #
 # ⚠️ Aucune route ne change `type_propriete` : il n'existe pas de conversion de type.
 
+import os
 import time
 import unicodedata
 from typing import Annotated
@@ -39,6 +40,26 @@ from routers.user import _inventory_payload
 from utils.lieux import connexions_du_lieu, get_lieu_links
 
 proprietes_router = APIRouter()
+
+# Dossier des images de lieux (mount `/towns` de main.py) : les images d'un type de bien y
+# sont lues pour le sélecteur 🖼️ (`proprietes.images_du_type`).
+TOWNS_IMAGES_PATH = "templates/resources/towns"
+
+
+def _fichiers_images() -> list:
+	try:
+		return os.listdir(TOWNS_IMAGES_PATH)
+	except OSError:
+		return []
+
+
+def _regions() -> dict:
+	return (get_doc("rules:regions") or {}).get("regions") or {}
+
+
+def _images_vue(prop: dict, tdef: dict) -> dict:
+	return {"courante": prop.get("image", ""),
+			"choix": proprietes.images_du_type(tdef, _fichiers_images(), _regions())}
 
 
 # ── Vues ─────────────────────────────────────────────────────────────────────────
@@ -200,6 +221,8 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 		# Échanges avec la cité (utils/echanges_cite) : fiche du négociant et journal, au maître.
 		"negoce": _negoce_view(character, prop, cat, employes) if gere else None,
 		"journal_echanges": list(prop.get("echanges_journal") or []) if gere else [],
+		# Sélecteur 🖼️ : images du MÊME type, au seul propriétaire (une chambre louée n'en a pas).
+		"images": _images_vue(prop, tdef) if gere and prop.get("mode") == proprietes.MODE_ACHAT else None,
 	}
 	if extra:
 		payload.update(extra)
@@ -474,6 +497,21 @@ async def installer(current_user: Annotated[dict, Depends(get_current_user)], bo
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer cet aménagement.")
 	proprietes.installer(prop, am_id)
 	_sauver(prop, character)
+	return _payload_ici(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/image")
+async def changer_image(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le propriétaire change l'image de son bien, à tout moment, parmi celles de son type."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	if prop.get("mode") != proprietes.MODE_ACHAT:
+		raise HTTPException(status_code=403, detail="Une chambre louée garde son image.")
+	tdef = proprietes.type_def(cat, prop.get("type_propriete")) or {}
+	ok, raison = proprietes.changer_image(prop, tdef, _fichiers_images(), _regions(), body.get("image"))
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(prop)
 	return _payload_ici(character, prop, cat, role)
 
 

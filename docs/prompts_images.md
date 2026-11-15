@@ -38,6 +38,7 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 | Tenancier | **paysage 16:9** (comme les portraits existants, ~1408×768) | `templates/resources/pnj/` | `marchand_<race>_<m\|f>_<categorie>NN.png` |
 | Monstre | carré 1:1 | `templates/resources/monsters/` | `<slug_espece>_transparent.png` (fond retiré après génération) |
 | Porte (ext./int.) | paysage 16:9 | `templates/resources/towns/` | `<slug_porte>.png` |
+| Logement du joueur (§ 7) | paysage 16:9 | `templates/resources/towns/` | `<type>_<region>NN.jpg` (ex. `maison_grand_nord01.jpg`) — région obligatoire |
 
 ### 0.4 Champs disponibles
 
@@ -258,6 +259,209 @@ Réalise l'image d'une petite ville fortifiée dans une plaine tempérée, au fo
 
 ```
 Réalise l'image d'une ville fortifiée dans une plaine tempérée, au format 5:4. Un système défensif complet l'entoure : double enceinte de pierre aux tours massives, chemin de ronde, et douves en eau au pied du mur extérieur ; quatre grandes portes fortifiées, chacune avec un pont sur les douves, percent les murailles au milieu de chacun des quatre bords de l'image. Dedans, une grande place centrale, des rues pavées hiérarchisées, des quartiers denses entrecoupés de places, de jardins et d'esplanades dégagées, et une vaste cour libre devant une grande bâtisse à plusieurs ailes. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+---
+
+## 7. Logements des joueurs (Chambre → Domaine) par région
+
+Un prompt par type de bien × région de `rules:regions` (16:9, comme les images provisoires `chambre.jpg`…`domaine.jpg`). Le propriétaire choisit l'image de son bien **à tout moment** parmi celles de **son type** (section « 🖼️ Apparence du bien » du panneau 🏠, `POST /api/proprietes/image`, `proprietes.images_du_type`) : une image déposée sous le bon nom est offerte **sans import ni redémarrage**.
+
+- **Nom de fichier** : `templates/resources/towns/<type>_<region>NN.jpg` (`maison_grand_nord01.jpg`) ; propre à une cité : `<type>_<region>_<cite>NN.jpg` (`demeure_afrique_du_nord_petra01.jpg`). ⚠️ La région (clé de `rules:regions`) est **obligatoire** : un fichier sans elle n'est pas proposé — c'est elle qui empêche `maison_des_conserves_europe01.jpg` de passer pour une Maison. `.jpg`, `.jpeg`, `.png`, `.webp`. Ne jamais écraser (§ 0.6).
+- **Cadrage** : Chambre et Logement = **intérieur vide** (le logis attend son occupant) ; Maison et Demeure = **façade** depuis la rue, peuplée (phrase du § 0.2) ; Domaine = **vue d'ensemble** légèrement plongeante, à l'abri d'une enceinte (on ne vit pas près des monstres sans se protéger).
+- Mot « portail » proscrit pour une entrée (porte cochère, porche) : il désigne un portail magique, absent de chaque prompt.
+- **Steppes et Caucase** : région déclarée sans cité en jeu à ce jour ; prompts prêts pour la première. **Océanie** : le grand édifice blanc aux voûtes en coquilles (temple des trois frères, Sydney) n'apparaît qu'au fond de la Demeure — ailleurs il serait hors de sa cité.
+
+### 7.1 Europe (`europe`) — Lutecia, Auxerre, Rhemi, Chartres, Orléans, Rome, Camelot, Bruges, Aix-la-Chapelle, Bucarest…
+
+#### Chambre — `chambre_europe01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans une auberge d'une cité-État d'Europe, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Murs de torchis blanchis entre des poutres de chêne, plafond bas aux solives apparentes, plancher de chêne usé ; un lit simple garni d'une couverture de laine et d'un édredon de plumes, un coffre ferré au pied du lit, une petite table avec une chandelle et un pichet, un tabouret ; une fenêtre à petits carreaux sertis de plomb donne sur des toits d'ardoise et de tuile et, au loin, le chemin de ronde d'un rempart. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_europe01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant à l'étage d'une maison à colombages d'une cité-État d'Europe, au-dessus d'un atelier, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Une cheminée de pierre où pend une crémaillère, une table de chêne et deux chaises, un banc-coffre, de la vaisselle d'étain sur une étagère ; au fond, une alcôve fermée par un rideau de laine abrite un lit pour deux ; une fenêtre à meneau s'ouvre sur une ruelle. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_europe01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une ruelle pavée d'une cité-État d'Europe, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Deux étages à colombages en encorbellement sur un soubassement de pierre calcaire, un toit pentu d'ardoise percé de lucarnes et d'une cheminée qui fume, une porte de chêne cloutée sous un auvent, des volets peints, un jardinet clos d'un muret avec un puits ; au fond, les tours d'un rempart. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_europe01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable dans une rue large d'une cité-État d'Europe, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Un hôtel particulier de pierre de taille blonde sur trois niveaux, une tourelle d'escalier en encorbellement à l'angle, de hautes fenêtres à meneaux, des toits d'ardoise à fortes pentes ornés de girouettes, une grande porte cochère ouverte sur une cour d'honneur pavée, des écuries au fond de la cour. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_europe01.jpg`
+
+```
+Réalise l'image d'un domaine en lisière d'une cité-État d'Europe, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Un manoir de pierre aux toits d'ardoise flanqué d'une tour carrée ; une grange, un pressoir, un colombier rond et des écuries ; un potager en carrés, un verger et des rangs de vigne ; le tout ceint d'un haut mur de pierre crénelé avec chemin de ronde et tour de guet ; au loin, les remparts et les toits de la cité. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 7.2 Grand Nord (`grand_nord`) — Reykjavik, Akureyri (Islande), Laponie
+
+#### Chambre — `chambre_grand_nord01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans une auberge d'une cité-État du Grand Nord, terre de volcans et de dragons, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Murs de planches goudronnées doublés de tourbe, poutres sculptées d'entrelacs ; un lit-banc fermé garni de peaux de mouton et d'une fourrure de renne, un coffre de bois peint, une lampe à huile, un petit poêle de pierre de lave ; une fenêtre étroite s'ouvre sur des coulées de lave noire saupoudrées de neige. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_grand_nord01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant dans une maison de tourbe d'une cité-État du Grand Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Une pièce longue au foyer central de pierres plates sous un trou à fumée, des banquettes-lits le long des murs couvertes de peaux, un métier à tisser vertical lesté de pierres, une marmite suspendue, des poissons séchés pendus aux poutres ; une porte basse mène à une petite réserve. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_grand_nord01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une cité-État du Grand Nord, entre mer grise et montagnes enneigées, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Une maison de tourbe et de bois au toit couvert d'herbe, des pignons de planches peints en noir et rouge, un soubassement de pierre de lave, une petite cour de galets et un séchoir à poissons ; plus loin, une source chaude qui fume ; très haut dans le ciel, la silhouette lointaine d'un dragon. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_grand_nord01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable dans une cité-État du Grand Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Une grande demeure faite de plusieurs pignons de bois accolés en rang sous des toits d'herbe, des poutres faîtières sculptées de têtes de dragon, des murs de pierre de lave et de tourbe, une cour close de pierre sèche où fume un bain alimenté par une source chaude. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_grand_nord01.jpg`
+
+```
+Réalise l'image d'un domaine au bord d'un fjord du Grand Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Une demeure aux pignons de bois et aux toits d'herbe, des étables à moutons, un enclos de petits chevaux trapus à crinière épaisse, des séchoirs à poissons, un bassin de source chaude fumant, des prés de fauche clos de murets de lave ; une haute palissade de rondins sur un socle de pierre et une tour de guet tournée vers le ciel ; au loin, un glacier. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 7.3 Steppes et Caucase (`steppes`) — steppe pontique, Volga, Oural, Caucase — aucune cité en jeu à ce jour
+
+#### Chambre — `chambre_steppes01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans un caravansérail fortifié des steppes et du Caucase, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Murs de pierre enduits d'argile, une niche voûtée ; une couche basse couverte de tapis de laine aux motifs géométriques et de coussins de feutre, un coffre de bois sculpté de rosaces, une lampe de cuivre, un brasero ; une petite fenêtre s'ouvre sur la steppe infinie et des cimes enneigées. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_steppes01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant à l'abri des remparts d'une cité-État des steppes, dans le monde médiéval fantastique de Telluris : une yourte de feutre blanc richement aménagée, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Un treillis de bois peint en rouge et en ocre, une couronne centrale ouverte sur le ciel, un foyer sur trépied, des feutres et des tapis épais, un lit bas, des coffres peints, un harnachement de cheval suspendu ; un rideau de feutre brodé sépare une seconde partie. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_steppes01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une cité-État du Caucase adossée à la montagne, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Une maison de pierre au toit plat de terre battue, accrochée à la pente, un balcon de bois sculpté, une porte basse en bois clouté ; juste à côté, une haute tour défensive de pierre ; une ruelle de pierres et, au fond, des montagnes enneigées. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_steppes01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable dans une cité-État du Caucase, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Une demeure de pierre autour d'une cour à galeries de bois sculpté sur deux niveaux, une haute tour carrée à mâchicoulis, des portes de bois sculpté, des tapis qui sèchent aux balcons, une vigne en treille au-dessus de l'entrée. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_steppes01.jpg`
+
+```
+Réalise l'image d'un domaine dans la steppe, aux portes d'une cité-État, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Une demeure de pierre flanquée d'une tour, de vastes enclos de chevaux de steppe, les yourtes des gardiens de troupeaux, des meules de foin ; un mur de pierre doublé d'un fossé et des tours de guet ; à l'horizon, des tertres funéraires herbeux et l'herbe à perte de vue. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 7.4 Afrique du Nord et Orient (`afrique_du_nord`) — Alexandrie, Le Caire, Abou Simbel, Petra, Maroc, Levant
+
+#### Chambre — `chambre_afrique_du_nord01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans une auberge de caravaniers d'une cité-État d'Afrique du Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Une pièce voûtée en pierre blanchie à la chaux, des niches dans les murs ; une banquette basse couverte de tapis et de coussins, un coffre de cèdre marqueté, une lanterne de cuivre ajourée, une jarre d'eau ; une fenêtre à moucharabieh de bois tourné jette sur le sol des motifs de lumière et laisse deviner des terrasses et des palmiers. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_afrique_du_nord01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant à l'étage d'une maison de briques crues d'une cité-État d'Afrique du Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Des murs enduits de chaux ocre, un sol de tomettes couvert d'un tapis, une banquette, une table basse de cuivre martelé avec une théière, des coffres, une jarre ; un escalier de terre monte vers la terrasse du toit. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_afrique_du_nord01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une ruelle étroite d'une cité-État d'Afrique du Nord, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Une maison à cour intérieure aux murs blanchis à la chaux, presque aveugles côté rue, une porte de bois clouté sous un arc outrepassé, un moucharabieh en encorbellement à l'étage, une terrasse sur le toit, un palmier qui dépasse de la cour. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_afrique_du_nord01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable dans une cité-État d'Afrique du Nord et d'Orient, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Une grande demeure de pierre ocre ornée de frises géométriques, une haute porte sous un arc polylobé, des moucharabiehs, une tour à vent qui rafraîchit les pièces ; par la porte ouverte, une cour d'honneur à bassin et fontaine, des galeries à colonnes et des orangers. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_afrique_du_nord01.jpg`
+
+```
+Réalise l'image d'un domaine au bord du Nil, en lisière d'une cité-État, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Une demeure à cour et à terrasses, une palmeraie, des jardins quadrillés de canaux d'irrigation, une noria qui puise au fleuve, des greniers voûtés, des pigeonniers de terre ; un mur d'enceinte de briques crues rythmé de tours ; au loin, le désert, et des voiles triangulaires sur le fleuve. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 7.5 Afrique subsaharienne (`afrique`) — Aksoum, Abyssinie, Sénégambie, Grands Lacs, Zambèze, Madagascar…
+
+#### Chambre — `chambre_afrique01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans une auberge de caravanes d'une cité-État du Sahel, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Des murs de terre crue lissés à la main, des niches, un plafond de rondins de palmier ; un lit de bois tendu de cuir et d'une natte, une couverture de coton tissé à bandes, une jarre de terre, une petite lampe à huile ; une ouverture étroite donne sur des toits-terrasses et des façades hérissées de pieux de bois. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_afrique01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant dans une cité-État d'Afrique subsaharienne, dans le monde médiéval fantastique de Telluris : une case ronde, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Des murs de terre peints de motifs géométriques ocre et blanc, la charpente conique d'un toit de chaume, un foyer de trois pierres, un lit bas de bois sculpté, des tabourets sculptés, des calebasses et des nattes ; la seconde pièce est une case voisine, qu'on aperçoit par la porte de l'autre côté d'une petite cour. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_afrique01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une cité-État des hauts plateaux d'Abyssinie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Des murs à assises alternées de pierre et de poutres de bois aux extrémités saillantes, des fenêtres encadrées de bois, un toit-terrasse, un escalier extérieur ; au loin, de grandes stèles de pierre dressées et l'horizon des plateaux. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_afrique01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable dans une cité-État d'Afrique australe, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Une demeure ceinte de hauts murs courbes de pierre sèche appareillée sans mortier, ornés de frises à chevrons, une tour conique pleine ; derrière l'entrée, des cases de terre au toit de chaume et des cours dallées. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_afrique01.jpg`
+
+```
+Réalise l'image d'un domaine sur les hauts plateaux d'Abyssinie, en lisière d'une cité-État, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Une demeure de pierre à assises de bois, des greniers, des champs en terrasses, des enclos et un haras ; un mur d'enceinte de pierre et une tour de guet ; au loin, au-dessus du plateau, quelques chevaux ailés sauvages en vol. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 7.6 Océanie (`oceanie`) — Sydney, Melbourne (Australie)
+
+#### Chambre — `chambre_oceanie01.jpg`
+
+```
+Réalise l'image de l'intérieur d'une chambre individuelle dans une auberge d'une cité-État au bord d'une grande baie d'Océanie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis le seuil, la pièce entière est visible : petite, modeste et propre, on y dort et on y range quelques affaires. Des murs de grès doré, un plafond de poutres d'eucalyptus ; un lit bas tendu de cordages de fibres et couvert d'un manteau de peaux d'opossum cousues et gravées, un coffre de bois d'eucalyptus, des paniers tressés et un plat de bois creusé ; une fenêtre s'ouvre sur les eaux turquoise de la baie. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Logement — `logement_oceanie01.jpg`
+
+```
+Réalise l'image de l'intérieur d'un petit logement indépendant dans une cité-État d'Océanie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. Vue depuis l'entrée sur la pièce principale, un passage vers une seconde pièce plus petite : un foyer simple pour un ou deux occupants. Des murs de grès ornés de motifs peints à points et de spirales ocre, blancs et rouges, un foyer, des nattes et des paniers tressés, des boomerangs et des propulseurs accrochés au mur, une couche couverte d'un manteau de peaux d'opossum ; la porte ouvre sur une terrasse ombragée d'écorce. La pièce est entièrement vide de personnages : le logis attend son occupant. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Maison — `maison_oceanie01.jpg`
+
+```
+Réalise l'image de la façade d'une maison individuelle dans une rue de grès d'une cité-État d'Océanie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La maison occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : un véritable foyer de plusieurs pièces, ni pauvre ni fastueux. Une maison de grès doré au toit d'écorce et de bois, un large auvent sur des poteaux d'eucalyptus, des motifs peints à points sur les murs, un jardin d'arbustes à fleurs rouges, des eucalyptus à l'écorce blanche. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Demeure — `demeure_oceanie01.jpg`
+
+```
+Réalise l'image de la façade d'une grande demeure de notable sur une colline dominant la baie d'une cité-État d'Océanie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9. La demeure occupe environ 80 % de l'image, vue de trois-quarts depuis la rue : nombreuses pièces, logement du personnel, de quoi recevoir des invités. Une grande demeure de grès doré à terrasses étagées, des galeries ombragées, de grandes fresques de spirales et de points qui racontent le voyage de trois frères, des bassins et des fougères arborescentes ; au loin, sur une pointe de la baie, un grand édifice blanc aux voûtes en coquilles. La rue est calme : quelques passants seulement, bien espacés, laissent voir le pavé. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+#### Domaine — `domaine_oceanie01.jpg`
+
+```
+Réalise l'image d'un domaine au bord d'une rivière, en lisière d'une cité-État d'Océanie, dans le monde médiéval fantastique de Telluris, au format paysage 16:9, en vue d'ensemble légèrement plongeante : une demeure principale, ses dépendances et ses terres privées, à l'abri d'une enceinte, car on ne vit pas près des monstres sans se protéger. Une demeure de grès et ses dépendances, des pièges à poissons en pierre sèche barrant la rivière, des jardins d'ignames, un mur de grès et des tours de guet ; au loin, une forêt d'eucalyptus bleutée et des montagnes bleues. Quelques silhouettes, toutes petites à cette distance, travaillent dans les jardins et les cours. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales : aucune Lignée n'est plus nombreuse que les autres. Aucun portail magique. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 ```
 
 ---

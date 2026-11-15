@@ -64,7 +64,7 @@ vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 vm.runInThisContext(extraireConst('_ECH_ICONES'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', '_propNomPnj', '_propNegoce', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
+	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', '_propNomPnj', '_propNegoce', '_propImages', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
 	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
@@ -126,6 +126,25 @@ t('toute chaîne saisie est échappée', () => {
 	renderPropriete(ici('proprietaire'));
 	assert.ok(!cible.innerHTML.includes(XSS), 'nom injecté tel quel');
 	assert.ok(cible.innerHTML.includes('&lt;img src=x'));
+});
+
+t('🖼️ apparence : vignettes du type, la courante pressée, noms échappés', () => {
+	const images = { courante: 'maison_europe01.jpg', choix: [
+		{ fichier: 'maison.jpg', region: '', label: "Image d'origine" },
+		{ fichier: 'maison_europe01.jpg', region: 'europe', label: 'Europe 1' },
+		{ fichier: 'maison_x"01.jpg', region: 'europe', label: XSS }] };
+	renderPropriete(ici('proprietaire', { images }));
+	const h = cible.innerHTML;
+	assert.ok(h.includes('Apparence du bien'));
+	assert.strictEqual((h.match(/onclick="propChoisirImage\(this\)"/g) || []).length, 3);
+	assert.ok(/data-img="maison_europe01\.jpg"\s+aria-pressed="true"/.test(h), 'courante non marquée');
+	assert.ok(/data-img="maison\.jpg"\s+aria-pressed="false"/.test(h));
+	assert.ok(!h.includes(XSS) && h.includes('maison_x&quot;01.jpg'), 'libellé ou fichier non échappé');
+	// Une seule image (ou visiteur : `images` null) : rien à choisir, pas de section.
+	renderPropriete(ici('proprietaire', { images: { courante: 'maison.jpg', choix: [images.choix[0]] } }));
+	assert.ok(!cible.innerHTML.includes('Apparence du bien'));
+	renderPropriete(ici('visiteur', { images: null }));
+	assert.ok(!cible.innerHTML.includes('Apparence du bien'));
 });
 
 t('le visiteur ne voit aucun geste de gestion', () => {
