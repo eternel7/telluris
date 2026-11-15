@@ -53,7 +53,7 @@ function colSiteHtml(site, chiffres) {
 	const lignes = Object.keys(COL_AXES).filter(a => site && site[a]).map(a => {
 		const b = site[a];
 		const detail = chiffres && (b.details || []).length ? ` — ${b.details.map(_colE).join(', ')}` : '';
-		const note = chiffres && b.note !== undefined ? ` <span class="q-desc">(${_colE(b.note)}/3)</span>` : '';
+		const note = chiffres && b.note !== undefined ? ` <span class="q-desc">(${_colE(b.note)}/${_colE(b.max ?? 3)})</span>` : '';
 		return `<div class="prop-ligne"><div class="prop-txt"><strong>${COL_AXES[a]}${note}</strong>
 			<span class="q-desc">${_colE(b.mots)}${detail}</span></div></div>`;
 	}).join('');

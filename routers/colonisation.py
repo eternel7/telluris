@@ -28,6 +28,7 @@ from utils import proprietes
 from utils import recrutement
 from utils import montures
 from utils import escorte
+from utils import traces
 from utils.zones import load_zone_defs_for_lieu
 from utils.lieux import connexions_du_lieu, get_lieu_links, ORIGINES_IMAGE_LIEU, TOWNS_IMAGES_PATH
 # Sens d'import : `routers/colonisation` → `routers/user`, jamais l'inverse.
@@ -59,8 +60,14 @@ def lire_site(pays_doc: dict, position, reg: dict) -> dict:
 	tags}`. Partagé avec `/play` (rattrapage)."""
 	relies = colonisation.lieux_relies(connexions_du_lieu(pays_doc.get("_id")), pays_doc.get("_id"), get_doc)
 	zone_defs = load_zone_defs_for_lieu(pays_doc, get_doc)
+	ids = {r.get("ressource") for r in pays_doc.get("ressources") or [] if r.get("ressource")}
+	items = {i: d for i, d in ((i, get_doc(i)) for i in ids) if d}
+	# Danger : rang de la pire rencontre possible ici — la mesure même des traces de monstres.
+	x, y = colonisation._xy(position)
+	menace = traces.menace_lieu(pays_doc, {"x": x, "y": y}, get_doc,
+								find_docs({"type": "profil"}) or [], ville=False) if pays_doc.get("rencontres") else None
 	return {"relies": relies, "zone_defs": zone_defs,
-			"fiche": colonisation.fiche_site(pays_doc, position, zone_defs, relies, reg),
+			"fiche": colonisation.fiche_site(pays_doc, position, zone_defs, relies, reg, items=items, menace=menace),
 			"tags": colonisation.tags_site(pays_doc, position, zone_defs)}
 
 
@@ -124,7 +131,7 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 	if bilan["passes"] or bilan.get("evenements_attente") or imp.get("fondateur_rang") != avant:
 		# La production vend son surplus aux boutiques du lieu (2 jours au plus, § 8).
 		vente = colonisation.echanger(imp, reg, employes, echanges_cite.boutiques_cite(imp["_id"], find_docs),
-									  get_doc, resolve_item_ref, bilan["passes"])
+									  get_doc, resolve_item_ref, bilan["passes"], site=site, find_docs_fn=find_docs)
 		if vente["gain"]:
 			evenements.append(f"La production s'est vendue : {vente['gain']} cu en caisse.")
 		for d in (bilan["employes_touches"] + vente["touchees"]

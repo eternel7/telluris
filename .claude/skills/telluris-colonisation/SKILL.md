@@ -26,7 +26,11 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 - Bouton « 🏕️ Fonder une implantation » sur toute carte de pays à qui tient une charte ; la case est jugée à l'ouverture (`GET /colonisation/site`).
 - `peut_fonder` : case marchable et sans connexion, ≥ `distance_cite_min` de toute `categorie:"ville"`, ≥ `distance_implantation_min` d'une autre implantation, `implantations_par_pays` par personnage. Distances de Chebyshev, cités lues dans les connexions du pays (`lieux_relies`).
 - Le panneau nomme le maître de guilde des cités les plus proches (`cites_de_la_charte`, ex æquo tous).
-- `fiche_site` : six axes notés 0-3, LUS à chaque fois (zones qui couvrent la case, tags du pays, cases d'eau, ressources, cités, donjons) — jamais stockés. Mots-clés et libellés : `site` des règles.
+- `fiche_site` : six axes LUS à chaque fois (zones qui couvrent la case, tags du pays, cases d'eau, ressources, cités, donjons) — jamais stockés. Mots-clés et libellés : `site` des règles. Chaque bloc porte `note` et `max`.
+  - Ressources (`pays.ressources` ∩ zones de la case, distinctes) : +1 sur l'axe de leur NATURE (`axe_de_ressource`, `site.ressources_axes` : catégorie OU sous-catégorie), plafond 3 ; ids gardés dans `bloc.ressources`.
+  - Danger 0…`site.danger_max` (8) : `menace` = `traces.menace_lieu` (rang de la pire rencontre, calculé par `routers/colonisation.lire_site`) ; None ⇒ 0 ; sinon `danger_par_rang[rang]` +1 si donjon proche OU `modificateurs.danger` > 0. Libellés `site.mots_danger` (`mots_axe.danger` n'est plus lu).
+  - ⚠️ Formules (sécurité, remarque, attaque, harcèlement) : toujours `danger_relatif` (note × 3 / max), jamais la note brute.
+- Ventes : `objets_du_metier` (`site.ventes_du_site`) — bûcheron : rondin de l'essence de chaque arbre du site (`bois.item_de_l_essence`), seul ; carrier : `produit.items` + minerais du site. Repli sur `produit.items`. `echanger(..., site=, find_docs_fn=)`.
 - Menace : une espèce rencontrable des zones du site, tirée à la fondation.
 
 #### Dans l'implantation

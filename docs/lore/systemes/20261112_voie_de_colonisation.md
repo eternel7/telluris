@@ -38,9 +38,20 @@ Six axes, lus sur la carte du pays autour de la case (terrain, eau, zones d'infl
 | Matériaux | bois, pierre |
 | Commerce | cité proche, fleuve, mer |
 | Défense | hauteur, visibilité, abri naturel |
-| Danger | monstres, tanière, donjon proche |
+| Danger | rang des monstres, donjon proche |
 
 L'eau est un trait du site, pas un stock.
+
+**Ressources et danger** (Auteur, 15/11) :
+
+- **Ressources** : chaque ressource distincte que la contrée laisse récolter sur la case relève l'axe de sa **nature**, d'un cran, jusqu'à trois :
+  - arbres, métaux, pierre, sel gemme → matériaux ;
+  - herbes, graines, fleurs, racines, sève, plumes → nourriture ;
+  - eau de source → eau.
+  - Une ressource d'une autre nature ne compte pas.
+- **Danger** : lu sur le **rang** de la pire rencontre possible sur la case, la même mesure que les traces de monstres.
+  - Échelle de 0 à 8 : aucune rencontre prévue → 0 ; rang F → 1, puis un cran par rang ; S+ → 8, le maximum.
+  - Un donjon proche ou une zone dangereuse ajoute **un** cran, seulement s'il existe des rencontres.
 
 ## 4. Les paliers
 
@@ -79,7 +90,7 @@ Affichage : un palier **en mots**, avec le **détail chiffré** des facteurs. Le
 
 - défense physique : palissade, fossé, portes, tours, éclairage ;
 - défense humaine : nombre et qualité des gardes ;
-- environnement : relief, visibilité, danger du site ;
+- environnement : relief, visibilité, danger du site (de 0 à 8, il pèse autant aux extrêmes qu'avant le passage au rang ; de même pour la menace, § 6) ;
 - logistique : état des quatre stocks ;
 - connaissance du territoire : tanière identifiée ou non.
 
@@ -134,6 +145,8 @@ Les soignants en poste et le stock de médicaments en limitent la gravité.
 **Bâtiments** (aménagements du lieu, chacun avec ses postes) : habitation, entrepôt, ferme, étable, auberge, boutique, atelier, poste de garde. Pas de lieu de culte.
 
 **Production** : fermes, élevages et coupes de bois alimentent les stocks. Ateliers et boutiques tournent comme les ateliers des propriétés urbaines.
+
+**Ce que le site fournit** (Auteur, 15/11) : le bûcheron vend les rondins des essences qui poussent sur le site, et le carrier la pierre plus les minerais du site (fer, métaux précieux, sel gemme). Sans ressource adaptée, chacun vend ses produits habituels.
 
 **Échanges des ateliers** (Auteur, 12/11, en jeu pour les biens urbains) : la mécanique des biens urbains s'applique telle quelle. L'implantation **est elle-même la cité** : ses ateliers échangent avec ses propres boutiques, sans cité de rattachement ni distance.
 

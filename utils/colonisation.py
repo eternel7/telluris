@@ -258,6 +258,27 @@ DEFAUTS = {
 			"defense": ["terrain ouvert", "peu d'abri", "bonne position", "position forte"],
 			"danger": ["contrée paisible", "contrée surveillée", "contrée dangereuse", "contrée redoutable"],
 		},
+		# Ressources de zone comptées par NATURE : +1 par ressource distincte sur l'axe de sa
+		# nature (plafond 3). Le premier axe dont la catégorie OU la sous-catégorie correspond gagne.
+		"ressources_axes": {
+			"materiaux": {"categories": ["metal"], "sous_categories": ["arbre", "pierre", "sel_gemme"]},
+			"nourriture": {"categories": [], "sous_categories": ["herbe", "graines", "fleur", "racine", "seve", "plumes"]},
+			"eau": {"categories": [], "sous_categories": ["eau"]},
+		},
+		# Danger = rang de la PIRE rencontre possible (mesure des traces) : aucune rencontre → 0,
+		# F → 1 … S+ → 8 ; donjon proche ou zone dangereuse : +1 au total, s'il y a des rencontres.
+		"danger_par_rang": {r: i + 1 for i, r in enumerate(RANGS)},
+		"danger_max": len(RANGS),
+		"mots_danger": ["contrée paisible", "vermine aux alentours", "bêtes dangereuses", "contrée hantée de monstres",
+						"contrée infestée", "contrée redoutable", "contrée maudite", "terre de légendes",
+						"terre d'apocalypse"],
+		# Ventes tirées des ressources du site (axe du métier) ; `remplace` : seuls ceux du site
+		# (repli sur `produit.items` à défaut), sinon ajoutés à la liste habituelle. `tier_bois` :
+		# l'arbre se vend en pièce de ce tier, de la même essence.
+		"ventes_du_site": {
+			"bucheron": {"categories": [], "sous_categories": ["arbre"], "tier_bois": "rondin", "remplace": True},
+			"carrier": {"categories": ["metal"], "sous_categories": ["pierre", "sel_gemme"], "remplace": False},
+		},
 	},
 	"securite": {
 		"plafond": 95,            # la sécurité n'atteint jamais le maximum (§ 5)
@@ -556,10 +577,48 @@ def tags_site(pays_doc: dict, position, zone_defs: dict) -> list:
 	return tags
 
 
-def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dict) -> dict:
+def _correspond(doc: dict, filtre: dict) -> bool:
+	"""L'objet entre dans un filtre `{categories, sous_categories}` (l'une OU l'autre)."""
+	return bool(doc) and (doc.get("categorie") in ((filtre or {}).get("categories") or [])
+						  or doc.get("sous_categorie") in ((filtre or {}).get("sous_categories") or []))
+
+
+def axe_de_ressource(doc: dict, reg: dict) -> str | None:
+	"""Axe que relève une ressource de zone, d'après sa nature (`site.ressources_axes`)."""
+	for axe, filtre in ((reg.get("site") or {}).get("ressources_axes") or {}).items():
+		if _correspond(doc, filtre):
+			return axe
+	return None
+
+
+def ressources_du_site(pays_doc: dict, zones_ici: set) -> list:
+	"""Ids DISTINCTS des ressources du pays rattachées à une zone qui couvre la case (ordre du doc)."""
+	out = []
+	for r in (pays_doc or {}).get("ressources") or []:
+		i = r.get("ressource")
+		if i and i not in out and set(zones_ici or ()) & set(r.get("zones") or []):
+			out.append(i)
+	return out
+
+
+def danger_max(reg: dict) -> int:
+	return max(1, _int((reg.get("site") or {}).get("danger_max"), len(RANGS)))
+
+
+def danger_relatif(site: dict, reg: dict) -> float:
+	"""Note de danger (0…`danger_max`) ramenée sur l'échelle 0-3 des formules de sécurité et de
+	menace : mêmes effets aux extrêmes qu'avant le passage au rang."""
+	return _int(((site or {}).get("danger") or {}).get("note")) * 3 / danger_max(reg)
+
+
+def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dict,
+			   items: dict | None = None, menace: dict | None = None) -> dict:
 	"""Les six axes du § 3, LUS sur la carte du pays autour de la case — rien n'est saisi par
-	site, rien n'est stocké. `{axe: {"note": 0-3, "mots": str, "details": [str]}}`."""
-	from utils import zones
+	site, rien n'est stocké. `{axe: {"note", "max", "mots", "details": [str]}}` ; un axe relevé
+	par des ressources porte aussi `ressources` (ids, lus par les ventes des métiers).
+	`items` = {id: doc} des ressources du pays ; `menace` = `traces.menace_lieu` à la case
+	(None : aucune rencontre possible ⇒ danger 0)."""
+	from utils import potentiel
 	conf = reg.get("site") or {}
 	mots = conf.get("mots") or {}
 	pos = _xy(position)
@@ -581,12 +640,16 @@ def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dic
 		   for y in range(pos[1] - rayon, pos[1] + rayon + 1) for x in range(pos[0] - rayon, pos[0] + rayon + 1)):
 		fiche["eau"]["note"] = min(3, fiche["eau"]["note"] + 1)
 		fiche["eau"]["details"].append("eau à portée")
-	# Nourriture : ce que la contrée laisse récolter ici compte aussi.
+	# Ressources de la contrée : chacune relève l'axe de sa nature (+1 par ressource distincte).
 	zones_ici = {p["zone"] for p in actifs}
-	recoltes = [r for r in (pays_doc or {}).get("ressources") or [] if zones_ici & set(r.get("zones") or [])]
-	if recoltes:
-		fiche["nourriture"]["note"] = min(3, fiche["nourriture"]["note"] + 1)
-		fiche["nourriture"]["details"].append(f"{len(recoltes)} ressource(s) à récolter")
+	for i in ressources_du_site(pays_doc, zones_ici):
+		doc = (items or {}).get(i) or {}
+		axe = axe_de_ressource(doc, reg)
+		if axe not in fiche:
+			continue
+		fiche[axe]["note"] = min(3, fiche[axe]["note"] + 1)
+		fiche[axe]["details"].append(doc.get("nom") or doc.get("label") or i.split(":", 1)[-1])
+		fiche[axe].setdefault("ressources", []).append(i)
 	# Commerce : cité proche, fleuve, mer.
 	villes = cites(relies)
 	n, trouves = note_tags("commerce")
@@ -596,31 +659,55 @@ def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dic
 		n += 2 if d <= 10 else 1 if d <= 20 else 0
 		trouves.append(f"{proche.get('label') or 'une cité'} à {d} cases")
 	fiche["commerce"] = {"note": min(3, n), "details": trouves}
-	# Danger : modificateurs des zones, espèces rencontrables, donjon proche.
-	danger = sum(_num(((zone_defs or {}).get(p["zone"]) or {}).get("modificateurs", {}).get("danger")) for p in actifs)
-	especes = sorted(zones.especes_rencontrables(pays_doc, zones_ici)) if zones_ici else []
+	# Danger : rang de la pire rencontre possible ; aucune rencontre ⇒ 0, sans bonus.
+	plafond = danger_max(reg)
 	details = []
 	n = 0
-	if danger >= 4:
-		n += 2
-	elif danger >= 2:
-		n += 1
-	if len(especes) >= 6:
-		n += 1
-	if especes:
-		details.append(f"{len(especes)} espèce(s) rôdent")
-	rayon_d = _int(conf.get("rayon_donjon"), 6)
-	donjons = [l for l in relies or [] if l.get("categorie") in (conf.get("categories_donjon") or [])
-			   and distance(l["pos"], pos) <= rayon_d]
-	if donjons:
-		n += 1
-		details.append("un donjon proche")
-	fiche["danger"] = {"note": min(3, n), "details": details}
+	rang = (menace or {}).get("rang")
+	if rang:
+		n = _int((conf.get("danger_par_rang") or {}).get(rang), RANGS.index(rang) + 1 if rang in RANGS else 1)
+		details.append(f"{potentiel.RANG_LIBELLES.get(rang, '') or 'menace'} (rang {rang})")
+		modif = sum(_num(((zone_defs or {}).get(p["zone"]) or {}).get("modificateurs", {}).get("danger")) for p in actifs)
+		rayon_d = _int(conf.get("rayon_donjon"), 6)
+		donjons = [l for l in relies or [] if l.get("categorie") in (conf.get("categories_donjon") or [])
+				   and distance(l["pos"], pos) <= rayon_d]
+		if donjons:
+			details.append("un donjon proche")
+		if donjons or modif > 0:
+			n += 1
+	fiche["danger"] = {"note": max(0, min(plafond, n)), "details": details}
 	mots_axe = conf.get("mots_axe") or {}
 	for axe, bloc in fiche.items():
-		libelles = mots_axe.get(axe) or []
-		bloc["mots"] = libelles[bloc["note"]] if bloc["note"] < len(libelles) else ""
+		bloc["max"] = plafond if axe == "danger" else 3
+		libelles = (conf.get("mots_danger") if axe == "danger" else None) or mots_axe.get(axe) or []
+		bloc["mots"] = libelles[bloc["note"]] if bloc["note"] < len(libelles) else (libelles[-1] if libelles else "")
 	return fiche
+
+
+def objets_du_metier(metier_id, produit: dict, site: dict, reg: dict, resolve_item, find_docs_fn=None) -> list:
+	"""Objets que vend un métier : ceux des ressources du site qui lui reviennent
+	(`site.ventes_du_site`, lues sur l'axe de son produit), sinon sa liste habituelle."""
+	from utils import bois
+	habituels = list((produit or {}).get("items") or [])
+	conf = ((reg.get("site") or {}).get("ventes_du_site") or {}).get(metier_id)
+	if not conf:
+		return habituels
+	du_site = []
+	for i in ((site or {}).get((produit or {}).get("axe")) or {}).get("ressources") or []:
+		doc = resolve_item(i) or {}
+		if not _correspond(doc, conf):
+			continue
+		if conf.get("tier_bois"):
+			essence = bois.essence_de(doc)
+			piece = bois.item_de_l_essence(find_docs_fn, essence, conf["tier_bois"]) if essence and find_docs_fn else None
+			if not piece:
+				continue
+			i = piece.get("_id")
+		if i and i not in du_site:
+			du_site.append(i)
+	if conf.get("remplace"):
+		return du_site or habituels
+	return habituels + [i for i in du_site if i not in habituels]
 
 
 def facteur_axe(site: dict, axe, reg: dict) -> float:
@@ -1632,7 +1719,7 @@ def securite(imp: dict, reg: dict, site: dict, employes: list) -> dict:
 	gardes = len(_du_role(imp, reg, employes, "gardes"))
 	humaine = 20.0 * min(1.0, gardes / besoin) + bonus_defense_guilde(imp, reg)
 	note = lambda axe: _int(((site or {}).get(axe) or {}).get("note"))
-	environnement = 10 + (note("defense") - note("danger")) * 10 / 3
+	environnement = 10 + (note("defense") - danger_relatif(site, reg)) * 10 / 3
 	seuils = seuils_stocks(imp, reg, employes)
 	ratios = [min(1.0, _num((imp.get("stocks") or {}).get(s)) / seuils[s]) if seuils.get(s) else 1.0
 			  for s in reg.get("stocks") or []]
@@ -1847,7 +1934,7 @@ def _menace(imp: dict, reg: dict, site: dict, employes: list, instant: int, rand
 		return
 	if not etape or not menace.get("espece"):
 		return
-	danger = _int(((site or {}).get("danger") or {}).get("note"))
+	danger = danger_relatif(site, reg)
 	if etape == 1:
 		if rand.random() < _num(conf.get("remarque_proba")) * (1 + danger) * _num((conf.get("feu") or {}).get(imp.get("feu")), 1):
 			menace["etape"] = 2
@@ -1942,13 +2029,14 @@ def caisse_max(imp: dict, reg: dict, employes: list) -> int:
 
 
 def echanger(imp: dict, reg: dict, employes: list, boutiques: list, get_doc_fn, resolve_item, passes: int,
-			 rand=random, now: int | None = None) -> dict:
+			 rand=random, now: int | None = None, site: dict | None = None, find_docs_fn=None) -> dict:
 	"""Les PNJ producteurs (fermes, coupes, carrières) vendent le SURPLUS de leur stock aux
 	boutiques du lieu — prix du FONDATEUR chez chacune, refus à la cible, plus offrant d'abord,
 	marchandise posée chez l'acheteur (`echanges_cite.prix_vente_boutique`, `marche.absorber_achat`).
 	Sans négociant : décote ; le crieur vend aux habitants ce que nulle boutique ne prend. Au
 	plus `echanges.passes_max` passes (2 jours, § 8). Recette → `imp.caisse_cuivre`. Rend
-	`{"gain", "touchees": [boutiques], "journal"}` ; mute `imp`, les boutiques, le négociant."""
+	`{"gain", "touchees": [boutiques], "journal"}` ; mute `imp`, les boutiques, le négociant.
+	`site` (fiche) + `find_docs_fn` : objets tirés des ressources du site (`objets_du_metier`)."""
 	from models import character_stats
 	from utils import echanges_cite, marche
 	now = now_epoch() if now is None else now
@@ -1980,7 +2068,7 @@ def echanger(imp: dict, reg: dict, employes: list, boutiques: list, get_doc_fn, 
 		crieur = [ctx.crieur]
 		for e in au_poste(imp, reg, employes):
 			produit = (par_metier.get(e.get("metier")) or {}).get("produit") or {}
-			objets = [i for i in produit.get("items") or [] if item(i)]
+			objets = [i for i in objets_du_metier(e.get("metier"), produit, site, reg, item, find_docs_fn) if item(i)]
 			s = produit.get("stock")
 			if not objets or not vente_autorisee(e):
 				continue
@@ -2330,7 +2418,7 @@ def attaque_presente(imp: dict, reg: dict, site: dict, employes: list, now: int 
 	if now - _int(imp.get("presence_at")) < pas:
 		return False
 	imp["presence_at"] = now
-	danger = _int(((site or {}).get("danger") or {}).get("note"))
+	danger = danger_relatif(site, reg)
 	proba = _num((conf.get("attaque_proba") or {}).get(imp.get("palier"))) * (1 + danger / 3)
 	if not _du_role(imp, reg, employes, "gardes"):
 		proba *= _num(conf.get("nuit_sans_garde"), 1)

@@ -73,8 +73,12 @@ def _imp(reg=None, palier="campement", **champs):
 	return db_config.suivre_modele(imp, {m["_id"]: m}.get)
 
 
-def _site(reg):
-	return col.fiche_site(_pays(), SITE_POS, ZONE_DEFS, RELIES, reg)
+ITEMS = {"item:Baies": {"_id": "item:Baies", "nom": "Baies", "categorie": "composant", "sous_categorie": "fleur"}}
+MENACE_C = {"rang": "C"}      # pire rencontre possible au site (les loups) : un rang médian
+
+
+def _site(reg, menace=MENACE_C):
+	return col.fiche_site(_pays(), SITE_POS, ZONE_DEFS, RELIES, reg, items=ITEMS, menace=menace)
 
 
 def _employe(imp, metier, poste, n=0):
@@ -212,12 +216,72 @@ def test_fiche_de_site_six_axes_lus_sur_la_carte():
 	reg = _reg()
 	fiche = _site(reg)
 	assert set(fiche) == set(reg["axes_site"])
-	assert all(0 <= b["note"] <= 3 and b["mots"] for b in fiche.values())
+	assert all(0 <= b["note"] <= b["max"] and b["mots"] for b in fiche.values())
 	assert fiche["eau"]["note"] >= 2 and "eau à portée" in fiche["eau"]["details"]   # rivière + case d'eau
-	assert fiche["danger"]["note"] >= 2 and "un donjon proche" in fiche["danger"]["details"]
+	# rang C + (donjon proche, zone dangereuse) : UN seul cran de plus
+	assert fiche["danger"]["note"] == reg["site"]["danger_par_rang"]["C"] + 1
+	assert "un donjon proche" in fiche["danger"]["details"] and fiche["danger"]["max"] == col.danger_max(reg)
 	# hors de toute zone, loin de l'eau : un site nu
-	nu = col.fiche_site(_pays(), {"x": 2, "y": 17}, ZONE_DEFS, RELIES, reg)
+	nu = col.fiche_site(_pays(), {"x": 2, "y": 17}, ZONE_DEFS, RELIES, reg, items=ITEMS, menace=None)
 	assert nu["eau"]["note"] == 0 and nu["materiaux"]["note"] == 0 and nu["danger"]["note"] == 0
+
+
+def test_danger_lu_sur_le_rang_de_la_pire_rencontre():
+	reg = _reg()
+	par_rang = reg["site"]["danger_par_rang"]
+	# aucune rencontre possible : 0, même avec un donjon proche et une zone dangereuse
+	assert _site(reg, menace=None)["danger"]["note"] == 0
+	# l'échelle suit les rangs, un cran par rang (F → 1 … S+ → max)
+	assert [par_rang[r] for r in RANGS] == list(range(1, len(RANGS) + 1))
+	assert col.danger_max(reg) == len(RANGS)
+	# S+ : au maximum, le bonus ne le dépasse pas
+	assert _site(reg, menace={"rang": RANGS[-1]})["danger"]["note"] == col.danger_max(reg)
+	# sans donjon ni zone dangereuse : le rang seul
+	calme = {"zone:foret": {**ZONE_FORET, "modificateurs": {}}}
+	f = col.fiche_site(_pays(), SITE_POS, calme, RELIES[:2], reg, items=ITEMS, menace={"rang": "D"})
+	assert f["danger"]["note"] == par_rang["D"] and "rang D" in f["danger"]["details"][0]
+	assert f["danger"]["mots"] == reg["site"]["mots_danger"][par_rang["D"]]
+
+
+def test_danger_relatif_rend_l_echelle_des_formules():
+	reg = _reg()
+	site = lambda n: {"danger": {"note": n}}
+	assert col.danger_relatif(site(0), reg) == 0
+	assert col.danger_relatif(site(col.danger_max(reg)), reg) == 3      # l'ancien maximum des formules
+	assert col.danger_relatif({}, reg) == 0
+
+
+def _pays_ressources(*ids):
+	p = _pays()
+	p["ressources"] = [{"ressource": i, "zones": ["zone:foret"]} for i in ids] \
+		+ [{"ressource": ids[0], "zones": ["zone:foret"]}]        # doublon : compté une fois
+	return p
+
+
+RESSOURCES = {
+	"item:Chene": {"_id": "item:Chene", "nom": "Chêne", "categorie": "composant", "sous_categorie": "arbre",
+				   "tags": ["bois", "a_couper", "essence_chene"]},
+	"item:Bouleau": {"_id": "item:Bouleau", "nom": "Bouleau", "categorie": "composant", "sous_categorie": "arbre",
+					 "tags": ["bois", "a_couper", "essence_bouleau"]},
+	"item:fer": {"_id": "item:fer", "nom": "Fer", "categorie": "metal", "sous_categorie": "fer"},
+	"item:Herbes": {"_id": "item:Herbes", "nom": "Herbes", "categorie": "composant", "sous_categorie": "herbe"},
+	"item:Bibelot": {"_id": "item:Bibelot", "nom": "Bibelot", "categorie": "divers", "sous_categorie": "bibelot"},
+}
+
+
+def test_chaque_ressource_releve_l_axe_de_sa_nature():
+	reg = _reg()
+	nu = {"zone:foret": {"_id": "zone:foret", "terrain_tags": []}}      # aucun mot-clé : seules les ressources
+	f = col.fiche_site(_pays_ressources("item:Chene", "item:fer", "item:Herbes", "item:Bibelot"),
+					   SITE_POS, nu, [], reg, items=RESSOURCES, menace=None)
+	assert f["materiaux"]["note"] == 2 and f["materiaux"]["ressources"] == ["item:Chene", "item:fer"]
+	assert f["nourriture"]["note"] == 1 and f["nourriture"]["details"] == ["Herbes"]
+	assert "ressources" not in f["eau"] and "Bibelot" not in str(f)            # nature inconnue : sans effet
+	# plafond 3
+	beaucoup = col.fiche_site(_pays_ressources("item:Chene", "item:Bouleau", "item:fer", "item:x"),
+							  SITE_POS, nu, [], reg,
+							  items={**RESSOURCES, "item:x": {"categorie": "metal"}}, menace=None)
+	assert beaucoup["materiaux"]["note"] == 3
 
 
 def test_tags_du_site_zone_puis_pays_puis_tag_de_pays():
@@ -665,7 +729,7 @@ def test_la_population_arrive_d_elle_meme_si_le_lieu_est_sur_et_loge():
 	imp["stocks"] = {s: 0.0 for s in reg["stocks"]}
 	imp["fortifications"], imp["morts"] = [], [20 * pas] * 5
 	avant = imp["population"]
-	bilan = col.rattraper(imp, reg, {a: {"note": 3 if a == "danger" else 0} for a in reg["axes_site"]}, [],
+	bilan = col.rattraper(imp, reg, {a: {"note": col.danger_max(reg) if a == "danger" else 0} for a in reg["axes_site"]}, [],
 						  now=30 * pas, rand=Hasard(0.0001))
 	assert imp["population"] < avant and any("quitté" in e for e in bilan["evenements"])
 
@@ -902,6 +966,30 @@ def test_le_surplus_de_production_se_vend_aux_boutiques_du_lieu(monkeypatch):
 	monkeypatch.setattr(echanges_cite, "prix_vente_boutique", lambda ctx, b, doc: None)
 	imp3, agri3 = _vente(reg)
 	assert col.echanger(imp3, reg, [agri3], [boulangerie], {}.get, items.get, 5, rand=random.Random(0))["gain"] == 0
+
+
+def _metier(reg, ident):
+	return next(m for m in reg["metiers_def"] if m["id"] == ident)
+
+
+def test_le_bucheron_vend_l_essence_du_site_et_le_carrier_ses_minerais():
+	reg = _reg()
+	rondins = [{"_id": f"item:Rondin_de_{e}", "type": "item", "sous_categorie": "rondin", "tags": [f"essence_{e.lower()}"]}
+			   for e in ("Chene", "Bouleau")]
+	find = lambda q: [d for d in rondins if d["sous_categorie"] == q.get("sous_categorie")]
+	resolve = {**RESSOURCES, **{d["_id"]: d for d in rondins}}.get
+	bucheron, carrier = _metier(reg, "bucheron")["produit"], _metier(reg, "carrier")["produit"]
+	site = {"materiaux": {"note": 2, "ressources": ["item:Bouleau", "item:fer"]}}
+	# le bouleau du site, pas le chêne de la liste habituelle
+	assert col.objets_du_metier("bucheron", bucheron, site, reg, resolve, find) == ["item:Rondin_de_Bouleau"]
+	# la pierre habituelle PLUS le fer du site
+	assert col.objets_du_metier("carrier", carrier, site, reg, resolve, find) == carrier["items"] + ["item:fer"]
+	# sans ressource adaptée : la liste habituelle
+	for metier, produit in (("bucheron", bucheron), ("carrier", carrier)):
+		assert col.objets_du_metier(metier, produit, {}, reg, resolve, find) == produit["items"]
+	# un métier hors `ventes_du_site` ne bouge pas
+	agri = _metier(reg, "agriculteur")["produit"]
+	assert col.objets_du_metier("agriculteur", agri, site, reg, resolve, find) == agri["items"]
 
 
 def test_le_personnel_du_comptoir_releve_portage_caisse_et_crieur():
