@@ -1,0 +1,90 @@
+{
+	"modele": "gemini-3.1-flash-lite-image",
+	"batch": null,
+	"lots": [
+		"batches/qymk7p7uk9rq0en7lrjjsen171a75woacwis",
+		"batches/l94ks0kam36e79ky5tmvfcii5i26usqqyaxg",
+		"batches/ddrtlp4c99moy5s4hh2tnbe99i42ikrizx5z",
+		"batches/yhtvxdouo8teniyxx1lqp5ga6b6uchycrv4y"
+	],
+	"images": {
+		"apep": "apep_transparent.png",
+		"autruches": "autruches_transparent.png",
+		"bisons": "bisons_transparent.png",
+		"boeufs_musques": "boeufs_musques_transparent.png",
+		"buffles": "buffles_transparent.png",
+		"dragon_de_sang": "dragon_de_sang_transparent.png",
+		"elephants": "elephants_transparent.png",
+		"flamants": "flamants_transparent.png",
+		"grands_singes": "grands_singes_transparent.png",
+		"hippopotames": "hippopotames_transparent.png",
+		"hyenes": "hyenes_transparent.png",
+		"illuyanka": "illuyanka_transparent.png",
+		"lamie": "lamie_transparent.png",
+		"licorne": "licorne_transparent.png",
+		"malandhir": "malandhir_transparent.png",
+		"mammouth": "mammouth_transparent.png",
+		"manticore": "manticore_transparent.png",
+		"marid": "marid_transparent.png",
+		"momie": "momie_transparent.png",
+		"monture_squelette": "monture_squelette_transparent.png",
+		"naiade": "naiade_transparent.png",
+		"nereide": "nereide_transparent.png",
+		"oceanide": "oceanide_transparent.png",
+		"oiseaux_de_proies": "oiseaux_de_proies_transparent.png",
+		"oreade": "oreade_transparent.png",
+		"ours": "ours_transparent.png",
+		"ours_polaire": "ours_polaire_transparent.png",
+		"pegase": "pegase_transparent.png",
+		"petit_dragon": "petit_dragon_transparent.png",
+		"phenix": "phenix_transparent.png",
+		"phoques_et_morses": "phoques_et_morses_transparent.png",
+		"poissons_mammiferes_marins": "poissons_mammiferes_marins_transparent.png",
+		"polar_kraken": "polar_kraken_transparent.png",
+		"prince_demon": "prince_demon_transparent.png",
+		"reine_lhamia": "reine_lhamia_transparent.png",
+		"rejeton_demoniaque": "rejeton_demoniaque_transparent.png",
+		"revenant": "revenant_transparent.png",
+		"roi_des_tombes": "roi_des_tombes_transparent.png",
+		"roi_liche": "roi_liche_transparent.png",
+		"satyre": "satyre_transparent.png",
+		"seraphin": "seraphin_transparent.png",
+		"singes": "singes_transparent.png",
+		"sirene": "sirene_transparent.png",
+		"taureau": "taureau_transparent.png",
+		"tortues_marines": "tortues_marines_transparent.png",
+		"triton": "triton_transparent.png",
+		"troglodyte": "troglodyte_transparent.png",
+		"troll": "troll_transparent.png",
+		"vers_des_sables": "vers_des_sables_transparent.png",
+		"yacks": "yacks_transparent.png",
+		"antilopes": "antilopes_transparent.png",
+		"monture_angelique": "monture_angelique_transparent.png",
+		"rennes": "rennes_transparent.png",
+		"serpopard": "serpopard_transparent.png",
+		"succube": "succube_transparent.png",
+		"spectre": "spectre_transparent.png"
+	},
+	"remplacees": [
+		{
+			"cle": "rennes",
+			"fichier": "rennes_transparent.png"
+		},
+		{
+			"cle": "serpopard",
+			"fichier": "serpopard_transparent.png"
+		},
+		{
+			"cle": "monture_angelique",
+			"fichier": "monture_angelique_transparent.png"
+		},
+		{
+			"cle": "succube",
+			"fichier": "succube_transparent.png"
+		},
+		{
+			"cle": "spectre",
+			"fichier": "spectre_transparent.png"
+		}
+	]
+}

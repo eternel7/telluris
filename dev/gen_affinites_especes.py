@@ -49,7 +49,7 @@ BANDES = [
 	 ["prince_demon", "demon_majeur_de_la_destinee", "demon_majeur_de_la_destruction", "demon_guerrier",
 	  "demon_mineur", "demon_servant", "besien", "rejeton_demoniaque", "cerbere", "monture_demoniaque"]),
 	("cour_des_tentations", "Cour des tentations",
-	 ["succube", "incube", "lamie", "dearg_due", "vouivre", "aicha_kandicha"]),
+	 ["succube", "incube", "lamie", "reine_lhamia", "dearg_due", "vouivre", "aicha_kandicha"]),
 	("ost_celeste", "Ost céleste",
 	 ["seraphin", "archange_de_l_ordre", "archange_du_savoir", "ange_de_la_connaissance",
 	  "ange_de_la_justice", "cupidon", "monture_angelique", "pegase"]),
