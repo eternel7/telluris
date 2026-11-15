@@ -1,8 +1,8 @@
-# Zones d'influence par biome — proposition à valider
+# Zones d'influence par biome
 
-> Statut : **PROPOSITION** (16/11/2026), rien n'est en base. Une fois validée, elle sert de source
-> au générateur (zones, essences, espèces, repeinte des cartes africaines), dans UN seul fichier à
-> importer.
+> Statut : **VALIDÉE** par l'Auteur le 16/11/2026, générée par `dev/gen_zones_biomes.py`
+> (`jsons/zones_biomes_a_importer.json`). ⚠️ La source exécutée est la table du générateur : une
+> retouche se fait là, puis se reporte ici.
 
 ## Règles retenues (Auteur, 15-16/11)
 
@@ -33,7 +33,7 @@ essences actuelles).
 | Steppe aride (`steppe_aride`) | `steppe` | steppe, plaine, herbe, aride | ★ antilopes · ✓ loup, rapaces, lievre · ✓ centaure | ★ alfa (fibre) · ✓ Feuilles_d_absinthe, graines |
 | Contreforts arides (`contreforts_arides`) | `contreforts` | montagne, colline, roche, pente, aride | ✓ scorpion_geant, serpent, fauves, oiseaux_de_proies · ✓ boukhnoun, ghul_des_sables | essence ★ genévrier · ✓ pierre, fer, Sel_gemme |
 | Steppe épineuse à acacias (`steppe_epineuse`) | `savane` | savane, plaine, broussaille, aride | ★ antilopes, ★ hyènes, ★ autruches · ✓ fauves, rapaces · ✓ nasnas | essence ★ acacia · ★ gomme d'acacia · ✓ graines |
-| Désert froid (`desert_froid`) | `hamada` | desert, roche, froid, plateau | ✓ loup, rapaces, vers_des_sables · ✓ troll | essence ★ saxaoul · ✓ Sel_gemme, pierre |
+| Désert froid (`desert_froid`) | `hamada` | desert, roche, froid, plateau | ✓ loup, rapaces · ✓ troll, vers_des_sables | essence ★ saxaoul · ✓ Sel_gemme, pierre |
 | Désert côtier brumeux (`desert_brumeux`) | `desert` | desert, sable, cote, brume | ★ antilopes · ✓ nuee_de_scarabees, serpent, scorpion_geant · ✓ silat | ★ lichen des brumes · ✓ Sel_gemme |
 | Désert de succulentes (`desert_succulentes`) | `desert` | desert, sable, vegetation, aride | ✓ serpent, scorpion_geant, araignee_geante, rapaces · ✓ serpopard | ★ sève de succulente · ★ épines · ✓ Herbes_medicinales |
 
@@ -98,12 +98,13 @@ Les `zones` des `rencontres` / `ressources` de ces deux lieux suivent la même t
 `haute_montagne`, `desert`, `erg`, `delta`, `oasis`. Le défaut `crocodile` de `lac` (réservé par
 région dans l'amorçage du 15/11) passe sans région sur `fleuve_tropical`, et quitte `lac`.
 
-## 7. Points à trancher
+## 7. Décisions (Auteur, 16/11)
 
-- Noms des espèces neuves en **groupes** (« Antilopes », comme « Fauves ») ou en **individus**
-  (« Gazelle », « Oryx »…).
-- Essences : chaîne **complète** (6 calibres, comme les feuillus d'Europe) ou **réduite** (arbre +
-  rondin + branche) pour les essences secondaires.
-- Créatures des mythes ajoutées ci-dessus (satyre, aicha_kandicha, grootslang, nahual…) : les garder
-  comme **défauts** de zone, ou les réserver aux placements (contenu propre, une créature à un
-  endroit précis).
+- Espèces neuves en **groupes** (« Antilopes », comme « Fauves »), sans image pour l'instant (repli
+  sur l'initiale) ; jeton classé dans `dev/gen_jetons_especes.py`.
+- Essences en **chaîne complète** (6 calibres) ; découpe par le moteur, aucune recette.
+- **Créatures des mythes = contenu de placement**, jamais un défaut de zone : dans les tableaux, les
+  ✓ qui suivent le second « · » (satyre, dryade, aicha_kandicha, grootslang, troll, vers_des_sables,
+  griffon…) sont des suggestions de placement, absentes des défauts générés (verrouillé par
+  `tests/test_gen_zones_biomes.py`, tags de mythe interdits).
+- Le filtre `regions` reste en réserve ; aucun amorçage n'en écrit plus (`gen_defauts_zones` compris).

@@ -40,6 +40,8 @@ FEMININS = {
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
 	"mimique", "monture_demoniaque", "nuee_de_scarabees", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
 	"reine_lhamia", "silat", "sirene", "succube", "tarasque", "vouivre", "wyvern",
+	# Faune des zones par biome (dev/gen_zones_biomes.py, 16/11), noms de groupe au pluriel.
+	"antilopes", "autruches", "hyenes", "tortues_marines",
 }
 
 MASCULINS = {
@@ -67,11 +69,17 @@ MASCULINS = {
 	# Noms de groupe : masculins, mais au pluriel (voir PLURIELS).
 	"elementaux", "fauves", "oiseaux_de_proies", "poissons_mammiferes_marins", "rapaces",
 	"vers_des_sables",
+	# Faune des zones par biome (dev/gen_zones_biomes.py, 16/11).
+	"singes", "grands_singes", "hippopotames", "flamants", "elephants", "buffles", "rennes",
+	"boeufs_musques", "bisons", "yacks", "phoques_et_morses",
 }
 
 PLURIELS = {
 	"elementaux", "fauves", "oiseaux_de_proies", "poissons_mammiferes_marins", "rapaces",
 	"vers_des_sables",
+	"singes", "grands_singes", "antilopes", "hyenes", "autruches", "hippopotames", "flamants",
+	"elephants", "buffles", "rennes", "boeufs_musques", "bisons", "yacks", "phoques_et_morses",
+	"tortues_marines",
 }
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
@@ -80,7 +88,7 @@ PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupido
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.
-H_ASPIRES = {"harpie"}
+H_ASPIRES = {"harpie", "hyenes"}
 
 
 def _dump_le_plus_recent() -> str:

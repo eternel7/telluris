@@ -1,7 +1,7 @@
 # tests/test_gen_defauts_zones.py
 #
 # Amorçage des défauts de zones (dev/gen_defauts_zones.py) : déduction « ≥ SEUIL_LIEUX lieux »,
-# régions de ces lieux, idempotence (un défaut déjà présent — retouché à la main — est gardé).
+# sans région (Auteur, 16/11 : une zone par biome), idempotence (un défaut déjà présent — retouché à la main — est gardé).
 # Données en constantes : aucun fichier de jsons/ (CLAUDE.md §20).
 
 import importlib.util
@@ -25,21 +25,22 @@ def _lieu(lid, renc=(), ress=()):
 			"ressources": [{"ressource": r, "zones": z} for r, z in ress]}
 
 
-def test_deduit_ce_que_le_seuil_de_lieux_partage_avec_leurs_regions():
+def test_deduit_ce_que_le_seuil_de_lieux_partage_sans_region():
 	lieux = [
 		_lieu("lieu:a", renc=[("espece:loup", ["zone:foret"]), ("espece:ours", ["zone:foret"])]),
 		_lieu("lieu:b", renc=[("espece:loup", ["zone:foret", "zone:foret@3"])]),
 		_lieu("lieu:c", renc=[("espece:loup", ["zone:foret"])], ress=[("item:sel", ["zone:desert"])]),
 	]
 	d = gen.deduire(lieux, REGLES)
-	assert d == {"zone:foret": {"rencontres": {"espece:loup": ["afrique_du_nord", "europe"]}}}
+	# Auteur, 16/11 : une zone par biome — l'amorçage n'écrit plus de `regions`.
+	assert d == {"zone:foret": {"rencontres": {"espece:loup": []}}}
 	assert gen.SEUIL_LIEUX == 2  # l'ours (1 lieu) et le sel (1 lieu) restent des compléments
 
 
-def test_un_lieu_sans_region_ne_restreint_pas():
+def test_un_seul_lieu_ne_fait_pas_un_defaut():
 	lieux = [_lieu("lieu:a", renc=[("espece:loup", ["zone:foret"])]),
-			 _lieu("lieu:x", renc=[("espece:loup", ["zone:foret"])])]
-	assert gen.deduire(lieux, REGLES)["zone:foret"]["rencontres"]["espece:loup"] == []
+			 _lieu("lieu:x", renc=[("espece:ours", ["zone:foret"])])]
+	assert gen.deduire(lieux, REGLES) == {}
 
 
 def test_zones_a_emettre_garde_les_defauts_existants_et_est_idempotent():

@@ -235,6 +235,22 @@ TABLE = {
 	"nuee_de_scarabees": ("2x2", "ellipse"),
 	"qudar": None,
 	"scorpion_geant": ("2x2", "ellipse"),
+	# Faune ordinaire des zones par biome (dev/gen_zones_biomes.py, 16/11) — même gabarit que là-bas.
+	"singes": None,
+	"grands_singes": None,
+	"antilopes": ("1x2", "ellipse"),
+	"hyenes": None,
+	"autruches": ("1x2", "ellipse"),
+	"hippopotames": ("1x2", "ellipse"),
+	"flamants": None,
+	"elephants": ("2x2", "ellipse"),
+	"buffles": ("1x2", "ellipse"),
+	"rennes": ("1x2", "ellipse"),
+	"boeufs_musques": ("1x2", "ellipse"),
+	"bisons": ("1x2", "ellipse"),
+	"yacks": ("1x2", "ellipse"),
+	"phoques_et_morses": ("1x2", "ellipse"),
+	"tortues_marines": ("1x2", "ellipse"),
 }
 
 

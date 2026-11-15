@@ -6,7 +6,8 @@
   un sous-lieu héritent de la région de leur `lieu_parent` à la lecture : seuls les pays y figurent.
 - `zone:*` : `defauts_rencontres` / `defauts_ressources` DÉDUITS de l'existant — une espèce ou une
   ressource que AU MOINS `SEUIL_LIEUX` lieux rattachent déjà à cette zone devient un défaut,
-  restreint aux régions de ces lieux (aucune région connue ⇒ partout). Les lieux ne sont PAS
+  SANS `regions` (Auteur, 16/11 : une zone par BIOME, `dev/gen_zones_biomes.py` ; le filtre reste
+  en réserve pour un endémique isolé, posé à la main dans /admin/zones). Les lieux ne sont PAS
   modifiés : la fusion étant une union, leurs entrées existantes deviennent de simples doublons.
 
 Idempotent : un défaut déjà présent sur la zone est gardé tel quel (régions comprises — une
@@ -81,7 +82,9 @@ def regles_regions(existant: dict | None) -> dict:
 
 def deduire(lieux: list, regles: dict) -> dict:
 	"""`{zone_id: {"rencontres": {id: [regions]}, "ressources": {id: [regions]}}}` : ce que
-	`SEUIL_LIEUX` lieux au moins rattachent à la zone, avec les régions (triées) de ces lieux."""
+	`SEUIL_LIEUX` lieux au moins rattachent à la zone. Régions toujours VIDES : l'amorçage n'en écrit
+	plus (Auteur, 16/11 — une zone par biome) ; la forme `{id: [regions]}` reste celle que lit
+	`zones_a_emettre`."""
 	par_id = {l["_id"]: l for l in lieux}
 	compte: dict = {}
 	for lieu in lieux:
@@ -100,11 +103,7 @@ def deduire(lieux: list, regles: dict) -> dict:
 			for ident, lieux_regions in ids.items():
 				if len(lieux_regions) < SEUIL_LIEUX:
 					continue
-				regions = sorted({r for r in lieux_regions.values() if r})
-				# Un lieu sans région connue : on ne restreint pas (le défaut vaut partout).
-				if any(r is None for r in lieux_regions.values()):
-					regions = []
-				out.setdefault(z, {}).setdefault(champ, {})[ident] = regions
+				out.setdefault(z, {}).setdefault(champ, {})[ident] = []
 	return out
 
 
