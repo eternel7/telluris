@@ -358,3 +358,20 @@ def test_bandes_du_generateur_valides():
 	assert gen_aff.controler(doc, ids) == []
 	assert gen_aff.controler(doc, ids - {next(iter(ids))}) != []
 	assert compo.regles(doc)["diversite_pleine"] == compo.DEFAUTS["diversite_pleine"]
+
+
+def test_tag_distance_aux_seules_especes_qui_tirent():
+	import gen_tag_distance as gen_dist
+	items = {"item:arc": {"categorie": "arme", "tags": ["tir"]},
+			 "item:javelot": {"categorie": "arme", "tags": ["jet"]},
+			 "item:hache": {"categorie": "arme", "tags": ["cac"]}}
+	archer = _espece("archer", tags=["humanoide"], items=["item:hache", "item:arc"])
+	lanceur = _espece("lanceur", tags=["humanoide"], items=["item:javelot"])
+	sortie = gen_dist.delta([archer, lanceur], items)
+	assert [d["_id"] for d in sortie] == [archer["_id"]]
+	assert sortie[0]["tags"] == ["humanoide", gen_dist.TAG]
+	assert gen_dist.delta(sortie, items) == []   # rejeu : rien de plus
+	# Le tag ouvre le rôle « distance » : un profil archer devient compatible.
+	archer_profil = {"_id": "profil:archer", "niveau": 2, "restriction_tags": [gen_dist.TAG]}
+	assert combat.profils_compatibles([archer_profil], sortie[0]) == [archer_profil]
+	assert compo.role(archer_profil) == compo.ROLE_DISTANCE
