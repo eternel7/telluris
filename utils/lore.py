@@ -188,8 +188,11 @@ _RE_URL_NUE = re.compile(r"https?://[^\s<>\"]+")
 _RE_PLACE = re.compile(r"\x00(\d+)\x00")
 
 
-def _inline(texte: str, lien_fn) -> str:
-	gardes = []
+def _inline(texte: str, lien_fn, _gardes: list | None = None) -> str:
+	# Un libellé de lien est rendu avec les gardes de son texte : un `code` déjà gardé dans le
+	# libellé garde son numéro (une liste neuve le résoudrait contre la mauvaise liste).
+	racine = _gardes is None
+	gardes = [] if racine else _gardes
 
 	def garder(h):
 		gardes.append(h)
@@ -200,7 +203,7 @@ def _inline(texte: str, lien_fn) -> str:
 
 	def lien(m):
 		image, libelle, url = m.group(1), m.group(2), m.group(3)
-		libelle_html = _inline(libelle, lien_fn) if libelle else html.escape(url)
+		libelle_html = _inline(libelle, lien_fn, gardes) if libelle else html.escape(url)
 		if image:
 			libelle_html = "🖼 " + (libelle_html or html.escape(url))
 		cible = lien_fn(url)
@@ -228,7 +231,7 @@ def _inline(texte: str, lien_fn) -> str:
 	texte = re.sub(r"(?<![\w*])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![\w*])", r"<em>\1</em>", texte)
 	texte = re.sub(r"(?<![\w_])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w_])", r"<em>\1</em>", texte)
 	texte = re.sub(r"~~(?=\S)(.+?)(?<=\S)~~", r"<del>\1</del>", texte)
-	while _RE_PLACE.search(texte):  # un libellé de lien peut contenir ses propres gardes
+	while racine and _RE_PLACE.search(texte):  # un libellé de lien peut contenir ses propres gardes
 		texte = _RE_PLACE.sub(lambda m: gardes[int(m.group(1))], texte)
 	return texte
 

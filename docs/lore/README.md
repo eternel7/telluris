@@ -98,6 +98,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Prompt système magie poids porté](systemes/20260919_prompt_systeme_magie_poids_porte.md) — 19/09/2026 — Dans mon jeu Telluris rpg stratégique 2D, je souhaite que le poids porté influence la pratique de la magie. Décris un système qui serait coh…
 - [Progression des lieux de guilde](systemes/20260924_progression_des_lieux_de_guilde.md) — 24/09/2026 — je souhaite introduire l'achat/création de lieu de vie pour le personnage de mon jeu avec pour but final la création d'une guilde d'aventuri…
 - [Voie de colonisation — décisions de l'Auteur](systemes/20261112_voie_de_colonisation.md) — 12/11/2026 — Décisions arrêtées : sept paliers du Campement à la Ville, charte, fiche de site, sécurité et moral, menace, stocks, métiers, guilde du joueur, place des autres joueurs (visiteur, soutien, associé), interface (lieu modèle par palier et milieu, pose libre des bâtiments).
+- [Zones d'influence et biomes — décisions de l'Auteur](systemes/20261115_zones_d_influence_et_biomes.md) — 15/11/2026 — Une zone par biome, jamais par lieu ; le biome apporte ses rencontres et ressources par défaut à tout lieu qui le pose ; régions de faune et de flore ; faune et monstres communs, mythes en placement ; exclusions et contenu propre d'un placement.
 
 ## 📦 Contenu (noms, recettes, prompts)
 

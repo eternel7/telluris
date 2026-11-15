@@ -93,6 +93,14 @@ def test_liens_externes_et_url_nue():
 	assert '<a href="https://ex.com/a_b" target="_blank" rel="noopener noreferrer">https://ex.com/a_b</a>.' in html
 
 
+def test_code_dans_un_libelle_de_lien():
+	"""Le `code` d'un libellé est gardé AVANT le lien : il se résout contre les gardes du texte."""
+	html = _html("`a` puis [`b` et `c`](https://ex.com) puis `d`")
+	assert html.count("<code>") == 4
+	assert '<a href="https://ex.com" target="_blank" rel="noopener noreferrer"><code>b</code> et <code>c</code></a>' in html
+	assert html.index("<code>a</code>") < html.index("<code>d</code>")
+
+
 def test_liens_md_relatifs_reecrits_vers_la_page():
 	fn = lore.lien_lore("lore/README.md")
 	html = _html("[a](monde/x.md#y) [m](../Telluris_Document_Maitre.md) [s](../SCHEMA.txt) [h](../../main.md)", fn)
