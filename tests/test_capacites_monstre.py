@@ -75,6 +75,18 @@ def test_carte_magies_et_tags_fusionnees():
 	assert _ids(pool) == ["sort:flammerole", "sort:ronces"]
 
 
+def test_pool_memorise_par_revision_sans_partage_mutable():
+	"""Vues mémorisées par (_id, _rev) : chaque appelant reçoit sa copie, et une nouvelle
+	révision du doc est relue (jamais de vue périmée)."""
+	espece = {"tags": ["magie_elementaire_9"]}
+	v1 = [dict(s, _rev="1-a") for s in SORTS[:1]]
+	pool = sorts_eligibles_espece(espece, lambda i: None, lambda sel: v1, None)
+	pool[0]["nom"] = "Altéré"
+	assert sorts_eligibles_espece(espece, lambda i: None, lambda sel: v1, None)[0]["nom"] == "Flammerole"
+	v2 = [dict(v1[0], _rev="2-b", nom="Flammerole II")]
+	assert sorts_eligibles_espece(espece, lambda i: None, lambda sel: v2, None)[0]["nom"] == "Flammerole II"
+
+
 def test_un_non_humanoide_tire_ses_sorts(monkeypatch):
 	monkeypatch.setattr(combat_mod, "find_docs", lambda q: SORTS)
 	monkeypatch.setattr(combat_mod.random, "sample", lambda pop, k: pop[:k])

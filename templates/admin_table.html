@@ -244,11 +244,20 @@ const LS_KEY = 'telluris.admin_table.v1.';   // préfixe localStorage (par type)
 // _id), jamais dans les docs, sinon un Save de l'éditeur JSON persisterait des dérivées en
 // base. Deux sources : les potentiels du simulateur (espece/character) et le bloc
 // `calcules` de /admin/table/data (connection → node_inexistant).
+// Colonnes ANNONCÉES avant la réponse de /admin/simulateur/potentiels (miroir de
+// POTENTIEL_COLONNES / RANG_COLONNES de main.py) : le tableau s'affiche sans attendre ce
+// calcul lent, avec « ?? » dans ces colonnes ; la liste du serveur fait foi à l'arrivée.
 const POTENTIEL_COLS = ['potentiel_combat', 'potentiel_survie', 'potentiel_support'];
+const POTENTIEL_COLS_PAR_TYPE = {
+	espece: POTENTIEL_COLS.concat(['potentiel_rang', 'fuite_pct', 'rang', 'rang_libelle']),
+	character: POTENTIEL_COLS,
+};
 let virtualCols = [];       // colonnes calculées du type courant ([] = aucune)
 let calcules = {};          // { _id: { colonne: valeur } }
 let virtualActive = false;  // vrai si le type courant a des colonnes calculées chargées
 let calculesServeur = false; // vrai si elles viennent de /admin/table/data (relues après un Save)
+let calculsEnAttente = false; // potentiels demandés, pas encore arrivés → cellules « ?? »
+let chargementSeq = 0;      // numéro du dernier loadType : une réponse plus ancienne est ignorée
 
 const $ = id => document.getElementById(id);
 
@@ -259,36 +268,35 @@ async function loadType() {
 	const t = $('type-input').value.trim();
 	if (!t) { setStatus($('load-status'), 'Sélectionnez un type.', 'err'); return; }
 	setStatus($('load-status'), 'Chargement…');
+	const seq = ++chargementSeq;
 	try {
 		const res = await fetch('/admin/table/data?type=' + encodeURIComponent(t));
+		if (seq !== chargementSeq) return;   // un autre type a été demandé entre-temps
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
 			setStatus($('load-status'), 'Erreur : ' + (err.detail || res.status), 'err');
 			return;
 		}
 		const data = await res.json();
+		if (seq !== chargementSeq) return;
 		docs = data.docs || [];
-		let note = '';
 		// Colonnes calculées — seulement là où elles ont un sens.
 		calcules = {}; virtualCols = []; virtualActive = false; calculesServeur = false;
+		calculsEnAttente = false;
 		if (data.calcules) {
 			calcules = data.calcules;
 			calculesServeur = true;
 			_declarerColonnesCalculees();
 		}
-		if (t === 'espece' || t === 'character') {
-			try {
-				const pRes = await fetch('/admin/simulateur/potentiels?type=' + encodeURIComponent(t));
-				if (pRes.ok) {
-					const pData = await pRes.json();
-					calcules = pData.potentiels || {};
-					// Le serveur liste ses colonnes (espèce : + rang de dangerosité et libellé).
-					virtualCols = (pData.colonnes || POTENTIEL_COLS).slice();
-					virtualActive = true;
-				} else { note = ' (potentiels indisponibles : ' + pRes.status + ')'; }
-			} catch (e) { note = ' (potentiels indisponibles)'; }
+		// Potentiels : colonnes annoncées tout de suite, valeurs chargées en arrière-plan.
+		const potentiels = POTENTIEL_COLS_PAR_TYPE[t];
+		if (potentiels) {
+			virtualCols = potentiels.slice();
+			virtualActive = true;
+			calculsEnAttente = true;
 		}
-		setStatus($('load-status'), docs.length + ' document(s) de type « ' + t + ' ».' + note, 'ok');
+		const statut = docs.length + ' document(s) de type « ' + t + ' ».';
+		setStatus($('load-status'), statut + (potentiels ? ' Calcul des potentiels…' : ''), 'ok');
 		currentType = t;
 		initColumns();
 		const stored = restoreState(t);   // préférences mémorisées pour ce type (ou défauts)
@@ -304,9 +312,40 @@ async function loadType() {
 		$('table-card').style.display = docs.length ? '' : 'none';
 		renderCols(); renderHead(); renderBody();
 		persistState();
+		if (potentiels) chargerPotentiels(t, seq, statut);   // sans await : le tableau est déjà là
 	} catch (e) {
 		setStatus($('load-status'), 'Erreur réseau : ' + e.message, 'err');
 	}
+}
+
+// Potentiels du simulateur (calcul lent côté serveur) : remplit les colonnes annoncées
+// par loadType. Réponse ignorée si un autre chargement a eu lieu depuis.
+async function chargerPotentiels(t, seq, statut) {
+	let note = '';
+	try {
+		const pRes = await fetch('/admin/simulateur/potentiels?type=' + encodeURIComponent(t));
+		if (seq !== chargementSeq) return;
+		if (pRes.ok) {
+			const pData = await pRes.json();
+			if (seq !== chargementSeq) return;
+			calcules = pData.potentiels || {};
+			// La liste du serveur fait foi : une colonne qu'il ajoute est déclarée et montrée.
+			const servies = (pData.colonnes || virtualCols).slice();
+			const neuves = servies.filter(c => !virtualCols.includes(c));
+			virtualCols = servies;
+			neuves.forEach(c => {
+				if (!columns.includes(c)) columns.push(c);
+				if (!visible.includes(c)) visible.push(c);
+			});
+			if (neuves.length) { renderCols(); renderHead(); persistState(); }
+		} else { note = ' (potentiels indisponibles : ' + pRes.status + ')'; }
+	} catch (e) {
+		if (seq !== chargementSeq) return;
+		note = ' (potentiels indisponibles)';
+	}
+	calculsEnAttente = false;
+	setStatus($('load-status'), statut + note, note ? 'err' : 'ok');
+	renderBody();
 }
 
 // Union des clés de 1er niveau (_id en tête, le reste trié). Colonnes visibles par
@@ -565,8 +604,10 @@ function renderBody() {
 	$('data-body').innerHTML = rows.map(r => {
 		const tds = visible.map(c => {
 			const v = valDe(r.d, c);
-			const txt = cellText(v);
-			const cls = (v === undefined || v === null || v === '') ? ' class="muted-cell"' : '';
+			// Potentiel pas encore arrivé (cf. chargerPotentiels) : « ?? » plutôt qu'une case vide.
+			const attente = calculsEnAttente && v === undefined && virtualCols.includes(c);
+			const txt = attente ? '??' : cellText(v);
+			const cls = (attente || v === undefined || v === null || v === '') ? ' class="muted-cell"' : '';
 			return `<td${cls} title="${esc(fullText(v))}">${esc(txt)}</td>`;
 		}).join('');
 		// Une ligne sans `_id` n'est ni cochable ni supprimable.
