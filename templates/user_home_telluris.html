@@ -27,9 +27,24 @@
 			scrollbar-gutter: stable;
 		}
 
-		/* ── SORTIES : bandeau du site + « ⟵ Accueil » ──────────────── */
+		/* ── SORTIES : bandeau du site ─────────────────────────────── */
 		/* Le logo mène à l'accueil SANS déconnecter ; la déconnexion est un geste à part,
 		   visible aussi sur mobile (part-nav-css masque `.nav-links` sous 768px). */
+		/* Logo = SEUL retour à l'accueil (aucun bouton dans la carte, qui reste aux personnages) :
+		   il s'affiche comme un lien de navigation — chevron « ‹ », soulignement doré au survol/focus. */
+		.nav-logo { display: inline-flex; align-items: center; gap: 0.55em; padding: 4px 0; }
+		.nav-logo::before {
+			content: '‹' / '';
+			font-size: 20px; line-height: 1; letter-spacing: 0; opacity: 0.65; margin-top: -4px;
+			transition: transform 0.2s, opacity 0.2s;
+		}
+		.nav-logo-texte { position: relative; }
+		.nav-logo-texte::after {
+			content: ''; position: absolute; left: 0; right: 0.4em; bottom: -4px; /* 0.4em : l'espacement final du letter-spacing */ height: 1px;
+			background: var(--gold2); transform: scaleX(0); transform-origin: left; transition: transform 0.25s;
+		}
+		.nav-logo:hover::before, .nav-logo:focus-visible::before { opacity: 1; transform: translateX(-3px); }
+		.nav-logo:hover .nav-logo-texte::after, .nav-logo:focus-visible .nav-logo-texte::after { transform: scaleX(1); }
 		.nav-droite { display: flex; align-items: center; gap: 36px; }
 		.nav-sortir {
 			font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -38,20 +53,9 @@
 			transition: color 0.2s, border-color 0.2s;
 		}
 		.nav-sortir:hover, .nav-sortir:focus-visible { color: var(--gold2); border-color: var(--gold2); }
-		/* Même geste que les « ⟵ Retour » de /play : remonter d'un cran, ici vers l'accueil. */
-		.retour-accueil {
-			position: absolute; top: 14px; left: 14px; z-index: 2;
-			font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
-			color: var(--bronze); text-decoration: none;
-			padding: 5px 12px; border: 1px solid var(--gold); border-radius: 2px;
-			background: rgba(255, 255, 255, 0.35);
-			transition: background 0.2s, color 0.2s;
-		}
-		.retour-accueil:hover, .retour-accueil:focus-visible { background: var(--gold); color: var(--parch); }
 		@media (max-width: 768px) {
 			body { padding-top: 64px; }
 			.nav-droite { gap: 16px; }
-			.retour-accueil { top: 10px; left: 10px; padding: 4px 9px; font-size: 11px; }
 		}
 		
 		#main-content {
@@ -1100,7 +1104,7 @@
 	</svg>
 	<a href="#main-content" class="skip-link">Aller au contenu principal</a>
 	<nav role="navigation" aria-label="Menu principal">
-		<a href="/" class="nav-logo">Telluris</a>
+		<a href="/" class="nav-logo" title="Revenir à l'accueil (vous restez connecté)"><span class="nav-logo-texte">Telluris</span></a>
 		<div class="nav-droite">
 			<ul class="nav-links">
 				<li><a href="/#monde">Le monde</a></li>
@@ -1113,7 +1117,6 @@
 	<main id="main-content">
 		<section class="user-main" aria-labelledby="User">
 		<div class="user-container">
-			<a href="/" class="retour-accueil" title="Revenir à l'accueil (vous restez connecté)">⟵ Accueil</a>
 			<div class="ornament"></div>
 			<div class="logo">{{ user_doc["username"] }}</div>
 			<div id="user-subtitle" class="subtitle">{{ user_doc["email"] }}</div>
