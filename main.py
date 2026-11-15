@@ -865,11 +865,15 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			save_doc(character)
 			if _n:
 				colonie_evenements.append(f"{_n} colon(s) s'installent.")
-	# Le bouton « Fonder » s'offre sur toute carte de pays à qui tient une charte ; la case
-	# elle-même est jugée à l'ouverture du panneau (un pas ne recharge pas la page). La charte
+	# Bouton « Fonder » : son `<li>` est émis sur toute carte de pays à qui tient une charte
+	# (`colonie_fonder_li`), VISIBLE seulement là où la case peut être fondée (`colonie_offre`,
+	# même jugement que `peut_fonder` : jamais sur un point de connexion). Un pas ne recharge
+	# pas la page : `move_character` renvoie `colonie_offre`, le client le bascule. La charte
 	# s'achète au bureau d'un maître de guilde (bouton « 📜 Charte de colonisation »).
-	colonie_offre = (bool(grid_doc) and grid_doc.get("categorie") == CATEGORIE_PAYS
-					 and bool(colonisation_util.charte_de(character)))
+	colonie_fonder_li = (bool(grid_doc) and grid_doc.get("categorie") == CATEGORIE_PAYS
+						 and bool(colonisation_util.charte_de(character)))
+	colonie_offre = colonie_fonder_li and colonisation_util.offre_fonder(
+		character, grid_doc, character.get("position") or {}, get_doc, find_docs, connexions_du_lieu)
 	# Auberge d'une cité : on y trouve des colons, pour qui fonde ou s'associe (§ 10).
 	colonie_colons = (auberge_util.lieu_est_taverne(grid_doc) and not colonisation_util.est_sous_lieu(grid_doc)
 					  and bool(colonisation_util.implantations_de(character) or character.get("association")))
@@ -1325,6 +1329,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"role_implantation": role_implantation,
 			"colonie_evenements": colonie_evenements,
 			"colonie_offre": colonie_offre,
+			"colonie_fonder_li": colonie_fonder_li,
 			"colonie_attaque": colonie_attaque,
 			"colonie_charte": colonie_charte,
 			"colonie_maison_guilde": colonie_maison_guilde,

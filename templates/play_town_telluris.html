@@ -2162,7 +2162,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or renseignement_dispo or est_propriete or proprietes_offre or est_implantation or colonie_offre or colonie_charte or colonie_maison_guilde or colonie_colons or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or renseignement_dispo or est_propriete or proprietes_offre or est_implantation or colonie_fonder_li or colonie_charte or colonie_maison_guilde or colonie_colons or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -2229,7 +2229,7 @@
 					{% if colonie_colons %}<li><button class="sub-loc-btn" onclick="openColonieColons()">🏕️ Colons</button></li>{% endif %}
 					{% if colonie_maison_guilde %}<li><button class="sub-loc-btn" onclick="openColonieGuilde()">🏰 La guilde</button></li>{% endif %}
 					{% if colonie_charte %}<li><button class="sub-loc-btn" onclick="openColonieCharte()">📜 Charte de colonisation</button></li>{% endif %}
-					{% if colonie_offre %}<li><button class="sub-loc-btn" onclick="openColonieSite()">🏕️ Fonder une implantation</button></li>{% endif %}
+					{% if colonie_fonder_li %}<li id="col-fonder-li"{% if not colonie_offre %} hidden style="display:none"{% endif %}><button class="sub-loc-btn" onclick="openColonieSite()">🏕️ Fonder une implantation</button></li>{% endif %}
 					{% if est_implantation %}<li><button class="sub-loc-btn" onclick="openColonie()">🏕️ {% if role_implantation == 'fondateur' %}Gérer l'implantation{% else %}L'implantation{% endif %}</button></li>
 					{% if colonie_attaque %}<li><button class="sub-loc-btn" onclick="colDefendre()">⚔️ Repousser l'attaque</button></li>{% endif %}
 					{# Repos au feu : même flux que la nuit d'auberge, gratuit (`routers/auberge._acces_nuit`). #}
@@ -4386,6 +4386,14 @@
 			li.style.display = ici ? '' : 'none';
 		});
 	}
+	// « 🏕️ Fonder une implantation » : visible seulement là où la case peut être fondée
+	// (`colonie_offre` de `move_character` / du panneau). Absent de la réponse ⇒ inchangé.
+	function _majColonieOffre(offre) {
+		const li = document.getElementById('col-fonder-li');
+		if (!li || offre === undefined) return;
+		li.hidden = !offre;
+		li.style.display = offre ? '' : 'none';
+	}
 	function _majProprietesOffre(offre) {
 		const li = document.getElementById('prop-offre-li');
 		if (!li) return;
@@ -4644,6 +4652,7 @@
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
 				_majProprietesOffre(rep.proprietes_offre);
+				_majColonieOffre(rep.colonie_offre);
 				_majPnjsIci(rep.pnjs_ici);
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
