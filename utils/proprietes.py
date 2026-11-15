@@ -380,6 +380,53 @@ def creer_propriete(tdef: dict, cite_id, origine: dict, acheteur: dict, mode: st
 	return prop
 
 
+# ── Image du bien : choisie par le propriétaire parmi celles de SON type ──────────
+# Fichiers de `towns/` nommés `<type>_<region>[_<cite>]NN.<ext>` (convention des magasins,
+# docs/prompts_images.md § 7), `<region>` = clé de `rules:regions`. La région est EXIGÉE dans
+# le motif : sans elle, `maison_des_conserves_europe01.jpg` passerait pour une Maison. L'image
+# du type (`tdef.image`) reste toujours proposée. Le type ne bouge jamais : seule `image` change.
+
+EXT_IMAGES = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def images_du_type(tdef: dict, fichiers, regions: dict | None) -> list[dict]:
+	"""`[{fichier, region, label}]` des images offertes à un bien de ce type, image du type en
+	tête puis par région (ordre de `rules:regions`) et nom. `fichiers` = noms du dossier
+	`towns/` ; `regions` = `{id: {nom, ...}}` de `rules:regions`."""
+	type_id = (tdef or {}).get("id") or ""
+	regions = regions or {}
+	presents = set(fichiers or [])
+	out = []
+	defaut = (tdef or {}).get("image")
+	if defaut and defaut in presents:
+		out.append({"fichier": defaut, "region": "", "label": "Image d'origine"})
+	if not type_id or not regions:
+		return out
+	ordre = list(regions)
+	motif = re.compile(r"^" + re.escape(type_id) + r"_(" + "|".join(
+		re.escape(r) for r in sorted(ordre, key=len, reverse=True)) + r")(?:_([a-z0-9_]+?))?(\d+)\.([a-z]+)$")
+	trouves = []
+	for f in presents:
+		m = motif.match(f)
+		if not m or f == defaut or ("." + m.group(4)) not in EXT_IMAGES:
+			continue
+		rid, cite, num = m.group(1), m.group(2), m.group(3)
+		nom = (regions.get(rid) or {}).get("nom") or rid
+		label = f"{nom}{' · ' + cite.replace('_', ' ').title() if cite else ''} {int(num)}"
+		trouves.append((ordre.index(rid), f, {"fichier": f, "region": rid, "label": label}))
+	out.extend(v for _o, _f, v in sorted(trouves, key=lambda t: (t[0], t[1])))
+	return out
+
+
+def changer_image(prop: dict, tdef: dict, fichiers, regions: dict | None, image) -> tuple[bool, str]:
+	"""Pose `image` sur le bien si elle est offerte à son type (`images_du_type`). Mute sans
+	sauver."""
+	if not any(c["fichier"] == image for c in images_du_type(tdef, fichiers, regions)):
+		return False, "Cette image ne convient pas à ce type de bien."
+	prop["image"] = image
+	return True, ""
+
+
 def creer_lien(prop: dict) -> dict:
 	"""Connexion case d'origine ↔ propriété (nœud de la propriété en [0,0], comme une
 	boutique). Même forme que les liens des générateurs `dev/gen_magasins*.py`."""

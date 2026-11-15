@@ -3264,6 +3264,14 @@
 		.col-modele { display: flex; flex-direction: column; gap: .2rem; cursor: pointer; }
 		.col-modele img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
 		.col-modele input:checked ~ img { outline: 2px solid currentColor; }
+		/* 🖼️ Image du bien : vignettes des images de son type, la courante cerclée. */
+		.prop-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
+		.prop-image { display: flex; flex-direction: column; gap: .2rem; padding: .25rem; cursor: pointer;
+			background: none; border: 1px solid rgba(120, 90, 50, .35); border-radius: 6px; font: inherit;
+			color: inherit; text-align: center; }
+		.prop-image img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
+		.prop-image[aria-pressed="true"] { outline: 2px solid var(--accent); cursor: default; }
+		.prop-image span { font-size: .85em; }
 		.prop-etat-on { color: #3d7a2e; font-weight: bold; }
 		.prop-etat-off { opacity: .7; }
 		/* PNJ du bien : son nom ouvre ses options (vente à la cité). */
@@ -11348,6 +11356,8 @@ function renderPropriete(data) {
 		return;
 	}
 
+	if (gere) html += _propImages(data.images);
+
 	html += `<section class="prop-section"><h3>📐 Capacités</h3>${_propCaps(data.capacites)}
 		<span class="q-desc">${data.gardien ? '🛡️ Un gardien veille sur les lieux.' : (loc ? '🔒 Chambre inviolable.' : '⚠️ Aucun gardien : un visiteur peut se servir dans le rangement.')}</span></section>`;
 
@@ -11395,6 +11405,27 @@ function renderPropriete(data) {
 
 	html += _propMesProprietes(data.mes_proprietes);
 	document.getElementById('prop-contenu').innerHTML = html;
+}
+
+// 🖼️ Image du bien : le propriétaire choisit parmi les images de SON type (serveur :
+// `proprietes.images_du_type`). Rien à choisir ⇒ pas de section.
+function _propImages(im) {
+	if (!im || (im.choix || []).length < 2) return '';
+	return `<section class="prop-section"><h3>🖼️ Apparence du bien</h3><div class="prop-images">`
+		+ im.choix.map(c => `<button type="button" class="prop-image" data-img="${escapeHtml(c.fichier)}"
+			aria-pressed="${c.fichier === im.courante}" onclick="propChoisirImage(this)">
+			<img src="/towns/${encodeURIComponent(c.fichier)}" alt="" loading="lazy"><span>${escapeHtml(c.label)}</span></button>`).join('')
+		+ `</div></section>`;
+}
+
+async function propChoisirImage(btn) {
+	if (btn.getAttribute('aria-pressed') === 'true') return;
+	const data = await _propPost('api/proprietes/image', { image: btn.dataset.img });
+	if (!data || !data.images) return;
+	// Le bien est un lieu sans grille : son décor est `#bg-image-fit`, remplacé sans rechargement.
+	const fond = document.getElementById('bg-image-fit');
+	if (fond) fond.src = '/towns/' + encodeURIComponent(data.images.courante);
+	showToast('🖼️ Apparence du bien changée.');
 }
 
 // Effets d'un aménagement (textes du serveur, `proprietes.textes_effets`). Installé : on dit

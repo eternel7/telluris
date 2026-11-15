@@ -254,6 +254,27 @@ def test_visiteur_ne_gere_pas(monde):
 	assert e.value.status_code == 403
 
 
+def test_changer_image_au_seul_proprietaire(monde, monkeypatch):
+	rp = monde["rp"]
+	monde["docs"]["rules:regions"] = {"_id": "rules:regions", "regions": {"europe": {"nom": "Europe"}}}
+	monkeypatch.setattr(rp, "_fichiers_images", lambda: ["maison.jpg", "maison_europe01.jpg", "demeure_europe01.jpg"])
+	char = _perso()
+	prop = _entrer(monde, char)
+	vue = _appel(monde, char, rp.ici, None)
+	assert [c["fichier"] for c in vue["images"]["choix"]] == ["maison.jpg", "maison_europe01.jpg"]
+	data = _appel(monde, char, rp.changer_image, None, {"image": "maison_europe01.jpg"})
+	assert prop["image"] == "maison_europe01.jpg" and data["images"]["courante"] == "maison_europe01.jpg"
+	assert prop["type_propriete"] == "maison"
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, rp.changer_image, None, {"image": "demeure_europe01.jpg"})
+	assert e.value.status_code == 409 and prop["image"] == "maison_europe01.jpg"
+	visiteur = _perso(_id="character:b", lieu=prop["_id"])
+	assert _appel(monde, visiteur, rp.ici, None)["images"] is None
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, visiteur, rp.changer_image, None, {"image": "maison.jpg"})
+	assert e.value.status_code == 403
+
+
 def test_vendre_supprime_la_porte_et_reconduit_dehors(monde):
 	char = _perso()
 	prop = _entrer(monde, char)
