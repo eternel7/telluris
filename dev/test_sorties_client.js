@@ -106,9 +106,10 @@ test('les deux pages déconnectent par la même route, qui existe côté serveur
 	}
 });
 
-test('/embleme : bandeau du site, « ⟵ Accueil », et la liste des personnages hors du bandeau fixe', () => {
-	assert.ok(/<a href="\/" class="nav-logo">/.test(embleme), 'logo du bandeau absent');
-	assert.ok(/<a href="\/" class="retour-accueil"/.test(embleme), '« ⟵ Accueil » absent');
+test('/embleme : le logo du bandeau est le SEUL retour à l\'accueil, et la liste des personnages hors du bandeau fixe', () => {
+	assert.ok(/<a href="\/" class="nav-logo"[^>]*title="Revenir à l'accueil/.test(embleme), 'logo du bandeau absent ou sans libellé de retour');
+	assert.ok(/\.nav-logo::before\s*\{[^}]*content:\s*'‹'/.test(embleme), 'le logo n\'affiche plus de chevron de retour');
+	assert.ok(!/class="retour-accueil"/.test(embleme), 'doublon « ⟵ Accueil » revenu dans la carte');
 	assert.ok(/\bnav\s*\{[^}]*position:\s*fixed/.test(embleme), 'part-nav-css n\'est plus inclus');
 	const reset = embleme.match(/nav\.char-list\s*\{([^}]*)\}/);
 	assert.ok(reset && /position:\s*static/.test(reset[1]), 'la liste des personnages hérite du bandeau fixe');
