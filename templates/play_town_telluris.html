@@ -10203,18 +10203,36 @@ function _smToggle(btn) {
 	else if (_smEtat.choisies.length >= MARCHAND.cmdMatieresMax) {
 		showToast('Pas plus de ' + MARCHAND.cmdMatieresMax + ' matières dans une même pièce.');
 		return;
-	} else if (_smEstMetal(id) && _smEtat.choisies.some(_smEstMetal)) {
-		// Drapeau `metal` servi par le serveur, qui revérifie à `devis`/`passer`.
-		showToast('Un seul métal par pièce : les métaux ne se combinent pas.');
-		return;
-	} else _smEtat.choisies.push(id);
+	} else {
+		const refus = _smConflit(id, _smEtat.choisies);
+		if (refus) { showToast(refus); return; }
+		_smEtat.choisies.push(id);
+	}
 	_smRender();
 	_smRafraichirDevis();
 }
 
-function _smEstMetal(id) {
-	const m = (MARCHAND.cmdMatieres || []).find(x => x.item_id === id);
-	return !!(m && m.metal);
+function _smMatiere(id) {
+	return (MARCHAND.cmdMatieres || []).find(x => x.item_id === id) || null;
+}
+
+// Une matière par famille, une partie par créature : `familles` et `creature` sont servis
+// par le serveur (Convention §10), qui revérifie à `devis`/`passer`. Rend le refus, ou ''.
+function _smConflit(id, choisies) {
+	const m = _smMatiere(id);
+	if (!m) return '';
+	const autres = choisies.map(_smMatiere).filter(Boolean);
+	for (const f of (m.familles || [])) {
+		if (autres.some(a => (a.familles || []).some(g => g.cle === f.cle))) {
+			return f.cle === 'metal'
+				? 'Un seul métal par pièce : les métaux ne se combinent pas.'
+				: 'Une seule matière de la famille « ' + f.libelle + ' » par pièce.';
+		}
+	}
+	if (m.creature && autres.some(a => a.creature === m.creature)) {
+		return 'Une seule partie d\'une même créature par pièce.';
+	}
+	return '';
 }
 
 // D'où sort cette matière ? Les trois provenances du serveur, lues sur les deux compteurs :
@@ -10254,7 +10272,7 @@ function _smRender() {
 	const cat = (MARCHAND.catalogue || []).find(c => c.item_id === _smEtat.itemId);
 	document.getElementById('sur-mesure-body').innerHTML =
 		`<h3 style="margin:.1rem 0 .2rem">✨ ${escapeHtml((cat && cat.nom) || 'Sur mesure')}</h3>
-		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières, dont un seul métal (⚒️). Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
+		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières, une seule par famille (métal ⚒️, cuir, tissu, gemme, partie de créature, légendaire) et une seule partie d'une même créature. Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
 		${_smChoixBase()}
 		<div class="sm-liste">${
 			mats.length ? mats.map(m => `<button type="button" class="sm-matiere${_smEtat.choisies.includes(m.item_id) ? ' choisie' : ''}"

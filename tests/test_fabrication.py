@@ -144,8 +144,9 @@ def test_liste_blanche_ignore_les_champs_interdits():
 
 def test_bonus_additifs_cumules_avec_la_quantite():
 	mods = fabrication.appliquer_modificateurs(EPEE, [(ACIER, 2)])
-	# base 3 + (2 × 2 lingots)
-	assert mods["bonus_degats"] == 7
+	# base 3 + 2 lingots × le fixe du barème (acier sans rareté ⇒ `RARETE_PAR_DEFAUT`)
+	_des, fixe = fabrication.BAREME_DEGATS[fabrication.RARETE_PAR_DEFAUT]
+	assert mods["bonus_degats"] == 3 + 2 * fixe
 
 
 def test_fusion_des_bonus_de_caracteristique_et_des_effets():
@@ -249,9 +250,18 @@ def test_composition_commutative():
 
 
 def test_de_de_degats_borne():
-	enorme = {"_id": "item:x", "fabrication": {"modificateurs": {"bonus_degats_dice": 999}}}
-	mods = fabrication.appliquer_modificateurs(EPEE, [(enorme, 1)])
+	# Le dé du BASE, sans dé de matière, reste un nombre de faces borné.
+	enorme = dict(EPEE, bonus_degats_dice=999)
+	mods = fabrication.appliquer_modificateurs(enorme, [(CRISTAL, 1)])
 	assert mods["bonus_degats_dice"] == fabrication.DICE_MAX
+
+
+def test_le_de_d_une_matiere_suit_le_bareme_pas_la_donnee():
+	enorme = {"_id": "item:x", "rarete": "rare",
+			  "fabrication": {"modificateurs": {"bonus_degats_dice": 999, "bonus_degats": 40}}}
+	des, fixe = fabrication.BAREME_DEGATS["rare"]
+	assert fabrication.proprietes_matiere(enorme)["modificateurs"] == \
+		{"bonus_degats_dice": des, "bonus_degats": fixe}
 
 
 def test_facteur_hors_bornes_clampe():
@@ -505,23 +515,26 @@ def test_famille_de_la_piece():
 def test_bonus_hors_famille_une_armure_ne_donne_pas_de_degats():
 	mods = fabrication.appliquer_modificateurs(CASQUE, [(MITHRIL, 1)])
 	assert "bonus_degats" not in mods and "bonus_cc" not in mods
-	assert mods["bonus_pa"] == 5 and mods["bonus_pm"] == 4 and mods["bonus"] == {"Ag": 2}
+	pa = fabrication.BAREME_PA[fabrication.RARETE_PAR_DEFAUT]   # mithril de fixture sans rareté
+	assert mods["bonus_pa"] == 2 + pa and mods["bonus_pm"] == 4 and mods["bonus"] == {"Ag": 2}
 
 
 def test_bonus_hors_famille_une_arme_ne_donne_pas_de_points_d_armure():
 	mods = fabrication.appliquer_modificateurs(FOUET, [(MITHRIL, 1)])
 	assert "bonus_pa" not in mods and "bonus_pm" not in mods
-	assert mods["bonus_degats"] == 4 and mods["bonus_cc"] == 2 and mods["bonus"] == {"Ag": 2}
+	_des, fixe = fabrication.BAREME_DEGATS[fabrication.RARETE_PAR_DEFAUT]
+	assert mods["bonus_degats"] == 1 + fixe and mods["bonus_cc"] == 2 and mods["bonus"] == {"Ag": 2}
 
 
 def test_bonus_hors_famille_renforce_ce_que_le_base_porte_deja_plafonne(monkeypatch):
 	"""Dague de parade : ses PA de base sont renforcés, jusqu'à base × plafond."""
 	plafond = character_stats.FABRICATION_PLAFOND_HORS_FAMILLE
 	mods = fabrication.appliquer_modificateurs(DAGUE_PARADE, [(MITHRIL, 1)])
-	assert mods["bonus_pa"] == min(2 + 3, 2 * plafond)
-	monkeypatch.setattr(character_stats, "FABRICATION_PLAFOND_HORS_FAMILLE", 1.5)
+	pa = fabrication.BAREME_PA[fabrication.RARETE_PAR_DEFAUT]
+	assert mods["bonus_pa"] == min(2 + pa, 2 * plafond)
+	monkeypatch.setattr(character_stats, "FABRICATION_PLAFOND_HORS_FAMILLE", 1.0)
 	mods = fabrication.appliquer_modificateurs(DAGUE_PARADE, [(MITHRIL, 1)])
-	assert mods["bonus_pa"] == 3   # 2 × 1,5
+	assert mods["bonus_pa"] == 2   # 2 × 1,0
 
 
 def test_bonus_hors_famille_un_bijou_ne_protege_ni_ne_blesse():
@@ -570,3 +583,101 @@ def test_un_metal_avec_d_autres_matieres_passe():
 def test_deux_exemplaires_du_meme_metal_comptent_deux():
 	# Indépendant du plafond COMMANDE_QUANTITE_MAX : la règle porte sur le nombre de métaux.
 	assert fabrication.metaux_combines([(LINGOT_FER, fabrication.MATIERES_METAL_MAX + 1)])
+
+
+# ── Barème des dégâts et des PA (Auteur, 15/11) ─────────────────────────────────
+
+def _matiere(rarete=None, conferee=None, **mods):
+	doc = {"_id": "item:m_%s" % (rarete or conferee or "x"), "nom": "M",
+		   "fabrication": {"nom": "m", "modificateurs": dict(mods, **({"rarete": conferee} if conferee else {}))}}
+	if rarete:
+		doc["rarete"] = rarete
+	return doc
+
+
+def test_bareme_par_rarete_degats_et_pa():
+	for rarete, (des, fixe) in fabrication.BAREME_DEGATS.items():
+		mods = fabrication.proprietes_matiere(_matiere(rarete, bonus_degats=10, bonus_pa=9))["modificateurs"]
+		assert mods.get("bonus_degats_dice", "") == des
+		assert mods.get("bonus_degats", 0) == fixe
+		assert mods["bonus_pa"] == fabrication.BAREME_PA[rarete]
+
+
+def test_bareme_une_matiere_ne_depasse_jamais_d20_plus_6():
+	# Règle de l'Auteur : +6 fixe et 1D20 hors de portée d'UNE matière.
+	for des, fixe in fabrication.BAREME_DEGATS.values():
+		assert fixe < 6
+		assert not des or int(des.split("D")[1]) < 20
+
+
+def test_bareme_sans_rarete_propre_lit_la_rarete_conferee():
+	doc = _matiere(conferee="legendaire", bonus_degats=10)
+	des, fixe = fabrication.BAREME_DEGATS["legendaire"]
+	assert fabrication.rarete_matiere(doc) == "legendaire"
+	assert fabrication.proprietes_matiere(doc)["modificateurs"]["bonus_degats_dice"] == des
+	assert fabrication.rarete_matiere({}) == fabrication.RARETE_PAR_DEFAUT
+
+
+def test_bareme_ne_touche_ni_les_malus_ni_les_autres_bonus():
+	mods = fabrication.proprietes_matiere(_matiere("rare", bonus_degats=-2, bonus_pa=-1, bonus_pv=10))["modificateurs"]
+	assert mods["bonus_degats"] == -2 and mods["bonus_pa"] == -1 and mods["bonus_pv"] == 10
+	assert "bonus_degats_dice" not in mods
+
+
+def test_les_des_des_matieres_s_ajoutent_a_ceux_de_la_piece():
+	rare, legende = _matiere("rare", bonus_degats=3), _matiere("legendaire", bonus_degats=10)
+	a = fabrication.appliquer_modificateurs(EPEE, [(rare, 1), (legende, 1)])
+	b = fabrication.appliquer_modificateurs(EPEE, [(legende, 1), (rare, 1)])
+	assert a["bonus_degats_dice"] == b["bonus_degats_dice"] == "1D6+1D10+1D6"   # base, puis du plus gros au plus petit
+	fixes = fabrication.BAREME_DEGATS["rare"][1] + fabrication.BAREME_DEGATS["legendaire"][1]
+	assert a["bonus_degats"] == EPEE["bonus_degats"] + fixes
+
+
+def test_des_d_une_matiere_hors_famille_ignores():
+	mods = fabrication.appliquer_modificateurs(CASQUE, [(_matiere("legendaire", bonus_degats=10), 1)])
+	assert "bonus_degats_dice" not in mods and "bonus_degats" not in mods
+
+
+# ── Une matière par famille, une partie par créature ────────────────────────────
+
+CUIR_A = {"_id": "item:cuir", "nom": "Cuir", "tags": ["cuir"]}
+CUIR_B = {"_id": "item:Peau_chamoisee", "nom": "Peau chamoisée", "tags": ["cuir"]}
+QUEUE = {"_id": "item:dragon_rouge_queue", "nom": "Queue", "sous_categorie": "carcasse",
+		 "rarete": "tres_rare", "source_espece": "espece:dragon_rouge"}
+ECAILLES = {"_id": "item:ecailles_dragon_rouge", "nom": "Écailles", "sous_categorie": "matiere_legendaire",
+			"source_espece": "espece:dragon_rouge",
+			"fabrication": {"nom": "x", "modificateurs": {"rarete": "rare"}}}
+PATTE_LEGENDE = {"_id": "item:zmey_patte", "nom": "Patte", "sous_categorie": "carcasse",
+				 "rarete": "legendaire", "source_espece": "espece:zmey"}
+CENDRE_LEGENDE = {"_id": "item:cendre", "nom": "Cendre", "sous_categorie": "matiere_legendaire",
+				  "fabrication": {"nom": "x", "modificateurs": {"rarete": "legendaire"}}}
+
+
+def test_familles_lues_dans_la_donnee():
+	assert fabrication.familles_matiere(LINGOT_FER) == ["metal"]
+	assert fabrication.familles_matiere(CUIR_A) == ["cuir"]
+	assert fabrication.familles_matiere(PATTE_LEGENDE) == ["carcasse", "legendaire"]
+	assert fabrication.familles_matiere(CENDRE_LEGENDE) == ["legendaire"]
+	assert fabrication.familles_matiere(GRENAILLE) == []
+	assert set(fabrication.LIBELLES_FAMILLE) >= set(fabrication.TAGS_FAMILLE)
+
+
+def test_une_seule_matiere_par_famille():
+	(c,) = fabrication.conflits_combinaison([(CUIR_A, 1), (CUIR_B, 1), (GEMME, 1)])
+	assert c["motif"] == "famille" and c["cle"] == "cuir" and c["docs"] == [CUIR_A, CUIR_B]
+	assert fabrication.conflits_combinaison([(CUIR_A, 1), (LINGOT_FER, 1), (GEMME, 1)]) == []
+
+
+def test_deux_exemplaires_d_une_famille_comptent_deux():
+	assert fabrication.conflits_combinaison([(CUIR_A, fabrication.MATIERES_PAR_FAMILLE_MAX + 1)])
+
+
+def test_une_seule_matiere_legendaire_carcasse_comprise():
+	(c,) = fabrication.conflits_combinaison([(PATTE_LEGENDE, 1), (CENDRE_LEGENDE, 1)])
+	assert c["cle"] == "legendaire"
+
+
+def test_une_seule_partie_par_creature():
+	(c,) = fabrication.conflits_combinaison([(QUEUE, 1), (ECAILLES, 1)])
+	assert c["motif"] == "creature" and c["cle"] == "espece:dragon_rouge"
+	assert fabrication.creature_matiere(CUIR_A) == ""

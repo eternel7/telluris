@@ -95,6 +95,10 @@ RARETE_ITEM_PALIER_1 = "commun"
 
 # Plafonds d'UNE matière, quel que soit son palier : au-delà, elle déclasserait le contenu
 # authoré (les meilleures armes de la base tiennent dans +2/+3 de dégâts).
+# ⚠️ Depuis le 15/11, le moteur ne lit plus le CHIFFRE de `bonus_degats` / `bonus_pa` d'une
+# matière : un positif dit seulement « renforce / protège », la valeur vient du barème de sa
+# rareté (`fabrication.BAREME_DEGATS`, `BAREME_PA`). Les chiffres ci-dessous ne servent plus
+# qu'au budget du palier.
 PLAFOND_DEGATS = 10
 PLAFOND_CARAC = 6
 

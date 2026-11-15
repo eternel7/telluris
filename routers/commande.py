@@ -212,6 +212,17 @@ def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 	return sorted(lignes, key=lambda l: l["nom"] or "")
 
 
+def _message_conflit(conflit: dict) -> str:
+	"""Refus lisible d'une combinaison interdite (`fabrication.conflits_combinaison`)."""
+	noms = ", ".join(dict.fromkeys(d.get("nom") or d.get("_id") or "?" for d in conflit["docs"]))
+	if conflit["motif"] == "creature":
+		return "Une seule partie d'une même créature par pièce (%s)." % noms
+	if conflit["cle"] == fabrication.TAG_METAL:
+		return "Un seul métal par pièce (%s) : les métaux ne se combinent pas." % noms
+	return "Une seule matière de la famille « %s » par pièce (%s)." % (
+		fabrication.LIBELLES_FAMILLE.get(conflit["cle"], conflit["cle"]), noms)
+
+
 def _matieres_vue(lieu_doc: dict, base_doc: dict, porteurs: list) -> list:
 	"""Ce qui peut entrer dans CETTE pièce ici, résolu pour le client : le rayon de la maison,
 	les sacs de l'expédition et le catalogue du monde (`commande.matieres_disponibles`, qui
@@ -240,8 +251,12 @@ def _matieres_vue(lieu_doc: dict, base_doc: dict, porteurs: list) -> list:
 			"qty_sac": entree["qty_sac"],
 			"apporte": apporte["nom"],
 			"modificateurs": apporte["modificateurs"],
-			# Drapeau calculé ICI (§10) : le client refuse un second métal sans redériver la règle.
+			# Calculés ICI (§10) : le client refuse une seconde matière de la même famille ou
+			# de la même créature sans redériver la règle (le serveur revérifie au devis).
 			"metal": fabrication.est_metal(item),
+			"familles": [{"cle": f, "libelle": fabrication.LIBELLES_FAMILLE[f]}
+						 for f in fabrication.familles_matiere(item)],
+			"creature": fabrication.creature_matiere(item),
 		})
 	return sorted(lignes, key=lambda l: (0 if l["qty_sac"] else (1 if l["qty"] else 2),
 										 l["nom"] or ""))
@@ -408,14 +423,12 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 					   % (doc.get("nom") or entree["item"]))
 		matieres_docs.append((doc, entree["quantite"]))
 
-	# Un seul métal par pièce (`fabrication.metaux_combines`) — tenu ICI, donc pour `devis`,
-	# `passer` et « Relancer » : le client refuse déjà le second, une requête forgée aussi.
-	metaux = fabrication.metaux_combines(matieres_docs)
-	if metaux:
-		raise HTTPException(
-			status_code=422,
-			detail="Un seul métal par pièce (%s) : les métaux ne se combinent pas."
-				   % ", ".join(dict.fromkeys(d.get("nom") or d.get("_id") or "?" for d in metaux)))
+	# Une matière par famille, une partie par créature (`fabrication.conflits_combinaison`) —
+	# tenu ICI, donc pour `devis`, `passer` et « Relancer » : le client refuse déjà la seconde,
+	# une requête forgée aussi.
+	conflits = fabrication.conflits_combinaison(matieres_docs)
+	if conflits:
+		raise HTTPException(status_code=422, detail=_message_conflit(conflits[0]))
 
 	# ── DEUX passes, et elles ne se facturent pas pareil ────────────────────────────
 	# Les ingrédients de la RECETTE sont déjà compris dans `prix_base` (le coût de revient se

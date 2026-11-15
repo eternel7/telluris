@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest  # noqa: E402
 
 from routers import commande as rc  # noqa: E402
-from utils import characters, commande as commande_util, marche  # noqa: E402
+from utils import characters, commande as commande_util, fabrication, marche  # noqa: E402
 
 
 CATEGORIE_SUR_MESURE = "grand_arsenal"   # une des `LIEU_CATEGORIES_FUSION`
@@ -234,3 +234,32 @@ def test_la_liste_des_matieres_signale_les_metaux(atelier, monkeypatch):
 	lignes = {l["item_id"]: l for l in rc._matieres_vue(LIEU, _DB["item:Epee_longue"], [_character()])}
 	assert lignes["item:fer"]["metal"] is True
 	assert lignes["item:gemme"]["metal"] is False
+	assert lignes["item:fer"]["familles"] == [{"cle": "metal", "libelle": fabrication.LIBELLES_FAMILLE["metal"]}]
+	assert lignes["item:gemme"]["creature"] == ""
+
+
+# ── Une matière par famille, une partie par créature ───────────────────────────
+
+def test_deux_matieres_d_une_meme_famille_sont_refusees(atelier, monkeypatch):
+	from fastapi import HTTPException
+	monkeypatch.setitem(_MONDE, "item:fer", dict(_DB["item:fer"], tags=["gemme"]))
+	monkeypatch.setitem(_MONDE, "item:gemme", dict(_DB["item:gemme"], tags=list(_DB["item:gemme"].get("tags") or []) + ["gemme"]))
+	character = _character()
+	with pytest.raises(HTTPException) as e:
+		_passer(monkeypatch, character, {"item_id": "item:Epee_longue", "matieres": [
+			{"item": "item:fer", "quantite": 1}, {"item": "item:gemme", "quantite": 1}]})
+	assert e.value.status_code == 422
+	assert fabrication.LIBELLES_FAMILLE["gemme"] in e.value.detail
+	assert character["commandes"] == []
+
+
+def test_deux_parties_d_une_meme_creature_sont_refusees(atelier, monkeypatch):
+	from fastapi import HTTPException
+	for iid in ("item:fer", "item:gemme"):
+		monkeypatch.setitem(_MONDE, iid, dict(_DB[iid], source_espece="espece:dragon_rouge"))
+	character = _character()
+	with pytest.raises(HTTPException) as e:
+		_passer(monkeypatch, character, {"item_id": "item:Epee_longue", "matieres": [
+			{"item": "item:fer", "quantite": 1}, {"item": "item:gemme", "quantite": 1}]})
+	assert "même créature" in e.value.detail
+	assert character["commandes"] == []
