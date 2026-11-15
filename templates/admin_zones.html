@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	{# Session expirée (401 / x-session: aucune) → /auth. AVANT les scripts de la page. #}
+	<script src="{{ script_url('session.js') }}"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{#
+	  /admin/zones — zones d'influence : contenu PAR DÉFAUT (espèces, ressources, par région),
+	  usage, reste du doc zone, régions (`rules:regions`), et APERÇU lecture seule du contenu
+	  effectif d'un lieu (utils/zones.py : `contenu_detaille`, `apercu_lieu`, `peupler_lieu`).
+	  Toute écriture FUSIONNE sur le doc relu côté serveur (routers/zones.py, /api/zones-admin/*).
+	#}
+	<style>
+		:root {
+			--bg: #0d0f14; --panel: #141720; --panel2: #1a1e2a; --border: #2a3040;
+			--accent: #c8a84b; --accent2: #4b8fc8; --danger: #c84b4b; --ok: #5fb36b;
+			--text: #fff; --muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: 1300px; padding: 24px; }
+		.onglets { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+		.onglets button {
+			background: var(--panel); color: var(--muted); border: 1px solid var(--border);
+			border-radius: 6px; padding: 8px 14px; font: inherit; cursor: pointer;
+		}
+		.onglets button.actif { color: var(--accent); border-color: var(--accent); }
+		.vue { display: none; }
+		.vue.active { display: block; }
+		.card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 16px; }
+		.card h2 { font-size: 0.95rem; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.06em; }
+		.desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+		.grille { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+		@media (max-width: 860px) { .grille { grid-template-columns: 1fr; } header { padding: 14px 16px; } .main { padding: 16px; } }
+		input, select, textarea {
+			background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+			border-radius: 4px; padding: 6px 8px; font: inherit; font-size: 0.82rem;
+		}
+		textarea { width: 100%; min-height: 120px; resize: vertical; }
+		button.btn {
+			background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+			border-radius: 4px; padding: 6px 12px; font: inherit; font-size: 0.8rem; cursor: pointer;
+		}
+		button.btn:hover { border-color: var(--accent); }
+		button.btn.primaire { border-color: var(--accent); color: var(--accent); }
+		button.btn.danger { border-color: var(--danger); color: var(--danger); }
+		button.btn:disabled { opacity: 0.5; cursor: default; }
+		.liste { max-height: 70vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+		.liste .el {
+			padding: 7px 10px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 0.8rem;
+			display: flex; justify-content: space-between; gap: 8px;
+		}
+		.liste .el:hover { background: var(--panel2); }
+		.liste .el.sel { background: var(--panel2); color: var(--accent); }
+		.liste .el .n { color: var(--muted); font-size: 0.72rem; white-space: nowrap; }
+		.champ { display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: var(--muted); }
+		.ligne-champs { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+		table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+		th, td { padding: 6px 8px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--border); }
+		th { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+		.puce {
+			display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; margin: 2px;
+			border: 1px solid var(--border); border-radius: 10px; font-size: 0.72rem; cursor: pointer; user-select: none;
+		}
+		.puce.on { border-color: var(--accent2); color: var(--accent2); }
+		.puce.fixe { cursor: default; }
+		.src { font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+		.src.defaut { color: var(--accent2); }
+		.src.lieu { color: var(--accent); }
+		.src.placement { color: var(--ok); }
+		.exclu td.nom { text-decoration: line-through; color: var(--muted); }
+		.doublon td { opacity: 0.55; }
+		.bloc-zone b { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; }
+		.muted { color: var(--muted); }
+		.statut { font-size: 0.8rem; min-height: 1.2em; margin: 8px 0; }
+		.statut.ok { color: var(--ok); }
+		.statut.err { color: var(--danger); }
+		.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+		details summary { cursor: pointer; color: var(--muted); font-size: 0.8rem; margin: 10px 0 6px; }
+		.bloc-zone { border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 10px; }
+		.bloc-zone h3 { font-size: 0.85rem; margin-bottom: 6px; }
+		.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+		@media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🗺️ Zones d'influence</h1>
+		{% include 'part-admin-retour.html' %}
+	</header>
+	<div class="main">
+		<div class="onglets">
+			<button type="button" data-vue="zones" class="actif">Zones &amp; défauts</button>
+			<button type="button" data-vue="regions">Régions</button>
+			<button type="button" data-vue="apercu">Aperçu d'un lieu</button>
+		</div>
+		<div id="statut" class="statut"></div>
+
+		<!-- ── Zones ─────────────────────────────────────────────────────── -->
+		<section class="vue active" id="vue-zones">
+			<div class="grille">
+				<div>
+					<input id="z-filtre" type="search" placeholder="Filtrer…" style="width:100%; margin-bottom:8px">
+					<div id="z-liste" class="liste"></div>
+					<div class="card" style="margin-top:12px">
+						<h2>Nouvelle zone</h2>
+						<div class="ligne-champs">
+							<input id="z-neuve" placeholder="zone:mon_slug" style="flex:1">
+							<button type="button" class="btn" id="z-creer">Créer</button>
+						</div>
+					</div>
+				</div>
+				<div id="z-editeur" class="card">
+					<p class="muted">Choisissez une zone dans la liste.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- ── Régions ───────────────────────────────────────────────────── -->
+		<section class="vue" id="vue-regions">
+			<div class="card">
+				<h2>Régions (rules:regions)</h2>
+				<p class="desc">
+					Un défaut restreint à des régions ne vaut que dans un lieu de ces régions. On y range
+					les PAYS : une cité ou un sous-lieu prend la région de son <code>lieu_parent</code>.
+					Un lieu listé dans deux régions garde la première.
+				</p>
+				<div id="r-liste"></div>
+				<div class="actions">
+					<input id="r-neuve" placeholder="id_region">
+					<button type="button" class="btn" id="r-ajouter">+ Région</button>
+					<button type="button" class="btn primaire" id="r-sauver">💾 Enregistrer les régions</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- ── Aperçu ────────────────────────────────────────────────────── -->
+		<section class="vue" id="vue-apercu">
+			<div class="card">
+				<h2>Contenu effectif d'un lieu (lecture seule)</h2>
+				<p class="desc">
+					Ce que le jeu lit réellement (combat, récolte, traces, chasse, quêtes, 🔎) :
+					défauts des zones posées (filtrés par la région du lieu), compléments écrits du lieu,
+					contenu propre des placements ; un défaut exclu par le lieu est barré, un défaut
+					« doublon » recopie une entrée que le lieu écrit déjà (l'entrée du lieu peut être retirée).
+					Après une modification, ⟳ Recharger relit l'état enregistré.
+				</p>
+				<div class="ligne-champs">
+					<select id="a-lieu"></select>
+					<button type="button" class="btn" id="a-recharger">⟳ Recharger</button>
+				</div>
+				<div id="a-resultat"></div>
+			</div>
+		</section>
+	</div>
+
+	<datalist id="dl-especes"></datalist>
+	<datalist id="dl-items"></datalist>
+
+<script>
+(() => {
+	const API = '/api/zones-admin';
+	let CAT = { zones: [], regions: {}, especes: [], items: [], lieux_a_zones: [], pays: [] };
+	let zoneSel = null;      // id de la zone ouverte
+	let brouillon = null;    // copie éditable de la zone ouverte
+	let regionsBrouillon = {};
+	const NOMS = {};
+
+	function escapeHtml(s) {
+		return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+	}
+	function nomDe(id) { return NOMS[id] || id; }
+	function statut(msg, ok = true) {
+		const el = document.getElementById('statut');
+		el.textContent = msg || '';
+		el.className = 'statut ' + (msg ? (ok ? 'ok' : 'err') : '');
+	}
+	async function api(url, opts = {}) {
+		const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', ...opts });
+		let data = null;
+		try { data = await r.json(); } catch (e) { data = null; }
+		if (!r.ok) throw new Error((data && data.detail) || ('Erreur ' + r.status));
+		return data;
+	}
+
+	// ── Onglets ──────────────────────────────────────────────────────────
+	document.querySelectorAll('.onglets button').forEach(b => b.addEventListener('click', () => {
+		document.querySelectorAll('.onglets button').forEach(x => x.classList.toggle('actif', x === b));
+		document.querySelectorAll('.vue').forEach(v => v.classList.toggle('active', v.id === 'vue-' + b.dataset.vue));
+		statut('');
+		if (b.dataset.vue === 'apercu') chargerApercu();
+	}));
+
+	// ── Chargement ───────────────────────────────────────────────────────
+	async function charger() {
+		CAT = await api(API + '/catalogue');
+		CAT.especes.forEach(e => { NOMS[e.id] = e.nom; });
+		CAT.items.forEach(i => { NOMS[i.id] = i.nom; });
+		CAT.pays.forEach(p => { NOMS[p.id] = p.label; });
+		document.getElementById('dl-especes').innerHTML = CAT.especes.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.nom)}</option>`).join('');
+		document.getElementById('dl-items').innerHTML = CAT.items.map(i => `<option value="${escapeHtml(i.id)}">${escapeHtml(i.nom)}</option>`).join('');
+		regionsBrouillon = JSON.parse(JSON.stringify(CAT.regions || {}));
+		const sel = document.getElementById('a-lieu');
+		const garde = sel.value;
+		sel.innerHTML = CAT.lieux_a_zones.map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.label)} (${l.placements} placements)</option>`).join('');
+		if (garde) sel.value = garde;
+		rendreListe();
+		rendreRegions();
+		if (zoneSel) ouvrirZone(zoneSel);
+	}
+
+	// ── Liste des zones ──────────────────────────────────────────────────
+	function rendreListe() {
+		const f = document.getElementById('z-filtre').value.trim().toLowerCase();
+		const el = document.getElementById('z-liste');
+		el.innerHTML = CAT.zones
+			.filter(z => !f || (z._id + ' ' + (z.nom || '')).toLowerCase().includes(f))
+			.map(z => {
+				const nd = (z.defauts_rencontres || []).length + (z.defauts_ressources || []).length;
+				const nu = (z.usage || []).length;
+				return `<div class="el${z._id === zoneSel ? ' sel' : ''}" data-id="${escapeHtml(z._id)}">
+					<span>${escapeHtml(z.nom || z._id)}</span>
+					<span class="n">${nd} déf. · ${nu} lieu${nu > 1 ? 'x' : ''}</span></div>`;
+			}).join('') || '<div class="el muted">Aucune zone.</div>';
+		el.querySelectorAll('.el[data-id]').forEach(d => d.addEventListener('click', () => ouvrirZone(d.dataset.id)));
+	}
+	document.getElementById('z-filtre').addEventListener('input', rendreListe);
+
+	// ── Éditeur d'une zone ───────────────────────────────────────────────
+	function ouvrirZone(id) {
+		const z = CAT.zones.find(x => x._id === id);
+		if (!z) { zoneSel = null; document.getElementById('z-editeur').innerHTML = '<p class="muted">Zone introuvable.</p>'; return; }
+		zoneSel = id;
+		brouillon = JSON.parse(JSON.stringify(z));
+		brouillon.defauts_rencontres = brouillon.defauts_rencontres || [];
+		brouillon.defauts_ressources = brouillon.defauts_ressources || [];
+		rendreListe();
+		rendreEditeur();
+	}
+
+	function puceRegions(entree, champ, idx) {
+		const ids = Object.keys(regionsBrouillon);
+		if (!ids.length) return '<span class="muted">aucune région définie</span>';
+		const on = new Set(entree.regions || []);
+		const puces = ids.map(r => `<span class="puce${on.has(r) ? ' on' : ''}" data-champ="${champ}" data-idx="${idx}" data-region="${escapeHtml(r)}">${escapeHtml((regionsBrouillon[r] || {}).nom || r)}</span>`).join('');
+		return puces + (on.size ? '' : ' <span class="muted">(partout)</span>');
+	}
+
+	function tableDefauts(champ, cle, liste) {
+		const lignes = brouillon[champ].map((e, i) => `<tr>
+			<td style="width:38%"><input list="${liste}" data-champ="${champ}" data-idx="${i}" data-cle="${cle}" value="${escapeHtml(e[cle] || '')}" style="width:100%">
+				<div class="muted" style="font-size:0.7rem">${escapeHtml(e[cle] ? nomDe(e[cle]) : '')}</div></td>
+			<td>${puceRegions(e, champ, i)}</td>
+			<td style="width:40px"><button type="button" class="btn danger" data-suppr="${champ}" data-idx="${i}" title="Retirer">✕</button></td>
+		</tr>`).join('');
+		return `<table><thead><tr><th>${cle === 'espece' ? 'Espèce' : 'Ressource'}</th><th>Régions</th><th></th></tr></thead>
+			<tbody>${lignes || `<tr><td colspan="3" class="muted">Aucun défaut.</td></tr>`}</tbody></table>
+			<div class="actions"><button type="button" class="btn" data-ajout="${champ}" data-cle="${cle}">+ Ajouter</button></div>`;
+	}
+
+	function rendreEditeur() {
+		const z = brouillon;
+		const usage = (z.usage || []).map(u => `${escapeHtml(u.label)} <span class="muted">(${u.placements})</span>`).join(', ');
+		document.getElementById('z-editeur').innerHTML = `
+			<h2>${escapeHtml(z._id)}</h2>
+			<div class="ligne-champs">
+				<label class="champ">Nom<input id="e-nom" value="${escapeHtml(z.nom || '')}" style="min-width:240px"></label>
+				<label class="champ">Intensité max (0–1)<input id="e-intensite" type="number" min="0" max="1" step="0.05" value="${escapeHtml(z.intensite_max ?? '')}" style="width:110px"></label>
+				<label class="champ" style="flex:1">Terrain (décor, séparé par des virgules)<input id="e-terrain" value="${escapeHtml((z.terrain_tags || []).join(', '))}"></label>
+			</div>
+			<p class="desc">Posée sur : ${usage || '<span class="muted">aucun lieu</span>'} — placements à éditer dans <a href="/admin/editor" style="color:var(--accent2)">l'éditeur de carte</a>.</p>
+			<div class="card" style="background:var(--panel2)">
+				<h2>Rencontres par défaut</h2>
+				<p class="desc">Espèces qu'on rencontre dans cette zone partout où elle est posée (régions : filtre ; aucune = partout). Un lieu peut en exclure ; il garde ses propres compléments.</p>
+				${tableDefauts('defauts_rencontres', 'espece', 'dl-especes')}
+			</div>
+			<div class="card" style="background:var(--panel2)">
+				<h2>Ressources par défaut</h2>
+				${tableDefauts('defauts_ressources', 'ressource', 'dl-items')}
+			</div>
+			<details>
+				<summary>Reste du doc zone : modificateurs et table d'événements (JSON)</summary>
+				<div class="cols">
+					<label class="champ">modificateurs<textarea id="e-modifs" spellcheck="false">${escapeHtml(z._modifsTexte ?? JSON.stringify(z.modificateurs || {}, null, 1))}</textarea></label>
+					<label class="champ">table_evenements<textarea id="e-evts" spellcheck="false">${escapeHtml(z._evtsTexte ?? JSON.stringify(z.table_evenements || [], null, 1))}</textarea></label>
+				</div>
+				<p class="desc">⚠️ Seuls <code>combat</code> et <code>ressource</code> ont du code derrière ; les autres types diluent le tirage (« il ne se passe rien ») — les retirer augmente la fréquence des combats.</p>
+			</details>
+			<div class="actions">
+				<button type="button" class="btn primaire" id="e-sauver">💾 Enregistrer</button>
+				<button type="button" class="btn danger" id="e-supprimer" ${(z.usage || []).length ? 'disabled title="Zone posée : retirez ses placements d\'abord"' : ''}>🗑 Supprimer</button>
+			</div>`;
+		const ed = document.getElementById('z-editeur');
+		ed.querySelectorAll('input[data-champ]').forEach(inp => inp.addEventListener('change', () => {
+			brouillon[inp.dataset.champ][+inp.dataset.idx][inp.dataset.cle] = inp.value.trim();
+			rendreEditeurGarde();
+		}));
+		ed.querySelectorAll('.puce[data-region]').forEach(p => p.addEventListener('click', () => {
+			const e = brouillon[p.dataset.champ][+p.dataset.idx];
+			const s = new Set(e.regions || []);
+			s.has(p.dataset.region) ? s.delete(p.dataset.region) : s.add(p.dataset.region);
+			e.regions = [...s];
+			rendreEditeurGarde();
+		}));
+		ed.querySelectorAll('[data-suppr]').forEach(b => b.addEventListener('click', () => {
+			brouillon[b.dataset.suppr].splice(+b.dataset.idx, 1);
+			rendreEditeurGarde();
+		}));
+		ed.querySelectorAll('[data-ajout]').forEach(b => b.addEventListener('click', () => {
+			brouillon[b.dataset.ajout].push({ [b.dataset.cle]: '' });
+			rendreEditeurGarde();
+		}));
+		document.getElementById('e-sauver').addEventListener('click', sauverZone);
+		document.getElementById('e-supprimer').addEventListener('click', supprimerZone);
+	}
+
+	// Redessine en gardant les champs libres en cours de saisie (nom, terrain, JSON).
+	function rendreEditeurGarde() {
+		lireChampsLibres();
+		const ouvert = document.querySelector('#z-editeur details')?.open;
+		rendreEditeur();
+		if (ouvert) document.querySelector('#z-editeur details').open = true;
+	}
+	function lireChampsLibres() {
+		const g = id => document.getElementById(id);
+		if (!g('e-nom')) return;
+		brouillon.nom = g('e-nom').value;
+		const v = g('e-intensite').value;
+		brouillon.intensite_max = v === '' ? brouillon.intensite_max : Number(v);
+		brouillon.terrain_tags = g('e-terrain').value.split(',').map(s => s.trim()).filter(Boolean);
+		brouillon._modifsTexte = g('e-modifs').value;
+		brouillon._evtsTexte = g('e-evts').value;
+		try { brouillon.modificateurs = JSON.parse(brouillon._modifsTexte); } catch (e) {}
+		try { brouillon.table_evenements = JSON.parse(brouillon._evtsTexte); } catch (e) {}
+	}
+
+	async function sauverZone() {
+		lireChampsLibres();
+		let modificateurs, table_evenements;
+		try { modificateurs = JSON.parse(document.getElementById('e-modifs').value); }
+		catch (e) { statut('modificateurs : JSON invalide', false); return; }
+		try { table_evenements = JSON.parse(document.getElementById('e-evts').value); }
+		catch (e) { statut('table_evenements : JSON invalide', false); return; }
+		const nettoie = (l, cle) => l.filter(e => (e[cle] || '').trim()).map(e => {
+			const o = { [cle]: e[cle].trim() };
+			if ((e.regions || []).length) o.regions = e.regions;
+			return o;
+		});
+		const corps = {
+			nom: brouillon.nom, intensite_max: brouillon.intensite_max, terrain_tags: brouillon.terrain_tags,
+			modificateurs, table_evenements,
+			defauts_rencontres: nettoie(brouillon.defauts_rencontres, 'espece'),
+			defauts_ressources: nettoie(brouillon.defauts_ressources, 'ressource'),
+		};
+		try {
+			const z = await api(API + '/zone/' + encodeURIComponent(zoneSel), { method: 'PUT', body: JSON.stringify(corps) });
+			const i = CAT.zones.findIndex(x => x._id === zoneSel);
+			z.usage = CAT.zones[i].usage;
+			CAT.zones[i] = z;
+			ouvrirZone(zoneSel);
+			statut('Zone enregistrée.');
+		} catch (e) { statut(e.message, false); }
+	}
+
+	async function supprimerZone() {
+		if (!confirm(`Supprimer définitivement ${zoneSel} ?`)) return;
+		try {
+			await api(API + '/zone/' + encodeURIComponent(zoneSel), { method: 'DELETE' });
+			CAT.zones = CAT.zones.filter(x => x._id !== zoneSel);
+			zoneSel = null;
+			document.getElementById('z-editeur').innerHTML = '<p class="muted">Zone supprimée.</p>';
+			rendreListe();
+			statut('Zone supprimée.');
+		} catch (e) { statut(e.message, false); }
+	}
+
+	document.getElementById('z-creer').addEventListener('click', async () => {
+		const id = document.getElementById('z-neuve').value.trim();
+		try {
+			const z = await api(API + '/zone', { method: 'POST', body: JSON.stringify({ _id: id }) });
+			CAT.zones.push(z);
+			CAT.zones.sort((a, b) => a._id.localeCompare(b._id));
+			document.getElementById('z-neuve').value = '';
+			ouvrirZone(z._id);
+			statut('Zone créée.');
+		} catch (e) { statut(e.message, false); }
+	});
+
+	// ── Régions ──────────────────────────────────────────────────────────
+	function rendreRegions() {
+		const el = document.getElementById('r-liste');
+		const optionsPays = CAT.pays.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.label)}</option>`).join('');
+		el.innerHTML = Object.entries(regionsBrouillon).map(([rid, reg]) => `
+			<div class="bloc-zone">
+				<div class="ligne-champs" style="align-items:flex-end">
+					<label class="champ">Id<input value="${escapeHtml(rid)}" disabled style="width:160px"></label>
+					<label class="champ" style="flex:1">Nom<input data-rnom="${escapeHtml(rid)}" value="${escapeHtml(reg.nom || '')}"></label>
+					<button type="button" class="btn danger" data-rsuppr="${escapeHtml(rid)}">✕ Région</button>
+				</div>
+				<div>${(reg.lieux || []).map((l, i) => `<span class="puce on" data-rretire="${escapeHtml(rid)}" data-idx="${i}" title="Retirer">${escapeHtml(nomDe(l))} ✕</span>`).join('') || '<span class="muted">aucun lieu</span>'}</div>
+				<div class="ligne-champs" style="margin-top:8px">
+					<select data-rajout-sel="${escapeHtml(rid)}"><option value="">— ajouter un pays —</option>${optionsPays}</select>
+				</div>
+			</div>`).join('') || '<p class="muted">Aucune région.</p>';
+		el.querySelectorAll('[data-rnom]').forEach(inp => inp.addEventListener('input', () => { regionsBrouillon[inp.dataset.rnom].nom = inp.value; }));
+		el.querySelectorAll('[data-rsuppr]').forEach(b => b.addEventListener('click', () => { delete regionsBrouillon[b.dataset.rsuppr]; rendreRegions(); }));
+		el.querySelectorAll('[data-rretire]').forEach(p => p.addEventListener('click', () => {
+			regionsBrouillon[p.dataset.rretire].lieux.splice(+p.dataset.idx, 1); rendreRegions();
+		}));
+		el.querySelectorAll('[data-rajout-sel]').forEach(s => s.addEventListener('change', () => {
+			const reg = regionsBrouillon[s.dataset.rajoutSel];
+			reg.lieux = reg.lieux || [];
+			if (s.value && !reg.lieux.includes(s.value)) reg.lieux.push(s.value);
+			rendreRegions();
+		}));
+	}
+	document.getElementById('r-ajouter').addEventListener('click', () => {
+		const id = document.getElementById('r-neuve').value.trim().toLowerCase();
+		if (!/^[a-z0-9_]+$/.test(id)) { statut('Id de région : lettres minuscules, chiffres, _', false); return; }
+		if (!regionsBrouillon[id]) regionsBrouillon[id] = { nom: id, lieux: [] };
+		document.getElementById('r-neuve').value = '';
+		rendreRegions();
+	});
+	document.getElementById('r-sauver').addEventListener('click', async () => {
+		try {
+			const r = await api(API + '/regions', { method: 'PUT', body: JSON.stringify({ regions: regionsBrouillon }) });
+			CAT.regions = r.regions;
+			regionsBrouillon = JSON.parse(JSON.stringify(r.regions));
+			rendreRegions();
+			if (zoneSel) rendreEditeurGarde();
+			statut('Régions enregistrées.');
+		} catch (e) { statut(e.message, false); }
+	});
+
+	// ── Aperçu ───────────────────────────────────────────────────────────
+	function badge(l) {
+		if (l.source === 'defaut') {
+			const r = (l.regions || []).map(x => (CAT.regions[x] || {}).nom || x).join(', ');
+			return `<span class="src defaut">défaut${r ? ' · ' + escapeHtml(r) : ''}</span>`;
+		}
+		if (l.source === 'placement') return `<span class="src placement">placement #${l.placement}</span>`;
+		return '<span class="src lieu">lieu</span>';
+	}
+	function tableApercu(lignes, titre) {
+		if (!lignes.length) return `<div><b>${titre}</b> <span class="muted">— rien</span></div>`;
+		return `<div><b>${titre}</b><table><tbody>${lignes.map(l => `<tr class="${l.exclu ? 'exclu' : ''}${l.doublon ? ' doublon' : ''}">
+			<td class="nom">${escapeHtml(nomDe(l.id))} <span class="muted" style="font-size:0.7rem">${escapeHtml(l.id)}</span></td>
+			<td style="text-align:right">${badge(l)}${l.exclu ? ' <span class="src" style="color:var(--danger)">exclu</span>' : ''}${l.doublon ? ' <span class="src" style="color:var(--muted)" title="Le lieu écrit déjà cette entrée pour cette zone : sans effet">doublon</span>' : ''}</td>
+		</tr>`).join('')}</tbody></table></div>`;
+	}
+	async function chargerApercu() {
+		const id = document.getElementById('a-lieu').value;
+		const el = document.getElementById('a-resultat');
+		if (!id) { el.innerHTML = '<p class="muted">Aucun lieu ne pose de zone.</p>'; return; }
+		el.innerHTML = '<p class="muted">Chargement…</p>';
+		try {
+			const a = await api(API + '/apercu/' + encodeURIComponent(id));
+			const region = a.region ? ((CAT.regions[a.region] || {}).nom || a.region) : 'aucune';
+			const tl = a.tout_le_lieu;
+			el.innerHTML = `
+				<p class="desc">Région : <b>${escapeHtml(region)}</b>${a.sans_defauts ? ' · <b style="color:var(--danger)">défauts coupés</b> (tag sans_defauts_zones)' : ''}
+					· ${a.exclusions.length} exclusion(s)</p>
+				${(tl.rencontres.length || tl.ressources.length) ? `<div class="bloc-zone"><h3>Tout le lieu</h3><div class="cols">${tableApercu(tl.rencontres, 'Rencontres')}${tableApercu(tl.ressources, 'Ressources')}</div></div>` : ''}
+				${a.zones.map(z => `<div class="bloc-zone">
+					<h3>${escapeHtml(z.nom)} <span class="muted" style="font-size:0.72rem">${escapeHtml(z.zone)} · ${z.placements} placement(s)</span></h3>
+					<div class="cols">${tableApercu(z.rencontres, 'Rencontres')}${tableApercu(z.ressources, 'Ressources')}</div>
+				</div>`).join('')}`;
+		} catch (e) { el.innerHTML = ''; statut(e.message, false); }
+	}
+	document.getElementById('a-recharger').addEventListener('click', chargerApercu);
+	document.getElementById('a-lieu').addEventListener('change', chargerApercu);
+
+	charger().catch(e => statut(e.message, false));
+})();
+</script>
+</body>
+</html>

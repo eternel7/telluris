@@ -21,7 +21,7 @@ from models import character_stats
 from utils import accord_espece, potentiel
 from utils.zones import (
 	compute_zone_intensity, load_zone_defs_for_lieu, especes_rencontrables, profils_candidats, profils_compatibles,
-	resolve_profil_weights,
+	resolve_profil_weights, peupler_lieu, cles_actives,
 )
 
 _MENACE_CACHE: dict = {}
@@ -57,7 +57,7 @@ def pire_menace(lieu: dict, position: dict, zone_defs: dict, especes: dict, prof
 	des rencontres l'emporte."""
 	menace_fn = menace_fn or _menace
 	actifs = placements_actifs(lieu, position, zone_defs)
-	ids = especes_rencontrables(lieu, {p.get("zone") for p in actifs})
+	ids = especes_rencontrables(lieu, cles_actives(actifs))
 	if not ids:
 		return None
 	if cap_niveau is not None:
@@ -124,6 +124,7 @@ def traces_ici(character: dict, lieu_doc: dict | None, get_doc_fn, find_docs_fn,
 			   ville: bool) -> dict | None:
 	"""Bloc `traces` à la position du personnage (DB injectée). `membres` =
 	`expedition.membres(character)` ; `ville` = lieu à image de ville (grades plafonnés)."""
+	lieu_doc = peupler_lieu(lieu_doc, get_doc_fn)
 	if not lieu_doc or not lieu_doc.get("rencontres") or not lieu_doc.get("zone_influences"):
 		return None
 	profils = find_docs_fn({"type": "profil"}) or []
@@ -136,6 +137,7 @@ def menace_lieu(lieu_doc: dict | None, position: dict, get_doc_fn, profils: list
 	"""`pire_menace` à `position` dans `lieu_doc`, zones et espèces relues (DB injectée) :
 	la lecture même des traces, partagée avec le choix de cible d'une épreuve de rang
 	(`chasse.offre_rang_pour`). `profils` = tous les docs profil ; `ville` ⇒ grades plafonnés."""
+	lieu_doc = peupler_lieu(lieu_doc, get_doc_fn)
 	if not lieu_doc or not lieu_doc.get("rencontres") or not lieu_doc.get("zone_influences"):
 		return None
 	zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc_fn)

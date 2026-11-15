@@ -617,8 +617,8 @@ def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dic
 	site, rien n'est stocké. `{axe: {"note", "max", "mots", "details": [str]}}` ; un axe relevé
 	par des ressources porte aussi `ressources` (ids, lus par les ventes des métiers).
 	`items` = {id: doc} des ressources du pays ; `menace` = `traces.menace_lieu` à la case
-	(None : aucune rencontre possible ⇒ danger 0)."""
-	from utils import potentiel
+	(None : aucune rencontre possible ⇒ danger 0). `pays_doc` PEUPLÉ (`zones.peupler_lieu`)."""
+	from utils import potentiel, zones
 	conf = reg.get("site") or {}
 	mots = conf.get("mots") or {}
 	pos = _xy(position)
@@ -641,7 +641,7 @@ def fiche_site(pays_doc: dict, position, zone_defs: dict, relies: list, reg: dic
 		fiche["eau"]["note"] = min(3, fiche["eau"]["note"] + 1)
 		fiche["eau"]["details"].append("eau à portée")
 	# Ressources de la contrée : chacune relève l'axe de sa nature (+1 par ressource distincte).
-	zones_ici = {p["zone"] for p in actifs}
+	zones_ici = zones.cles_actives(actifs)
 	for i in ressources_du_site(pays_doc, zones_ici):
 		doc = (items or {}).get(i) or {}
 		axe = axe_de_ressource(doc, reg)
@@ -718,7 +718,7 @@ def facteur_axe(site: dict, axe, reg: dict) -> float:
 
 def especes_du_site(pays_doc: dict, position) -> list:
 	from utils import zones
-	zones_ici = {p["zone"] for p in placements_actifs(pays_doc, position)}
+	zones_ici = zones.cles_actives(placements_actifs(pays_doc, position))
 	return sorted(zones.especes_rencontrables(pays_doc, zones_ici)) if zones_ici else []
 
 

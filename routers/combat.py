@@ -23,6 +23,7 @@ from utils.zones import (
     load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
     especes_rencontrables,
     terrain_tags_actifs,
+    peupler_lieu, cles_actives,
 )
 from utils import focalisation
 from utils import traversee
@@ -192,12 +193,15 @@ def _demarrer_combat(body: StartCombatRequest, current_user: dict):
             depart_lieu = traversee.lieu_en_mer(
                 depart_lieu, route, int(character["traversee"].get("etape", 0)))
 
+    # Contenu EFFECTIF (défauts des zones + compléments + placements − exclusions) : copie
+    # jamais sauvée (`zones.peupler_lieu`).
+    depart_lieu = peupler_lieu(depart_lieu, get_doc)
     # Espèces rencontrables = celles du lieu dont une zone concernée est active à la
-    # position du personnage (rencontres: [{espece, zones:[zone_def_id]}]).
+    # position du personnage (rencontres: [{espece, zones:[clé de localisation]}]).
     active_placements, zone_defs = (
         _active_zone_placements(depart_lieu, character) if depart_lieu else ([], {})
     )
-    actives = {p.get("zone") for p in active_placements}
+    actives = cles_actives(active_placements)
     espece_ids = especes_rencontrables(depart_lieu, actives)
     pool_especes = [e for e in especes_all if e["_id"] in espece_ids]
     # ÉPREUVE DE RANG : dans le 3×3 de l'élite traquée, la rencontre est GARANTIE — le pool se

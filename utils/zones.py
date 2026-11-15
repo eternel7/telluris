@@ -92,14 +92,15 @@ def resolve_zone_event(
     Resolve a movement event from all active zones at (px, py).
 
     `boost` (focalisation) : {"type": "combat"|"ressource", "mult": float, "zones": set}
-    — multiplie le poids des entrées du type visé si l'une des `zones` (zone_def ids)
-    est active. Ne touche PAS à la probabilité de déclenchement.
+    — multiplie le poids des entrées du type visé si l'une des `zones` (clés de
+    localisation : zone_def ids, ou `<zone>@<i>` d'un placement à contenu propre) est active. Ne touche PAS à la probabilité de déclenchement.
 
     `rand_fn` : tirage de déclenchement injectable (tests) — `random.random` par défaut.
 
     Returns {"type", "tags", "zones_actives", "intensite", "modificateurs"} or None.
     """
     active = []
+    placements_actifs = []
     for placement in zone_influences:
         zone_id = placement.get("zone")
         zone_def = zone_defs.get(zone_id)
@@ -108,6 +109,8 @@ def resolve_zone_event(
         intensity = compute_zone_intensity(px, py, placement, zone_def)
         if intensity > 0.0:
             active.append((intensity, zone_def))
+            placements_actifs.append(placement)
+    cles = cles_actives(placements_actifs)
 
     if not active:
         return None
@@ -118,7 +121,7 @@ def resolve_zone_event(
 
     # Composite weighted event table
     boost_actif = bool(
-        boost and (boost.get("zones") or set()) & {zd.get("_id") for _, zd in active}
+        boost and (boost.get("zones") or set()) & cles
     )
     entries = []
     weights = []
@@ -146,6 +149,9 @@ def resolve_zone_event(
         "tags": chosen.get("tags", []),
         "zones_actives": [zd.get("nom", "") for _, zd in active],
         "zones_actives_ids": [zd.get("_id") for _, zd in active if zd.get("_id")],
+        # Clés de localisation (zones + `<zone>@<i>` des placements à contenu propre) : ce
+        # que `resolve_recolte` compare aux `zones` des ressources EFFECTIVES (`peupler_lieu`).
+        "cles_actives": sorted(cles),
         "intensite": proba_globale,
         "modificateurs": modificateurs,
     }
@@ -155,8 +161,8 @@ def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn,
                     favori: str | None = None, favori_mult: float = 1.0) -> str | None:
     """Ressource récoltable pour un événement de zone de type « ressource ».
 
-    Candidats = items de `lieu_doc["ressources"]` dont les `zones` recoupent les zones
-    actives de l'événement. On compare les `tags` de l'entrée d'événement (table_evenements)
+    Candidats = items de `lieu_doc["ressources"]` dont les `zones` recoupent les clés
+    actives de l'événement — `lieu_doc` PEUPLÉ (`peupler_lieu`) : défauts des zones compris. On compare les `tags` de l'entrée d'événement (table_evenements)
     à la `categorie`, la `sous_categorie` (si non vide) et aux `tags` de chaque item. S'il y
     a des correspondances → on en tire une au hasard ; sinon → une ressource au hasard parmi
     les candidats. Renvoie un `item:*` id, ou None (pas de ressource récoltable).
@@ -174,7 +180,7 @@ def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn,
 
     if not event or event.get("type") != "ressource":
         return None
-    zone_ids = set(event.get("zones_actives_ids", []))
+    zone_ids = set(event.get("cles_actives") or event.get("zones_actives_ids") or [])
     candidats = [
         r.get("ressource")
         for r in (lieu_doc or {}).get("ressources", [])
@@ -226,7 +232,8 @@ def resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
 
 def especes_rencontrables(lieu: dict | None, zones_actives: set) -> set:
     """Ids d'espèces que les `rencontres` du lieu ([{espece, zones:[zone_def_id]}]) rattachent
-    à au moins une des `zones_actives`. SOURCE UNIQUE du pool d'un combat de zone
+    à au moins une des `zones_actives` (clés : `cles_actives` des placements actifs ; lieu
+    PEUPLÉ par `peupler_lieu`). SOURCE UNIQUE du pool d'un combat de zone
     (`routers/combat.start_combat`) et de la lecture des traces (`utils/traces.py`)."""
     return {
         r["espece"] for r in (lieu or {}).get("rencontres", []) or []
@@ -317,3 +324,324 @@ def load_zone_defs_for_lieu(lieu_doc: dict, get_doc_fn) -> dict:
         if doc:
             result[zone_id] = doc
     return result
+
+
+# ── Contenu PAR DÉFAUT des zones d'influence ─────────────────────────────────────
+#
+# Une zone porte `defauts_rencontres: [{espece, regions?}]` et `defauts_ressources:
+# [{ressource, regions?}]` ; sans `regions` (ou vide) l'entrée vaut partout, sinon seulement
+# dans un lieu dont la RÉGION (`rules:regions`) y figure. Le lieu garde ses `rencontres` /
+# `ressources` (COMPLÉMENTS, inchangés), peut retirer un défaut par `exclusions:
+# [{espece|ressource, zones?}]` (sans `zones` : toutes ses zones), ou couper tous les défauts
+# par le tag `sans_defauts_zones`. Un PLACEMENT peut porter ses propres `rencontres` /
+# `ressources` (listes d'ids) : valables dans SA forme seulement, sous la clé
+# `<zone>@<index>` (`cle_placement`).
+#
+# ⚠️ POINT DE PASSAGE UNIQUE : `peupler_lieu` rend une COPIE du lieu dont `rencontres` /
+# `ressources` sont le contenu EFFECTIF, dans la forme d'avant (`[{espece, zones}]`), et dont
+# les placements à contenu propre portent `_cle`. Tout lecteur de ces champs doit passer par
+# lui (verrouillé par `test_zones_defauts.test_aucun_lecteur_ne_contourne_peupler_lieu`), puis
+# comparer les placements actifs par `cles_actives` / `placement_couvre`, jamais par
+# `p["zone"]` seul. Un lieu peuplé ne se sauve JAMAIS (`db.config.save_doc` le refuse).
+
+REGLES_REGIONS = "rules:regions"
+TAG_SANS_DEFAUTS = "sans_defauts_zones"
+SEP_PLACEMENT = "@"
+CHAMPS_CONTENU = (("rencontres", "espece", "defauts_rencontres"),
+                  ("ressources", "ressource", "defauts_ressources"))
+
+
+def cle_placement(zone_id: str, index: int) -> str:
+    """Clé de localisation du contenu PROPRE d'un placement (`zone:foret@3`)."""
+    return f"{zone_id}{SEP_PLACEMENT}{index}"
+
+
+def zone_de_cle(cle: str) -> str:
+    """Zone d'une clé de localisation : `zone:foret@3` → `zone:foret` (une zone reste elle-même)."""
+    return str(cle or "").split(SEP_PLACEMENT, 1)[0]
+
+
+def cles_actives(placements: list) -> set:
+    """Clés de localisation des placements donnés : leurs zones, plus la `_cle` de ceux qui ont
+    un contenu propre (posée par `peupler_lieu`). À comparer aux `zones` des entrées effectives."""
+    out = set()
+    for p in placements or []:
+        if p.get("zone"):
+            out.add(p["zone"])
+        if p.get("_cle"):
+            out.add(p["_cle"])
+    return out
+
+
+def placement_couvre(placement: dict, cles: set) -> bool:
+    """Le placement correspond-il à l'une de ces clés (sa zone, ou sa clé propre) ?"""
+    return bool(cles_actives([placement]) & set(cles or ()))
+
+
+def index_regions(regles: dict | None) -> dict:
+    """`{lieu_id: region}` depuis `rules:regions` (`{"regions": {id: {nom, lieux:[...]}}}`).
+    Un lieu listé dans deux régions garde la PREMIÈRE (ordre du doc)."""
+    out: dict = {}
+    for rid, reg in ((regles or {}).get("regions") or {}).items():
+        for lid in (reg or {}).get("lieux") or []:
+            out.setdefault(lid, rid)
+    return out
+
+
+def region_de(lieu: dict | None, regles: dict | None, get_doc_fn=None, profondeur: int = 4) -> str | None:
+    """Région d'un lieu : celle où `rules:regions` le liste, sinon celle de son `lieu_parent`
+    (remonté jusqu'à `profondeur` crans si `get_doc_fn` est fourni), sinon None."""
+    idx = index_regions(regles)
+    courant = lieu
+    for _ in range(profondeur + 1):
+        if not courant:
+            return None
+        rid = idx.get(courant.get("_id"))
+        if rid:
+            return rid
+        parent = courant.get("lieu_parent")
+        if not parent or not get_doc_fn or parent == courant.get("_id"):
+            return None
+        courant = get_doc_fn(parent)
+    return None
+
+
+def _defaut_vaut_ici(entree: dict, region: str | None) -> bool:
+    regions = [r for r in (entree.get("regions") or []) if r]
+    return not regions or (region is not None and region in regions)
+
+
+def _exclu(exclusions: list, cle: str, ident: str, zone_id: str) -> bool:
+    for e in exclusions or []:
+        if e.get(cle) != ident:
+            continue
+        zones = e.get("zones") or []
+        if not zones or zone_id in zones:
+            return True
+    return False
+
+
+def contenu_detaille(lieu: dict | None, zone_defs: dict, region: str | None) -> dict:
+    """Contenu d'un lieu ligne par ligne, AVEC sa provenance — la lecture de l'aperçu de
+    /admin/zones et la source de `contenu_effectif`. Pur.
+
+    `{"rencontres": [ligne], "ressources": [ligne]}`, ligne = `{id, zone (clé de
+    localisation, None = tout le lieu), source: "lieu"|"defaut"|"placement", exclu: bool,
+    regions}`. Les défauts ne valent que pour les zones POSÉES sur le lieu ; une exclusion ne
+    retire qu'un défaut (le contenu écrit du lieu ou d'un placement n'est jamais exclu)."""
+    lieu = lieu or {}
+    placements = lieu.get("zone_influences") or []
+    sans_defauts = TAG_SANS_DEFAUTS in (lieu.get("tags") or [])
+    exclusions = lieu.get("exclusions") or []
+    zones_posees = []
+    for p in placements:
+        z = p.get("zone")
+        if z and z not in zones_posees:
+            zones_posees.append(z)
+    out = {}
+    for champ, cle, champ_defaut in CHAMPS_CONTENU:
+        lignes = []
+        for e in lieu.get(champ) or []:
+            ident = e.get(cle)
+            if not ident:
+                continue
+            zones = e.get("zones") if "zones" in e else None
+            for z in (zones if zones is not None else [None]):
+                lignes.append({"id": ident, "zone": z, "source": "lieu", "exclu": False, "regions": []})
+        if not sans_defauts:
+            for z in zones_posees:
+                for d in ((zone_defs or {}).get(z) or {}).get(champ_defaut) or []:
+                    ident = d.get(cle)
+                    if not ident or not _defaut_vaut_ici(d, region):
+                        continue
+                    lignes.append({"id": ident, "zone": z, "source": "defaut",
+                                   "exclu": _exclu(exclusions, cle, ident, z),
+                                   "regions": list(d.get("regions") or [])})
+        for i, p in enumerate(placements):
+            if not p.get("zone"):
+                continue
+            for ident in p.get(champ) or []:
+                if ident:
+                    lignes.append({"id": ident, "zone": cle_placement(p["zone"], i),
+                                   "source": "placement", "exclu": False, "regions": []})
+        out[champ] = lignes
+    return out
+
+
+def contenu_effectif(lieu: dict | None, zone_defs: dict, region: str | None) -> dict:
+    """`{"rencontres": [...], "ressources": [...]}` dans la forme historique du lieu : les
+    entrées écrites du lieu d'abord, INTACTES (même ordre, même forme — une entrée sans `zones`
+    reste « tout le lieu »), puis une entrée `{cle: id, zones: [...]}` par id apporté par les
+    défauts non exclus et les placements, dans l'ordre d'apparition. Pur."""
+    lieu = lieu or {}
+    detail = contenu_detaille(lieu, zone_defs, region)
+    out = {}
+    for champ, cle, _ in CHAMPS_CONTENU:
+        entrees = [dict(e) for e in lieu.get(champ) or [] if e.get(cle)]
+        ajouts: dict = {}
+        for ligne in detail[champ]:
+            if ligne["source"] == "lieu" or ligne["exclu"]:
+                continue
+            zones = ajouts.setdefault(ligne["id"], [])
+            if ligne["zone"] not in zones:
+                zones.append(ligne["zone"])
+        entrees += [{cle: ident, "zones": zones} for ident, zones in ajouts.items()]
+        out[champ] = entrees
+    return out
+
+
+def peupler_lieu(lieu: dict | None, get_doc_fn) -> dict | None:
+    """COPIE du lieu avec son contenu EFFECTIF (défauts des zones posées, filtrés par région,
+    + compléments du lieu + contenu des placements − exclusions). Idempotent (`_peuple`), ne
+    mute jamais le doc reçu (souvent en cache). Lieu sans placement : rendu tel quel.
+    `get_doc_fn` lit les zone-defs et `rules:regions` (contenu caché par process)."""
+    if not lieu or lieu.get("_peuple"):
+        return lieu
+    placements = lieu.get("zone_influences") or []
+    if not placements:
+        return lieu
+    zone_defs = load_zone_defs_for_lieu(lieu, get_doc_fn)
+    region = region_de(lieu, get_doc_fn(REGLES_REGIONS), get_doc_fn)
+    eff = contenu_effectif(lieu, zone_defs, region)
+    copie = dict(lieu)
+    copie["zone_influences"] = [
+        dict(p, _cle=cle_placement(p["zone"], i))
+        if p.get("zone") and (p.get("rencontres") or p.get("ressources")) else p
+        for i, p in enumerate(placements)
+    ]
+    copie["rencontres"] = eff["rencontres"]
+    copie["ressources"] = eff["ressources"]
+    copie["_peuple"] = True
+    return copie
+
+
+# ── Édition (/admin/zones, /admin/editor) : normalisation et aperçu, purs ────────
+
+def _ids(raw, prefixe: str) -> list:
+    """Ids distincts (ordre gardé) d'une liste brute, réduits à ceux qui commencent par `prefixe`."""
+    out = []
+    for v in raw if isinstance(raw, list) else []:
+        v = str(v or "").strip()
+        if v.startswith(prefixe) and v not in out:
+            out.append(v)
+    return out
+
+
+def normaliser_defauts(raw, cle: str) -> list:
+    """`[{cle: id, regions?}]` propre : ids `espece:` / `item:` seuls, dédoublonnés (le premier
+    gagne), `regions` = liste d'ids non vides (absente si vide). Lève ValueError sur un id invalide."""
+    prefixe = "espece:" if cle == "espece" else "item:"
+    out, vus = [], set()
+    for e in raw if isinstance(raw, list) else []:
+        ident = str((e or {}).get(cle) or "").strip() if isinstance(e, dict) else ""
+        if not ident.startswith(prefixe):
+            raise ValueError(f"{cle} invalide : {ident or '(vide)'}")
+        if ident in vus:
+            continue
+        vus.add(ident)
+        entree = {cle: ident}
+        regions = [str(r).strip() for r in (e.get("regions") or []) if str(r or "").strip()]
+        if regions:
+            entree["regions"] = list(dict.fromkeys(regions))
+        out.append(entree)
+    return out
+
+
+def normaliser_contenu_placement(p: dict) -> dict:
+    """Placement à écrire : `rencontres` / `ressources` propres (listes d'ids, retirées si vides)
+    et JAMAIS de `_cle` (clé de lecture posée par `peupler_lieu`). Mute et renvoie `p`."""
+    p.pop("_cle", None)
+    for champ, cle, _ in CHAMPS_CONTENU:
+        ids = _ids(p.get(champ), "espece:" if cle == "espece" else "item:")
+        if ids:
+            p[champ] = ids
+        else:
+            p.pop(champ, None)
+    return p
+
+
+def normaliser_exclusions(raw) -> list:
+    """`[{espece|ressource: id, zones?: [...]}]` propre ; une entrée sans id valide est écartée."""
+    out = []
+    for e in raw if isinstance(raw, list) else []:
+        if not isinstance(e, dict):
+            continue
+        for _, cle, _ in CHAMPS_CONTENU:
+            ident = str(e.get(cle) or "").strip()
+            if ident.startswith("espece:" if cle == "espece" else "item:"):
+                entree = {cle: ident}
+                zones = _ids(e.get("zones"), "zone:")
+                if zones:
+                    entree["zones"] = zones
+                out.append(entree)
+                break
+    return out
+
+
+def normaliser_regions(raw) -> dict:
+    """`{id: {nom, lieux}}` propre : id en minuscules `[a-z0-9_]`, lieux `lieu:*` distincts.
+    Lève ValueError sur un id de région invalide."""
+    import re
+    out = {}
+    for rid, reg in (raw or {}).items() if isinstance(raw, dict) else []:
+        rid = str(rid or "").strip()
+        if not re.fullmatch(r"[a-z0-9_]+", rid):
+            raise ValueError(f"id de région invalide : {rid or '(vide)'}")
+        reg = reg if isinstance(reg, dict) else {}
+        out[rid] = {"nom": str(reg.get("nom") or rid).strip()[:80],
+                    "lieux": _ids(reg.get("lieux"), "lieu:")}
+    return out
+
+
+def usage_des_zones(lieux: list) -> dict:
+    """`{zone_id: [{id, label, placements}]}` : quels lieux posent chaque zone, et combien de fois."""
+    out: dict = {}
+    for lieu in lieux or []:
+        compte: dict = {}
+        for p in lieu.get("zone_influences") or []:
+            if p.get("zone"):
+                compte[p["zone"]] = compte.get(p["zone"], 0) + 1
+        for z, n in compte.items():
+            out.setdefault(z, []).append({"id": lieu.get("_id"), "label": lieu.get("label") or lieu.get("nom") or lieu.get("_id"),
+                                          "placements": n})
+    return out
+
+
+def apercu_lieu(lieu: dict, zone_defs: dict, region: str | None) -> dict:
+    """Aperçu LECTURE SEULE du contenu d'un lieu, zone par zone (/admin/zones) : chaque ligne de
+    `contenu_detaille` rangée sous sa zone (le contenu d'un placement sous la zone du placement,
+    avec son index), le contenu « tout le lieu » à part. Ordre des zones = ordre de pose."""
+    detail = contenu_detaille(lieu, zone_defs, region)
+    placements = (lieu or {}).get("zone_influences") or []
+    ordre, blocs = [], {}
+    for p in placements:
+        z = p.get("zone")
+        if z and z not in blocs:
+            ordre.append(z)
+            blocs[z] = {"zone": z, "nom": ((zone_defs or {}).get(z) or {}).get("nom") or z,
+                        "placements": 0, "rencontres": [], "ressources": []}
+        if z:
+            blocs[z]["placements"] += 1
+    tout_le_lieu = {"rencontres": [], "ressources": []}
+    for champ in ("rencontres", "ressources"):
+        # `doublon` : défaut qui recopie une entrée déjà écrite par le lieu pour la même zone (sans
+        # effet — l'entrée du lieu pourrait être retirée, le défaut la couvre).
+        ecrits = {(l["id"], l["zone"]) for l in detail[champ] if l["source"] == "lieu"}
+        for ligne in detail[champ]:
+            z = ligne["zone"]
+            ligne = dict(ligne, placement=None,
+                         doublon=ligne["source"] == "defaut" and (ligne["id"], z) in ecrits)
+            if z is None:
+                tout_le_lieu[champ].append(ligne)
+                continue
+            base = zone_de_cle(z)
+            if base != z:
+                ligne["placement"] = int(z.split(SEP_PLACEMENT, 1)[1])
+            if base not in blocs:  # zone citée par le lieu mais posée nulle part
+                ordre.append(base)
+                blocs[base] = {"zone": base, "nom": ((zone_defs or {}).get(base) or {}).get("nom") or base,
+                               "placements": 0, "rencontres": [], "ressources": []}
+            blocs[base][champ].append(ligne)
+    return {"lieu": (lieu or {}).get("_id"), "region": region,
+            "sans_defauts": TAG_SANS_DEFAUTS in ((lieu or {}).get("tags") or []),
+            "zones": [blocs[z] for z in ordre], "tout_le_lieu": tout_le_lieu}

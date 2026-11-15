@@ -29,7 +29,7 @@ from utils import recrutement
 from utils import montures
 from utils import escorte
 from utils import traces
-from utils.zones import load_zone_defs_for_lieu
+from utils.zones import load_zone_defs_for_lieu, peupler_lieu
 from utils.lieux import connexions_du_lieu, get_lieu_links, ORIGINES_IMAGE_LIEU, TOWNS_IMAGES_PATH
 # Sens d'import : `routers/colonisation` → `routers/user`, jamais l'inverse.
 from routers.user import _inventory_payload
@@ -57,7 +57,9 @@ def _sauver(*docs) -> None:
 
 def lire_site(pays_doc: dict, position, reg: dict) -> dict:
 	"""Tout ce qui se lit sur la carte du pays autour d'une case : `{relies, zone_defs, fiche,
-	tags}`. Partagé avec `/play` (rattrapage)."""
+	tags}`. Partagé avec `/play` (rattrapage). Lu sur le contenu EFFECTIF du pays
+	(`zones.peupler_lieu` : défauts des zones compris), copie jamais sauvée."""
+	pays_doc = peupler_lieu(pays_doc, get_doc) or {}
 	relies = colonisation.lieux_relies(connexions_du_lieu(pays_doc.get("_id")), pays_doc.get("_id"), get_doc)
 	zone_defs = load_zone_defs_for_lieu(pays_doc, get_doc)
 	ids = {r.get("ressource") for r in pays_doc.get("ressources") or [] if r.get("ressource")}
@@ -274,7 +276,7 @@ async def fonder(current_user: Annotated[dict, Depends(get_current_user)], body:
 	if body.get("modele") not in proposes:
 		raise HTTPException(status_code=409, detail="Ce modèle n'est pas proposé pour ce site.")
 	modele = get_doc(body["modele"])
-	especes = colonisation.especes_du_site(pays_doc, position)
+	especes = colonisation.especes_du_site(peupler_lieu(pays_doc, get_doc), position)
 	imp = colonisation.creer_implantation(
 		character, pays_doc, position, modele, reg, nom=body.get("nom"),
 		espece=colonisation.random.choice(especes) if especes else None)

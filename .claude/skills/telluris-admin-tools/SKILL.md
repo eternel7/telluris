@@ -54,6 +54,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_lutecia.py` — zones d'influence de la capitale (urbain, Seine, faubourgs, campagne).
 - `gen_coherence_france.py` — ressources + espèces manquantes de `lieu:france` (+ `restriction_tags` magique).
 - `gen_grades_france.py` — profils de niveau 5-6 du lieu descendus vers `zone:tres_dangereuse`.
+- `gen_defauts_zones.py [--dump] [--sortie]` — amorçage du contenu par défaut des zones (`telluris-quetes-pnj` § Contenu par défaut) : `rules:regions` (table `REGIONS`, pays seuls ; ajouts d'une édition gardés) + `defauts_*` des zones DÉDUITS — ce que ≥ `SEUIL_LIEUX` (2) lieux rattachent déjà à la zone, restreint à leurs régions (un lieu sans région ⇒ partout). Lieux non modifiés ; défaut déjà présent gardé tel quel (retouche de `/admin/zones` jamais écrasée) ; DELTA seul → `jsons/defauts_zones_a_importer.json` (`tests/test_gen_defauts_zones.py`).
 - `gen_geants_mont_saint_michel.py` — zone de la baie (`zone:zone_danger_3`) sur `lieu:france` ; géant du Mont toujours Seigneur (bornes relues : géant ordinaire × `profil:seigneur`) ; sa massue de fer et sa tunique de barbes, non fabricables (exclues de `gen_recettes_orphelins.py`, posées aussi dans la table de `gen_equipement_humanoides.py`). Un seul fichier d'import : `jsons/geants_mont_saint_michel_a_importer.json`.
 - `gen_acces_donjon.py` — chaîne d'accès au donjon-mine.
 - `gen_relation_guilde.py` — `relation_lieu` : les 4 lieux du Bastion partagent une cote.

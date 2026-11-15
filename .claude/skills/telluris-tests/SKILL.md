@@ -56,6 +56,7 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_donjon_form_client` | section 🏰 du formulaire de lieu | fusion donjon/salle, changement ou retrait de donjon, `_id` neuf, porte gardée simple vs personnalisée, passages ; « ouvrir puis enregistrer » sans effet |
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |
 | `test_portes_client` | portes de rempart | ordre des nœuds (porte qui change de côté) ; 5 `_id` ; clés perdues |
+| `test_defauts_zones_client` | exclusions de défauts de zones (`admin_map_editor.html`, panneaux Rencontres/Ressources) | bascule qui retire ou rétablit un défaut dans une autre zone que celle cliquée ; « toutes zones » rouvert d'un coup |
 | `test_guilde_client` | maison de guilde | étape sautée ou maison dédoublée ; `relation_lieu` écrasé ou clés perdues des docs réécrits ; bureau avec `sous_categorie` |
 | `test_lot_lieux_client` | lot de lieux | N boutiques ⇒ un seul `link:*` ⇒ boutiques sans porte |
 | `test_gestion_lieux_client` | `/admin/lieux` + contrat `LIEUX_HOTE` | globale d'éditeur lue par la part (ReferenceError au clic sur l'autre page) ; clé de contrat absente ; lignes affichées envoyées aux outils ; 📍 hors région principale ; 🧾 d'une connexion hors liste |

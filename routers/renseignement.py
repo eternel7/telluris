@@ -14,6 +14,7 @@ from models import character_stats
 from utils import donjon as donjon_util
 from utils import expedition, fiche, focalisation, journal, marche, pouvoirs_objets, quetes, recrutement
 from utils import renseignement as rens
+from utils.zones import peupler_lieu
 from utils.auth import get_current_user
 from utils.characters import (
 	carried_weight, charge_max_of, credit_character, cuivre_to_purse, get_selected_character,
@@ -25,7 +26,7 @@ from routers.user import _inventory_payload
 renseignement_router = APIRouter()
 
 CHAMPS_LIEU = ["_id", "label", "nom", "lieu_parent", "categorie", "sous_categorie", "tags",
-			   "rencontres", "ressources", "stock_vente"]
+			   "rencontres", "ressources", "stock_vente", "zone_influences", "exclusions"]
 SUGGESTIONS_MAX = 12
 
 _RANGS: dict = {}
@@ -64,13 +65,15 @@ def _index_chaine(lieu_doc: dict) -> dict:
 	index, doc, vus = {}, lieu_doc, set()
 	while doc and doc.get("_id") and doc["_id"] not in vus:
 		vus.add(doc["_id"])
-		index[doc["_id"]] = doc
+		index[doc["_id"]] = peupler_lieu(doc, get_doc)
 		doc = get_doc(doc.get("lieu_parent")) if doc.get("lieu_parent") else None
 	return index
 
 
 def _index_complet() -> dict:
-	return {d["_id"]: d for d in (find_docs({"type": "lieu"}, fields=CHAMPS_LIEU) or []) if d.get("_id")}
+	"""Tous les lieux, PEUPLÉS (`zones.peupler_lieu`) : une piste se lit aussi sur les défauts des zones."""
+	return {d["_id"]: peupler_lieu(d, get_doc)
+			for d in (find_docs({"type": "lieu"}, fields=CHAMPS_LIEU) or []) if d.get("_id")}
 
 
 def _interlocuteurs(character: dict, lieu_doc: dict) -> dict:
@@ -97,7 +100,8 @@ def _contexte(character: dict, complet=True) -> dict:
 	"""Tout ce que lit une recherche : lieu, index, membres, méthodes exerçables ici.
 	`complet=False` : index réduit à la chaîne du lieu (bouton 🔎 de /play) ; `"auto"` : complet
 	seulement si un interlocuteur de guilde est là (ses sujets « du coin » balaient le pays)."""
-	lieu_doc = get_doc(character.get("lieu", "")) or {}
+	# PEUPLÉ (`zones.peupler_lieu`) : un lieu sauvage l'est aussi par les défauts de ses zones.
+	lieu_doc = peupler_lieu(get_doc(character.get("lieu", "")), get_doc) or {}
 	regles = rens.regles_de(get_doc)
 	_, erreurs = rens.methodes_de(regles)
 	for e in erreurs:

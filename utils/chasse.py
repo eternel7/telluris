@@ -43,7 +43,7 @@ import uuid
 from models import character_stats
 from utils.zones import (
 	load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
-	profils_compatibles,
+	profils_compatibles, peupler_lieu, placement_couvre,
 )
 from utils.characters import lieu_label, item_ref_id, item_ref_lieu
 from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID, porte_carte_valable, carte_valable_dans
@@ -80,17 +80,19 @@ def lieux_chasse_de(cite_id: str, get_doc_fn, find_docs_fn) -> list:
 	`position_de_chasse`, `_profils_compatibles` et `_construire_quete_rang` (`label`), plus
 	`image` (lieu de ville ⇒ grades plafonnés dans la menace de zone, `menace_zone`)."""
 	out = []
-	cite = get_doc_fn(cite_id) if cite_id else None
+	cite = peupler_lieu(get_doc_fn(cite_id), get_doc_fn) if cite_id else None
 	if cite is not None:
 		out.append(cite)
 	enfants = (find_docs_fn(
 		{"type": "lieu", "lieu_parent": cite_id},
 		["_id", "type", "label", "nom", "rencontres", "zone_influences", "profil_weights", "dimensions",
-		 "image"],
+		 "image", "tags", "lieu_parent", "exclusions"],
 	) or []) if cite_id else []
 	for l in enfants:
 		if l.get("_id") == cite_id:
 			continue
+		# Contenu EFFECTIF (`zones.peupler_lieu`) : les défauts des zones font un gibier.
+		l = peupler_lieu(l, get_doc_fn)
 		if l.get("rencontres") and l.get("zone_influences"):
 			out.append(l)
 	return out
@@ -109,7 +111,8 @@ def pays_de_chasse(cite_doc: dict, get_doc_fn, find_docs_fn) -> list:
 
 
 def _zones_de_lespece(lieu_doc: dict, espece_id: str) -> set:
-	"""Ids de zones d'influence (`rencontres[].zones`) où l'espèce peut apparaître."""
+	"""Clés de localisation (`rencontres[].zones` d'un lieu PEUPLÉ : zones, ou `<zone>@<i>` d'un
+	placement à contenu propre) où l'espèce peut apparaître."""
 	return {
 		z for r in (lieu_doc or {}).get("rencontres", [])
 		if r.get("espece") == espece_id for z in (r.get("zones") or [])
@@ -204,7 +207,7 @@ def position_de_chasse(lieu_doc: dict, espece_doc: dict) -> dict | None:
 	if not zones_cibles:
 		return None
 	placements = [
-		p for p in lieu_doc.get("zone_influences", []) if p.get("zone") in zones_cibles
+		p for p in lieu_doc.get("zone_influences", []) if placement_couvre(p, zones_cibles)
 	]
 	if not placements:
 		return None
@@ -229,7 +232,7 @@ def _profils_compatibles(lieu_doc: dict, espece_doc: dict, position: dict | None
 	if not zones_cibles:
 		return []
 	placements = [
-		p for p in (lieu_doc or {}).get("zone_influences", []) if p.get("zone") in zones_cibles
+		p for p in (lieu_doc or {}).get("zone_influences", []) if placement_couvre(p, zones_cibles)
 	]
 	if position is not None:
 		zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc_fn)
