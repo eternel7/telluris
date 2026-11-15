@@ -124,7 +124,22 @@ PROFILS: dict[str, list] = {
 PROFIL_PAR_ESPECE: dict[str, str] = {
 	"araignee_geante": "arachnide",
 	"homme_arbre":     "humanoide",
+	# Oiseau coureur : ailes et deux pattes, mais pas le tag `vol`.
+	"autruches":       "aile",
 }
+
+
+# Tags d'espèce qui disent comment elle SE BAT (type d'IA, magie innée, flair) : ils n'ont aucun
+# sens sur un morceau de carcasse, et ont été ajoutés aux espèces après coup — les recopier
+# réécrivait toutes les portions à chaque relance (287 au dump du 15/11) pour rien.
+PREFIXES_TAGS_COMBAT = ("ia_", "magie_")
+TAGS_COMBAT = {"insensible_furtivite"}
+
+
+def tags_de_portion(tags_espece) -> set:
+	"""Tags de l'espèce qu'une portion hérite : tout sauf les tags de comportement en combat."""
+	return {t for t in (tags_espece or [])
+			if t not in TAGS_COMBAT and not str(t).startswith(PREFIXES_TAGS_COMBAT)}
 
 
 def seuil() -> float:
@@ -316,7 +331,8 @@ def generer(docs: list, filtres=()) -> tuple[list, list, list, list, list]:
 							   f"débité{'e' if part['genre'] == 'f' else ''} sur place.",
 				# Les tags de l'ESPÈCE suivent la portion (une aile de dragon reste
 				# draconique), plus un tag de partie pour filtrer et écrire des recettes.
-				"tags": sorted(set(espece.get("tags") or []) | {"partie_" + p["partie"]}),
+				# Tags de comportement en combat exclus (`tags_de_portion`).
+				"tags": sorted(tags_de_portion(espece.get("tags")) | {"partie_" + p["partie"]}),
 				"source_espece": espece["_id"],
 				"portion_de": carc["_id"],
 				"partie": p["partie"],
