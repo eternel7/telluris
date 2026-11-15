@@ -695,6 +695,9 @@
                 "negociant"
               ]
             },
+            "effets_poste": {
+              "achats_cite": true
+            },
             "description": "Un comptoir et des registres : un marchand y achète et revend pour votre compte."
           },
           {
@@ -1056,6 +1059,9 @@
                 "negociant"
               ]
             },
+            "effets_poste": {
+              "achats_cite": true
+            },
             "description": "Un bureau de négoce avec ses commis et ses registres : un marchand y achète et revend pour votre compte."
           },
           {
@@ -1150,6 +1156,9 @@
               "categories": [
                 "jardinier"
               ]
+            },
+            "effets_poste": {
+              "autoproduction": true
             },
             "description": "Allées, massifs et serre : un jardinier les entretient et vend plants et cueillettes."
           },
@@ -1520,6 +1529,9 @@
                 "jardinier"
               ]
             },
+            "effets_poste": {
+              "autoproduction": true
+            },
             "description": "Des carrés de légumes et d'herbes : un jardinier les cultive et vend ses récoltes."
           },
           {
@@ -1542,6 +1554,9 @@
               "categories": [
                 "jardinier"
               ]
+            },
+            "effets_poste": {
+              "autoproduction": true
             },
             "description": "Des rangs d'arbres fruitiers : un jardinier les soigne et vend ses fruits."
           },
@@ -1633,6 +1648,121 @@
               }
             },
             "description": "Des terres closes autour du domaine : chaque jour, de quoi récolter."
+          },
+          {
+            "id": "salle_commis",
+            "nom": "Salle des commis",
+            "categorie": "gestion",
+            "types_autorises": [
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "commis": 1
+              }
+            },
+            "effets_poste": {
+              "prospection": 2
+            },
+            "description": "Un pupitre, des tablettes de cire et la liste des échoppes de la cité : le commis en part chaque matin et revient avec les prix du jour."
+          },
+          {
+            "id": "remise_charrette",
+            "nom": "Remise à charrette",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "charretier": 1
+              }
+            },
+            "effets_poste": {
+              "portage_kg": 200
+            },
+            "description": "Un appentis, une charrette et son harnais : les marchandises cessent de partir à dos d'homme."
+          },
+          {
+            "id": "cabinet_comptes",
+            "nom": "Cabinet des comptes",
+            "categorie": "gestion",
+            "types_autorises": [
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 2000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "teneur_livres": 1
+              }
+            },
+            "effets_poste": {
+              "remise_achat": 0.1,
+              "caisse_facteur": 2
+            },
+            "description": "Une petite pièce fermée, des registres reliés et une balance à monnaie : chaque pièce de cuivre y a sa ligne."
+          },
+          {
+            "id": "etal_rue",
+            "nom": "Étal sur rue",
+            "categorie": "activite",
+            "types_autorises": [
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 1500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "crieur": 1
+              }
+            },
+            "effets_poste": {
+              "crieur": {
+                "unites": 2
+              }
+            },
+            "description": "Une planche sur deux tréteaux, contre le mur qui donne sur la rue : ce qui encombre les rayons y trouve un acheteur de passage."
+          },
+          {
+            "id": "mur_trophees",
+            "nom": "Mur des trophées",
+            "categorie": "vie",
+            "types_autorises": [
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 3000,
+            "prerequis": [],
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 25,
+                "icon": "🏆",
+                "nom": "Fierté du chasseur",
+                "buffs": {
+                  "Cha": 3,
+                  "Vol": 2
+                },
+                "requiert_trophee": true
+              }
+            },
+            "description": "Un panneau de chêne pour exposer une tête naturalisée. Rangée au coffre, la pièce y est accrochée : au réveil, on passe devant."
           }
         ],
         "metiers": [
@@ -1712,15 +1842,34 @@
             "label": "Bibliothécaire",
             "cout_embauche_cuivre": 600,
             "description": "Tient la bibliothèque : on peut y écrire comme au scriptorium."
+          },
+          {
+            "id": "commis",
+            "label": "Commis",
+            "cout_embauche_cuivre": 600,
+            "description": "Court les boutiques de la cité, compare les prix et rapporte les meilleures offres."
+          },
+          {
+            "id": "charretier",
+            "label": "Charretier",
+            "cout_embauche_cuivre": 500,
+            "description": "Mène la charrette du bien : ce qui part vers la cité ou en revient voyage par lui."
+          },
+          {
+            "id": "teneur_livres",
+            "label": "Teneur de livres",
+            "cout_embauche_cuivre": 1200,
+            "description": "Tient les comptes des ateliers : il achète au plus juste et garde une caisse plus grande."
+          },
+          {
+            "id": "crieur",
+            "label": "Crieur",
+            "cout_embauche_cuivre": 200,
+            "description": "Vend à la porte, aux passants, ce que nulle boutique n'a voulu prendre."
           }
         ],
         "reglages": {
           "candidats_duree_s": 86400,
-          "vente_auto": {
-            "proba": 0.5,
-            "fraction": 0.34,
-            "reserve": 1
-          },
           "prix_achat": {
             "rayon": 4,
             "bonus": {
@@ -1730,6 +1879,53 @@
             },
             "plafond_voisinage": 1.5,
             "multiplicateur_occupation": 2
+          },
+          "echanges": {
+            "periode_s": 3600,
+            "alea": 0.5,
+            "rattrapage_max_s": 172800,
+            "proba_vente": 0.5,
+            "reserve": 1,
+            "seuil_refus": 1.0,
+            "decote_sans_negociant": 0.2,
+            "prospection_base": 3,
+            "portage_kg": 20,
+            "achat_cible": 5,
+            "caisse_max_cuivre": {
+              "logement": 5000,
+              "maison": 20000,
+              "demeure": 60000,
+              "domaine": 200000
+            },
+            "journal_max": 20
+          },
+          "negociant": {
+            "seuils_xp": [
+              0,
+              500,
+              2000,
+              6000,
+              15000
+            ],
+            "bonus_prix": [
+              0.0,
+              0.05,
+              0.1,
+              0.15,
+              0.2
+            ],
+            "prospection": [
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "xp_par_cuivre": 0.1,
+            "seance_part": 0.25,
+            "seance_delai_s": 86400,
+            "formation_cout_par_xp": 2,
+            "vocation_livres": "lettre"
           }
         }
       }
