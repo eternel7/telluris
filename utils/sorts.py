@@ -1359,15 +1359,39 @@ def sorts_eligibles_espece(espece: dict, get_doc, find_docs, profil_id=None) -> 
 		return []
 	out = []
 	for doc in find_docs({"type": "sort"}) or []:
-		sort = normaliser_sort(doc)
-		if not sort:
-			continue
-		ecole = slug_ecole(magie_de_sort(sort, None))
-		if not ecole or ecole not in magies:
+		sort, ecole = _vue_sort_memo(doc, slug_ecole)
+		if not sort or not ecole or ecole not in magies:
 			continue
 		if sort["niveau"] <= magies[ecole]:
-			out.append(sort)
+			# Copie : la vue mémorisée est partagée entre tous les appelants.
+			out.append(dict(sort))
 	return out
+
+
+# Vues normalisées des `sort:*` mémorisées par (_id, _rev), avec le slug de leur école.
+# `sorts_eligibles_espece` balaie TOUS les sorts du monde à chaque appel (chaque spécimen,
+# chaque potentiel d'espèce de /admin/table) : sans ce cache, `normaliser_sort` dominait
+# l'endpoint des potentiels (~100 000 appels pour 200 espèces). `normaliser_sort` ne lit que
+# le doc et des constantes de module ; une révision CouchDB est immuable ⇒ jamais périmé.
+# Un doc sans `_rev` (test, doc construit en mémoire) n'est pas mémorisé.
+_VUES_SORT: dict = {}
+_VUES_SORT_MAX = 4096
+
+
+def _vue_sort_memo(doc, slug_ecole) -> tuple:
+	"""`(vue, slug d'école)` d'un doc sort — ⚠️ vue PARTAGÉE : la copier avant de la muter."""
+	cle = ((doc or {}).get("_id"), (doc or {}).get("_rev"))
+	if not cle[0] or not cle[1]:
+		vue = normaliser_sort(doc)
+		return vue, (slug_ecole(magie_de_sort(vue, None)) if vue else None)
+	hit = _VUES_SORT.get(cle)
+	if hit is None:
+		vue = normaliser_sort(doc)
+		hit = (vue, slug_ecole(magie_de_sort(vue, None)) if vue else None)
+		if len(_VUES_SORT) >= _VUES_SORT_MAX:
+			_VUES_SORT.clear()
+		_VUES_SORT[cle] = hit
+	return hit
 
 
 def sort_de_depart_valide(sort: dict | None, voc, rules_vocations) -> bool:
