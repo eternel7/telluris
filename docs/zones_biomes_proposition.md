@@ -108,3 +108,12 @@ région dans l'amorçage du 15/11) passe sans région sur `fleuve_tropical`, et 
   griffon…) sont des suggestions de placement, absentes des défauts générés (verrouillé par
   `tests/test_gen_zones_biomes.py`, tags de mythe interdits).
 - Le filtre `regions` reste en réserve ; aucun amorçage n'en écrit plus (`gen_defauts_zones` compris).
+
+## 8. Révision (Auteur, 15/11) — défauts de toutes les zones naturelles
+
+- Lève deux règles du §7 pour `dev/gen_defauts_zones_biomes.py` : les monstres **communs** (gobelin, orc,
+  troll, goule, oréade…) peuvent être des défauts — jamais un légendaire, un boss, une créature nommée,
+  un ange ni un démon ; le filtre `regions` sert à la faune **typée** d'une zone partagée par plusieurs
+  continents (loup, cerf → europe ; hyènes, fauves → afrique…).
+- `gen_zones_biomes.py` garde sa propre règle (faune ordinaire, sans `regions`), verrouillée par son test.
+- Zones de cité, zones habitables et calques de danger : aucun défaut.
