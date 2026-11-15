@@ -84,8 +84,13 @@ vm.runInThisContext([
 	'const LIGNES_PORTRAIT = ' + LIGNES + ';',
 	'const PROFONDEUR_PORTRAIT = ' + PROFONDEUR + ';',
 	'let VUE_PORTRAIT = false;',
+	'const MAX_H = ' + MAX_H + ';', 'const FLOOR = ' + FLOOR + ';',
+	// Une colonne : la colonne centrale est mesurée (le budget deux colonnes lit la grille, hors modèle).
+	'function _deuxColonnes() { return false; }',
+	(js.match(/^const PAS_MIN_HAUTEUR = \d+;/m) || [''])[0],
 	extraireLet('_vueResolue'), extraireLet('_stepApplique'), extraireLet('_vueAppliquee'),
-	extraire('tailleVue'), extraire('tailleVuePortrait'), extraire('_tailleCourante'),
+	extraireLet('_plafondMesure'),
+	extraire('tailleVue'), extraire('plafondHauteur'), extraire('tailleVuePortrait'), extraire('_tailleCourante'),
 	extraire('_largeurVue'), extraire('_appliquerVue'),
 	extraire('syncViewSize'), extraire('_surRedimensionnement'),
 ].join('\n'), { filename: 'combat_telluris.html:syncViewSize' });
@@ -96,6 +101,7 @@ function page(opts) {
 						   barre: 17, colonneMasquee: false, portrait: false },
 				  opts || {});
 	vm.runInThisContext('_vueResolue = null; _stepApplique = null; _vueAppliquee = null;'
+		+ ' _plafondMesure = ' + (monde.plafond || null) + ';'
 		+ ' VUE_PORTRAIT = ' + !!monde.portrait + ';');
 	ROOT.vars = {};
 	ROOT.ecritures = 0;
@@ -194,6 +200,43 @@ t('colonne momentanément à 0 px : l’échelle en place est gardée, rien n’
 	const ecritures = ROOT.ecritures;
 	monde.colonneMasquee = true;
 	assert.deepStrictEqual(syncViewSize(), r1);
+	assert.strictEqual(ROOT.ecritures, ecritures);
+});
+
+console.log('\n── Grand écran : pas borné par la HAUTEUR (plafondHauteur) ─────────────────');
+
+const PAS_MIN = Number((js.match(/^const PAS_MIN_HAUTEUR = (\d+);/m) || [])[1]);
+const RANGEES = MAX_H - 1 + FLOOR;
+t('plafondHauteur : la carte tient dans la hauteur donnée, jamais sous le plancher', () => {
+	assert.ok(PAS_MIN > 8, 'const PAS_MIN_HAUTEUR introuvable dans le template');
+	for (let h = 0; h <= 2000; h++) {
+		const p = plafondHauteur(h);
+		assert.ok(Number.isInteger(p) && p >= PAS_MIN, 'h=' + h);
+		if (p > PAS_MIN) {
+			assert.ok(p * RANGEES <= h, 'déborde : h=' + h);
+			assert.ok((p + 1) * RANGEES > h, 'hauteur non remplie : h=' + h);
+		}
+	}
+});
+
+t('tailleVue avec plafond : le plus petit des deux budgets, sans plafond = la largeur seule', () => {
+	for (let w = 170; w <= 3000; w += 7) {
+		const libre = tailleVue(w);
+		assert.deepStrictEqual(tailleVue(w, null), libre, 'w=' + w);
+		[40, 60, 90].forEach(p => {
+			const r = tailleVue(w, p);
+			assert.strictEqual(r.step, Math.min(libre.step, p), `w=${w} p=${p}`);
+			assert.strictEqual(r.viewWidth, r.step * 17);
+		});
+	}
+});
+
+t('syncViewSize avec plafond : idempotente, le plafond l’emporte sur une colonne large', () => {
+	page({ largeur: 1900, hauteur: 2000, plafond: 60 });
+	const r1 = syncViewSize();
+	assert.strictEqual(r1.step, 60);
+	const ecritures = ROOT.ecritures;
+	for (let i = 0; i < 5; i++) assert.deepStrictEqual(syncViewSize(), r1);
 	assert.strictEqual(ROOT.ecritures, ecritures);
 });
 

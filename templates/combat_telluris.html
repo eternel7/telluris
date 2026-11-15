@@ -146,7 +146,7 @@ html.vue-portrait .viewport {
 }
 /* Barres du bas (barre d'action + bandeau de tour) FIXÉES et FLOTTANTES en bas de la fenêtre :
    la carte dépasse l'écran, les deux barres restent à portée. Hors portrait, `.barres-bas` est
-   transparent (`display: contents`) : ses deux enfants restent des items de `.combat-center`.
+   UN SEUL panneau (cf. « barre FUSIONNÉE » plus bas).
    Le vide de leur hauteur (--barre-h, mesurée par _syncBarreFixe sur `.barres-bas`) est rendu
    au pied de la page, pour que le défilement amène tout le reste AU-DESSUS d'elles. Sous le pavé
    (z-index 100) et les overlays de fin. `column-reverse` : le bandeau de tour AU-DESSUS, la barre
@@ -166,6 +166,69 @@ html.vue-portrait .barres-bas > .tour-header {
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 html.vue-portrait .barres-bas > .tour-header { padding: 2px 10px; }
+/* Hors portrait (grand écran) : barre d'action et bandeau de tour FUSIONNÉS en un seul panneau,
+   à la LARGEUR de la carte (`--view-width`, borné par la colonne avant le 1er syncViewSize, où
+   il vaut encore 100vw) et COLLÉ sous elle : −18 px = la marge basse du viewport (10) + le gap
+   de `.combat-center` (8) ; coins de la jointure carrés, la carte et la barre font un seul bloc.
+   La barre d'action en tête, le bandeau de tour dessous (ordre du DOM), un filet entre les
+   deux ; les deux enfants perdent leur propre cadre. Pas en portrait : ~360 px de large, cases
+   et bandeau ne tiennent pas côte à côte — la fusion n'y gagnerait rien sur deux barres déjà
+   empilées. */
+html:not(.vue-portrait) .viewport { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+html:not(.vue-portrait).pave-carte .viewport { clip-path: inset(0 round 10px 10px 0 0); }
+html:not(.vue-portrait) .barres-bas {
+	display: flex; flex-direction: column;
+	width: min(var(--view-width), calc(100% - 20px));
+	margin: -18px 10px 0;
+	background: var(--panel-bg);
+	border: 1.5px solid var(--border-color); border-top: none;
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+	border-radius: 0 0 10px 10px;
+}
+html:not(.vue-portrait) .barres-bas > .action-bar,
+html:not(.vue-portrait) .barres-bas > .tour-header {
+	margin: 0; background: none; border: none; box-shadow: none; border-radius: 0;
+}
+html:not(.vue-portrait) .barres-bas > .tour-header {
+	padding: 0 10px;
+	border-top: 1px solid rgba(74, 74, 90, 0.7);
+}
+/* Second sablier « Passer le tour » : à l'EXTRÊME DROITE de la rangée des cases, détaché d'elles
+   (marge gauche) pour ne jamais passer pour un sort de plus. Grand écran seulement : en
+   portrait, celui du bandeau reste seul. */
+.passer-barre { display: none; }
+html:not(.vue-portrait) .action-bar {
+	grid-template-columns: auto 1fr auto;
+	grid-template-areas:
+		"gear grid passer"
+		"editrow editrow editrow"
+		"targetrow targetrow targetrow";
+}
+/* ⚙ et sablier CENTRÉS verticalement sur la rangée des cases (la barre cale sinon tout en bas,
+   `align-items: end`, que la rangée d'édition et le ciblage gardent). */
+html:not(.vue-portrait) #btn-slots-edit,
+html:not(.vue-portrait) .passer-barre { align-self: center; }
+html:not(.vue-portrait) .passer-barre {
+	grid-area: passer; justify-self: end;
+	display: flex; align-items: center; justify-content: center;
+	width: 42px; height: 42px; margin: 5px 8px 5px 20px; padding: 0;
+	border-radius: 50%; cursor: pointer;
+	background: #2a2a36; border: 1.5px solid var(--border-color);
+	-webkit-tap-highlight-color: transparent;
+}
+html:not(.vue-portrait) .passer-barre:hover:not(:disabled) { border-color: var(--accent-color); }
+/* ⚙ à l'image du sablier : même rond de 42 px, même fond et bordure, et marge GAUCHE égale à
+   la marge droite du sablier (8 px) — les deux boutons encadrent les cases symétriquement. */
+html:not(.vue-portrait) #btn-slots-edit {
+	display: flex; align-items: center; justify-content: center;
+	width: 42px; height: 42px; margin: 5px 20px 5px 8px; padding: 0;
+	border-radius: 50%; font-size: 20px; line-height: 1; color: var(--muted);
+	background: #2a2a36; border: 1.5px solid var(--border-color);
+}
+html:not(.vue-portrait) #btn-slots-edit:hover:not(:disabled) { background: #2a2a36; border-color: var(--accent-color); }
+html:not(.vue-portrait) #btn-slots-edit:active:not(:disabled) { transform: none; }
+html:not(.vue-portrait) .passer-barre:disabled { opacity: 0.35; cursor: default; }
+.passer-barre > svg { width: 22px; height: 22px; }
 /* Fond SEMI-TRANSPARENT en portrait : la carte reste lisible sous les barres flottantes. */
 html.vue-portrait .barres-bas > .action-bar,
 html.vue-portrait .barres-bas > .tour-header { background: rgba(44, 44, 56, 0.55); }
@@ -734,17 +797,40 @@ html.vue-portrait #move-controls { transform: rotate(90deg); }
 	/* ⚠️ Colonne ennemis à largeur FIXE (280 px + 2 × 10 px de marge) et non `auto` : en
 	   `auto`, chaque texte qui change (portrait de l'ennemi, journal) redimensionnait sa
 	   colonne — et avec elle le centre, donc la carte, qui sautait à chaque tour. */
+	/* Depuis la carte bornée en HAUTEUR (aucun défilement, cf. `_recalerHauteur`) : la colonne
+	   centrale épouse la carte (`max-content` = --view-width + marge gauche, aucune autre
+	   contribution — carte et barre ont une largeur explicite) et les ennemis prennent TOUT le
+	   reste, `--col-ennemis` au moins. ⚠️ Toujours aucune dépendance au contenu : le minimum est
+	   explicite, le journal est en `contain: size`. `--col-ennemis` est RELU par `_largeurVue`. */
 	.combat-layout {
-		grid-template-columns: minmax(0, 1fr) 300px;
+		--col-ennemis: 300px;
+		grid-template-columns: max-content minmax(var(--col-ennemis), 1fr);
 		grid-template-areas: "center ennemis";
 	}
-	.enemy-panel {
-		max-width: 280px;
-	}
+	html:not(.vue-portrait) .barres-bas { width: var(--view-width); }
 	/* Le panneau ennemi s'étire sur la hauteur de la ligne (fixée par la carte) ; sous le
 	   portrait, le journal prend tout le reste. */
 	.enemy-panel { align-self: stretch; }
 	.enemy-panel > .combat-log { flex: 1 1 0; min-height: 120px; }
+	/* Panneau ennemi COLLÉ à la carte et descendu jusqu'au bas de la barre fusionnée : carte et
+	   barre sont calées à DROITE de leur colonne (le reliquat de largeur, < 2 cases, passe à
+	   gauche), plus de gap entre colonnes ni de marge entre eux ; marge basse nulle — le bas du
+	   centre EST celui de la barre (cf. `.barres-bas`, marge −18 px), le haut reste aligné (10 px
+	   des deux côtés). */
+	.combat-layout { column-gap: 0; }
+	html:not(.vue-portrait) .viewport,
+	html:not(.vue-portrait) .barres-bas { align-self: flex-end; margin-right: 0; }
+	.combat-layout > .enemy-panel { margin-left: 0; margin-bottom: 0; }
+	/* UN SEUL arrondi pour l'ensemble carte + barre + portrait + journal : chaque bloc ne garde
+	   que le coin qui est un coin du tout. Portrait et journal collés (plus de gap), et les
+	   bordures en contact ne sont tracées qu'une fois (celle de la carte / de la barre à gauche,
+	   celle du portrait au-dessus du journal). */
+	html:not(.vue-portrait) .viewport { border-radius: 10px 0 0 0; }
+	html:not(.vue-portrait).pave-carte .viewport { clip-path: inset(0 round 10px 0 0 0); }
+	html:not(.vue-portrait) .barres-bas { border-radius: 0 0 0 10px; }
+	.combat-layout > .enemy-panel { gap: 0; }
+	.combat-layout > .enemy-panel > .enemy-portrait-wrap { border-radius: 0 10px 0 0; border-left: none; }
+	.combat-layout > .enemy-panel > .combat-log { border-radius: 0 0 10px 0; border-left: none; border-top: none; }
 }
 .combat-center  { grid-area: center; }
 .enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; margin: 10px; align-items: center;}
@@ -1037,7 +1123,8 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
    un bord ou un coin, mêmes règles que `.viewport .controls-carte` de play_town. Les flèches
    du bord ARRIÈRE (reculer, deux pivots) se centrent sur la rangée derrière le joueur
    (`--floor`) : elles ne recouvrent plus son jeton. Le centre (`.move-spacer`) est masqué ;
-   « Passer le tour » vit dans le bandeau, à côté du numéro de tour.
+   « Passer le tour » vit dans le bandeau, à côté du numéro de tour (et, en grand écran, en
+   double au bout de la barre d'action — `.passer-barre`).
    ⚠️ Calque `pointer-events:none` : les jetons dessous restent cliquables, seuls les boutons
    rétablissent le clic. */
 .viewport .controls-carte {
@@ -1084,7 +1171,14 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
    neuf boutons restent à portée comme les barres. Le `clip-path` du viewport le rogne à la
    carte (un `overflow` ne coupe pas un descendant fixe) : en défilant jusqu'au journal, les
    flèches s'en vont avec elle. */
-html.vue-portrait.pave-carte .viewport { clip-path: inset(0 round 10px); }
+html.pave-carte .viewport { clip-path: inset(0 round 10px); }
+/* Grand écran : même calque FIXÉ, posé par `_caleFlechesCarte` sur la partie visible de la carte
+   — en défilant vers la barre d'action, les flèches restent à l'écran. */
+html:not(.vue-portrait) #move-controls.controls-carte {
+	position: fixed; inset: auto;
+	top: var(--pave-haut, 0px); bottom: var(--pave-plancher, 0px);
+	left: var(--pave-gauche, 0px); width: var(--pave-largeur, 100%);
+}
 /* ⚠️ Sélecteur à id : il doit battre le `rotate(90deg)` du pavé flottant (même id). */
 html.vue-portrait #move-controls.controls-carte {
 	position: fixed; inset: auto;
@@ -1537,13 +1631,16 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 				<select id="target-select"></select>
 				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
 			</div>
+			<!-- Second « Passer le tour » (grand écran seulement, cf. `.passer-barre`) : même action
+			     que le sablier du bandeau ; les deux portent `.btn-passer` (activation commune). -->
+			<button type="button" class="btn-passer passer-barre" id="btn-passer-barre" onclick="doAction('passer', null)" title="Passer le tour" aria-label="Passer le tour">{{ movepanel.sablier() }}</button>
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
 			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><!-- Sablier « Passer le tour » : DANS le libellé, collé au numéro de tour, dans
 			     les DEUX modes du pavé — à part, il se lisait comme un badge de plus du bandeau
 			     d'initiative ; le pavé, lui, garde une case vide au centre.
-			--><span class="passer-tour"><button class="btn center" id="btn-passer" onclick="doAction('passer', null)" title="Passer le tour">{{ movepanel.sablier() }}</button></span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
+			--><span class="passer-tour"><button class="btn center btn-passer" id="btn-passer" onclick="doAction('passer', null)" title="Passer le tour">{{ movepanel.sablier() }}</button></span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -1851,9 +1948,20 @@ document.documentElement.style.setProperty('--floor', FLOOR);
 //   • les largeurs ainsi résolues sont MÉMORISÉES avec leur pas (`_vueResolue`) : les re-mesurer
 //     ne recalcule rien, seule une largeur inédite (vrai redimensionnement) relance le calcul.
 // Verrouillé par dev/test_vue_combat_client.js.
-function tailleVue(largeur) {
-	const step = Math.max(8, Math.floor(largeur / 17) - 1);
+//
+// GRAND ÉCRAN (deux colonnes, ≥ 1280 px) : le pas est AUSSI borné par la hauteur de fenêtre
+// (`plafond`, cf. `_recalerHauteur`) pour que carte + barre tiennent sans défilement — jamais
+// sous PAS_MIN_HAUTEUR : une fenêtre trop basse redéfile plutôt que de rendre des jetons
+// minuscules. La largeur libérée passe au panneau ennemi (grille `max-content | 1fr`).
+const PAS_MIN_HAUTEUR = 40;
+function tailleVue(largeur, plafond) {
+	let step = Math.max(8, Math.floor(largeur / 17) - 1);
+	if (plafond) step = Math.max(8, Math.min(step, plafond));
 	return { step: step, viewWidth: step * 17 };
+}
+// Plus grand pas qui fait tenir la carte (MAX_H − 1 + FLOOR rangées) dans `hauteurDispo` px.
+function plafondHauteur(hauteurDispo) {
+	return Math.max(PAS_MIN_HAUTEUR, Math.floor(hauteurDispo / (MAX_H - 1 + FLOOR)));
 }
 
 // ── Vue PORTRAIT (mobile tenu debout) ─────────────────────────────
@@ -1887,7 +1995,7 @@ function tailleVuePortrait(largeur) {
 	return { step: step, viewWidth: step * PROFONDEUR_PORTRAIT };
 }
 function _tailleCourante(largeur) {
-	return VUE_PORTRAIT ? tailleVuePortrait(largeur) : tailleVue(largeur);
+	return VUE_PORTRAIT ? tailleVuePortrait(largeur) : tailleVue(largeur, _plafondMesure);
 }
 
 // Barres du bas FIXES (portrait : barre d'action + bandeau de tour, dans `#barres-bas`) : sorties
@@ -1908,9 +2016,51 @@ function _syncBarreFixe() {
 let _vueResolue = null;     // { largeurs: [px mesurés], step } — la dernière résolution
 let _stepApplique = null;   // le pas réellement écrit sur :root
 let _vueAppliquee = null;   // la largeur de carte réellement écrite (--view-width)
+let _plafondMesure = null;  // plafond du pas par la HAUTEUR (grand écran), cf. _recalerHauteur
+let _cleHauteur = null;     // taille de fenêtre du dernier _recalerHauteur
+const _mqDeuxColonnes = window.matchMedia ? window.matchMedia('(min-width: 1280px)') : null;
+function _deuxColonnes() {
+	return !VUE_PORTRAIT && !!(_mqDeuxColonnes && _mqDeuxColonnes.matches);
+}
+// Budget LARGEUR. Deux colonnes : la colonne centrale épouse la carte (`max-content`), la mesurer
+// serait circulaire — le budget est la grille moins le minimum des ennemis (`--col-ennemis`,
+// relu du CSS), soit l'ancienne colonne centrale : sans plafond, le même pas qu'avant.
 function _largeurVue() {
+	if (_deuxColonnes()) {
+		const grille = document.querySelector('.combat-layout');
+		const col = grille ? parseFloat(getComputedStyle(grille).getPropertyValue('--col-ennemis')) : NaN;
+		if (grille && col > 0) return Math.max(0, grille.clientWidth - col);
+	}
 	const center = document.querySelector('.combat-center');
 	return center ? center.clientWidth : window.innerWidth;
+}
+// Plafond du pas par la HAUTEUR : tout ce qui n'est pas la carte (au-dessus : marge ; dessous :
+// barre fusionnée, padding du body) est mesuré au pas COURANT, le reste de la fenêtre revient aux
+// rangées. `null` hors grand écran (deux colonnes) : la largeur seule décide, comme avant.
+function _mesurePlafond() {
+	if (!_deuxColonnes()) return null;
+	const vp = document.getElementById('viewport');
+	const barre = document.getElementById('barres-bas');
+	if (!vp || !barre || !vp.offsetHeight) return null;
+	const basPage = barre.getBoundingClientRect().bottom + window.scrollY
+		+ (parseFloat(getComputedStyle(document.body).paddingBottom) || 0);
+	return plafondHauteur(window.innerHeight - (basPage - vp.offsetHeight));
+}
+// Recalage du plafond — à la FENÊTRE seulement (ouverture, redimensionnement, bascule), jamais au
+// ResizeObserver : la barre grandit en mode édition ou au ciblage, et la carte rétrécirait à
+// chaque sort visé. Même garde que syncViewSize (§17) : la barre dépend du pas (ses cases passent
+// à la ligne), donc on re-mesure après écriture et le plus PETIT plafond l'emporte ; une taille
+// de fenêtre déjà traitée ne relance rien.
+function _recalerHauteur(force) {
+	const cle = window.innerWidth + 'x' + window.innerHeight;
+	if (!force && cle === _cleHauteur) return;
+	_cleHauteur = cle;
+	const p1 = _mesurePlafond();
+	if (p1 !== _plafondMesure) { _plafondMesure = p1; _vueResolue = null; }
+	_surRedimensionnement();
+	if (p1 === null) return;
+	const p2 = _mesurePlafond();
+	if (p2 !== null && p2 < p1) { _plafondMesure = p2; _vueResolue = null; _surRedimensionnement(); }
 }
 function _appliquerVue(taille) {
 	if (taille.step === _stepApplique && taille.viewWidth === _vueAppliquee) return;
@@ -1962,6 +2112,7 @@ function _surOrientation() {
 	syncViewSize();
 	_syncBarreFixe();
 	if (window._combatReady) { renderTokens(); updateCamera(); }
+	_recalerHauteur(true);
 }
 if (_mqPortrait) {
 	if (_mqPortrait.addEventListener) _mqPortrait.addEventListener('change', _surOrientation);
@@ -1974,7 +2125,7 @@ if (window.ResizeObserver) {
 	if (center) _ro.observe(center);
 }
 // La hauteur de fenêtre (budget hauteur) n'est pas captée par le ResizeObserver sur la colonne.
-window.addEventListener('resize', _surRedimensionnement);
+window.addEventListener('resize', () => _recalerHauteur());
 
 // Portraits des membres du groupe : la portion d'image cadrée dans play_town (zoom +
 // déplacement) est reproduite dans les jetons via background-size/-position en %
@@ -3423,16 +3574,40 @@ function appliquerModePave(mode) {
 // trois rangées (haut, milieu, bas) se TASSE vers le haut : chaque rangée se pose sur celle du
 // dessous, à la Tetris. Ne mesure que la carte et un bouton — ce qu'on écrit ne bouge ni l'un
 // ni l'autre (§17).
+//
+// Hors portrait (grand écran), même idée : le calque est FIXÉ sur la partie VISIBLE de la carte
+// (son intérieur, bordure exclue), pour que les flèches restent à l'écran quand on défile vers
+// la barre d'action. Pile trop haute pour la part visible ⇒ le haut remonte hors de l'écran,
+// la rangée du bas reste posée sur le bord bas visible (le `clip-path` rogne le reste).
 function _caleFlechesCarte() {
 	const controls = document.getElementById('move-controls');
 	if (!controls) return;
-	const actif = VUE_PORTRAIT && controls.classList.contains('controls-carte');
+	const surCarte = controls.classList.contains('controls-carte');
 	const carte = document.getElementById('viewport');
-	if (!actif || !carte) {
-		controls.style.removeProperty('--pave-plancher');
-		controls.style.removeProperty('--pave-haut');
+	if (!surCarte || !carte) {
+		['--pave-plancher', '--pave-haut', '--pave-gauche', '--pave-largeur']
+			.forEach(p => controls.style.removeProperty(p));
 		return;
 	}
+	if (!VUE_PORTRAIT) {
+		const H = window.innerHeight;
+		const r = carte.getBoundingClientRect();
+		const dedansHaut = r.top + carte.clientTop;
+		const dedansBas = dedansHaut + carte.clientHeight;
+		const bas = Math.min(dedansBas, H);
+		const btn = controls.querySelector('.btn:not(.move-spacer)');
+		const f = btn ? btn.getBoundingClientRect().height : 50;
+		const cs = getComputedStyle(controls);
+		const pile = (parseFloat(cs.paddingTop) || 84) + 3 * f + (parseFloat(cs.paddingBottom) || 6);
+		const haut = Math.min(Math.max(dedansHaut, 0), bas - pile);
+		controls.style.setProperty('--pave-haut', Math.round(haut) + 'px');
+		controls.style.setProperty('--pave-plancher', Math.round(H - bas) + 'px');
+		controls.style.setProperty('--pave-gauche', Math.round(r.left + carte.clientLeft) + 'px');
+		controls.style.setProperty('--pave-largeur', carte.clientWidth + 'px');
+		return;
+	}
+	controls.style.removeProperty('--pave-gauche');
+	controls.style.removeProperty('--pave-largeur');
 	const H = window.innerHeight;
 	const barreH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--barre-h')) || 0;
 	const plancherBase = barreH + 18 + 42;                         // = le `bottom` du CSS
@@ -4152,7 +4327,7 @@ function updateButtons(data) {
 	// rallume tout (et `doAction` qui couvre les jetons/badges, dont le clic ne passe pas
 	// par `disabled`).
 	if (revealing) {
-		document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
+		document.querySelectorAll('#move-controls .btn, .btn-passer, .action-btn, .slot-btn')
 			.forEach(el => el.disabled = true);
 		return;
 	}
@@ -4170,7 +4345,7 @@ function updateButtons(data) {
 	document.querySelectorAll('#move-controls .rot-btn').forEach(b => {
 		b.disabled = !canMoveBudget(data);
 	});
-	document.getElementById('btn-passer').disabled   = !(isActive && isPlayer);
+	document.querySelectorAll('.btn-passer').forEach(b => { b.disabled = !(isActive && isPlayer); });
 	document.getElementById('btn-confirm').disabled  = !canAct || targetableMonsters(currentMode).length === 0;
 	// ⚙ : entrer en édition COÛTE UNE ACTION → même condition qu'une action jouée.
 	// Exception : en édition, le bouton doit rester actif — c'est le seul moyen d'en sortir.
@@ -4929,7 +5104,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	// fin de l'action si le même membre garde la main (`finally`), sinon avec `/acteur`.
 	if (type === 'passer') _effacerPalierCharge();
 	busy = true;
-	document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
+	document.querySelectorAll('#move-controls .btn, .btn-passer, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
@@ -5331,6 +5506,8 @@ window._combatReady = true;
 // Vue portrait : la barre d'action FIXE n'est remplie (renderSlots) qu'ici — sa hauteur, rendue
 // en vide au pied de la page, et la place du pavé au-dessus d'elle se prennent maintenant.
 _syncBarreFixe();
+// Grand écran : la barre fusionnée est remplie, le plafond du pas par la hauteur peut se prendre.
+_recalerHauteur(true);
 if (window.ResizeObserver) {
 	const _barre = document.getElementById('barres-bas');
 	if (_barre) new ResizeObserver(_syncBarreFixe).observe(_barre);
