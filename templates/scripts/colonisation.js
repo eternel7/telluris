@@ -108,7 +108,7 @@ function colCharteHtml(d) {
 	return `<section class="prop-section"><h3>📜 Charte de colonisation — ${_colE(d.cite)}</h3><div class="prop-ligne"><div class="prop-txt">
 		<span class="q-desc">${d.maitre ? _colE(d.maitre) + ' signe' : 'Le maître de guilde signe'} la charte qui autorise à fonder une implantation en pleine contrée,
 			sur une case dont ${_colE(d.cite)} est la cité la plus proche.</span>
-		<span class="q-desc">Rang ${_colE(r.rang_min)} au moins · ${_colE(r.distance_cite_min)} cases de toute Cité-État ·
+		<span class="q-desc">Rang ${_colE(r.rang_min)} au moins · une case libre, hors de tout point de connexion ·${(+r.distance_cite_min || 0) > 1 ? ` ${_colE(r.distance_cite_min)} cases de toute Cité-État ·` : ''}
 			${_colE(r.distance_implantation_min)} cases d'une autre implantation · ${_colE(r.implantations_par_pays)} par pays.</span>
 		${tenue}${!d.peut_acheter && d.refus && !d.charte ? `<span class="q-desc">⚠️ ${_colE(d.refus)}</span>` : ''}
 		<span class="sell-prix">💰 ${_prixTexte(d.prix)}</span></div>

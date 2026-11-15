@@ -486,8 +486,10 @@ def peut_fonder(character: dict, pays_doc: dict, position, relies: list, implant
 	pos = _xy(position)
 	if not case_marchable(pays_doc, pos[0], pos[1]):
 		return False, "On ne s'établit pas sur cette case."
+	# Aucun point de connexion (cité, capitale ou non, donjon, autre implantation…) : la carte
+	# reste lisible, une case = un lieu. `distance_cite_min` (1 par défaut) n'ajoute rien au-delà.
 	if any(l["pos"] == pos for l in relies or []):
-		return False, "Cette case est déjà prise."
+		return False, "Cette case est déjà un point de connexion : choisissez une case libre."
 	if any(distance(v["pos"], pos) < _int(r.get("distance_cite_min")) for v in cites(relies)):
 		return False, f"Trop près d'une Cité-État : il faut au moins {_int(r.get('distance_cite_min'))} cases."
 	miennes = sum(1 for i in implantations or [] if i.get("fondateur") == (character or {}).get("_id"))

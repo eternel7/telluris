@@ -20,7 +20,7 @@ La voie de colonisation est le pendant de la voie urbaine (Chambre → Logement 
 ## 2. Fonder
 
 - **Site** : une case libre d'un lieu de type pays.
-- **Distance** : au moins **6 cases** de toute Cité-État et **4 cases** d'une autre implantation.
+- **Distance** (Auteur, 15/11) : une case **libre**, jamais sur un point de connexion (cité, capitale ou non, donjon, autre lieu) — aucune distance de plus aux Cités-États ; au moins **4 cases** d'une autre implantation.
 - **Charte** : **4 or**, payée au maître de guilde d'aventuriers de la cité la plus proche. À égale distance, toutes les cités concernées se valent.
 - **Où l'acheter** (Auteur, 13/11) : au **bureau du maître de guilde**, avant de partir ; elle porte le nom de sa cité et ne vaut que sur une case dont cette cité est la plus proche. Une charte à la fois, remise à la fondation.
 - **Prérequis** : **rang C** de la guilde au minimum.
