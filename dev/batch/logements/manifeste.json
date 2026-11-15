@@ -1,0 +1,98 @@
+{
+	"modele": "gemini-3.1-flash-lite-image",
+	"batch": null,
+	"lots": [
+		"batches/gnqe3uzl1bwc9y38uiebxfh1ge1buus6ql6q",
+		"batches/rp9x26qnt9hfg4mywk8l1zrqu1ee4v0mc5i1",
+		"batches/hv8cwgi9osw38cne9dmm1m5pb2ixuy2woakh",
+		"batches/aert3wegtkvhxts0eon6onbhwl2lu96rszrp",
+		"batches/l5pyrjz3ro9y1qr56dy8nc5f8mfcgwpr59ws",
+		"batches/bamziow4xjb1ial6vrhsdehb2iqcdd6rz9fh"
+	],
+	"images": {
+		"chambre_europe": "chambre_europe01.jpg",
+		"logement_europe": "logement_europe01.jpg",
+		"maison_europe": "maison_europe01.jpg",
+		"demeure_europe": "demeure_europe01.jpg",
+		"chambre_grand_nord": "chambre_grand_nord01.jpg",
+		"logement_grand_nord": "logement_grand_nord01.jpg",
+		"maison_grand_nord": "maison_grand_nord01.jpg",
+		"demeure_grand_nord": "demeure_grand_nord01.jpg",
+		"chambre_steppes": "chambre_steppes01.jpg",
+		"logement_steppes": "logement_steppes01.jpg",
+		"maison_steppes": "maison_steppes01.jpg",
+		"demeure_steppes": "demeure_steppes01.jpg",
+		"chambre_afrique_du_nord": "chambre_afrique_du_nord01.jpg",
+		"logement_afrique_du_nord": "logement_afrique_du_nord01.jpg",
+		"maison_afrique_du_nord": "maison_afrique_du_nord01.jpg",
+		"demeure_afrique_du_nord": "demeure_afrique_du_nord01.jpg",
+		"chambre_afrique": "chambre_afrique01.jpg",
+		"logement_afrique": "logement_afrique01.jpg",
+		"demeure_afrique": "demeure_afrique01.jpg",
+		"chambre_oceanie": "chambre_oceanie01.jpg",
+		"logement_oceanie": "logement_oceanie01.jpg",
+		"maison_oceanie": "maison_oceanie01.jpg",
+		"domaine_europe": "domaine_europe01.jpg",
+		"domaine_grand_nord": "domaine_grand_nord01.jpg",
+		"domaine_steppes": "domaine_steppes01.jpg",
+		"maison_afrique": "maison_afrique01.jpg",
+		"domaine_afrique": "domaine_afrique01.jpg",
+		"demeure_oceanie": "demeure_oceanie01.jpg",
+		"domaine_afrique_du_nord": "domaine_afrique_du_nord02.jpg",
+		"domaine_oceanie": "domaine_oceanie03.jpg"
+	},
+	"remplacees": [
+		{
+			"cle": "demeure_oceanie",
+			"fichier": "demeure_oceanie01.jpg"
+		},
+		{
+			"cle": "maison_afrique",
+			"fichier": "maison_afrique01.jpg"
+		},
+		{
+			"cle": "domaine_europe",
+			"fichier": "domaine_europe01.jpg"
+		},
+		{
+			"cle": "domaine_grand_nord",
+			"fichier": "domaine_grand_nord01.jpg"
+		},
+		{
+			"cle": "domaine_steppes",
+			"fichier": "domaine_steppes01.jpg"
+		},
+		{
+			"cle": "domaine_afrique_du_nord",
+			"fichier": "domaine_afrique_du_nord01.jpg"
+		},
+		{
+			"cle": "domaine_afrique",
+			"fichier": "domaine_afrique01.jpg"
+		},
+		{
+			"cle": "domaine_oceanie",
+			"fichier": "domaine_oceanie01.jpg"
+		},
+		{
+			"cle": "domaine_oceanie",
+			"fichier": "domaine_oceanie01.jpg"
+		},
+		{
+			"cle": "domaine_afrique_du_nord",
+			"fichier": "domaine_afrique_du_nord01.jpg"
+		},
+		{
+			"cle": "domaine_oceanie",
+			"fichier": "domaine_oceanie01.jpg"
+		},
+		{
+			"cle": "domaine_oceanie",
+			"fichier": "domaine_oceanie02.jpg"
+		},
+		{
+			"cle": "domaine_oceanie",
+			"fichier": "domaine_oceanie03.jpg"
+		}
+	]
+}
