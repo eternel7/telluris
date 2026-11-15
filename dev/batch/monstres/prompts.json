@@ -1,0 +1,282 @@
+{
+	"antilopes": {
+		"espece": "espece:antilopes",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'une antilope (une seule bête, isolée) : hardes rapides des plaines sèches, qui détalent au premier bruit. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"apep": {
+		"espece": "espece:apep",
+		"champ_image": "apep_transparent.png",
+		"prompt": "Réalise l'image d'un serpent colossal, Apep, le Serpent du Chaos : serpent colossal du chaos aux écailles sombres et luisantes, lové en anneaux énormes, gueule béante, dont la seule présence semble éteindre la lumière autour de lui. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"autruches": {
+		"espece": "espece:autruches",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'une autruche (une seule bête, isolée) : grands oiseaux coureurs, incapables de voler, dont le coup de patte éventre. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"bisons": {
+		"espece": "espece:bisons",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un bison (une seule bête, isolée) : troupeaux bossus des herbes hautes ; leur galop fait trembler le sol. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"boeufs_musques": {
+		"espece": "espece:boeufs_musques",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un bœuf musqué (une seule bête, isolée) : bêtes laineuses qui se serrent en cercle, cornes dehors, face aux loups. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"buffles": {
+		"espece": "espece:buffles",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un buffle (une seule bête, isolée) : troupeaux massifs aux cornes recourbées, qui font front ensemble contre un fauve. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"dragon_de_sang": {
+		"espece": "espece:dragon_de_sang",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un Dragon de sang : paladin de l'Ordre du Dragon relevé par le sang ; tant qu'il garde la foi, le soleil ne peut rien contre lui, et il protège encore les routes. Ce n'est PAS un dragon : c'est un chevalier mort-vivant, un paladin vampire en armure de plates noble et sombre, tabard frappé d'un dragon héraldique, épée longue, teint cadavérique et yeux rouges, allure fière et droite. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"elephants": {
+		"espece": "espece:elephants",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un éléphant (une seule bête, isolée) : géants gris menés par une vieille femelle ; leur charge rase tout sur son passage. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"flamants": {
+		"espece": "espece:flamants",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un flamant rose (une seule bête, isolée) : nuées roses qui filtrent l'eau salée des rives, sur une patte. Elle est en vol, ailes déployées. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"grands_singes": {
+		"espece": "espece:grands_singes",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un grand singe (gorille) (une seule bête, isolée) : colosses du sous-bois, paisibles tant qu'on ne menace pas leur troupe. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"hippopotames": {
+		"espece": "espece:hippopotames",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un hippopotame (une seule bête, isolée) : masses grises des eaux lentes, plus redoutées que les crocodiles par les bateliers. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"hyenes": {
+		"espece": "espece:hyenes",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'une hyène (une seule bête, isolée) : meutes ricanantes aux mâchoires capables de broyer les os. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"illuyanka": {
+		"espece": "espece:illuyanka",
+		"champ_image": "illuyanka_transparent.png",
+		"prompt": "Réalise l'image d'un serpent-dragon, Illuyanka : serpent-dragon des hauts plateaux d'Anatolie, corps de serpent démesuré et massif, tête de dragon cornue, gueule vorace. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"lamie": {
+		"espece": "espece:lamie",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'une Lamie : vampire d'une beauté souveraine, fille de la reine Lamia, venue de Novgorod ; elle séduit avant de boire, et le soleil la laisse inerte comme une statue. Ce n'est PAS une femme-serpent : c'est une femme vampire d'une beauté aristocratique, robe de cour somptueuse, teint de porcelaine, lèvres sombres, regard hypnotique. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"licorne": {
+		"espece": "espece:licorne",
+		"champ_image": "licorne_transparent.png",
+		"prompt": "Réalise l'image d'une Licorne : créature pure et majestueuse, son contact apaise les blessures et repousse la corruption. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"malandhir": {
+		"espece": "espece:malandhir",
+		"champ_image": "malandhir_transparent.png",
+		"prompt": "Réalise l'image d'un Malandhir : monstre-monture des terres sombres, féroce et difficile à dompter, réservé aux cavaliers expérimentés. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"mammouth": {
+		"espece": "espece:mammouth",
+		"champ_image": "mammouth_transparent.png",
+		"prompt": "Réalise l'image d'un Mammouth : pachyderme préhistorique aux défenses imposantes, force colossale et résistance au froid extrême. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"manticore": {
+		"espece": "espece:manticore",
+		"champ_image": "manticore_transparent.png",
+		"prompt": "Réalise l'image d'une Manticore : bête à corps de lion, ailes et queue de scorpion empoisonnée, redoutable prédateur des contrées sauvages. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"marid": {
+		"espece": "espece:marid",
+		"champ_image": "marid_transparent.png",
+		"prompt": "Réalise l'image d'un Marid : djinn des eaux profondes, souverain des grandes oasis et des mers intérieures, d'une arrogance d'empereur. Corps luisant, comme sortant de l'eau. Génie dont le bas du corps est une colonne d'eau tourbillonnante, port impérial et arrogant. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"momie": {
+		"espece": "espece:momie",
+		"champ_image": "momie_transparent.png",
+		"prompt": "Réalise l'image d'une Momie : cadavre embaumé animé par une malédiction ancienne, lent mais porteur de pourriture et de fléaux. Corps entouré de bandelettes jaunies et déchirées, bijoux funéraires dorés. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"monture_angelique": {
+		"espece": "espece:monture_angelique",
+		"champ_image": "monture_angelique_transparent.png",
+		"prompt": "Réalise l'image d'une Monture angélique : créature céleste portant les messagers divins, sa crinière rayonne d'une lumière apaisante. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"monture_squelette": {
+		"espece": "espece:monture_squelette",
+		"champ_image": "monture_squelette_transparent.png",
+		"prompt": "Réalise l'image d'une Monture squelette : cheval ou bête réduite à l'état d'ossature, monture obéissante des morts-vivants n'ayant plus à se reposer. Un cheval squelette harnaché, os blanchis, lueur froide dans les orbites. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"naiade": {
+		"espece": "espece:naiade",
+		"champ_image": "naiade_transparent.png",
+		"prompt": "Réalise l'image d'une Naïade : nymphe des sources et rivières, protectrice des eaux douces et des points d'eau sacrés. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"nereide": {
+		"espece": "espece:nereide",
+		"champ_image": "nereide_transparent.png",
+		"prompt": "Réalise l'image d'une Néréide : nymphe marine gracieuse, escortant parfois les marins ou les attirant vers les profondeurs. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"oceanide": {
+		"espece": "espece:oceanide",
+		"champ_image": "oceanide_transparent.png",
+		"prompt": "Réalise l'image d'une Océanide : nymphe des océans, gardienne des flots profonds et des courants marins. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"oiseaux_de_proies": {
+		"espece": "espece:oiseaux_de_proies",
+		"champ_image": "oiseaux_de_proies_transparent.png",
+		"prompt": "Réalise l'image d'un grand oiseau de proie (aigle) : chasseur ailé, serres et bec crochu, agilité et précision en plein vol. Elle est en vol, ailes déployées. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"oreade": {
+		"espece": "espece:oreade",
+		"champ_image": "oreade_transparent.png",
+		"prompt": "Réalise l'image d'une Oréade : nymphe des montagnes et des grottes, esprit discret lié à la roche et aux hauteurs. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"ours": {
+		"espece": "espece:ours",
+		"champ_image": "ours_transparent.png",
+		"prompt": "Réalise l'image d'un Ours : grand prédateur omnivore, puissant et imprévisible, capable de charges dévastatrices. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"ours_polaire": {
+		"espece": "espece:ours_polaire",
+		"champ_image": "ours_polaire_transparent.png",
+		"prompt": "Réalise l'image d'un Ours polaire : géant des glaces, parfaitement adapté au froid mordant, redoutable chasseur solitaire. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"pegase": {
+		"espece": "espece:pegase",
+		"champ_image": "pegase_transparent.png",
+		"prompt": "Réalise l'image d'un Pégase : cheval ailé capable de fendre les cieux, symbole de noblesse et de liberté. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"petit_dragon": {
+		"espece": "espece:petit_dragon",
+		"champ_image": "petit_dragon_transparent.png",
+		"prompt": "Réalise l'image d'un Petit dragon : jeune dragon encore en pleine croissance, déjà redoutable malgré une taille modeste. Elle est en vol, ailes déployées. Jeune dragon de la taille d'un grand chien, écailles brun-doré. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"phenix": {
+		"espece": "espece:phenix",
+		"champ_image": "phenix_transparent.png",
+		"prompt": "Réalise l'image d'un Phénix : oiseau de feu renaissant de ses cendres, symbole d'immortalité et de renouveau. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"phoques_et_morses": {
+		"espece": "espece:phoques_et_morses",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un morse (une seule bête, isolée) : colonies échouées sur la glace ; les mâles défendent leur rivage à coups de défenses. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"poissons_mammiferes_marins": {
+		"espece": "espece:poissons_mammiferes_marins",
+		"champ_image": "poissons_mammiferes_marins_transparent.png",
+		"prompt": "Réalise l'image d'un dauphin : grand mammifère marin entouré d'un petit banc de poissons argentés, la faune variée des mers. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"polar_kraken": {
+		"espece": "espece:polar_kraken",
+		"champ_image": "polar_kraken_transparent.png",
+		"prompt": "Réalise l'image d'un Kraken polaire : variante du Kraken adaptée aux mers glacées, ses tentacules gèlent au contact tout ce qu'elles enserrent. Corps luisant, comme sortant de l'eau. Pieuvre géante aux tentacules couverts de givre et de glace. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"prince_demon": {
+		"espece": "espece:prince_demon",
+		"champ_image": "prince_demon_transparent.png",
+		"prompt": "Réalise l'image d'un Prince démon : souverain des enfers, son autorité s'étend sur des légions entières et sa seule volonté peut déchaîner des guerres. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"reine_lhamia": {
+		"espece": "espece:reine_lhamia",
+		"champ_image": "reine_lhamia_transparent.png",
+		"prompt": "Réalise l'image de la Reine des lamies : reine des vampires lamies, d'une beauté souveraine et glaciale, la plus haute des aristocrates de sa lignée ; un esprit dompté vit enfermé en elle, et elle règne en secret depuis Novgorod. Ce n'est PAS une femme-serpent : c'est une femme vampire, debout, couronne ancienne d'orfèvrerie orientale, robe royale noire et or somptueuse, bijoux lourds, teint de porcelaine, lèvres sombres, regard hypnotique et dominateur, une lueur spectrale à peine visible dans ses yeux. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"rejeton_demoniaque": {
+		"espece": "espece:rejeton_demoniaque",
+		"champ_image": "rejeton_demoniaque_transparent.png",
+		"prompt": "Réalise l'image d'un Rejeton démoniaque : progéniture hybride d'un démon et d'un mortel, instable et imprévisible, mais portant en lui un pouvoir latent. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"rennes": {
+		"espece": "espece:rennes",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un renne (une seule bête, isolée) : cervidés du froid aux larges sabots, qui grattent la neige pour trouver le lichen. Attitude aux aguets, prête à fuir. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"revenant": {
+		"espece": "espece:revenant",
+		"champ_image": "revenant_transparent.png",
+		"prompt": "Réalise l'image d'un Revenant : esprit vengeur revenu d'entre les morts, hanté par une obsession qui le pousse à traquer les vivants. Mort-vivant décharné aux vêtements en lambeaux, regard brûlant de rancune. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"roi_des_tombes": {
+		"espece": "espece:roi_des_tombes",
+		"champ_image": "roi_des_tombes_transparent.png",
+		"prompt": "Réalise l'image d'un Roi des tombes : souverain mort-vivant régnant sur une nécropole, commandant ses légions de squelettes et de zombies. Squelette couronné en armure royale corrodée, manteau funéraire en lambeaux. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"roi_liche": {
+		"espece": "espece:roi_liche",
+		"champ_image": "roi_liche_transparent.png",
+		"prompt": "Réalise l'image d'un Roi liche : liche ayant atteint un pouvoir suprême, régnant sur les morts-vivants comme un monarque sur ses sujets. Squelette couronné en robes de mage somptueuses, bâton surmonté d'un cristal, aura arcanique froide. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"satyre": {
+		"espece": "espece:satyre",
+		"champ_image": "satyre_transparent.png",
+		"prompt": "Réalise l'image d'un Satyre : humanoïde caprin facétieux et joueur, lié aux forêts et aux célébrations sauvages. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"seraphin": {
+		"espece": "espece:seraphin",
+		"champ_image": "seraphin_transparent.png",
+		"prompt": "Réalise l'image d'un Séraphin : plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels. Elle est en vol, ailes déployées. Six ailes de lumière, visage serein et éblouissant. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"serpopard": {
+		"espece": "espece:serpopard",
+		"champ_image": "serpopard_transparent.png",
+		"prompt": "Réalise l'image d'un Serpopard : félin des ruines au cou de serpent démesuré, qui frappe par-dessus les murets. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"singes": {
+		"espece": "espece:singes",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un singe (une seule bête, isolée) : bandes bruyantes et agiles, qui harcèlent de haut et volent tout ce qui brille. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"sirene": {
+		"espece": "espece:sirene",
+		"champ_image": "sirene_transparent.png",
+		"prompt": "Réalise l'image d'une Sirène : créature mi-femme mi-poisson, son chant envoûtant attire les marins vers une fin funeste. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"spectre": {
+		"espece": "espece:spectre",
+		"champ_image": "spectre_transparent.png",
+		"prompt": "Réalise l'image d'un Spectre : apparition immatérielle traversant les murs, son contact glacial draine la force vitale. Silhouette translucide et flottante, sans pieds, contours qui se dissipent en volutes froides. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"succube": {
+		"espece": "espece:succube",
+		"champ_image": "succube_transparent.png",
+		"prompt": "Réalise l'image d'une Succube : démone séductrice prenant forme féminine, drainant la vitalité de ses victimes envoûtées par son charme. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"taureau": {
+		"espece": "espece:taureau",
+		"champ_image": "taureau_transparent.png",
+		"prompt": "Réalise l'image d'un Taureau : bovidé puissant et entêté, charge redoutable et résistance physique solide. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"tortues_marines": {
+		"espece": "espece:tortues_marines",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'une tortue marine (une seule bête, isolée) : lourdes nageuses qui viennent pondre sur les plages, la nuit. Attitude aux aguets, prête à fuir. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"triton": {
+		"espece": "espece:triton",
+		"champ_image": "triton_transparent.png",
+		"prompt": "Réalise l'image d'un Triton : homme des mers à queue de poisson, guerrier des profondeurs maniant trident et magie aquatique. Corps luisant, comme sortant de l'eau. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"troglodyte": {
+		"espece": "espece:troglodyte",
+		"champ_image": "troglodyte_transparent.png",
+		"prompt": "Réalise l'image d'un Troglodyte : humanoïde reptilien des cavernes, à la peau visqueuse et à l'odeur repoussante qui désoriente ses ennemis. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"troll": {
+		"espece": "espece:troll",
+		"champ_image": "troll_transparent.png",
+		"prompt": "Réalise l'image d'un Troll : créature massive à la régénération stupéfiante, vulnérable au feu mais quasiment increvable autrement. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"vers_des_sables": {
+		"espece": "espece:vers_des_sables",
+		"champ_image": "vers_des_sables_transparent.png",
+		"prompt": "Réalise l'image d'un Ver des sables : créature titanesque vivant sous les déserts, surgissant pour engloutir tout ce qui traverse son territoire. Ver titanesque à la gueule circulaire bordée de dents, corps annelé entier visible et arqué, sans sable ni sol. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	},
+	"yacks": {
+		"espece": "espece:yacks",
+		"champ_image": null,
+		"prompt": "Réalise l'image d'un yack (une seule bête, isolée) : bovins à longue toison des hauteurs froides, robustes et ombrageux. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane."
+	}
+}

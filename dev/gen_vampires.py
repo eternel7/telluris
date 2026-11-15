@@ -99,10 +99,13 @@ MODIFS = {
 					   "au bain.",
 	},
 	"espece:reine_lhamia": {
-		# Pas « Reine Lamia » : c'est le nom propre de la reine des lamies VAMPIRES.
-		"nom": "Reine des lamias",
-		"description": "Lamia ayant atteint un rang souverain, son venin et son charme sont également "
-					   "mortels.",
+		# Reine des lamies VAMPIRES (Auteur, 15/11/2026), plus une lamia du désert : humanoïde,
+		# sans queue de serpent. `_id` inchangé. Identité avec la reine Lamia : rumeur, jamais tranchée.
+		"nom": "Reine des lamies",
+		"description": "Souveraine des vampires lamies, d'une beauté qui glace ; on la dit la reine Lamia "
+					   "elle-même, en qui deux sœurs sorcières enfermèrent un esprit dompté, mais nul à "
+					   "Novgorod ne l'affirme à voix haute. Elle séduit avant de boire, et le soleil la "
+					   "laisse inerte comme une statue.",
 	},
 	"sort:soif_du_nosferatu": {
 		"nom": "Soif du strigoï",

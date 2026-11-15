@@ -203,9 +203,9 @@ TABLE = {
 		"Harnois_du_grand_arsenal", "Epaulieres_acier_gravees", "Heaume_de_plates",
 		"Gantelets_de_plates", "Bottes_de_plates",
 	],
-	"reine_lhamia": [
-		"Naginata", "Jian", "Chakram",
-		"Manteau_de_cour_double", "Diademe_d_orfevre", "Gants_fins",
+	"reine_lhamia": [  # reine des lamies vampires (15/11) : le kit de la lamie, en souveraine
+		"Rapiere", "Dague",
+		"Manteau_de_cour_double", "Diademe_d_orfevre", "Gants_fins_noirs", "Bottines_legeres",
 	],
 	"roi_des_tombes": [
 		"Epee_longue", "Morgenstern", "Arbalete", "Ecu",
@@ -271,7 +271,6 @@ TABLE = {
 SLOTS_INTERDITS = {
 	"aicha_kandicha": {"pieds"},
 	"centaure": {"jambes", "pieds"},
-	"reine_lhamia": {"jambes", "pieds"},
 	"vouivre": {"jambes", "pieds"},
 	"satyre": {"jambes", "pieds"},
 }

@@ -187,7 +187,7 @@ for _c, _especes in {
 	"toucher_petrifiant": ["cockatrice"],
 	"hurlement_terrifiant": ["bete_glatissante", "boukhnoun", "cu_sidhe", "cwn_annwn", "horreur"],
 	"lamentation": ["banshee"],
-	"charme": ["succube", "incube", "vouivre", "lamie", "aicha_kandicha", "sirene", "dearg_due"],
+	"charme": ["succube", "incube", "vouivre", "lamie", "reine_lhamia", "aicha_kandicha", "sirene", "dearg_due"],
 	"morsure_vampirique": ["vampire", "comte_vampire", "nosferatu", "strigoi", "penanggalan",
 						   "dearg_due", "seigneur_du_sang", "chevalier_du_sang"],
 	"toucher_spectral": ["spectre", "fantome", "revenant", "banshee"],
@@ -212,6 +212,7 @@ MAGIE = {
 	"nosferatu": ["magie_necromancie_6", "magie_necromancie_10_seigneur_mage"],
 	"dearg_due": ["magie_necromancie_4", "magie_illusoire_3"],
 	"lamie": ["magie_necromancie_3", "magie_illusoire_3"],
+	"reine_lhamia": ["magie_necromancie_5", "magie_illusoire_5"],  # reine des lamies : au-dessus de ses filles
 	"dragon_de_sang": ["magie_necromancie_3", "magie_bataille_4"],
 	"gobelin_chamanique": ["magie_nature_1", "magie_nature_3_mage"],
 	"dryade": ["magie_nature_4"],

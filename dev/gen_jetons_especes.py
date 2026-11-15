@@ -193,7 +193,7 @@ TABLE = {
 	"prince_demon": ("2x2", "rectangle"),
 	"rapaces": None,
 	"rat_geant": None,
-	"reine_lhamia": ("1x2", "ellipse"),
+	"reine_lhamia": None,  # reine des lamies vampires (15/11) : humanoïde, plus de queue de serpent
 	"rejeton_demoniaque": None,
 	"renard": None,
 	"revenant": None,
