@@ -60,7 +60,7 @@ PALIERS = [{"id": i, "label": l, "rang": n + 1, "population_min": pop, "postes_m
 
 SOCLE = {
 	"paliers": PALIERS,
-	"reglages": {"charte_cuivre": 4 * OR, "rang_min": "C", "distance_cite_min": 6,
+	"reglages": {"charte_cuivre": 4 * OR, "rang_min": "C", "distance_cite_min": 1,
 				 "distance_implantation_min": 4, "implantations_par_pays": 1,
 				 "rattrapage_max_s": 3 * 86400, "visible_des_le": "campement"},
 	"stocks": ["nourriture", "bois", "materiaux", "medicaments"],

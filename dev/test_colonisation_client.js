@@ -146,9 +146,11 @@ test('fonder : le refus se dit, le bouton attend un modèle', () => {
 
 test('charte : prix, règles, bouton fermé sans les fonds ou avec une charte en main', () => {
 	const base = { cite: MECHANT, maitre: MECHANT, prix: 40000, peut_acheter: true, refus: '', charte: null,
-		reglages: { rang_min: 'C', distance_cite_min: 6, distance_implantation_min: 4, implantations_par_pays: 1 } };
+		reglages: { rang_min: 'C', distance_cite_min: 1, distance_implantation_min: 4, implantations_par_pays: 1 } };
 	const ok = colCharteHtml(Object.assign({}, base, { purse: { cuivre: 40000 } }));
 	assert.ok(!ok.includes('<script>') && ok.includes('colAcheterCharte()') && !/disabled/.test(ok) && ok.includes('Rang C'));
+	assert.ok(ok.includes('point de connexion') && !ok.includes('Cité-État'));
+	assert.ok(colCharteHtml(Object.assign({}, base, { purse: { cuivre: 40000 }, reglages: Object.assign({}, base.reglages, { distance_cite_min: 3 }) })).includes('3 cases de toute Cité-État'));
 	assert.ok(/disabled/.test(colCharteHtml(Object.assign({}, base, { purse: { cuivre: 1 } }))));
 	const tenue = colCharteHtml(Object.assign({}, base, { peut_acheter: false, refus: 'déjà', charte: { label: 'Sens' }, purse: { cuivre: 99999 } }));
 	assert.ok(/disabled/.test(tenue) && tenue.includes('signée à Sens'));

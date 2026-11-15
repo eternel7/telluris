@@ -149,12 +149,16 @@ def test_fonder_exige_le_rang_de_la_charte():
 
 def test_fonder_respecte_les_distances_et_la_case():
 	reg = _reg()
-	d_cite, d_imp = reg["reglages"]["distance_cite_min"], reg["reglages"]["distance_implantation_min"]
+	d_imp = reg["reglages"]["distance_implantation_min"]
 	cite = RELIES[0]["pos"]
-	trop_pres = {"x": cite[0] + d_cite - 1, "y": cite[1]}
-	juste = {"x": cite[0] + d_cite, "y": cite[1]}
-	assert "Cité-État" in col.peut_fonder(_perso(), _pays(), trop_pres, RELIES, [], reg)[1]
-	assert col.peut_fonder(_perso(charte="lieu:cite"), _pays(), juste, RELIES, [], reg)[0]
+	# Auteur, 15/11 : une case par défaut — seule la case de connexion est refusée, la voisine se fonde
+	assert reg["reglages"]["distance_cite_min"] == 1
+	assert "point de connexion" in col.peut_fonder(_perso(charte="lieu:cite"), _pays(), {"x": cite[0], "y": cite[1]}, RELIES, [], reg)[1]
+	assert col.peut_fonder(_perso(charte="lieu:cite"), _pays(), {"x": cite[0] + 1, "y": cite[1] + 1}, RELIES, [], reg)[0]
+	# un réglage relevé s'applique toujours, à toute ville
+	reg["reglages"]["distance_cite_min"] = d_cite = 3
+	assert "Cité-État" in col.peut_fonder(_perso(), _pays(), {"x": cite[0] + d_cite - 1, "y": cite[1]}, RELIES, [], reg)[1]
+	assert col.peut_fonder(_perso(charte="lieu:cite"), _pays(), {"x": cite[0] + d_cite, "y": cite[1]}, RELIES, [], reg)[0]
 	voisine = {"fondateur": "character:b", "origine": {"pos": [SITE_POS["x"] + d_imp - 1, SITE_POS["y"]]}}
 	assert "autre implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [voisine], reg)[1]
 	voisine["origine"]["pos"][0] += 1
@@ -162,9 +166,9 @@ def test_fonder_respecte_les_distances_et_la_case():
 	# une seule par pays et par personnage, où qu'elle soit
 	mienne = {"fondateur": "character:a", "origine": {"pos": [0, 19]}}
 	assert "déjà une implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [mienne], reg)[1]
-	# case non marchable, case déjà reliée, hors d'un pays
+	# case non marchable, point de connexion de tout genre (ici une grotte), hors d'un pays
 	assert not col.peut_fonder(_perso(), _pays(), {"x": 0, "y": 0}, RELIES, [], reg)[0]
-	assert not col.peut_fonder(_perso(), _pays(), {"x": 22, "y": 12}, RELIES, [], reg)[0]
+	assert "point de connexion" in col.peut_fonder(_perso(), _pays(), {"x": 22, "y": 12}, RELIES, [], reg)[1]
 	assert not col.peut_fonder(_perso(), {**_pays(), "categorie": "ville"}, SITE_POS, RELIES, [], reg)[0]
 
 
