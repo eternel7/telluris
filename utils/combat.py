@@ -3969,6 +3969,87 @@ def instantiate_rencontre(
 	return monstres
 
 
+def instantiate_groupes(
+	especes: list, profils: list, budget: float, cout_fn,
+	plafond: int | None = None, proba_second: float | None = None,
+	profil_weights: dict | None = None, espece_weights: dict | None = None,
+	rand=None,
+) -> list:
+	"""Rencontre GROUPÉE PAR ESPÈCE (Auteur, 15/11) : une espèce principale tirée dans
+	`especes` (pondérée par `espece_weights`, la focalisation), dont les spécimens dépensent
+	`budget` — chacun coûte `cout_fn(espece, profil)`, son potentiel de menace au grade tiré.
+	On ajoute tant que le spécimen suivant tient dans le reste : plus la bête est puissante,
+	moins elle vient nombreuse. Avec `proba_second`, une SECONDE espèce du pool dépense le
+	reste. Chaque groupe a au moins un spécimen ; le total ne dépasse jamais `plafond`.
+
+	`plafond` / `proba_second` absents ⇒ world-vars `RENCONTRE_PLAFOND` /
+	`RENCONTRE_SECOND_GROUPE_PROBA`. `rand` (défaut : module `random`) tire les espèces et le
+	second groupe — injecté par les tests ; le grade passe par `_pick_profil`, comme ailleurs.
+	Coût illisible (None) ou nul ⇒ le spécimen prend tout le reste du budget : une bête qu'on
+	ne sait pas mesurer ne doit pas venir en nuée."""
+	rand = rand or random
+	plafond = max(1, int(plafond if plafond is not None else character_stats.RENCONTRE_PLAFOND))
+	if proba_second is None:
+		proba_second = character_stats.RENCONTRE_SECOND_GROUPE_PROBA
+	pool = list(especes or [])
+	if not pool:
+		return []
+
+	def tirer(candidats):
+		if espece_weights:
+			poids = [max(0.0, espece_weights.get(e.get("_id"), 1.0)) for e in candidats]
+			if sum(poids) > 0:
+				return rand.choices(candidats, weights=poids, k=1)[0]
+		return rand.choice(candidats)
+
+	monstres: list = []
+	restant = max(0.0, float(budget or 0))
+
+	def remplir(espece):
+		nonlocal restant
+		compat = profils_compatibles(profils, espece)
+		premier = True
+		while len(monstres) < plafond:
+			profil = _pick_profil(compat, profil_weights)
+			cout = cout_fn(espece, profil)
+			cout = float(cout) if cout else 0.0
+			if cout <= 0:
+				cout = max(restant, 1.0)
+			if not premier and cout > restant:
+				return
+			monstres.append(build_monster_snapshot(espece, profil, len(monstres)))
+			restant = max(0.0, restant - cout)
+			premier = False
+
+	principale = tirer(pool)
+	remplir(principale)
+	autres = [e for e in pool if e.get("_id") != principale.get("_id")]
+	if autres and len(monstres) < plafond and rand.random() < float(proba_second):
+		remplir(tirer(autres))
+	return monstres
+
+
+def armure_naturelle_espece(espece: dict) -> int:
+	"""PA NATURELS SUPPLÉMENTAIRES d'une espèce (champ `armure_naturelle` du doc `espece:*`,
+	posé par `dev/gen_armure_naturelle.py` selon le rang), ajoutés à `R // facteur`.
+	Absent ou illisible ⇒ 0 : le comportement d'avant (CLAUDE.md §4)."""
+	try:
+		return max(0, int((espece or {}).get("armure_naturelle") or 0))
+	except (TypeError, ValueError):
+		return 0
+
+
+def avec_armure_naturelle(equipment: EquipmentBonus, armure: int) -> EquipmentBonus:
+	"""Replie `armure` PA naturels dans l'agrégat d'équipement (mute et renvoie). Comptés
+	HORS ZONE : l'armure naturelle protège partout, comme le bouclier — l'invariant
+	`pa == pa_hors_zone + Σ pa_zones` tient. Passer par l'agrégat, plutôt que par le seul `pa`
+	du snapshot, est ce qui la fait survivre à `_refresh_snapshot_stats` (relu à chaque effet)."""
+	if armure > 0:
+		equipment.pa += armure
+		equipment.pa_hors_zone += armure
+	return equipment
+
+
 def des_cc_espece(espece: dict) -> int:
 	"""Nombre de dés de Force au corps à corps pour l'attaque NATURELLE de cette espèce.
 
@@ -4104,6 +4185,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		if slots_monstre:
 			equipment = recompute_equipment_bonus(slots_monstre)
 		attaque_profils = _weapon_attacks({"slots": slots_monstre}, base_stats)
+	# ARMURE NATURELLE de l'espèce : cumulée aux pièces d'un humanoïde armé (Auteur, 15/11).
+	armure_naturelle = armure_naturelle_espece(espece)
+	avec_armure_naturelle(equipment, armure_naturelle)
 	derived = compute_derived_stats(base_stats, niveau=niveau, equipment=equipment, des_cc=des_cc)
 	portee = max(1, int(_profil_arme_monstre({"attaque_profils": attaque_profils or []}).get("portee", 1)))
 	# XP dérivée de la DANGEROSITÉ du spécimen (espèce × grade tiré) : courbe en paliers de
@@ -4208,6 +4292,12 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 	# humanoïde sans rien tiré) — même parti pris que `jeton`/`vol_espece` ci-dessus,
 	# et même comportement d'avant pour un humanoïde nu (`_profil_arme_monstre` retombe
 	# alors sur son repli mains nues, identique à ce qu'`attaque_profils` porterait).
+	# Armure naturelle : clé ABSENTE sans bonus. `equipment_bonus` la porte aussi (relu par
+	# `_refresh_snapshot_stats`) ; `armure_naturelle` sert au banc (`simulateur._equiper_snapshot`
+	# recompose l'agrégat depuis des slots et doit la remettre).
+	if armure_naturelle:
+		snap["armure_naturelle"] = armure_naturelle
+		snap["equipment_bonus"] = equipment.model_dump()
 	if is_humanoide and slots_monstre:
 		snap["slots"] = slots_monstre
 		snap["equipment_bonus"] = equipment.model_dump()
