@@ -9,8 +9,13 @@
 	mobiles (Chrome Android surtout) grossit le texte d'un bloc selon sa largeur et la quantité
 	de texte alentour — tailles imprévisibles, changées par un simple remaniement de mise en
 	page (bouton 👤 Personnage de /play). Les tailles du CSS sont alors celles qu'on voit.
+	Mobile (≤ 768px) : `html` à 93.75 % (15px) → toutes les tailles en rem baissent d'un cran
+	léger ; les tailles en px ne bougent pas.
 	Usage : `{% include "part-polices.html" %}` dans le <head>.
 #}
-<style>html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }</style>
+<style>
+	html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+	@media (max-width: 768px) { html { font-size: 93.75%; } }
+</style>
 <link rel="preload" href="{{ url_for('polices', path='cinzel-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ url_for('polices', path='polices.css') }}">
