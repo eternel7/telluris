@@ -741,6 +741,70 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 @media (prefers-reduced-motion: reduce) {
 	.dep-token { transition: none; }
 }
+
+/* ── Aide « ? » : bouton recopié de /play (`.aide-btn`), pouls tant qu'elle n'a jamais été ouverte ── */
+header .aide-btn {
+	flex-shrink: 0; margin-left: 4px;
+	width: 26px; height: 26px; padding: 0; border-radius: 50%;
+	background: var(--accent, #c8a96e); color: #1a1408;
+	border: 2px solid #f3dfb2; font: bold 15px/1 Georgia, serif; cursor: pointer;
+	box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 10px rgba(200,169,110,.55);
+}
+header .aide-btn:hover, header .aide-btn:focus-visible { background: #e6c98e; outline: none; }
+.aide-btn.aide-pouls { animation: aide-pouls 1.6s ease-in-out infinite; }
+@keyframes aide-pouls {
+	0%, 100% { box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 4px 1px rgba(110, 185, 255, 0.35); }
+	50%      { box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 14px 5px rgba(110, 185, 255, 0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aide-btn.aide-pouls { animation: none; box-shadow: 0 0 7px 2px rgba(110, 185, 255, 0.75); }
+}
+
+/* Visite guidée : un calque qui AVALE les clics (aucun geste ne passe à la carte pendant la
+   visite), un projecteur sur l'élément décrit, une carte d'étape placée du côté libre. */
+#aide-ed-overlay { position: fixed; inset: 0; z-index: 1000; }
+#aide-ed-overlay[hidden] { display: none; }
+#aide-ed-spot {
+	position: fixed; pointer-events: none; border: 2px solid var(--accent); border-radius: 6px;
+	box-shadow: 0 0 0 9999px rgba(0,0,0,.6), 0 0 18px rgba(200,168,75,.6);
+	transition: top .2s, left .2s, width .2s, height .2s;
+}
+#aide-ed-spot.sans-cible { border: 0; width: 0 !important; height: 0 !important; left: 50% !important; top: 50% !important; }
+#aide-ed-carte {
+	position: fixed; width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 32px);
+	display: flex; flex-direction: column;
+	background: var(--panel); border: 1px solid var(--accent); border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(0,0,0,.6); color: var(--text); font-size: .82rem; line-height: 1.5;
+}
+.aide-ed-tete { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.aide-ed-tete h3 { margin: 0; flex: 1; font-family: 'Cinzel', serif; font-size: .95rem; color: var(--accent); letter-spacing: .05em; }
+.aide-ed-compteur { color: var(--muted); font-size: .72rem; white-space: nowrap; }
+.aide-ed-fermer { background: none; border: 0; color: var(--muted); font-size: 1rem; cursor: pointer; padding: 0 2px; }
+.aide-ed-fermer:hover, .aide-ed-fermer:focus-visible { color: var(--accent); outline: none; }
+.aide-ed-corps { padding: 10px 14px; overflow-y: auto; min-height: 0; }
+.aide-ed-corps p, .aide-ed-corps ul { margin: 0 0 .55rem; }
+.aide-ed-corps ul { padding-left: 1.1rem; }
+.aide-ed-corps li { margin-bottom: .2rem; }
+.aide-ed-corps b { color: var(--accent); }
+.aide-ed-corps code { color: #f3dfb2; }
+.aide-ed-absent { border: 1px dashed var(--border); border-radius: 4px; padding: 6px 8px; color: var(--muted); font-size: .74rem; }
+.aide-ed-points { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 8px; }
+.aide-ed-points button {
+	width: 22px; height: 22px; padding: 0; border-radius: 50%; cursor: pointer;
+	border: 1px solid var(--border); background: #1c1c28; color: var(--muted); font-size: .62rem;
+}
+.aide-ed-points button:hover, .aide-ed-points button:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.aide-ed-points button[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: #1a1408; font-weight: bold; }
+.aide-ed-pied { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); }
+.aide-ed-pied button {
+	flex: 1; padding: 6px 8px; cursor: pointer; border-radius: 4px; font: inherit; font-size: .76rem;
+	background: #1c1c28; color: var(--text); border: 1px solid var(--border);
+}
+.aide-ed-pied button:hover:not(:disabled), .aide-ed-pied button:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.aide-ed-pied button:disabled { opacity: .35; cursor: default; }
+.aide-ed-pied .aide-ed-suivant { background: var(--accent); color: #1a1408; border-color: var(--accent); font-weight: bold; }
+.aide-ed-pied .aide-ed-suivant:hover, .aide-ed-pied .aide-ed-suivant:focus-visible { background: #e6c98e; color: #1a1408; }
+@media (prefers-reduced-motion: reduce) { #aide-ed-spot { transition: none; } }
 </style>
 </head>
 <body>
@@ -749,6 +813,10 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 	<h1>🗺️ Battlemap Grid Editor</h1>
 	<span>— Éditeur de grille de déplacement</span>
 	{% include 'part-admin-retour.html' %}
+	{# Aide « ? » — même bouton que les cartes de /play (`.aide-btn`). Ouvre la visite guidée
+	   `#aide-ed-overlay` (fin de fichier), en LECTURE SEULE. #}
+	<button type="button" class="aide-btn" id="aide-ed-btn" onclick="ouvrirAideEditeur()"
+		title="Comment fonctionne l'éditeur" aria-label="Aide : visite guidée de l'éditeur">?</button>
 </header>
 
 <div class="main">
@@ -7216,5 +7284,245 @@ function _choixSauverChamp(el) {
 		</div>
 	</div>
 </div>
+
+<!-- AIDE « ? » : visite guidée de l'éditeur. LECTURE SEULE — elle ne lit que le DOM pour
+     placer son projecteur : aucun appel réseau, aucun état de l'éditeur touché, aucun mode
+     changé, aucune section dépliée. Le calque avale les clics : rien ne peint pendant la visite.
+     ✕, Échap ou clic hors de la carte l'arrêtent ; les pastilles sautent à n'importe quelle étape. -->
+<div id="aide-ed-overlay" hidden onclick="if (event.target === this) fermerAideEditeur()">
+	<div id="aide-ed-spot"></div>
+	<div id="aide-ed-carte" role="dialog" aria-modal="true" aria-labelledby="aide-ed-titre">
+		<div class="aide-ed-tete">
+			<h3 id="aide-ed-titre"></h3>
+			<span class="aide-ed-compteur" id="aide-ed-compteur"></span>
+			<button type="button" class="aide-ed-fermer" onclick="fermerAideEditeur()" title="Arrêter la visite (Échap)" aria-label="Arrêter la visite">✕</button>
+		</div>
+		<div class="aide-ed-corps" id="aide-ed-corps"></div>
+		<div class="aide-ed-points" id="aide-ed-points" role="group" aria-label="Aller à l'étape"></div>
+		<div class="aide-ed-pied">
+			<button type="button" id="aide-ed-prec" onclick="aideEditeurAller(aideEdEtape - 1)">◀ Précédent</button>
+			<button type="button" onclick="fermerAideEditeur()">Arrêter</button>
+			<button type="button" class="aide-ed-suivant" id="aide-ed-suiv" onclick="aideEditeurSuivant()">Suivant ▶</button>
+		</div>
+	</div>
+</div>
+
+<script>
+// ── AIDE « ? » — visite guidée (lecture seule) ──────────────────────────────────────────
+// `cible` : sélecteur de l'élément éclairé (null = étape sans projecteur). Absent ou masqué
+// (pas encore de lieu chargé, carte non offerte pour ce lieu) ⇒ l'étape s'affiche quand même,
+// avec `absent` pour dire quand l'élément apparaît. ⚠️ Rien ici n'écrit : ni fetch, ni
+// setMode, ni clic simulé — verrouillé par dev/test_aide_editeur_client.js.
+const AIDE_ED_VUE = 'editeur-carte.aide_vue';
+const AIDE_ED_ETAPES = [
+	{ cible: null, titre: '🗺️ Bienvenue dans l\'éditeur',
+	  html: `<p>Cet écran dessine la <b>grille</b> d'un lieu : ce qu'on peut fouler, par où on passe,
+		ce qu'on y rencontre, et les portes vers les autres lieux.</p>
+		<p>Une carte = un document <code>lieu:*</code> : une image, une grille de cases (<code>cells</code>),
+		des murs fins (<code>nav</code>), des zones d'influence, et des <b>connexions</b> (<code>link:*</code>) vers d'autres lieux.</p>
+		<p>Cette visite <b>ne modifie rien</b> : elle montre seulement. <b>Suivant ▶</b> pour avancer,
+		les pastilles pour sauter une étape, <b>✕</b> ou <b>Échap</b> pour arrêter à tout moment.</p>` },
+	{ cible: '#left-panel', titre: '🧰 Le panneau d\'outils',
+	  html: `<p>Toutes les sections d'édition. Chaque titre <b>se replie</b> d'un clic (accordéon indépendant).</p>
+		<ul><li><b>⧉</b> détache le panneau : il flotte au-dessus de la carte, qui prend toute la largeur ;
+		on le déplace par sa poignée <b>⠿</b>. <b>⇤</b> le rancre.</li>
+		<li>Position et sections repliées sont retenues par ce navigateur.</li></ul>` },
+	{ cible: '#lieu-card', titre: '📍 Choisir un lieu',
+	  html: `<p>Tout commence ici : choisir un lieu charge son image et sa grille. Le dernier lieu ouvert est rouvert à la visite suivante.</p>
+		<p>Seuls les lieux <b>qui ont une grille</b> figurent dans la liste ; une boutique n'en a pas, elle s'atteint par une connexion (mode Lieux).</p>` },
+	{ cible: '#grid-container', titre: '🖼️ La carte',
+	  html: `<p>L'image du lieu, découpée en cases. Ce que fait un clic dépend du <b>mode d'édition</b> : peindre du terrain, poser un mur, placer une zone, sélectionner une connexion…</p>
+		<p>⚠️ Le pinceau (Terrain, Navigation) <b>s'enregistre tout seul</b>, moins d'une seconde après le dernier coup — il n'y a pas de bouton 💾 pour la grille.</p>`,
+	  absent: 'La carte apparaît une fois un lieu choisi.' },
+	{ cible: '#mode-card', titre: '🎯 Les modes d\'édition',
+	  html: `<p>Un seul mode à la fois ; chacun a son panneau sous le sélecteur :</p>
+		<ul><li><b>Terrain</b> — le coût de chaque case.</li>
+		<li><b>Navigation</b> — les murs fins entre deux cases.</li>
+		<li><b>Zones</b>, <b>Rencontres</b>, <b>Ressources</b> — ce qui vit sur la carte (seulement pour une carte de combat).</li>
+		<li><b>Lieux</b> — les connexions vers les autres lieux.</li></ul>
+		<p>Les étapes suivantes les décrivent un par un.</p>` },
+	{ cible: '#mode-card', titre: '⛰️ Mode Terrain',
+	  html: `<p>On choisit une valeur, puis on peint (clic, ou glisser).</p>
+		<ul><li><b>0</b> — inaccessible (mur, bâtiment, cadre de la carte).</li>
+		<li><b>1</b> — libre : la seule valeur que les <b>flèches de déplacement</b> du jeu acceptent.</li>
+		<li><b>2 / 3 / 5</b> — terrain difficile : franchissable en combat, au prix de ×2, ×3, ×5 points de mouvement ; 5 sert à l'eau.</li>
+		<li><b>∞</b> — bloqué.</li></ul>
+		<p>La <b>légende</b> sous la carte rappelle les valeurs présentes.</p>` },
+	{ cible: '#mode-card', titre: '🧱 Mode Navigation',
+	  html: `<p>Un mur trop fin pour occuper une case : on interdit un <b>pas</b> d'une case à sa voisine sans rendre aucune case inaccessible.</p>
+		<ul><li>Cliquer une case, puis allumer les directions fermées dans la rose des 8 directions.</li>
+		<li>« Effacer restrictions cellule » rouvre la case.</li></ul>
+		<p>Le terrain prime : une case à 0 est infranchissable quoi que disent ses murs.</p>` },
+	{ cible: '#mode-card', titre: '🐾 Zones, Rencontres, Ressources',
+	  html: `<p>Offerts quand le lieu est une <b>carte de combat</b> (case « Lieu de combat » de la carte ⚔️).</p>
+		<ul><li><b>Zones</b> — poser une zone d'influence (forêt, marais…) : forme, taille, rotation, grades, et son contenu propre.</li>
+		<li><b>Rencontres</b> — quelles espèces apparaissent, et dans quelles zones.</li>
+		<li><b>Ressources</b> — ce qu'on y récolte (source des quêtes de collecte).</li></ul>
+		<p>Chaque zone apporte aussi des <b>défauts</b>, listés en bas : un clic les exclut pour ce lieu.
+		Ici, rien ne part sans le bouton <b>💾 Sauvegarder</b> du panneau.</p>` },
+	{ cible: '#mode-card', titre: '🚪 Mode Lieux',
+	  html: `<p>Les <b>points</b> sur la carte sont les connexions du lieu (portes, boutiques, passages). Ce mode ne peint rien : un clic sélectionne la case et filtre la liste.</p>
+		<ul><li><b>📄 Fiche</b> montre le lieu de destination tel qu'en jeu ; <b>✏️</b> l'édite ; <b>🔗</b> édite la connexion ; <b>🧾 JSON</b> le document brut, et <b>🎯</b> déplace une porte.</li>
+		<li><b>➕ Ajouter un lieu</b> crée un sous-lieu et sa connexion sur la case choisie.</li>
+		<li><b>🔀</b> relie deux cases de la même carte (escalier, porte de rempart) ; <b>🏰</b> crée une paire de portes de rempart.</li>
+		<li><b>Maj + clic</b> empile des cases, puis <b>➕ Ajouter un lot</b> y pose plusieurs boutiques d'un coup.</li></ul>
+		<p>Chaque formulaire n'écrit qu'à son bouton d'enregistrement ; ✕ et Échap annulent.</p>` },
+	{ cible: '#grille-card', titre: '🔍 Générer grille',
+	  html: `<p>Propose une grille <b>lue sur l'image</b> : cases et murs fins, rues, enceinte, passages. Le réglage (ville, forêt, catacombes, pays) se devine d'après les tags du lieu.</p>
+		<p>La proposition n'est qu'un <b>aperçu</b> dessiné sur la carte : rien ne change tant qu'on n'a pas cliqué <b>✔ Appliquer</b>.</p>`,
+	  absent: 'Offerte une fois un lieu à image chargé.' },
+	{ cible: '#voies-card', titre: '🛤️ Tracer les voies',
+	  html: `<p>Montre où l'on <b>circule vraiment</b>, avec les règles de pas du jeu : régions séparées (enclaves en couleurs vives), goulots, carte de passage.</p>
+		<p>Viser deux cases A et B trace les chemins les plus courts et la plus petite brèche qui les sépare.
+		<b>Lecture seule</b> : rien n'est écrit. Après une modification, « ↻ Recalculer ».</p>`,
+	  absent: 'Offerte une fois une grille chargée.' },
+	{ cible: '#dim-card', titre: '📐 Dimensions',
+	  html: `<p>Change le nombre de cases : la grille, les murs, les zones et les portes sont rééchantillonnés.</p>
+		<p>En deux temps : <b>↔ Appliquer</b> donne un aperçu (l'enregistrement automatique est alors suspendu), <b>💾</b> écrit, <b>↺</b> annule.</p>`,
+	  absent: 'Offerte une fois une grille chargée.' },
+	{ cible: '#entrees-card', titre: '🚪 Entrées de colonie',
+	  html: `<p>Seulement pour un <b>lieu modèle</b> de colonie (tag <code>modele_colonie</code>) : 1 à 4 cases d'entrée, la première est l'arrivée.</p>
+		<p>Une entrée doit être sur une case de terrain <b>1</b>. Rien n'est écrit avant <b>💾</b>.</p>`,
+	  absent: 'Cette carte n\'apparaît que sur un lieu modèle de colonie.' },
+	{ cible: '.status-bar', titre: '🚶 Barre d\'état et test de déplacement',
+	  html: `<p>La barre d'état commente chaque geste (case visée, enregistrement, erreur).</p>
+		<p><b>🚶 Tester le déplacement</b> pose un jeton et le fait marcher avec les <b>vraies règles du jeu</b>, flèches comprises : le meilleur moyen de vérifier une grille. Le test n'écrit rien.</p>`,
+	  absent: 'Le bouton de test apparaît une fois un lieu chargé.' },
+	{ cible: '#bm-card', titre: '⚔️ Battle map',
+	  html: `<p>La case <b>« Lieu de combat »</b> fait de cette carte un terrain de combat possible ; ses <b>tags</b> pèsent dans le choix de la carte quand un combat éclate.</p>
+		<p>Ces deux champs s'enregistrent tout seuls, comme le pinceau. Catégorie, capacités et PNJ s'éditent par <b>✎ Modifier le lieu</b>.</p>` },
+	{ cible: '#legend-card', titre: '🎨 Légende',
+	  html: `<p>Ce que signifient les couleurs de la carte : les valeurs de terrain présentes ou, en mode Lieux, l'état des points de connexion (PNJ manquant, case hors des flèches…).</p>
+		<p><b>▾</b> la réduit.</p>` },
+	{ cible: null, titre: '✅ En résumé',
+	  html: `<ul><li><b>S'enregistre tout seul</b> : le pinceau Terrain / Navigation et les champs de la carte ⚔️.</li>
+		<li><b>Au bouton 💾</b> : zones, rencontres, ressources, dimensions, entrées de colonie ; au bouton d'enregistrement de chaque formulaire en mode Lieux.</li>
+		<li><b>Jamais</b> : 🔍 avant ✔ Appliquer, 🛤️ voies, 🚶 test de déplacement.</li></ul>
+		<p>Le bouton <b>?</b> rouvre cette visite quand vous voulez.</p>` },
+];
+let aideEdEtape = 0;
+let aideEdFocusAvant = null;
+
+function _aideEdOuverte() {
+	const ov = document.getElementById('aide-ed-overlay');
+	return !!ov && !ov.hidden;
+}
+
+// Élément éclairé de l'étape, ou null s'il n'existe pas ou n'est pas affiché (`hidden`,
+// `display:none`, ou parent masqué : `getClientRects` est alors vide).
+function _aideEdCible(etape) {
+	if (!etape || !etape.cible) return null;
+	const el = document.querySelector(etape.cible);
+	if (!el || el.closest('[hidden]') || !el.getClientRects().length) return null;
+	return el;
+}
+
+// Projecteur sur la cible et carte du côté opposé. Lecture du DOM seule.
+function _aideEdPlacer() {
+	if (!_aideEdOuverte()) return;
+	const spot = document.getElementById('aide-ed-spot');
+	const carte = document.getElementById('aide-ed-carte');
+	const el = _aideEdCible(AIDE_ED_ETAPES[aideEdEtape]);
+	const vw = window.innerWidth, vh = window.innerHeight, M = 16;
+	const cw = carte.offsetWidth, ch = carte.offsetHeight;
+	if (!el) {
+		spot.classList.add('sans-cible');
+		carte.style.left = Math.max(M, (vw - cw) / 2) + 'px';
+		carte.style.top = Math.max(M, (vh - ch) / 2) + 'px';
+		return;
+	}
+	spot.classList.remove('sans-cible');
+	const r = el.getBoundingClientRect(), P = 4;
+	// Rognée à la fenêtre : un panneau plus haut que l'écran garderait sinon un bord invisible.
+	const top = Math.max(2, r.top - P), left = Math.max(2, r.left - P);
+	const bas = Math.min(vh - 2, r.bottom + P), droite = Math.min(vw - 2, r.right + P);
+	spot.style.top = top + 'px';
+	spot.style.left = left + 'px';
+	spot.style.width = Math.max(0, droite - left) + 'px';
+	spot.style.height = Math.max(0, bas - top) + 'px';
+	// Côté libre : à droite de la cible, sinon à gauche, sinon dessous, sinon dessus, sinon en bas à droite.
+	let x, y;
+	if (vw - droite >= cw + 2 * M) { x = droite + M; y = top; }
+	else if (left >= cw + 2 * M) { x = left - cw - M; y = top; }
+	else if (vh - bas >= ch + 2 * M) { x = left; y = bas + M; }
+	else if (top >= ch + 2 * M) { x = left; y = top - ch - M; }
+	else { x = vw - cw - M; y = vh - ch - M; }
+	carte.style.left = Math.min(Math.max(M, x), Math.max(M, vw - cw - M)) + 'px';
+	carte.style.top = Math.min(Math.max(M, y), Math.max(M, vh - ch - M)) + 'px';
+}
+
+function aideEditeurAller(i) {
+	if (i < 0 || i >= AIDE_ED_ETAPES.length) return;
+	aideEdEtape = i;
+	const etape = AIDE_ED_ETAPES[i];
+	const el = _aideEdCible(etape);
+	document.getElementById('aide-ed-titre').textContent = etape.titre;
+	document.getElementById('aide-ed-compteur').textContent = `${i + 1} / ${AIDE_ED_ETAPES.length}`;
+	document.getElementById('aide-ed-corps').innerHTML = etape.html
+		+ (!el && etape.cible ? `<p class="aide-ed-absent">${etape.absent || 'Cet élément n\'est pas affiché pour le moment.'}</p>` : '');
+	document.getElementById('aide-ed-corps').scrollTop = 0;
+	document.querySelectorAll('#aide-ed-points button').forEach((b, k) => {
+		if (k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+	});
+	document.getElementById('aide-ed-prec').disabled = i === 0;
+	document.getElementById('aide-ed-suiv').textContent = i === AIDE_ED_ETAPES.length - 1 ? 'Terminer ✓' : 'Suivant ▶';
+	// Faire défiler jusqu'à la cible ne change que la vue, jamais l'état de l'éditeur.
+	if (el) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+	requestAnimationFrame(_aideEdPlacer);
+}
+
+function aideEditeurSuivant() {
+	if (aideEdEtape >= AIDE_ED_ETAPES.length - 1) fermerAideEditeur();
+	else aideEditeurAller(aideEdEtape + 1);
+}
+
+function ouvrirAideEditeur() {
+	const btn = document.getElementById('aide-ed-btn');
+	if (btn) btn.classList.remove('aide-pouls');
+	try { localStorage.setItem(AIDE_ED_VUE, '1'); } catch (e) {}
+	const points = document.getElementById('aide-ed-points');
+	if (!points.children.length) {
+		points.innerHTML = AIDE_ED_ETAPES.map((e, k) =>
+			`<button type="button" onclick="aideEditeurAller(${k})" title="${_escHtml(e.titre)}" aria-label="Étape ${k + 1} : ${_escHtml(e.titre)}">${k + 1}</button>`).join('');
+	}
+	aideEdFocusAvant = document.activeElement;
+	document.getElementById('aide-ed-overlay').hidden = false;
+	aideEditeurAller(0);
+	document.getElementById('aide-ed-suiv').focus();
+}
+
+function fermerAideEditeur() {
+	document.getElementById('aide-ed-overlay').hidden = true;
+	if (aideEdFocusAvant && aideEdFocusAvant.focus) aideEdFocusAvant.focus();
+	aideEdFocusAvant = null;
+}
+
+// Pouls tant que l'aide n'a jamais été ouverte dans ce navigateur (comme /play).
+(function () {
+	let vue = false;
+	try { vue = localStorage.getItem(AIDE_ED_VUE) === '1'; } catch (e) {}
+	const btn = document.getElementById('aide-ed-btn');
+	if (btn && !vue) btn.classList.add('aide-pouls');
+})();
+
+window.addEventListener('resize', () => requestAnimationFrame(_aideEdPlacer));
+window.addEventListener('scroll', () => requestAnimationFrame(_aideEdPlacer), true);
+// En CAPTURE, avant le gestionnaire d'Échap de l'éditeur : pendant la visite, Échap l'arrête
+// et ne ferme rien d'autre ; ← / → changent d'étape. Tab reste dans la carte.
+document.addEventListener('keydown', (e) => {
+	if (!_aideEdOuverte()) return;
+	if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); fermerAideEditeur(); return; }
+	if (e.key === 'ArrowRight') { e.preventDefault(); e.stopImmediatePropagation(); aideEditeurSuivant(); return; }
+	if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopImmediatePropagation(); aideEditeurAller(aideEdEtape - 1); return; }
+	if (e.key === 'Tab') {
+		const f = [...document.querySelectorAll('#aide-ed-carte button:not(:disabled)')];
+		if (!f.length) return;
+		const i = f.indexOf(document.activeElement);
+		const j = i < 0 ? 0 : (i + (e.shiftKey ? -1 : 1) + f.length) % f.length;
+		e.preventDefault();
+		f[j].focus();
+	}
+}, true);
+</script>
 </body>
 </html>
