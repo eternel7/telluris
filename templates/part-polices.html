@@ -5,7 +5,12 @@
 	Cinzel (la police de presque tout) est PRÉCHARGÉE : elle arrive avant le premier rendu.
 	⚠️ `crossorigin` est obligatoire sur un preload de police, même servie par la même origine :
 	sans lui, le navigateur la télécharge deux fois.
+	⚠️ `text-size-adjust: 100%` sur `html` : sans lui, le « text autosizing » des navigateurs
+	mobiles (Chrome Android surtout) grossit le texte d'un bloc selon sa largeur et la quantité
+	de texte alentour — tailles imprévisibles, changées par un simple remaniement de mise en
+	page (bouton 👤 Personnage de /play). Les tailles du CSS sont alors celles qu'on voit.
 	Usage : `{% include "part-polices.html" %}` dans le <head>.
 #}
+<style>html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }</style>
 <link rel="preload" href="{{ url_for('polices', path='cinzel-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ url_for('polices', path='polices.css') }}">
