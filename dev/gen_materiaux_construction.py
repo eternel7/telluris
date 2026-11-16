@@ -7,10 +7,15 @@
 - `defauts_ressources` des zones naturelles, toutes régions confondues : ADDITIF, relu du dump
   (un défaut déjà présent est gardé tel quel, rien n'est retiré).
 
-DELTA seul contre le dump : un objet déjà en base n'est pas réémis ; seules les zones qui gagnent une
-entrée le sont. Régénération idempotente.
+- Objets OUVRÉS déjà en base qui servent à bâtir (cordes, poix et résines, fibres, toiles et feutre,
+  Auteur 16/11) : tag `materiau_construction` (critère `tags` de la règle de dépôt Matériaux), rien
+  d'autre ne change — catégorie, sous-catégorie et recettes intactes. Fichier À PART
+  (`--sortie-objets`), une demande = un fichier.
 
-    python dev/gen_materiaux_construction.py [--dump jsons/telluris-dump-….json] [--sortie …]
+DELTA seul contre le dump : un objet déjà en base n'est pas réémis ; seules les zones qui gagnent une
+entrée le sont, seuls les objets à qui le tag manque. Régénération idempotente.
+
+    python dev/gen_materiaux_construction.py [--dump jsons/telluris-dump-….json] [--sortie …] [--sortie-objets …]
 """
 
 import argparse
@@ -26,6 +31,22 @@ sys.path.insert(0, RACINE)
 from utils import zones  # noqa: E402
 
 SORTIE = os.path.join(RACINE, "jsons", "materiaux_construction_a_importer.json")
+SORTIE_OBJETS = os.path.join(RACINE, "jsons", "materiaux_construction_objets_a_importer.json")
+
+TAG = "materiau_construction"   # relu par `colonisation.DEFAUTS["depots"]` (règle Matériaux)
+
+# Objets existants qui comptent comme matériaux de construction (Auteur, 16/11). Les cordes
+# d'instrument, d'arc et de rechange n'en sont pas.
+OBJETS_TAGUES = [
+	# cordes
+	"item:corde", "item:Corde_5m", "item:Corde_10m", "item:Cordage_de_marine",
+	# poix et résines
+	"item:poix", "item:Resine_de_pin", "item:Resine_de_cedre", "item:Gomme_d_acacia",
+	# fibres végétales
+	"item:Lianes", "item:Alfa", "item:Papyrus",
+	# toiles et feutre
+	"item:lin", "item:feutre",
+]
 
 # id (sans « item: ») → (nom, icône, rareté, poids kg, valeur cu, description)
 OBJETS = {
@@ -143,23 +164,50 @@ def generer(docs: list) -> list:
 	return sortie
 
 
+def generer_tags(docs: list) -> list:
+	"""Objets de `OBJETS_TAGUES` à qui manque le tag : doc RELU, tag ajouté, rien d'autre (PUT complet)."""
+	par_id = {d["_id"]: d for d in docs}
+	sortie = []
+	for ident in OBJETS_TAGUES:
+		doc = par_id.get(ident)
+		if doc is None or doc.get("type") != "item":
+			sys.exit(f"Objet absent du dump : {ident}")
+		tags = list(doc.get("tags") or [])
+		if TAG in tags:
+			continue
+		neuf = copy.deepcopy(doc)
+		neuf.pop("_rev", None)
+		neuf["tags"] = tags + [TAG]
+		sortie.append(neuf)
+	return sortie
+
+
+def _ecrire(chemin: str, sortie: list) -> None:
+	ids = [d["_id"] for d in sortie]
+	assert len(ids) == len(set(ids)), "doublon d'_id dans la sortie"
+	with open(chemin, "w", encoding="utf-8") as f:
+		json.dump(sortie, f, ensure_ascii=False, indent=1)
+		f.write("\n")
+
+
 def main():
 	ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 	ap.add_argument("--dump", default=None)
 	ap.add_argument("--sortie", default=SORTIE)
+	ap.add_argument("--sortie-objets", default=SORTIE_OBJETS)
 	args = ap.parse_args()
 	chemin = args.dump or dernier_dump()
 	with open(chemin, encoding="utf-8") as f:
 		docs = json.load(f)["docs"]
 	sortie = generer(docs)
-	ids = [d["_id"] for d in sortie]
-	assert len(ids) == len(set(ids)), "doublon d'_id dans la sortie"
-	with open(args.sortie, "w", encoding="utf-8") as f:
-		json.dump(sortie, f, ensure_ascii=False, indent=1)
-		f.write("\n")
-	n_obj = sum(1 for i in ids if i.startswith("item:"))
+	_ecrire(args.sortie, sortie)
+	n_obj = sum(1 for d in sortie if d["_id"].startswith("item:"))
 	print(f"{os.path.basename(chemin)} → {os.path.relpath(args.sortie, RACINE)} : "
-		  f"{n_obj} objets, {len(ids) - n_obj} zones")
+		  f"{n_obj} pierres, {len(sortie) - n_obj} zones")
+	tagues = generer_tags(docs)
+	_ecrire(args.sortie_objets, tagues)
+	print(f"{os.path.basename(chemin)} → {os.path.relpath(args.sortie_objets, RACINE)} : "
+		  f"{len(tagues)} objets tagués {TAG}")
 
 
 if __name__ == "__main__":

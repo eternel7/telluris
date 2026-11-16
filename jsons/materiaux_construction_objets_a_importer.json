@@ -1,0 +1,235 @@
+[
+ {
+  "_id": "item:corde",
+  "type": "item",
+  "nom": "Corde",
+  "sous_categorie": "",
+  "icon": "🪢",
+  "description": "Corde de chanvre solide, toujours utile en route.",
+  "rarete": "commun",
+  "categorie": "outil",
+  "slots": [],
+  "poids": 1.0,
+  "tags": [
+   "materiau_construction"
+  ]
+ },
+ {
+  "_id": "item:Corde_5m",
+  "type": "item",
+  "nom": "Corde 5m",
+  "sous_categorie": "",
+  "icon": "🪢",
+  "description": "Cinq mètres de corde de chanvre.",
+  "rarete": "commun",
+  "categorie": "outil",
+  "slots": [],
+  "poids": 0.5,
+  "tags": [
+   "materiau_construction"
+  ]
+ },
+ {
+  "_id": "item:Corde_10m",
+  "type": "item",
+  "nom": "Corde 10m",
+  "sous_categorie": "",
+  "icon": "🪢",
+  "description": "Dix mètres de corde de chanvre.",
+  "rarete": "commun",
+  "categorie": "outil",
+  "slots": [],
+  "poids": 1.0,
+  "tags": [
+   "materiau_construction"
+  ]
+ },
+ {
+  "_id": "item:Cordage_de_marine",
+  "type": "item",
+  "nom": "Cordage de marine",
+  "description": "Chanvre commis avec du fil de boyau et gainé de feutre : il ne cisaille pas la main et ne rompt pas sous la pluie.",
+  "icon": "🪢",
+  "rarete": "peu_commun",
+  "categorie": "outil",
+  "sous_categorie": "",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 2.5
+ },
+ {
+  "_id": "item:poix",
+  "type": "item",
+  "nom": "Poix",
+  "description": "Résine noire bouillie, collante et inflammable, dont on enrobe les pointes que l'on veut voir brûler.",
+  "icon": "🔥",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "poix",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 0.4
+ },
+ {
+  "_id": "item:Resine_de_pin",
+  "type": "item",
+  "nom": "Résine de pin",
+  "icon": "🟠",
+  "description": "Résine collante recueillie à l'entaille : elle calfate, colle et entretient les torches.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "resine",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 0.2,
+  "valeur": [
+   {
+    "cu": 5
+   }
+  ]
+ },
+ {
+  "_id": "item:Resine_de_cedre",
+  "type": "item",
+  "nom": "Résine de cèdre",
+  "icon": "🟠",
+  "description": "Résine odorante qui protège le bois et les étoffes des vers et de la pourriture.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "resine",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 0.2,
+  "valeur": [
+   {
+    "cu": 15
+   }
+  ]
+ },
+ {
+  "_id": "item:Gomme_d_acacia",
+  "type": "item",
+  "nom": "Gomme d'acacia",
+  "icon": "🟡",
+  "description": "Larmes de gomme durcie qui suintent de l'écorce : elles lient les encres et les remèdes.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "resine",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 0.1,
+  "valeur": [
+   {
+    "cu": 12
+   }
+  ]
+ },
+ {
+  "_id": "item:Lianes",
+  "type": "item",
+  "nom": "Lianes",
+  "icon": "🌿",
+  "description": "Lianes souples coupées dans le sous-bois, solides comme une corde une fois tressées.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "fibre",
+  "slots": [],
+  "tags": [
+   "plante",
+   "materiau_construction"
+  ],
+  "poids": 0.5,
+  "valeur": [
+   {
+    "cu": 2
+   }
+  ]
+ },
+ {
+  "_id": "item:Alfa",
+  "type": "item",
+  "nom": "Alfa",
+  "icon": "🌾",
+  "description": "Herbe dure des steppes sèches, qu'on tresse en cordes, en paniers et en nattes.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "fibre",
+  "slots": [],
+  "tags": [
+   "plante",
+   "materiau_construction"
+  ],
+  "poids": 0.3,
+  "valeur": [
+   {
+    "cu": 2
+   }
+  ]
+ },
+ {
+  "_id": "item:Papyrus",
+  "type": "item",
+  "nom": "Papyrus",
+  "icon": "🌿",
+  "description": "Tiges de papyrus coupées dans l'eau : nattes, cordes, barques légères et feuilles d'écriture.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "fibre",
+  "slots": [],
+  "tags": [
+   "plante",
+   "materiau_construction"
+  ],
+  "poids": 0.3,
+  "valeur": [
+   {
+    "cu": 3
+   }
+  ]
+ },
+ {
+  "_id": "item:lin",
+  "type": "item",
+  "nom": "Toile de lin",
+  "icon": "🧵",
+  "description": "Coupon de toile de lin écru, rouie, teillée et tissée au métier.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "lin",
+  "slots": [],
+  "tags": [
+   "materiau_construction"
+  ],
+  "poids": 0.3,
+  "valeur": [
+   {
+    "cu": 8
+   }
+  ]
+ },
+ {
+  "_id": "item:feutre",
+  "type": "item",
+  "nom": "Feutre",
+  "sous_categorie": "",
+  "icon": "🧵",
+  "description": "Laine foulée en une étoffe épaisse et dense.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": 0.3,
+  "tags": [
+   "materiau_construction"
+  ]
+ }
+]

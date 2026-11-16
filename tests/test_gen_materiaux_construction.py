@@ -42,3 +42,18 @@ def test_rejeu_apres_import_ne_reemet_rien():
 def test_chaque_pierre_rejoint_le_stock_materiaux():
 	for ident in gen.OBJETS:
 		assert col.stock_de_item(gen.doc_objet(ident), ["matiere.autre"], col.DEFAUTS)["stock"] == "materiaux"
+
+
+def test_objets_ouvres_tagues_sans_rien_changer_d_autre():
+	dump = [{"_id": i, "_rev": "1-x", "type": "item", "categorie": "outil", "tags": None}
+			for i in gen.OBJETS_TAGUES]
+	dump[0]["tags"] = [gen.TAG]                                    # déjà tagué : pas réémis
+	sortie = gen.generer_tags(dump)
+	assert [d["_id"] for d in sortie] == gen.OBJETS_TAGUES[1:]
+	assert all(d["tags"] == [gen.TAG] and d["categorie"] == "outil" and "_rev" not in d for d in sortie)
+	assert gen.generer_tags([{**d, "tags": [gen.TAG]} for d in dump]) == []   # rejeu après import
+
+
+def test_le_tag_est_celui_que_lit_la_regle_materiaux():
+	regle = next(r for r in col.DEFAUTS["depots"] if r["stock"] == "materiaux")
+	assert gen.TAG in regle["tags"]
