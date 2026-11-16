@@ -632,6 +632,10 @@ def test_un_objet_donne_rejoint_le_stock_que_sa_regle_reconnait():
 	assert col.stock_de_item({}, ["matiere.bois"], reg)["stock"] == "bois"
 	assert col.stock_de_item({}, ["matiere.metal"], reg)["stock"] == "materiaux"
 	assert col.stock_de_item({"sous_categorie": "grimoire"}, ["magie.grimoire"], reg) is None
+	# Pierres de construction (marbre, granit, argile…) : sous-catégorie « pierre » ; les cordes
+	# d'instrument ne bâtissent rien (Auteur, 16/11).
+	assert col.stock_de_item({"sous_categorie": "pierre"}, ["matiere.autre"], reg)["stock"] == "materiaux"
+	assert col.stock_de_item({"sous_categorie": "corde"}, ["matiere.autre"], reg) is None
 	regle = col.stock_de_item(pain, [], reg)
 	assert col.unites_de_item(pain, regle) == 2 * regle["unites_par_kg"]
 	assert col.unites_de_item({"poids": [1, 3]}, regle) == 2 * regle["unites_par_kg"]      # poids en fourchette

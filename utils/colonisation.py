@@ -87,7 +87,7 @@ DEFAUTS = {
 		 "unites_par_kg": 1},
 		{"stock": "medicaments", "filtres": ["conso.soin"], "sous_categories": ["herbe"], "unites_par_kg": 10},
 		{"stock": "bois", "filtres": ["matiere.bois"], "sous_categories": [], "unites_par_kg": 0.5},
-		{"stock": "materiaux", "filtres": ["matiere.metal"], "sous_categories": ["corde", "pierre", "sel_gemme"],
+		{"stock": "materiaux", "filtres": ["matiere.metal"], "sous_categories": ["pierre", "sel_gemme"],
 		 "unites_par_kg": 1},
 	],
 	"batiments_def": [

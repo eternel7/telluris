@@ -1,0 +1,3017 @@
+[
+ {
+  "_id": "item:calcaire",
+  "type": "item",
+  "nom": "Calcaire de taille",
+  "icon": "🪨",
+  "description": "Bloc de pierre blonde et tendre, qui se scie au sortir de la carrière et durcit à l'air. La pierre des remparts et des maisons de rapport.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 4
+   }
+  ]
+ },
+ {
+  "_id": "item:gres",
+  "type": "item",
+  "nom": "Grès",
+  "icon": "🪨",
+  "description": "Pierre de sable soudé, rose ou ocre, rugueuse sous la main. On en dalle les cours et l'on en taille les meules.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 4
+   }
+  ]
+ },
+ {
+  "_id": "item:argile",
+  "type": "item",
+  "nom": "Argile",
+  "icon": "🟫",
+  "description": "Terre grasse tirée des berges, qui se moule en briques et en tuiles et se cuit au four.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 2
+   }
+  ]
+ },
+ {
+  "_id": "item:silex",
+  "type": "item",
+  "nom": "Silex",
+  "icon": "🪨",
+  "description": "Rognon de pierre dure arraché à la craie. Il donne l'étincelle, et taillé en moellons il tient un mur des siècles.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 0.5,
+  "valeur": [
+   {
+    "cu": 5
+   }
+  ]
+ },
+ {
+  "_id": "item:ardoise",
+  "type": "item",
+  "nom": "Ardoise",
+  "icon": "⬛",
+  "description": "Pierre grise qui se fend en feuilles minces : les toits qui en sont couverts ne craignent ni la pluie ni les braises.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 5
+   }
+  ]
+ },
+ {
+  "_id": "item:tuf_volcanique",
+  "type": "item",
+  "nom": "Tuf volcanique",
+  "icon": "🪨",
+  "description": "Cendre de volcan prise en pierre, légère et poreuse. Elle se taille au couteau et garde la fraîcheur des caves.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 0.8,
+  "valeur": [
+   {
+    "cu": 3
+   }
+  ]
+ },
+ {
+  "_id": "item:basalte",
+  "type": "item",
+  "nom": "Basalte",
+  "icon": "⬛",
+  "description": "Roche noire et lourde des coulées refroidies, qui se brise en colonnes. Les seuils et les bornes qui en sont faits ne s'usent pas.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.2,
+  "valeur": [
+   {
+    "cu": 5
+   }
+  ]
+ },
+ {
+  "_id": "item:granit",
+  "type": "item",
+  "nom": "Granit",
+  "icon": "🪨",
+  "description": "Pierre grenue, mouchetée de gris et de rose, la plus dure à tailler et la plus longue à mourir. Les fondations des tours en sont faites.",
+  "rarete": "commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.2,
+  "valeur": [
+   {
+    "cu": 6
+   }
+  ]
+ },
+ {
+  "_id": "item:travertin",
+  "type": "item",
+  "nom": "Travertin",
+  "icon": "🪨",
+  "description": "Pierre crème piquée de petits trous, que l'eau des sources chaudes dépose couche après couche. On en pave les thermes et les grandes salles.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 10
+   }
+  ]
+ },
+ {
+  "_id": "item:marbre",
+  "type": "item",
+  "nom": "Marbre",
+  "icon": "⬜",
+  "description": "Bloc de pierre blanche veinée, qui prend le poli comme un miroir. Les cités en parent leurs temples et les puissants leurs escaliers.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.0,
+  "valeur": [
+   {
+    "cu": 12
+   }
+  ]
+ },
+ {
+  "_id": "item:albatre",
+  "type": "item",
+  "nom": "Albâtre",
+  "icon": "⬜",
+  "description": "Pierre laiteuse qui laisse passer la lumière quand on l'amincit : on en fait des vasques, des lampes et des fenêtres sans verre.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 0.8,
+  "valeur": [
+   {
+    "cu": 15
+   }
+  ]
+ },
+ {
+  "_id": "item:porphyre",
+  "type": "item",
+  "nom": "Porphyre",
+  "icon": "🟥",
+  "description": "Roche pourpre semée de cristaux clairs, si dure qu'il faut des semaines pour en polir une colonne. Elle était, dit-on, réservée aux souverains.",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 1.2,
+  "valeur": [
+   {
+    "cu": 25
+   }
+  ]
+ },
+ {
+  "_id": "item:obsidienne",
+  "type": "item",
+  "nom": "Obsidienne",
+  "icon": "⬛",
+  "description": "Verre noir né du feu des volcans, tranchant à la cassure. On en incruste les seuils et les autels ; certains y lisent l'avenir.",
+  "rarete": "rare",
+  "categorie": "composant",
+  "sous_categorie": "pierre",
+  "slots": [],
+  "tags": [],
+  "poids": 0.5,
+  "valeur": [
+   {
+    "cu": 30
+   }
+  ]
+ },
+ {
+  "_id": "zone:carriere",
+  "type": "zone_influence",
+  "nom": "Carrière",
+  "terrain_tags": [
+   "carriere",
+   "pierre",
+   "roche",
+   "chantier"
+  ],
+  "intensite_max": 0.55,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 45,
+    "tags": [
+     "pierre",
+     "calcaire",
+     "ardoise",
+     "minerai"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "carrier",
+     "tailleur_de_pierre",
+     "contremaitre"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 15,
+    "tags": [
+     "eboulement",
+     "chute",
+     "poussiere"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 10,
+    "tags": [
+     "creature_rocheuse",
+     "brigand"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rat_geant"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rapaces"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:alun"
+   },
+   {
+    "ressource": "item:Salpetre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:marbre"
+   },
+   {
+    "ressource": "item:calcaire"
+   },
+   {
+    "ressource": "item:granit"
+   },
+   {
+    "ressource": "item:ardoise"
+   }
+  ]
+ },
+ {
+  "_id": "zone:montagne",
+  "type": "zone_influence",
+  "nom": "Montagne escarpée",
+  "terrain_tags": [
+   "montagne",
+   "falaise",
+   "pierre",
+   "chemin"
+  ],
+  "intensite_max": 0.8,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 40,
+    "tags": [
+     "aigle_geant",
+     "troll",
+     "brigand_montagnard"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 20,
+    "tags": [
+     "chute_pierres",
+     "blizzard",
+     "altitude"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 30,
+    "tags": [
+     "minerai",
+     "pierre_precieuse",
+     "herbe_rare"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "nain",
+     "ascete"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:aigle_geant"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:orc"
+   },
+   {
+    "espece": "espece:harpie"
+   },
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe",
+     "steppes",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:ours",
+    "regions": [
+     "europe",
+     "steppes"
+    ]
+   },
+   {
+    "espece": "espece:troll",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:oreade",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:argent"
+   },
+   {
+    "ressource": "item:plomb"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Pin_cembro",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:marbre"
+   },
+   {
+    "ressource": "item:granit"
+   }
+  ]
+ },
+ {
+  "_id": "zone:haute_montagne",
+  "type": "zone_influence",
+  "nom": "Haute montagne",
+  "terrain_tags": [
+   "montagne",
+   "roche",
+   "neige",
+   "falaise"
+  ],
+  "intensite_max": 0.9,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 40,
+    "tags": [
+     "altitude",
+     "avalanche",
+     "blizzard",
+     "chute"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "aigle_geant",
+     "dragon",
+     "yeti"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 20,
+    "tags": [
+     "minerai_rare",
+     "cristal",
+     "pierre_precieuse"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "ascete",
+     "mineur"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 4,
+   "visibilite": 0,
+   "deplacement": -3
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:aigle_geant"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:wyvern"
+   },
+   {
+    "espece": "espece:griffon"
+   },
+   {
+    "espece": "espece:troll",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:oreade",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:argent"
+   },
+   {
+    "ressource": "item:gemmes"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:granit"
+   },
+   {
+    "ressource": "item:porphyre"
+   }
+  ]
+ },
+ {
+  "_id": "zone:contreforts",
+  "type": "zone_influence",
+  "nom": "Contreforts montagneux",
+  "terrain_tags": [
+   "montagne",
+   "colline",
+   "pente",
+   "roche",
+   "foret"
+  ],
+  "intensite_max": 0.6,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "minerai",
+     "pierre",
+     "bois",
+     "herbe_rare"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "loup",
+     "ours",
+     "brigand_montagnard"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 15,
+    "tags": [
+     "mineur",
+     "bucheron",
+     "berger"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 10,
+    "tags": [
+     "eboulement",
+     "pente_raide"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:aigle_geant"
+   },
+   {
+    "espece": "espece:orc"
+   },
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe",
+     "steppes",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:ours",
+    "regions": [
+     "europe",
+     "steppes"
+    ]
+   },
+   {
+    "espece": "espece:troll",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:Sapin"
+   },
+   {
+    "ressource": "item:Pin_sylvestre"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:marbre"
+   },
+   {
+    "ressource": "item:granit"
+   },
+   {
+    "ressource": "item:ardoise"
+   }
+  ]
+ },
+ {
+  "_id": "zone:contreforts_arides",
+  "type": "zone_influence",
+  "nom": "Contreforts arides",
+  "intensite_max": 0.6,
+  "terrain_tags": [
+   "montagne",
+   "colline",
+   "roche",
+   "pente",
+   "aride"
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "minerai",
+     "pierre",
+     "bois",
+     "herbe_rare"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "loup",
+     "ours",
+     "brigand_montagnard"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 15,
+    "tags": [
+     "mineur",
+     "bucheron",
+     "berger"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 10,
+    "tags": [
+     "eboulement",
+     "pente_raide"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "defauts_rencontres": [
+   {
+    "espece": "espece:scorpion_geant"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:fauves"
+   },
+   {
+    "espece": "espece:oiseaux_de_proies"
+   },
+   {
+    "espece": "espece:orc",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:nasnas",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Genevrier"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:alun"
+   },
+   {
+    "ressource": "item:gres"
+   }
+  ]
+ },
+ {
+  "_id": "zone:karst",
+  "type": "zone_influence",
+  "nom": "Plateau karstique",
+  "terrain_tags": [
+   "plateau",
+   "karst",
+   "calcaire",
+   "roche",
+   "souterrain"
+  ],
+  "intensite_max": 0.6,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "calcaire",
+     "pierre",
+     "champignon",
+     "herbe_rare"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "chauve_souris_geante",
+     "araignee_geante",
+     "creature_souterraine"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 20,
+    "tags": [
+     "gouffre_cache",
+     "dedale",
+     "perte_d_eau"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "berger",
+     "explorateur"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 0,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:chauve_souris"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:lievre"
+   },
+   {
+    "espece": "espece:troglodyte"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Salpetre"
+   },
+   {
+    "ressource": "item:alun"
+   },
+   {
+    "ressource": "item:Herbes_aromatiques"
+   },
+   {
+    "ressource": "item:marbre"
+   },
+   {
+    "ressource": "item:calcaire"
+   },
+   {
+    "ressource": "item:travertin"
+   }
+  ]
+ },
+ {
+  "_id": "zone:plateau",
+  "type": "zone_influence",
+  "nom": "Plateau",
+  "terrain_tags": [
+   "plateau",
+   "herbe",
+   "roche",
+   "pente"
+  ],
+  "intensite_max": 0.45,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "herbe",
+     "plante",
+     "pierre",
+     "minerai"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 25,
+    "tags": [
+     "rapace",
+     "loup",
+     "bandit"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 20,
+    "tags": [
+     "berger",
+     "mineur",
+     "voyageur"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "vent_fort",
+     "orage"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 2,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:lievre"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:renard"
+   },
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe",
+     "steppes",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:antilopes",
+    "regions": [
+     "afrique",
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:graines"
+   },
+   {
+    "ressource": "item:Genevrier"
+   },
+   {
+    "ressource": "item:calcaire"
+   },
+   {
+    "ressource": "item:silex"
+   }
+  ]
+ },
+ {
+  "_id": "zone:collines",
+  "type": "zone_influence",
+  "nom": "Collines",
+  "terrain_tags": [
+   "colline",
+   "herbe",
+   "pente",
+   "chemin"
+  ],
+  "intensite_max": 0.4,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "herbe",
+     "fleur",
+     "pierre",
+     "bois"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "loup",
+     "sanglier",
+     "bandit"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "berger",
+     "paysan",
+     "voyageur"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "brouillard",
+     "orage"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:renard",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:lievre",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:petits_animaux_divers"
+   },
+   {
+    "espece": "espece:gobelin",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:orc",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:hyenes",
+    "regions": [
+     "afrique",
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:antilopes",
+    "regions": [
+     "afrique",
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Fleur_de_souci",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_a_bruler",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Merisier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:graines",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:plumes",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Herbes_aromatiques"
+   },
+   {
+    "ressource": "item:calcaire"
+   },
+   {
+    "ressource": "item:silex"
+   }
+  ]
+ },
+ {
+  "_id": "zone:falaise_cotiere",
+  "type": "zone_influence",
+  "nom": "Falaise côtière",
+  "terrain_tags": [
+   "cote",
+   "mer",
+   "falaise",
+   "rocher"
+  ],
+  "intensite_max": 0.6,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 35,
+    "tags": [
+     "chute",
+     "vent_fort",
+     "eboulement"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 25,
+    "tags": [
+     "nid_oiseau",
+     "algue",
+     "minerai"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 15,
+    "tags": [
+     "oiseau_geant",
+     "monstre_marin"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 10,
+    "tags": [
+     "guetteur",
+     "ermite"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 15
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 2,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:harpie"
+   },
+   {
+    "espece": "espece:sirene"
+   },
+   {
+    "espece": "espece:phoques_et_morses",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Sel"
+   },
+   {
+    "ressource": "item:plumes"
+   },
+   {
+    "ressource": "item:Nacre"
+   },
+   {
+    "ressource": "item:granit"
+   },
+   {
+    "ressource": "item:calcaire"
+   },
+   {
+    "ressource": "item:basalte"
+   },
+   {
+    "ressource": "item:silex"
+   }
+  ]
+ },
+ {
+  "_id": "zone:fjord",
+  "type": "zone_influence",
+  "nom": "Fjord",
+  "terrain_tags": [
+   "fjord",
+   "mer",
+   "falaise",
+   "eau",
+   "cote"
+  ],
+  "intensite_max": 0.65,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "poisson",
+     "algue",
+     "bois",
+     "eau_douce"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pecheur",
+     "marin",
+     "ermite"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "serpent_de_mer",
+     "monstre_marin",
+     "raider"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 15,
+    "tags": [
+     "brume",
+     "vent_froid",
+     "pluie"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 0,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:phoques_et_morses"
+   },
+   {
+    "espece": "espece:poissons_mammiferes_marins"
+   },
+   {
+    "espece": "espece:loup"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:ours",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:troll",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:draugr",
+    "regions": [
+     "grand_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Sel"
+   },
+   {
+    "ressource": "item:Huile_de_phoque"
+   },
+   {
+    "ressource": "item:Pin_sylvestre"
+   },
+   {
+    "ressource": "item:Bouleau"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:granit"
+   },
+   {
+    "ressource": "item:ardoise"
+   }
+  ]
+ },
+ {
+  "_id": "zone:gorge",
+  "type": "zone_influence",
+  "nom": "Gorge",
+  "terrain_tags": [
+   "montagne",
+   "gorge",
+   "roche",
+   "falaise"
+  ],
+  "intensite_max": 0.7,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 35,
+    "tags": [
+     "troll",
+     "bandit",
+     "monstre_rocheux"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 30,
+    "tags": [
+     "eboulement",
+     "chute",
+     "crue"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 20,
+    "tags": [
+     "minerai",
+     "pierre",
+     "cristal"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 15
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": -1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:aigle_geant"
+   },
+   {
+    "espece": "espece:harpie"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:orc"
+   },
+   {
+    "espece": "espece:troll",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:ardoise"
+   }
+  ]
+ },
+ {
+  "_id": "zone:lande",
+  "type": "zone_influence",
+  "nom": "Lande",
+  "terrain_tags": [
+   "lande",
+   "bruyere",
+   "herbe",
+   "brume",
+   "plaine"
+  ],
+  "intensite_max": 0.5,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "bruyere",
+     "tourbe",
+     "herbe",
+     "gibier"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "loup",
+     "brigand",
+     "spectre"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 20,
+    "tags": [
+     "brouillard",
+     "bruine",
+     "vent_fort"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 10,
+    "tags": [
+     "berger",
+     "chasseur",
+     "ermite"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": -1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:lievre"
+   },
+   {
+    "espece": "espece:renard"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:cu_sidhe",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:miel_de_bruyere"
+   },
+   {
+    "ressource": "item:Herbes_a_bruler"
+   },
+   {
+    "ressource": "item:Genevrier"
+   },
+   {
+    "ressource": "item:Bouleau"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:ardoise"
+   }
+  ]
+ },
+ {
+  "_id": "zone:canyon",
+  "type": "zone_influence",
+  "nom": "Canyon",
+  "terrain_tags": [
+   "canyon",
+   "desert",
+   "falaise",
+   "roche",
+   "riviere"
+  ],
+  "intensite_max": 0.75,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 35,
+    "tags": [
+     "pillard",
+     "rapace",
+     "creature_rocheuse"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 25,
+    "tags": [
+     "chute",
+     "eboulement",
+     "crue_soudaine"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 25,
+    "tags": [
+     "minerai",
+     "pierre",
+     "fossile",
+     "eau_douce"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "guide",
+     "hors_la_loi"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": -1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:oiseaux_de_proies"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:scorpion_geant"
+   },
+   {
+    "espece": "espece:harpie"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:gres"
+   },
+   {
+    "ressource": "item:porphyre"
+   }
+  ]
+ },
+ {
+  "_id": "zone:desert",
+  "type": "zone_influence",
+  "nom": "Désert",
+  "terrain_tags": [
+   "desert",
+   "sable",
+   "aride"
+  ],
+  "intensite_max": 0.8,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 35,
+    "tags": [
+     "chaleur",
+     "soif",
+     "tempete_sable"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 25,
+    "tags": [
+     "minerai",
+     "pierre",
+     "plante_desertique"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "scorpion_geant",
+     "serpent",
+     "predateur_desert"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 10,
+    "tags": [
+     "nomade",
+     "marchand"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:sphinx",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:vers_des_sables",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:scorpion_geant"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:nuee_de_scarabees"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:ghul_des_sables",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:nasnas",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Natron"
+   },
+   {
+    "ressource": "item:Epines"
+   },
+   {
+    "ressource": "item:gres"
+   }
+  ]
+ },
+ {
+  "_id": "zone:hamada",
+  "type": "zone_influence",
+  "nom": "Désert de pierres",
+  "terrain_tags": [
+   "desert",
+   "roche",
+   "pierre",
+   "aride",
+   "plateau"
+  ],
+  "intensite_max": 0.7,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 35,
+    "tags": [
+     "chaleur",
+     "soif",
+     "vent_abrasif"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 30,
+    "tags": [
+     "pierre",
+     "minerai",
+     "fossile",
+     "cristal"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 25,
+    "tags": [
+     "scorpion_geant",
+     "rapace",
+     "pillard"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "prospecteur",
+     "nomade"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 3,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:scorpion_geant"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:nasnas",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:ghul_des_sables",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:Epines"
+   },
+   {
+    "ressource": "item:gres"
+   }
+  ]
+ },
+ {
+  "_id": "zone:volcan",
+  "type": "zone_influence",
+  "nom": "Zone volcanique",
+  "terrain_tags": [
+   "volcan",
+   "roche",
+   "cendre",
+   "lave"
+  ],
+  "intensite_max": 0.95,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 40,
+    "tags": [
+     "chaleur_extreme",
+     "lave",
+     "eruption",
+     "gaz_toxique"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 30,
+    "tags": [
+     "obsidienne",
+     "soufre",
+     "minerai",
+     "cristal"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "elementaire_feu",
+     "dragon",
+     "creature_volcanique"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 5,
+   "visibilite": -1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:elementaux"
+   },
+   {
+    "espece": "espece:petit_dragon"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:serpent"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Soufre"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Cendres"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:basalte"
+   },
+   {
+    "ressource": "item:tuf_volcanique"
+   },
+   {
+    "ressource": "item:obsidienne"
+   }
+  ]
+ },
+ {
+  "_id": "zone:source_thermale",
+  "type": "zone_influence",
+  "nom": "Sources chaudes",
+  "terrain_tags": [
+   "source",
+   "eau",
+   "vapeur",
+   "roche",
+   "volcan"
+  ],
+  "intensite_max": 0.55,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "soufre",
+     "eau_thermale",
+     "sel_mineral",
+     "plante_rare"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pelerin",
+     "guerisseur",
+     "ascete"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 20,
+    "tags": [
+     "vapeur_brulante",
+     "gaz_toxique",
+     "chaleur"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 15,
+    "tags": [
+     "elementaire_eau",
+     "creature_thermale"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": -1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:petits_animaux_divers"
+   },
+   {
+    "espece": "espece:elementaux"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Soufre"
+   },
+   {
+    "ressource": "item:alun"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:tuf_volcanique"
+   },
+   {
+    "ressource": "item:travertin"
+   }
+  ]
+ },
+ {
+  "_id": "zone:cascade",
+  "type": "zone_influence",
+  "nom": "Chutes et cascades",
+  "terrain_tags": [
+   "riviere",
+   "cascade",
+   "eau",
+   "rocher",
+   "falaise"
+  ],
+  "intensite_max": 0.5,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "eau_douce",
+     "poisson",
+     "mousse",
+     "plante"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "ondine",
+     "sangsue_geante",
+     "predateur"
+    ]
+   },
+   {
+    "type": "ambiance",
+    "poids": 20,
+    "tags": [
+     "arc_en_ciel",
+     "grondement_eau",
+     "embruns"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 15,
+    "tags": [
+     "chute",
+     "courant_fort",
+     "rocher_glissant"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": 0,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:ondin"
+   },
+   {
+    "espece": "espece:naiade",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:gemmes"
+   },
+   {
+    "ressource": "item:travertin"
+   }
+  ]
+ },
+ {
+  "_id": "zone:haut_plateau_froid",
+  "type": "zone_influence",
+  "nom": "Haut plateau froid",
+  "intensite_max": 0.45,
+  "terrain_tags": [
+   "plateau",
+   "herbe",
+   "roche",
+   "froid",
+   "neige"
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 2,
+   "deplacement": -1
+  },
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "herbe",
+     "plante",
+     "pierre",
+     "minerai"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 25,
+    "tags": [
+     "rapace",
+     "loup",
+     "bandit"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 20,
+    "tags": [
+     "berger",
+     "mineur",
+     "voyageur"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "vent_fort",
+     "orage"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "defauts_rencontres": [
+   {
+    "espece": "espece:yacks"
+   },
+   {
+    "espece": "espece:loup"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:oiseaux_de_proies"
+   },
+   {
+    "espece": "espece:mammouth"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:basalte"
+   }
+  ]
+ },
+ {
+  "_id": "zone:grotte",
+  "type": "zone_influence",
+  "nom": "Grotte naturelle",
+  "terrain_tags": [
+   "grotte",
+   "roche",
+   "souterrain"
+  ],
+  "intensite_max": 0.7,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 30,
+    "tags": [
+     "minerai",
+     "cristal",
+     "champignon"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 40,
+    "tags": [
+     "chauve_souris_geante",
+     "araignee_geante",
+     "ours"
+    ]
+   },
+   {
+    "type": "tresor",
+    "poids": 15,
+    "tags": [
+     "objet_abandonne",
+     "coffre",
+     "mineral_rare"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 15
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": -3,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:chauve_souris"
+   },
+   {
+    "espece": "espece:chauve_souris_geante"
+   },
+   {
+    "espece": "espece:rat_geant"
+   },
+   {
+    "espece": "espece:araignee_geante"
+   },
+   {
+    "espece": "espece:troglodyte"
+   },
+   {
+    "espece": "espece:ours",
+    "regions": [
+     "europe",
+     "steppes",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:gobelin",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Salpetre"
+   },
+   {
+    "ressource": "item:fer"
+   },
+   {
+    "ressource": "item:gemmes"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:albatre"
+   }
+  ]
+ },
+ {
+  "_id": "zone:gouffre",
+  "type": "zone_influence",
+  "nom": "Gouffre",
+  "terrain_tags": [
+   "gouffre",
+   "souterrain",
+   "roche",
+   "eau",
+   "grotte"
+  ],
+  "intensite_max": 0.85,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 40,
+    "tags": [
+     "creature_souterraine",
+     "araignee_geante",
+     "mort_vivant"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 30,
+    "tags": [
+     "chute",
+     "obscurite",
+     "noyade"
+    ]
+   },
+   {
+    "type": "tresor",
+    "poids": 15,
+    "tags": [
+     "ossements",
+     "offrande",
+     "mineral_rare"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 10,
+    "tags": [
+     "cristal",
+     "champignon",
+     "eau"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 4,
+   "visibilite": -3,
+   "deplacement": -3
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:chauve_souris"
+   },
+   {
+    "espece": "espece:chauve_souris_geante"
+   },
+   {
+    "espece": "espece:rat_geant"
+   },
+   {
+    "espece": "espece:araignee_geante"
+   },
+   {
+    "espece": "espece:troglodyte"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Salpetre"
+   },
+   {
+    "ressource": "item:Lichen"
+   },
+   {
+    "ressource": "item:albatre"
+   }
+  ]
+ },
+ {
+  "_id": "zone:desert_sel",
+  "type": "zone_influence",
+  "nom": "Désert de sel",
+  "terrain_tags": [
+   "desert",
+   "sel",
+   "aride",
+   "plaine"
+  ],
+  "intensite_max": 0.8,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 40,
+    "tags": [
+     "soif",
+     "reverberation",
+     "croute_fragile",
+     "chaleur"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "sel",
+     "sel_gemme",
+     "mineral_rare"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 15,
+    "tags": [
+     "creature_du_sel",
+     "pillard",
+     "mirage_vivant"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "caravanier",
+     "saunier"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 3,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:scorpion_geant"
+   },
+   {
+    "espece": "espece:nuee_de_scarabees"
+   },
+   {
+    "espece": "espece:rapaces"
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Sel_gemme"
+   },
+   {
+    "ressource": "item:Sel"
+   },
+   {
+    "ressource": "item:Natron"
+   },
+   {
+    "ressource": "item:alun"
+   },
+   {
+    "ressource": "item:pierre"
+   },
+   {
+    "ressource": "item:albatre"
+   }
+  ]
+ },
+ {
+  "_id": "zone:riviere",
+  "type": "zone_influence",
+  "nom": "Rivière et berges",
+  "terrain_tags": [
+   "riviere",
+   "eau",
+   "berge",
+   "bois"
+  ],
+  "intensite_max": 0.5,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 45,
+    "tags": [
+     "poisson",
+     "eau_fraiche",
+     "plante_aquatique"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "crocodile",
+     "sirene",
+     "sangsue_geante"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pecheur",
+     "passeur",
+     "lavandiere"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 5,
+    "tags": [
+     "noyade",
+     "courant_fort"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 0,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:petits_animaux_divers",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:serpent",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:renard",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:ondin"
+   },
+   {
+    "espece": "espece:naiade",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:cerf",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Aulne",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Eau_de_source",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_medicinales",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Peuplier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Saule",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:perles"
+   },
+   {
+    "ressource": "item:gemmes"
+   },
+   {
+    "ressource": "item:Frene"
+   },
+   {
+    "ressource": "item:argile"
+   }
+  ]
+ },
+ {
+  "_id": "zone:delta",
+  "type": "zone_influence",
+  "nom": "Delta fluvial",
+  "terrain_tags": [
+   "riviere",
+   "delta",
+   "eau",
+   "marais",
+   "berge"
+  ],
+  "intensite_max": 0.65,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 50,
+    "tags": [
+     "poisson",
+     "roseau",
+     "plante_aquatique",
+     "bois"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 20,
+    "tags": [
+     "pecheur",
+     "batelier",
+     "passeur"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "crocodile",
+     "serpent",
+     "monstre_aquatique"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": -1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:crocodile",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:flamants"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:hippopotames",
+    "regions": [
+     "afrique",
+     "afrique_du_nord"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Papyrus"
+   },
+   {
+    "ressource": "item:Lotus"
+   },
+   {
+    "ressource": "item:Eau_de_source"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:Sycomore"
+   },
+   {
+    "ressource": "item:Palmier_dattier"
+   },
+   {
+    "ressource": "item:argile"
+   }
+  ]
+ },
+ {
+  "_id": "zone:marais",
+  "type": "zone_influence",
+  "nom": "Marais putride",
+  "terrain_tags": [
+   "marais",
+   "eau",
+   "boue"
+  ],
+  "intensite_max": 0.85,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 45,
+    "tags": [
+     "serpent",
+     "grenouille_geante",
+     "mort_vivant"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 25,
+    "tags": [
+     "maladie",
+     "empoisonnement",
+     "enlisement"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 20,
+    "tags": [
+     "plante_toxique",
+     "tourbe",
+     "minerai_noir"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "sorciere",
+     "fugitif"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": -2,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rat_geant"
+   },
+   {
+    "espece": "espece:gobelin_des_marais"
+   },
+   {
+    "espece": "espece:araignee"
+   },
+   {
+    "espece": "espece:petits_animaux_divers"
+   },
+   {
+    "espece": "espece:bunyip",
+    "regions": [
+     "oceanie"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Racine_de_mandragore"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:Saule"
+   },
+   {
+    "ressource": "item:Aulne"
+   },
+   {
+    "ressource": "item:Herbes_a_bruler"
+   },
+   {
+    "ressource": "item:Feves_de_carreau"
+   },
+   {
+    "ressource": "item:argile"
+   }
+  ]
+ },
+ {
+  "_id": "zone:estuaire",
+  "type": "zone_influence",
+  "nom": "Estuaire",
+  "terrain_tags": [
+   "cote",
+   "riviere",
+   "mer",
+   "eau",
+   "berge"
+  ],
+  "intensite_max": 0.6,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 45,
+    "tags": [
+     "poisson",
+     "crustace",
+     "eau",
+     "algue"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pecheur",
+     "marin",
+     "passeur"
+    ]
+   },
+   {
+    "type": "commerce",
+    "poids": 15,
+    "tags": [
+     "port",
+     "transport",
+     "marchandise"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 10,
+    "tags": [
+     "monstre_aquatique",
+     "pirate"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:poissons_mammiferes_marins"
+   },
+   {
+    "espece": "espece:serpent"
+   },
+   {
+    "espece": "espece:rapaces"
+   },
+   {
+    "espece": "espece:ondin"
+   },
+   {
+    "espece": "espece:phoques_et_morses",
+    "regions": [
+     "europe",
+     "grand_nord"
+    ]
+   },
+   {
+    "espece": "espece:flamants",
+    "regions": [
+     "afrique",
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:crocodile",
+    "regions": [
+     "afrique"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Sel"
+   },
+   {
+    "ressource": "item:Saule"
+   },
+   {
+    "ressource": "item:Peuplier"
+   },
+   {
+    "ressource": "item:Herbes_medicinales"
+   },
+   {
+    "ressource": "item:argile"
+   }
+  ]
+ }
+]
