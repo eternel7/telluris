@@ -229,7 +229,7 @@ def test_motif_de_tag_couvre_les_suffixes():
 
 
 def test_solitaire_seul_et_grade_releve_par_le_budget():
-	dragon = _espece("dragon", tags=["legendaire"])
+	dragon = _espece("dragon", tags=["boss"])
 	pool = [dragon, _espece("kobold")]
 	couts = lambda e, p: 10 * p["niveau"]
 	# Tiré au niveau 1 (premier), le budget 35 paie jusqu'au niveau 3 (30), pas au 4 (40).
@@ -375,3 +375,197 @@ def test_tag_distance_aux_seules_especes_qui_tirent():
 	archer_profil = {"_id": "profil:archer", "niveau": 2, "restriction_tags": [gen_dist.TAG]}
 	assert combat.profils_compatibles([archer_profil], sortie[0]) == [archer_profil]
 	assert compo.role(archer_profil) == compo.ROLE_DISTANCE
+
+
+# ── Fourchette d'effectif (`espece.effectif`, Auteur 16/11) ───────────────────
+
+def test_fourchette_lue_et_bornee():
+	assert compo.fourchette(_espece("loup", effectif=[3, 6])) == (3, 6)
+	assert compo.fourchette(_espece("loup", effectif=[0, -2])) == (1, 1)   # min ≥ 1, max ≥ min
+	assert compo.fourchette(_espece("loup")) is None
+	assert compo.fourchette(_espece("loup", effectif="beaucoup")) is None
+
+
+def test_effectif_penche_vers_le_milieu_et_symetrique():
+	# Toutes les combinaisons des trois tirages : chaque valeur de [2, 6], sa fréquence.
+	span = 4
+	valeurs = [(i + 0.5) / (span + 1) for i in range(span + 1)]
+	freq: dict = {}
+	for a in valeurs:
+		for b in valeurs:
+			for demi in (0.0, 0.99):
+				n = compo.tirer_effectif((2, 6), _Seq([a, b, demi, demi]))
+				freq[n] = freq.get(n, 0) + 1
+	assert sorted(freq) == [2, 3, 4, 5, 6]
+	assert all(freq[2 + k] == freq[6 - k] for k in range(3))   # symétrique
+	assert freq[4] == max(freq.values()) and freq[4] > freq[2]
+
+
+def test_effectif_decale_par_les_compagnons():
+	assert compo.tirer_effectif((3, 3), _Seq([0.5]), decalage=2) == 5
+
+
+def test_legendaire_n_est_plus_solitaire():
+	r = compo.regles(_aff())
+	assert not compo.est_solitaire(_espece("loup", tags=["legendaire"]), r)
+	assert compo.est_solitaire(_espece("x", tags=["boss"]), r)
+
+
+def test_fourchette_fixe_le_nombre_et_le_budget_les_grades():
+	loup = _espece("loup", tags=["ia_meute"], effectif=[4, 4])
+	couts = lambda e, p: 10 * p["niveau"]
+	profils = list(_P.values())
+	# Budget minuscule : quatre loups quand même, tous au plus bas grade.
+	m = combat.instantiate_groupes([loup], profils, 5, couts, plafond=8, proba_second=0,
+								   affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == 4 and {x["profil_id"] for x in m} == {"profil:p1"}
+	# Budget large : toujours quatre, le chef relevé et la suite plus haut que p1.
+	m = combat.instantiate_groupes([loup], profils, 1000, couts, plafond=8, proba_second=0,
+								   affinites=_aff(), rand=_Seq([0.99]))
+	assert len(m) == 4
+	assert m[0]["profil_id"] == "profil:p3"   # tiré p1 (premier), relevé de 2 crans
+	assert all(int(x["profil_id"][-1]) < 3 for x in m[1:])
+
+
+def test_fourchette_prime_sur_le_rodeur_mais_pas_sur_le_solitaire():
+	araignee = _espece("araignee", tags=["ia_embuscade"], effectif=[5, 5])
+	m = combat.instantiate_groupes([araignee], [], 1000, _couts({"espece:araignee": 1}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == 5
+	dragon = _espece("dragon", tags=["boss"], effectif=[3, 3])
+	m = combat.instantiate_groupes([dragon], [], 1000, _couts({"espece:dragon": 1}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == 1
+
+
+def test_compagnons_ajoutent_des_specimens_pas_des_crans():
+	orc = _espece("orc", effectif=[2, 2])
+	couts = lambda e, p: 10 * p["niveau"]
+	profils = [_P[1], _P[2]]
+	# Seul : budget 40 pour deux orcs → part 20 chacun, chef p2 + suite p1 (30 ≤ 40).
+	seul = combat.instantiate_groupes([orc], profils, 40, couts, plafond=8, proba_second=0,
+									  affinites=_aff(hierarchie={"chef_crans_max": 1}), rand=_Seq([0.0]))
+	# Deux compagnons : le routeur double le budget (× (1 + 0,5 × 2)) ; un orc de plus, même part.
+	from models import character_stats
+	budget = 40 * (1 + character_stats.RENCONTRE_BUDGET_COMPAGNON * 2)
+	avec = combat.instantiate_groupes([orc], profils, budget, couts, plafond=8, proba_second=0,
+									  affinites=_aff(hierarchie={"chef_crans_max": 1}), rand=_Seq([0.0]),
+									  compagnons=2)
+	assert len(seul) == 2 and len(avec) == 3
+	assert max(int(x["profil_id"][-1]) for x in avec) == max(int(x["profil_id"][-1]) for x in seul)
+
+
+def test_second_groupe_a_fourchette_borne_par_le_plafond():
+	gob = _espece("gobelin", effectif=[3, 3])
+	loup = _espece("loup", effectif=[4, 4])
+	aff = _aff(bandes=[{"id": "horde", "especes": ["gobelin", "loup"]}], diversite_pleine=1)
+	m = combat.instantiate_groupes([gob, loup], [], 1000, _couts({"espece:gobelin": 1, "espece:loup": 1}),
+								   plafond=5, proba_second=1.0, affinites=aff, rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m] == ["espece:gobelin"] * 3 + ["espece:loup"] * 2
+
+
+def test_charognards_a_fourchette_restent_peu_nombreux():
+	aff = _aff(charognards={"suivis_tags": ["predateur"], "tags": ["vermine"], "max": 2},
+			   diversite_pleine=1)
+	loup = _espece("loup", tags=["predateur"], effectif=[2, 2])
+	rat = _espece("rat", tags=["vermine"], effectif=[6, 6])
+	m = combat.instantiate_groupes([loup, rat], [], 1000, _couts({"espece:loup": 1, "espece:rat": 1}),
+								   plafond=8, proba_second=1.0, affinites=aff, rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m].count("espece:rat") == 2
+
+
+def test_generateur_effectifs_par_tags_et_rang():
+	import gen_effectifs_especes as gen_eff
+	assert gen_eff.fourchette_pour(["boss", "ia_meute"], None) == [1, 1]
+	assert gen_eff.fourchette_pour(["ia_meute"], None) == [3, 6]
+	assert gen_eff.fourchette_pour(["ia_meute"], "A") == [3, 6 - gen_eff.RESSERREMENT["A"]]
+	assert gen_eff.fourchette_pour(["humanoide", "legendaire"], None) == [2, gen_eff.LEGENDAIRE_MAX]
+	assert gen_eff.fourchette_pour([], None) == list(gen_eff.DEFAUT)
+	assert gen_eff.fourchette_pour(["ia_meute"], "S+")[1] >= gen_eff.fourchette_pour(["ia_meute"], "S+")[0]
+	loup, ours = _espece("loup", tags=["ia_meute"]), _espece("ours", tags=["boss"], effectif=[1, 1])
+	sortie = gen_eff.delta([loup, ours], {})
+	assert [d["_id"] for d in sortie] == [loup["_id"]]
+	assert {k: v for k, v in sortie[0].items() if k != gen_eff.CHAMP} == loup
+	assert gen_eff.delta(sortie, {}) == []   # rejeu : rien de plus
+
+
+# ── Exceptions par tag : nuée, chef, unique (Auteur, 16/11) ───────────────────
+
+def test_nuee_ignore_la_fourchette_et_depense_le_budget():
+	# Fourchette posée à la main : ignorée, le budget seul décide (100 / 10 = 10 rats).
+	rat = _espece("rat", tags=["nuee"], effectif=[2, 2])
+	m = combat.instantiate_groupes([rat], [], 100, _couts({"espece:rat": 10}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == 10
+
+
+def test_nuee_bornee_par_son_plafond_propre():
+	from models import character_stats
+	rat = _espece("rat", tags=["nuee"])
+	m = combat.instantiate_groupes([rat], [], 10_000, _couts({"espece:rat": 1}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == max(8, character_stats.RENCONTRE_PLAFOND_NUEE)
+
+
+def test_nuee_grades_libres_sans_chef():
+	rat = _espece("rat", tags=["nuee"])
+	# random 0.99 relèverait un chef de 2 crans : une nuée n'en a pas, tous restent au premier tiré.
+	m = combat.instantiate_groupes([rat], list(_P.values()), 1000, lambda e, p: 10 * p["niveau"],
+								   plafond=8, proba_second=0, affinites=_aff(), rand=_Seq([0.99]))
+	assert {x["profil_id"] for x in m} == {"profil:p1"}
+
+
+def test_nuee_le_second_groupe_se_sert_d_abord():
+	rat = _espece("rat", tags=["nuee"])
+	loup = _espece("loup", effectif=[2, 2])
+	aff = _aff(bandes=[{"id": "b", "especes": ["rat", "loup"]}], diversite_pleine=1)
+	m = combat.instantiate_groupes([rat, loup], [], 100, _couts({"espece:rat": 10, "espece:loup": 10}),
+								   plafond=8, proba_second=1.0, affinites=aff, rand=_Seq([0.0]))
+	ids = [x["espece_id"] for x in m]
+	assert ids[:2] == ["espece:loup"] * 2           # le second groupe d'abord, sa fourchette entière
+	assert ids[2:] == ["espece:rat"] * 8            # la nuée dépense tout le reste (80 / 10)
+
+
+def test_chef_mene_une_suite_garantie_sur_sa_part():
+	from models import character_stats
+	roi = _espece("roi", tags=["boss", "chef"])
+	squelette = _espece("squelette", effectif=[3, 3])
+	aff = _aff(bandes=[{"id": "tertre", "especes": ["roi", "squelette"]}])
+	couts = lambda e, p: 10 * p["niveau"]
+	# proba_second = 0 : la suite d'un chef ne dépend pas de la chance du second groupe.
+	m = combat.instantiate_groupes([roi, squelette], list(_P.values()), 100, couts, plafond=8,
+								   proba_second=0, affinites=aff, rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m] == ["espece:roi"] + ["espece:squelette"] * 3
+	# Le chef relève son grade sur la part laissée par la suite (60 → p4 à 40 tient).
+	part_chef = 100 * (1 - character_stats.RENCONTRE_CHEF_SUITE_PART)
+	assert 10 * int(m[0]["profil_id"][-1]) <= part_chef
+
+
+def test_chef_sans_association_au_pool_vient_seul():
+	roi = _espece("roi", tags=["boss", "chef"])
+	m = combat.instantiate_groupes([roi, _espece("cerf")], [], 100, _couts({"espece:roi": 10,
+																			"espece:cerf": 1}),
+								   plafond=8, proba_second=1.0, affinites=_aff(), rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m] == ["espece:roi"]
+
+
+def test_chef_exige_un_solitaire():
+	r = compo.regles(_aff())
+	assert compo.est_chef(_espece("roi", tags=["boss", "chef"]), r)
+	assert not compo.est_chef(_espece("orc", tags=["chef"]), r)
+	assert compo.est_solitaire(_espece("kraken", tags=["unique"]), r)
+	assert not compo.est_nuee(_espece("x", tags=["boss", "nuee"]), r)
+
+
+def test_generateur_pose_les_tags_et_retire_la_fourchette_des_nuees():
+	import gen_effectifs_especes as gen_eff
+	rat = {"_id": "espece:rat_geant", "type": "espece", "tags": ["animal", "vermine"], "effectif": [3, 8]}
+	kraken = {"_id": "espece:kraken", "type": "espece", "tags": ["legendaire"], "effectif": [2, 2]}
+	sortie = {d["_id"]: d for d in gen_eff.delta([rat, kraken], {})}
+	assert sortie["espece:rat_geant"]["tags"] == ["animal", "vermine", "nuee"]
+	assert gen_eff.CHAMP not in sortie["espece:rat_geant"]
+	assert "unique" in sortie["espece:kraken"]["tags"] and sortie["espece:kraken"][gen_eff.CHAMP] == [1, 1]
+	assert gen_eff.delta(list(sortie.values()), {}) == []   # rejeu : rien de plus
+	ids = {f"espece:{e}" for es in gen_eff.TAGS_POSES.values() for e in es}
+	assert gen_eff.especes_inconnues(ids) == []
+	assert gen_eff.especes_inconnues(ids - {"espece:kraken"}) == ["espece:kraken"]

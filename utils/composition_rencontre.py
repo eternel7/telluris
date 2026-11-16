@@ -9,7 +9,12 @@
 #   • SECOND GROUPE associé à la première espèce : BANDE nommée (sinon FAMILLE de tags), MAÎTRE
 #     ET BÊTES (ou nécromancien et morts), CHASSE EN COURS (proie fuyarde), CHAROGNARDS ;
 #     une association tirée parmi celles qui ont un candidat au pool, sinon espèce au hasard.
-#     Chance = `RENCONTRE_SECOND_GROUPE_PROBA` × min(1, candidats / `diversite_pleine`).
+#     Chance = `RENCONTRE_SECOND_GROUPE_PROBA` × min(1, candidats / `diversite_pleine`) ;
+#   • FOURCHETTE d'effectif propre à l'espèce (champ `effectif` du doc `espece:*`, Auteur 16/11) :
+#     le nombre est tiré dedans, le budget ne règle plus que les grades ; prime sur meute/rôdeur ;
+#   • EXCEPTIONS par tag (Auteur, 16/11) : NUÉE (`nuee` : sans fourchette, grades libres, tout le
+#     budget, plafond `RENCONTRE_PLAFOND_NUEE`) ; CHEF (`chef` sur un solitaire : suite GARANTIE
+#     tirée dans ses associations, `RENCONTRE_CHEF_SUITE_PART` du budget) ; UNIQUE (solitaire).
 #
 # Doc ABSENT ⇒ `combat.instantiate_groupes` garde le comportement d'avant (CLAUDE.md §4) ;
 # doc présent, clé absente ⇒ la valeur de `DEFAUTS`.
@@ -26,7 +31,13 @@ DEFAUTS = {
 	"bandes": [],
 	"familles_tags": [],
 	"formes": {
-		"solitaire_tags": ["boss", "legendaire", "geant"],
+		# Sans « legendaire » (Auteur, 16/11) : une espèce légendaire peut venir à plusieurs ;
+		# `unique` = créature dont il n'existe qu'une (kraken, grand phénix…).
+		"solitaire_tags": ["boss", "geant", "unique"],
+		# NUÉE : aucune fourchette, grades libres, dépense tout le budget (Auteur, 16/11).
+		"nuee_tags": ["nuee"],
+		# CHEF : un solitaire qui mène une suite tirée dans ses associations.
+		"chef_tags": ["chef"],
 		"meute_tags": ["ia_meute"],
 		"meute_min": 2,
 		"rodeur_tags": ["ia_embuscade", "furtif"],
@@ -79,6 +90,16 @@ def est_solitaire(espece, r) -> bool:
 	return tag_correspond(_tags(espece), r["formes"].get("solitaire_tags"))
 
 
+def est_nuee(espece, r) -> bool:
+	"""Nuée : ni solitaire ni fourchette ; le nombre sort du budget (plafond propre)."""
+	return not est_solitaire(espece, r) and tag_correspond(_tags(espece), r["formes"].get("nuee_tags"))
+
+
+def est_chef(espece, r) -> bool:
+	"""Chef : un SOLITAIRE qui mène une suite d'une autre espèce (le tag seul n'y suffit pas)."""
+	return est_solitaire(espece, r) and tag_correspond(_tags(espece), r["formes"].get("chef_tags"))
+
+
 def est_meute(espece, r) -> bool:
 	return not est_solitaire(espece, r) and tag_correspond(_tags(espece), r["formes"].get("meute_tags"))
 
@@ -100,6 +121,32 @@ def effectif_max(espece, r) -> int | None:
 
 def effectif_min(espece, r) -> int:
 	return max(1, int(r["formes"].get("meute_min") or 1)) if est_meute(espece, r) else 1
+
+
+# ── Fourchette d'effectif (champ `effectif` du doc `espece:*`, Auteur 16/11) ──────
+# La NATURE de l'espèce fixe la taille du groupe ; le budget de menace ne règle plus que les
+# grades. Posée par `dev/gen_effectifs_especes.py`. Absente ⇒ effectif dépensé au budget.
+
+def fourchette(espece) -> tuple | None:
+	"""`(min, max)` du champ `effectif` ([min, max]) ; illisible ou absent ⇒ None."""
+	v = (espece or {}).get("effectif")
+	try:
+		mn, mx = int(v[0]), int(v[1])
+	except (TypeError, ValueError, IndexError, KeyError):
+		return None
+	mn = max(1, mn)
+	return mn, max(mn, mx)
+
+
+def tirer_effectif(fourch: tuple, rand, decalage: int = 0) -> int:
+	"""Effectif PENCHÉ VERS LE MILIEU de la fourchette (moyenne de deux tirages uniformes, la
+	demi-unité tranchée par un troisième : symétrique), décalé de `decalage` (compagnons)."""
+	mn, mx = fourch
+	span = mx - mn
+	a = min(span, int(rand.random() * (span + 1)))
+	b = min(span, int(rand.random() * (span + 1)))
+	demi = 1 if rand.random() >= 0.5 else 0
+	return mn + (a + b + demi) // 2 + max(0, int(decalage or 0))
 
 
 # ── Associations du second groupe ─────────────────────────────────────────────
