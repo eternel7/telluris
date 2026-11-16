@@ -34,7 +34,8 @@ from utils.marche import (
 from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu, noeud_destination, lieu_est_ville_image
 from utils import donjon
 from utils import tresor as tresor_util
-from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
+from utils.combat import instantiate_monsters, instantiate_rencontre, create_combat_doc, resolve_first_turns, finalize_combat
+from utils import combat_arrivee
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte, peupler_lieu
 from utils import quetes
 from utils import bois
@@ -645,6 +646,47 @@ def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
 	return combat_doc["_id"]
 
 
+def _declencher_combat_arrivee(character: dict, lieu_doc: dict,
+							   point_apparition: dict) -> str | None:
+	"""Combat d'ARRIVÉE (`utils/combat_arrivee.py`) : le gardien du lieu et ses comparses,
+	sur la carte du lieu, le groupe à la case d'arrivée. None si le lieu n'en porte pas, si le
+	gardien est mort depuis moins de son délai de réapparition (lieu vide), ou si le bestiaire
+	ne le connaît pas. ⚠️ Appelé APRÈS `_effets_arrivee` : le personnage est déjà sauvé dans le
+	lieu, c'est là qu'il se retrouve à l'issue du combat. Combat actif repris, jamais doublé."""
+	regle = combat_arrivee.spec(lieu_doc)
+	if not regle:
+		return None
+	etat = get_doc(combat_arrivee.etat_id(lieu_doc["_id"]))
+	if combat_arrivee.abattu_recemment(etat, regle, quetes.now_epoch()):
+		return None
+	for c in (find_docs({"type": "combat", "user_id": character["user_id"]}) or []):
+		if c.get("character_id") == character["_id"] and c.get("status") == "active":
+			return c["_id"]
+	cible = get_doc(regle["espece"])
+	if not cible:
+		return None
+	accompagnants = [d for d in (get_doc(e) for e in regle["accompagnants"]) if d]
+	compagnons = recrutement.groupe_effectif(character, get_doc)
+	monstres = instantiate_rencontre(
+		cible, accompagnants, find_docs({"type": "profil"}) or [],
+		combat_arrivee.nb_accompagnants(regle, len(compagnons)) if accompagnants else 0,
+		profil_weights=regle["profil_weights"])
+	if not monstres:
+		return None
+	combat_doc = create_combat_doc(
+		character, monstres, list(lieu_doc.get("tags") or []), lieu_doc.get("image", ""),
+		battle_map=lieu_doc, compagnons=compagnons,
+		montures=montures.montures_effectives(character, get_doc),
+		proteges=escorte.proteges_effectifs(character, get_doc),
+		point_apparition=point_apparition)
+	combat_doc[combat_arrivee.CHAMP] = combat_arrivee.marque(lieu_doc["_id"], regle)
+	resolve_first_turns(combat_doc)
+	if combat_doc["status"] != "active":
+		finalize_combat(combat_doc)
+	save_doc(combat_doc)
+	return combat_doc["_id"]
+
+
 def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 					lieu_doc: dict) -> dict:
 	"""Arrivée RÉELLE dans un autre lieu, et tout ce qu'elle entraîne : quêtes de visite,
@@ -874,6 +916,13 @@ def move_character(
 						# Doc ANNEXE, sauvé après le personnage (déjà sorti de son groupe).
 						if guide_parti:
 							save_doc(guide_parti)
+						# Gardien du lieu (`combat_arrivee`) : le combat s'ouvre à l'arrivée, le
+						# client y part (`combat_id`) — l'événement de zone tiré est ignoré.
+						if not interne:
+							combat_id = _declencher_combat_arrivee(
+								character_to_update, lieu_doc, destination_pos)
+							if combat_id:
+								arrivee["combat_id"] = combat_id
 						return arrivee
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move

@@ -153,6 +153,8 @@ utils/
   chasse.py              # quêtes de chasse (pur) : élite à profil élevé, rang de guilde
   donjon.py              # donjons (pur) : salles curatées, plafond de grade, commissions d'éradication ;
                          #   donjon à ÉTAGES (`mode:"etages"`) : étages reliés par des connexions, un seul combat
+  combat_arrivee.py      # gardien d'un lieu explorable (pur) : bloc `combat_arrivee` → combat dès l'arrivée par connexion,
+                         #   sauf mort depuis < `reapparition_min` (délai GLOBAL, doc d'état `reapparition:*`) ; sommet du Mont
   recrutement.py         # recrutement (pur) : recrues, tableau, groupe, affinités, parts, compagnie
   montures.py            # montures (pur) : étable, charge multipliée, troupeau, harnachement (slots propres)
   guides.py              # guides locaux (pur) : `rules:guides`, métiers localisés, arrhes + question, départ à la sortie de la cité, savoir, cap posé par le guide

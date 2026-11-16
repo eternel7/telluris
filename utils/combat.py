@@ -54,6 +54,7 @@ from utils import ia_monstre
 from utils import chasse_signee
 from utils import exigence_arme
 from utils import composition_rencontre as composition
+from utils import combat_arrivee
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -8991,5 +8992,19 @@ def finalize_combat(combat_doc: dict) -> bool:
 	if not _finalize_membre(combat_doc, joueur_principal, character, status):
 		return False  # échec de sauvegarde → ne pas marquer, on réessaiera
 
+	_noter_gardien_abattu(combat_doc)
 	combat_doc["recompense_appliquee"] = True
 	return True
+
+
+def _noter_gardien_abattu(combat_doc: dict) -> None:
+	"""Combat d'arrivée (`utils/combat_arrivee.py`) : le gardien tombé, sa mort se note sur le
+	doc d'état GLOBAL du lieu — le délai de réapparition part pour tous les joueurs. Toute
+	issue (tué puis fuite compte). Best-effort : un échec d'écriture laisse le lieu gardé."""
+	if not combat_doc.get(combat_arrivee.CHAMP):
+		return
+	lieu_id = combat_doc[combat_arrivee.CHAMP].get("lieu")
+	etat = get_doc(combat_arrivee.etat_id(lieu_id)) if lieu_id else None
+	doc = combat_arrivee.noter_abattu(etat, combat_doc, int(time.time()))
+	if doc is not None and save_doc(doc) is None:
+		print("combat_arrivee : mort du gardien non notée", lieu_id)
