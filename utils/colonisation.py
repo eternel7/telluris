@@ -79,7 +79,8 @@ DEFAUTS = {
 		"materiaux_seuil": 5, "medicaments_seuil": 2,
 	},
 	# Ce qu'un objet du sac devient une fois donné : premier stock dont une règle le reconnaît
-	# (ordre de la liste). `filtres` = clés de `utils/filtres_boutique.filtres_item`.
+	# (ordre de la liste). `filtres` = clés de `utils/filtres_boutique.filtres_item` ; `tags` = tags
+	# du doc item (objets ouvrés sans sous-catégorie propre : cordes, poix, toiles…).
 	"depots": [
 		{"stock": "nourriture", "filtres": ["conso.nourriture", "conso.boisson"],
 		 "sous_categories": ["carcasse", "viande", "volaille", "legume", "fruit", "fruit_sec", "grain", "farine",
@@ -87,8 +88,8 @@ DEFAUTS = {
 		 "unites_par_kg": 1},
 		{"stock": "medicaments", "filtres": ["conso.soin"], "sous_categories": ["herbe"], "unites_par_kg": 10},
 		{"stock": "bois", "filtres": ["matiere.bois"], "sous_categories": [], "unites_par_kg": 0.5},
-		{"stock": "materiaux", "filtres": ["matiere.metal"], "sous_categories": ["corde", "pierre", "sel_gemme"],
-		 "unites_par_kg": 1},
+		{"stock": "materiaux", "filtres": ["matiere.metal"], "sous_categories": ["pierre", "sel_gemme"],
+		 "tags": ["materiau_construction"], "unites_par_kg": 1},
 	],
 	"batiments_def": [
 		{"id": "habitation", "label": "Habitation", "icone": "🏠", "nature": REPERE, "palier_min": "campement",
@@ -1773,8 +1774,11 @@ def habitants(imp: dict, employes: list) -> int:
 def stock_de_item(item: dict, filtres: list, reg: dict) -> dict | None:
 	"""Règle de dépôt (`depots`) qui reconnaît cet objet, ou None : il ne se donne pas."""
 	cles = set(filtres or [])
+	tags = set((item or {}).get("tags") or [])
 	for regle in reg.get("depots") or []:
-		if cles & set(regle.get("filtres") or []) or (item or {}).get("sous_categorie") in (regle.get("sous_categories") or []):
+		if (cles & set(regle.get("filtres") or [])
+				or (item or {}).get("sous_categorie") in (regle.get("sous_categories") or [])
+				or tags & set(regle.get("tags") or [])):
 			return regle
 	return None
 

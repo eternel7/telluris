@@ -632,6 +632,14 @@ def test_un_objet_donne_rejoint_le_stock_que_sa_regle_reconnait():
 	assert col.stock_de_item({}, ["matiere.bois"], reg)["stock"] == "bois"
 	assert col.stock_de_item({}, ["matiere.metal"], reg)["stock"] == "materiaux"
 	assert col.stock_de_item({"sous_categorie": "grimoire"}, ["magie.grimoire"], reg) is None
+	# Pierres de construction (marbre, granit, argile…) : sous-catégorie « pierre » ; les cordes
+	# d'instrument ne bâtissent rien (Auteur, 16/11).
+	assert col.stock_de_item({"sous_categorie": "pierre"}, ["matiere.autre"], reg)["stock"] == "materiaux"
+	assert col.stock_de_item({"sous_categorie": "corde"}, ["matiere.autre"], reg) is None
+	# Objets ouvrés (cordes, poix, toiles…) : par le tag, catégorie inchangée.
+	corde = {"categorie": "outil", "sous_categorie": "", "tags": ["materiau_construction"], "poids": 1.0}
+	assert col.stock_de_item(corde, [], reg)["stock"] == "materiaux"
+	assert col.stock_de_item({"categorie": "outil", "tags": None}, [], reg) is None
 	regle = col.stock_de_item(pain, [], reg)
 	assert col.unites_de_item(pain, regle) == 2 * regle["unites_par_kg"]
 	assert col.unites_de_item({"poids": [1, 3]}, regle) == 2 * regle["unites_par_kg"]      # poids en fourchette
@@ -1069,6 +1077,11 @@ def test_le_bucheron_vend_l_essence_du_site_et_le_carrier_ses_minerais():
 	assert col.objets_du_metier("bucheron", bucheron, site, reg, resolve, find) == ["item:Rondin_de_Bouleau"]
 	# la pierre habituelle PLUS le fer du site
 	assert col.objets_du_metier("carrier", carrier, site, reg, resolve, find) == carrier["items"] + ["item:fer"]
+	# une pierre de construction du site (sous-catégorie « pierre ») se vend aussi, avec la pierre brute
+	marbre = {"_id": "item:marbre", "type": "item", "categorie": "composant", "sous_categorie": "pierre"}
+	resolve_m = {**RESSOURCES, marbre["_id"]: marbre}.get
+	site_m = {"materiaux": {"note": 1, "ressources": ["item:marbre"]}}
+	assert col.objets_du_metier("carrier", carrier, site_m, reg, resolve_m, find) == carrier["items"] + ["item:marbre"]
 	# sans ressource adaptée : la liste habituelle
 	for metier, produit in (("bucheron", bucheron), ("carrier", carrier)):
 		assert col.objets_du_metier(metier, produit, {}, reg, resolve, find) == produit["items"]
