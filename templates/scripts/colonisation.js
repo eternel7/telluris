@@ -378,7 +378,7 @@ function colGuildeHtml(g, role, purse) {
 		const s = g.suivant;
 		if (!s) return '';
 		html += `<section class="prop-section"><h3>🏰 Fonder la guilde</h3><div class="prop-ligne"><div class="prop-txt">
-			<span class="q-desc">${_colE(s.label)} : s'ouvre au palier ${_colE(s.palier)}. Les associés d'alors en seront membres fondateurs.</span>
+			<span class="q-desc">${_colE(s.label)}. Les associés d'alors en seront membres fondateurs.</span>
 			<span class="sell-prix">💰 ${_prixTexte(s.prix)}</span>
 			${s.refus ? `<span class="q-desc">⚠️ ${_colE(s.refus)}</span>` : ''}
 			${role === 'fondateur' && !s.refus ? '<input type="text" id="col-guilde-nom" maxlength="40" placeholder="Nom de la guilde (facultatif)">' : ''}</div>
@@ -426,7 +426,10 @@ function colGuildeHtml(g, role, purse) {
 // tableau des besoins, dons (§ 12.7).
 function colImplantationHtml(d, onglet) {
 	if (!_colGere(d)) return colEnteteHtml(d) + colOngletSiteHtml(d) + (d.guilde && d.guilde.existe ? colGuildeHtml(d.guilde, d.role, d.purse) : '');
-	const tabs = `<div class="col-onglets">` + COL_ONGLETS.map(([id, nom]) =>
+	// L'onglet Guilde n'existe qu'une fois la guilde fondée ou fondable au palier courant.
+	const avecGuilde = !!(d.guilde && (d.guilde.existe || d.guilde.suivant));
+	if (onglet === 'guilde' && !avecGuilde) onglet = 'site';
+	const tabs = `<div class="col-onglets">` + COL_ONGLETS.filter(([id]) => id !== 'guilde' || avecGuilde).map(([id, nom]) =>
 		`<button class="sheet-tab-btn${id === onglet ? ' active' : ''}" data-onglet="${id}" onclick="colOnglet(this)">${nom}</button>`).join('') + `</div>`;
 	const corps = onglet === 'population' ? colOngletPopulationHtml(d)
 		: onglet === 'guilde' ? colGuildeHtml(d.guilde, d.role, d.purse)
