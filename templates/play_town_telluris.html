@@ -13802,6 +13802,25 @@ function onGroupeInvSelect(avId) {
 	renderGroupeInventaire();
 }
 
+// Sac d'un porteur du groupe (compagnon, monture) changé HORS du panneau 👥 — don à une
+// implantation (scripts/colonisation.js). `payload` = `_inventory_payload(porteur, principal)`.
+//  - fiche de CE compagnon ouverte : elle affiche son sac → appliqué tel quel ;
+//  - payload du groupe en mémoire (`_grpEtat`) : sac et charge du porteur réécrits, carte de
+//    monture comprise ; les CONTENANTS (clés `porteur#index`, contenu) ne sont pas dans ce
+//    payload → `_grpEtat` jeté s'il en a, rechargé au prochain besoin (`_assurerGroupe`).
+function _resyncSacPorteur(id, payload) {
+	if (!id || !payload) return;
+	if (_compagnonActif && _compagnonActif.id === id) _applyInventoryPayload(payload);
+	if (!_grpEtat) return;
+	if ((_grpEtat.contenants || []).length) { _grpEtat = null; return; }
+	const sacs = _grpEtat.sacs || {};
+	if (sacs[id]) sacs[id] = Object.assign({}, sacs[id], {
+		inventaire: payload.inventaire, charge: payload.charge, charge_max: payload.charge_max,
+	});
+	const mnt = (_grpEtat.montures || []).find(m => m.id === id);
+	if (mnt) { mnt.charge = payload.charge; _majPiedMonture(mnt); }
+}
+
 async function transfererItem(sens, index, itemId) {
 	// Colonne de droite = un CONTENANT : `compagnon_id` est son porteur (vous compris), le
 	// contenant est adressé à part (index vérifié par item_id).

@@ -26,6 +26,7 @@ from utils import echanges_cite
 from utils import filtres_boutique
 from utils import proprietes
 from utils import recrutement
+from utils import contenants
 from utils import montures
 from utils import escorte
 from utils import traces
@@ -223,20 +224,43 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	return payload
 
 
-def _dons_possibles(character: dict, reg: dict) -> list:
-	"""Objets du sac qu'un stock accepte : `[{index, item_id, nom, icon, stock, unites}]`."""
+def _sacs_dons(character: dict) -> list:
+	"""Les sacs où l'on puise un don : le principal EN TÊTE, ses porteurs (compagnons puis
+	montures, `recrutement.porteurs_effectifs`), puis les contenants ouverts de tous ces sacs
+	(sacs virtuels, `contenants.avec_contenants`). ⚠️ Source UNIQUE de la liste des dons et
+	de `donner` : les deux doivent voir les mêmes sacs, adressés par `_id`."""
+	return contenants.avec_contenants([character] + recrutement.porteurs_effectifs(character, get_doc),
+									  get_doc, colonisation.now_epoch())
+
+
+def _nom_sac(sac: dict, character: dict) -> str:
+	"""Qui porte l'objet : vide pour le principal, le nom du compagnon / de la monture, ou
+	celui du contenant (« Sac de Manannán ») pour un sac virtuel."""
+	if sac is character:
+		return ""
+	if contenants.est_virtuel(sac):
+		return sac.get("nom") or ""
+	return proprietes.nom_personnage(sac) if sac.get("prenom") else (sac.get("nom") or "")
+
+
+def _dons_possibles(character: dict, reg: dict, sacs: list | None = None) -> list:
+	"""Objets du GROUPE qu'un stock accepte :
+	`[{sac, porteur, index, item_id, nom, icon, stock, stock_label, unites}]`."""
 	labels = reg.get("stocks_labels") or {}
 	out = []
-	for i, ref in enumerate(character.get("inventaire") or []):
-		item = resolve_item_ref(ref)
-		if not item:
-			continue
-		regle = colonisation.stock_de_item(item, filtres_boutique.filtres_item(item), reg)
-		if regle:
-			out.append({"index": i, "item_id": item_ref_id(ref), "nom": item.get("nom", ""),
-						"icon": item.get("icon", ""), "stock": regle["stock"],
-						"stock_label": labels.get(regle["stock"], regle["stock"]),
-						"unites": colonisation.unites_de_item(item, regle)})
+	for sac in sacs if sacs is not None else _sacs_dons(character):
+		porteur = _nom_sac(sac, character)
+		for i, ref in enumerate(sac.get("inventaire") or []):
+			item = resolve_item_ref(ref)
+			if not item:
+				continue
+			regle = colonisation.stock_de_item(item, filtres_boutique.filtres_item(item), reg)
+			if regle:
+				out.append({"sac": sac.get("_id"), "porteur": porteur,
+							"index": i, "item_id": item_ref_id(ref), "nom": item.get("nom", ""),
+							"icon": item.get("icon", ""), "stock": regle["stock"],
+							"stock_label": labels.get(regle["stock"], regle["stock"]),
+							"unites": colonisation.unites_de_item(item, regle)})
 	return out
 
 
@@ -368,7 +392,14 @@ async def donner(current_user: Annotated[dict, Depends(get_current_user)], body:
 	"""Don LIBRE d'un objet du sac à l'un des quatre stocks (tout visiteur, § 10) ; c'est
 	aussi l'approvisionnement de l'associé et le dépôt du fondateur."""
 	character, imp, reg, role = _ici(current_user)
-	refs = character.get("inventaire") or []
+	# L'objet peut venir de TOUT le groupe : un compagnon, une monture, un contenant (sac
+	# virtuel) — `sac` = son `_id` dans `_sacs_dons`, le principal à défaut.
+	vise = body.get("sac") or character.get("_id")
+	sacs = _sacs_dons(character)
+	sac = next((s for s in sacs if s.get("_id") == vise), None)
+	if sac is None:
+		raise HTTPException(status_code=404, detail="Ce sac n'est pas celui de votre groupe.")
+	refs = sac.setdefault("inventaire", [])
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
@@ -382,11 +413,18 @@ async def donner(current_user: Annotated[dict, Depends(get_current_user)], body:
 	entre = colonisation.deposer(imp, reg, character, stock, colonisation.unites_de_item(item, regle),
 								 item.get("nom", ""))
 	refs.pop(pos)
-	_sauver(imp, character)
+	contenants.reporter([sac])                          # sac virtuel → référence du contenant
+	porteur = contenants.porteurs_reels([sac])[0]
+	_sauver(imp, porteur)
 	role = colonisation.role_de(character, imp)        # un premier don fait un soutien
-	return _payload(character, imp, reg, role, extra={
-		"don": {"stock": stock, "unites": entre, "nom": item.get("nom", "")},
-		"inventaire_payload": _inventory_payload(character)})
+	extra = {"don": {"stock": stock, "unites": entre, "nom": item.get("nom", "")},
+			 "inventaire_payload": _inventory_payload(character)}
+	if porteur is not character:
+		# Sac d'un compagnon / d'une monture allégé : son payload voyage à part (Convention §10),
+		# jamais à la place de celui du principal — sac du porteur, sol du joueur.
+		extra["compagnon_id"] = porteur.get("_id")
+		extra["compagnon"] = _inventory_payload(porteur, character)
+	return _payload(character, imp, reg, role, extra=extra)
 
 
 @colonisation_router.post("/colonisation/feu")

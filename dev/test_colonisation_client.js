@@ -216,4 +216,16 @@ test('🏷️ icône de carte : au fondateur seul, « Aucune » tant qu’elle n
 		assert.ok(!colOngletSiteHtml(gerant(role, { icone_carte: { courante: null, choix, obligatoire: false } })).includes('Icône sur la carte'));
 });
 
+test('don depuis le sac d’un compagnon : son sac est resynchronisé, après celui du principal', () => {
+	const appels = [];
+	globalThis._applyInventoryPayload = p => appels.push(['principal', p]);
+	globalThis._resyncSacPorteur = (id, p) => appels.push([id, p]);
+	const principal = { inventaire: [] }, sacBo = { inventaire: [], charge: 0 };
+	colRendre(visiteur({ inventaire_payload: principal, compagnon_id: 'aventurier:1', compagnon: sacBo }));
+	assert.deepStrictEqual(appels, [['principal', principal], ['aventurier:1', sacBo]]);
+	appels.length = 0;
+	colRendre(visiteur({ inventaire_payload: principal }));
+	assert.deepStrictEqual(appels, [['principal', principal]], 'don du principal : aucun sac de porteur');
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);
