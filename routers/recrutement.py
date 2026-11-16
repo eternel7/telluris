@@ -19,6 +19,7 @@ from utils.characters import (
 # `credit_character` et la bourse) : c'est le seul débit du jeu, il refuse en rendant None.
 from utils.marche import debit_character
 from utils import recrutement
+from utils import expedition
 from utils import mercenaires
 from utils import montures
 from utils import escorte
@@ -210,6 +211,8 @@ def _payload(character: dict, recrues: list | None = None, lieu_doc: dict | None
 					 for p in escorte.proteges_effectifs(character, get_doc)],
 		# Bouton 👥 Groupe de /play : masqué tant que le panneau n'a personne à montrer.
 		"groupe_visible": recrutement.groupe_visible(character, get_doc),
+		# Hache / lame partagées : le groupe vient peut-être de changer (client : `_majBoutonGroupe`).
+		"outils_groupe": expedition.outils_partages(character, get_doc),
 	}
 	if lieu_doc is not None:
 		# Un contrat d'une mission se signe, se rompt sans frais et s'achève ICI : le client

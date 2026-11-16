@@ -1484,7 +1484,7 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 	sac d'un facteur 3 à 5, et le client recopie cette valeur pour griser ses flèches."""
 	slots = character.get("slots", {})
 	sol   = sol_doc if sol_doc is not None else character
-	return {
+	payload = {
 		"slots":         {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
 		"inventaire":    [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))],
 		"objets_au_sol": [d for r in sol.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
@@ -1504,6 +1504,13 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 			consommables.canalisation_bonus(character),
 		),
 	}
+	# Outils PARTAGÉS par l'expédition (hache, lame) : lus depuis le PRINCIPAL — le sol est
+	# le sien, le groupe aussi. Un appel sans `sol_doc` dont le porteur n'est pas un
+	# personnage (compagnon, monture) n'a pas de groupe à lire : la clé est omise et le
+	# client garde sa dernière valeur.
+	if str(sol.get("_id", "")).startswith("character:"):
+		payload["outils_groupe"] = expedition.outils_partages(sol, get_doc)
+	return payload
 
 
 def _fiche_payload(character: dict) -> dict | None:

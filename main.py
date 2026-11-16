@@ -1382,6 +1382,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"intro": intro_payload,
 			"intro_musique": intro_musique,
 			"ressource_recoltable": ressource_recoltable,
+			# Hache / lame portées par N'IMPORTE QUEL membre de l'expédition (bouton 🪓/🔪) ;
+			# resynchronisé par `outils_groupe` de `_inventory_payload`.
+			"outils_groupe": expedition_util.outils_partages(character, get_doc),
 			"relations_lieux": relations_lieux,
 			# Onglet 📖 : le carnet du personnage + son bestiaire. ⚠️ Clé de PREMIER NIVEAU et
 			# non `bloc_fiche` : ce bloc-là est fusionné dans le payload d'un compagnon, or

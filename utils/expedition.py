@@ -72,6 +72,21 @@ def porteur_avec_sous_categorie(get_doc_fn, porteurs: list, sous_categorie: str)
 	return False
 
 
+def outils_partages(character: dict, get_doc_fn=None) -> dict:
+	"""Outils d'exploration que l'EXPÉDITION a sous la main — `{coupe_bois, tranchant}`.
+
+	Publié au client (`outils_groupe`) pour griser le bouton 🪓/🔪 exactement comme
+	l'endpoint `/api/couper` refuse : mêmes porteurs (`membres` : principal + compagnons,
+	jamais de monture), mêmes tags (variables de monde). Sans ce bloc, le client ne
+	voyait que le personnage affiché — une hache dans la main d'un compagnon laissait le
+	bouton grisé chez le principal."""
+	porteurs = membres(character, get_doc_fn)
+	return {
+		"coupe_bois": porteur_avec_tag(get_doc_fn, porteurs, character_stats.OUTIL_COUPE_BOIS_TAG),
+		"tranchant":  porteur_avec_tag(get_doc_fn, porteurs, character_stats.CARCASSE_TRANCHANT_TAG),
+	}
+
+
 def meilleur_negociateur(character: dict, compagnons: list, seuil_min: int | None = None) -> tuple:
 	"""Qui parle au marchand : `(doc, cha, est_compagnon)` — le plus haut Cha BUFFÉ.
 
