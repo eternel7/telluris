@@ -929,11 +929,13 @@ def test_le_visiteur_lit_en_mots_le_fondateur_a_les_chiffres():
 	assert fondateur["journal"][0]["texte"] == "secret du carnet" and len(fondateur["stocks"]) == len(reg["stocks"])
 	associe = col.vue(imp, reg, col.ASSOCIE, site, [], CAT_PROP, now=10)
 	assert "stocks" in associe and "journal" not in associe and "demandes" not in associe
-	# le catalogue ne montre que ce qui se construit, les sept paliers ont leur libellé de menace
+	# le catalogue ne montre que ce qui se construit AU PALIER COURANT, les sept paliers ont leur libellé de menace
 	# sans métier disponible, une boutique « toutes catégories » n'a aucune ligne d'achat
 	assert {c["id"] for c in fondateur["catalogue"]} == {d["id"] for d in reg["batiments_def"]
 														  if d["nature"] in col.NATURES_OUVERTES and d.get("catalogue", True)
-														  and not d.get("toutes_categories")}
+														  and not d.get("toutes_categories")
+														  and col.palier_atteint(reg, imp["palier"], d.get("palier_min"))}
+	assert not any(c["id"] == "ferme" for c in fondateur["catalogue"])        # la ferme attend le Hameau
 	assert set(reg["menace"]["attaque_proba"]) == {p["id"] for p in col.paliers(reg)}
 
 
@@ -970,11 +972,15 @@ def test_chaque_boutique_de_cite_s_achete_une_par_une():
 	imp = _imp(reg, "bourgade", stocks={"bois": 0, "materiaux": 0})
 	lignes = col.catalogue_achats(imp, reg, DISPONIBLES)
 	par_cat = {l["categorie"]: l for l in lignes if l["id"] == "boutique"}
-	assert set(par_cat) == set(col.categories_possibles(reg, "boutique", DISPONIBLES))
+	# la grande maison n'est pas présentée avant son palier
+	assert set(par_cat) == {c for c in col.categories_possibles(reg, "boutique", DISPONIBLES) if not col.est_grande_maison(c)}
 	assert par_cat["boulangerie"]["prix"] == boutique["prix_cuivre"] and par_cat["boulangerie"]["refus"] == ""
 	assert par_cat["boulangerie"]["bois"] == par_cat["boulangerie"]["materiaux"] == 0   # acheté, sans stock
-	grande = par_cat["grande_boulangerie"]
-	assert grande["grande"] and grande["prix"] == boutique["prix_grande_maison"] and "palier" in grande["refus"]
+	assert "palier" in col.peut_construire(imp, reg, "boutique", "grande_boulangerie", DISPONIBLES)[1]
+	bourg = _imp(reg, boutique["palier_grande_maison"])
+	grande = {l["categorie"]: l for l in col.catalogue_achats(bourg, reg, DISPONIBLES) if l["id"] == "boutique"}["grande_boulangerie"]
+	assert grande["grande"] and grande["prix"] == boutique["prix_grande_maison"]
+	assert not any(l["id"] == "boutique" for l in col.catalogue_achats(_imp(reg), reg, DISPONIBLES))  # campement : aucune boutique
 	assert col.peut_construire(_imp(reg, boutique["palier_grande_maison"]), reg, "boutique", "grande_boulangerie", DISPONIBLES)[0]
 	assert "métier" in col.peut_construire(imp, reg, "boutique", "etable", DISPONIBLES)[1]
 	assert "métier" in col.peut_construire(imp, reg, "boutique", "absente", DISPONIBLES)[1]

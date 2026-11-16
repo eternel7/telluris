@@ -1323,16 +1323,23 @@ def construire(imp: dict, reg: dict, type_id, now: int | None = None, categorie=
 def catalogue_achats(imp: dict, reg: dict, disponibles=()) -> list:
 	"""Ce qui s'achète, une ligne par achat : chaque bâtiment, et — pour la boutique — chaque
 	métier de cité (Auteur, 13/11 : « on les achète un par un »), avec le pictogramme de son
-	enseigne. `categorie` part dans le corps de `construire`."""
+	enseigne. `categorie` part dans le corps de `construire`. Ce que le palier COURANT
+	n'ouvre pas encore n'est pas présenté (bâtiment sous son `palier_min`, grande maison
+	sous `palier_grande_maison`)."""
 	from utils import enseignes_icones
 	out = []
+	palier = imp.get("palier")
 	for d in reg.get("batiments_def") or []:
 		if d.get("nature") not in NATURES_OUVERTES or not d.get("catalogue", True):
+			continue
+		if not palier_atteint(reg, palier, d.get("palier_min")):
 			continue
 		base = {"id": d.get("id"), "nature": d.get("nature"), "description": d.get("description", ""),
 				"bois": _int(d.get("bois")), "materiaux": _int(d.get("materiaux"))}
 		if _choisit_metier(d):
 			for c in categories_possibles(reg, d.get("id"), disponibles):
+				if est_grande_maison(c) and not palier_atteint(reg, palier, d.get("palier_grande_maison")):
+					continue
 				out.append({**base, "categorie": c, "label": libelle_metier(c),
 							"icone": (enseignes_icones.METIERS.get(c) or (None, d.get("icone")))[1] or d.get("icone"),
 							"grande": est_grande_maison(c), "prix": prix_batiment(d, c),
