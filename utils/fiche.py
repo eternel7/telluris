@@ -67,7 +67,25 @@ def derived_de(character: dict) -> dict:
 	derived = compute_derived_stats(base=base, niveau=voc_niveau, equipment=eq)
 	out = derived.model_dump()
 	out["charge_max"] = charge_max_of(character)
-	return avec_degats_par_arme(character, out)
+	return derivees_affichees(character, out)
+
+
+def derivees_affichees(character: dict, derived: dict) -> dict:
+	"""Complète un `DerivedStats.model_dump()` de ce que la fiche affiche EN PLUS — SOURCE
+	UNIQUE des trois sites qui renvoient `derived_stats` (`derived_de`, `spend_xp`,
+	equip/unequip) : dégâts par arme (`avec_degats_par_arme`) et ESQUIVE.
+
+	`defense_physique` = Ag (bufée) + bonus d'esquive — la difficulté qu'oppose le
+	personnage à un jet PHYSIQUE (cc/cd), même somme que `combat._defense_physique` sur le
+	snapshot. Hors combat, l'aura d'un compagnon compte (comme pour les caracts de la fiche) ;
+	en combat elle devient positionnelle. `esquive_bonus` : la part hors Ag, pour l'infobulle.
+	⚠️ Pas dans `DerivedStats` : le bonus vient des passives et effets actifs, que
+	`compute_derived_stats` ne voit pas. Mute et rend."""
+	ag = max(0, int(consommables.caracts_avec_buffs(character).get("Ag", 0) or 0))
+	bonus = consommables.esquive_bonus(character)
+	derived["esquive_bonus"] = bonus
+	derived["defense_physique"] = ag + bonus
+	return avec_degats_par_arme(character, derived)
 
 
 def avec_degats_par_arme(character: dict, derived: dict) -> dict:

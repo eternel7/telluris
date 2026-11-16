@@ -2539,13 +2539,14 @@
 							("CàC arme lourde","cc_lourde",""),("CàC arme équilibrée","cc_equilibree",""),
 							("CàC arme légère","cc",""),("CàC deux armes","cc_deux_armes_affiche",""),
 							("À distance","cd",""),
-							("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
+							("Armure (PA)","pa",""),("Esquive","defense_physique",""),("Déf. magique","pm_def",""),
 							("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
 						] %}
 						{# « CàC deux armes » : bras droit / bras gauche, malus de seconde arme compris —
 						   rendue même absente (masquée) pour que `_refreshDerivedStats` l'allume. #}
 						<div class="sh-derived-row" id="sh-drv-row-{{ key }}"{% if key == "cc_deux_armes_affiche" and not d.get(key) %} style="display:none"{% endif %}
-							 {% if key == "cc_deux_armes_affiche" %}title="Précision du bras droit / du bras gauche (malus de seconde arme, typologies)"{% endif %}>
+							 {% if key == "cc_deux_armes_affiche" %}title="Précision du bras droit / du bras gauche (malus de seconde arme, typologies)"{% endif %}
+							 {% if key == "defense_physique" %}title="Difficulté à vous toucher au corps à corps et à distance : Ag + bonus d'esquive{% if d.get('esquive_bonus') %} (+{{ d.get('esquive_bonus') }}){% endif %}. La magie se résout sur la défense magique."{% endif %}>
 							<span class="sh-derived-lbl">{{ lbl }}</span>
 							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ (d.get("degats_cc_affiche") if key == "degats_cc" else None) or d.get(key,"—") }}{{ unit }}</span>
 						</div>
@@ -6229,7 +6230,14 @@ function _refreshDerivedStats(d) {
 		const v = document.getElementById('sh-drv-cc_deux_armes_affiche');
 		if (v) v.textContent = d.cc_deux_armes_affiche || '—';
 	}
-	for (const key of ['pv_max','pm_max','initiative','deplacement','cc_lourde','cc_equilibree','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
+	// Esquive : l'infobulle dit la part hors Ag (passives, objets, effets actifs).
+	const rowEsq = document.getElementById('sh-drv-row-defense_physique');
+	if (rowEsq && d.defense_physique !== undefined) {
+		rowEsq.title = "Difficulté à vous toucher au corps à corps et à distance : Ag + bonus d'esquive"
+			+ (d.esquive_bonus ? ' (+' + d.esquive_bonus + ')' : '')
+			+ '. La magie se résout sur la défense magique.';
+	}
+	for (const key of ['pv_max','pm_max','initiative','deplacement','cc_lourde','cc_equilibree','cc','cd','pa','defense_physique','pm_def','degats_cc','degats_cd','charge_max']) {
 		// Deux armes : un terme par arme (« X / Y », fiche.avec_degats_par_arme) plutôt que la somme.
 		const val = (key === 'degats_cc' && d.degats_cc_affiche) ? d.degats_cc_affiche : d[key];
 		const el = document.getElementById('sh-drv-' + key);
