@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
 import copy
-import math
 import re
 import uuid
 import random
@@ -1020,10 +1019,7 @@ def _apply_world_turn_regen(character: dict) -> None:
     les max ont pu redescendre → re-clamp."""
     eq = sync_equipment_bonus(character)
     derived = _derived_from_character(character, eq)
-    caracts = consommables.caracts_avec_buffs(character)
-    bonus_pv, bonus_pm = consommables.regen_bonus(character)
-    regen_pv = math.ceil(caracts.get("R", 1) / 20) + bonus_pv
-    regen_pm = math.ceil(caracts.get("Vol", 1) / 20) + bonus_pm
+    regen_pv, regen_pm = consommables.regen_par_tour(character)
     avant_pv = character.get("currentPV", derived.pv_max)
     character["currentPV"] = min(derived.pv_max, avant_pv + regen_pv)
     character["currentPM"] = max(0, min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm))

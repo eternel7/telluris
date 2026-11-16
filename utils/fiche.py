@@ -73,7 +73,8 @@ def derived_de(character: dict) -> dict:
 def derivees_affichees(character: dict, derived: dict) -> dict:
 	"""Complète un `DerivedStats.model_dump()` de ce que la fiche affiche EN PLUS — SOURCE
 	UNIQUE des trois sites qui renvoient `derived_stats` (`derived_de`, `spend_xp`,
-	equip/unequip) : dégâts par arme (`avec_degats_par_arme`) et ESQUIVE.
+	equip/unequip) : dégâts par arme (`avec_degats_par_arme`), ESQUIVE, actions par tour,
+	régén du tour et aide à la canalisation.
 
 	`defense_physique` = Ag (bufée) + bonus d'esquive — la difficulté qu'oppose le
 	personnage à un jet PHYSIQUE (cc/cd), même somme que `combat._defense_physique` sur le
@@ -81,10 +82,19 @@ def derivees_affichees(character: dict, derived: dict) -> dict:
 	en combat elle devient positionnelle. `esquive_bonus` : la part hors Ag, pour l'infobulle.
 	⚠️ Pas dans `DerivedStats` : le bonus vient des passives et effets actifs, que
 	`compute_derived_stats` ne voit pas. Mute et rend."""
-	ag = max(0, int(consommables.caracts_avec_buffs(character).get("Ag", 0) or 0))
+	caracts = consommables.caracts_avec_buffs(character)
+	ag = max(0, int(caracts.get("Ag", 0) or 0))
 	bonus = consommables.esquive_bonus(character)
 	derived["esquive_bonus"] = bonus
 	derived["defense_physique"] = ag + bonus
+	# Actions par tour : même formule que le snapshot de combat, sur les caracts bufées.
+	derived["actions_tour"] = combat_util._compute_actions_max(
+		ag, max(0, int(caracts.get("V", 0) or 0)))
+	derived["regen_pv_tour"], derived["regen_pm_tour"] = consommables.regen_par_tour(character)
+	# Aide à la canalisation PLAFONNÉE (ce que `charge_magie.modificateur_de` applique
+	# réellement) ; 0 ⇒ la fiche masque la ligne.
+	derived["canalisation"] = min(int(character_stats.CANALISATION_REDUCTION_MAX),
+								  max(0, consommables.canalisation_bonus(character)))
 	return avec_degats_par_arme(character, derived)
 
 

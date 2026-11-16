@@ -11,6 +11,7 @@
 # restriction_satisfaite (équipement) : un buff expiré ne doit ni bloquer un déplacement
 # (surcharge), ni permettre d'équiper/monter ce qu'on ne pourrait pas sans lui.
 
+import math
 import time
 
 from utils.characters import item_ref_id
@@ -370,6 +371,17 @@ def regen_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> tuple[int,
 		pv += _as_signed_int(eff.get("regen_pv"))
 		pm += _as_signed_int(eff.get("regen_pm"))
 	return pv, pm
+
+
+def regen_par_tour(character: dict) -> tuple[int, int]:
+	"""(PV, PM) regagnés à chaque tour de jeu hors combat — SOURCE UNIQUE de la régén du
+	tour (`routers/user._apply_world_turn_regen`) et de la ligne de la fiche :
+	ceil(R/20) PV et ceil(Vol/20) PM sur les caracts BUFÉES, + `regen_bonus`. Peut être
+	négatif (poison). Ni plafond aux max ni plancher : c'est le travail de l'appelant."""
+	caracts = caracts_avec_buffs(character)
+	bonus_pv, bonus_pm = regen_bonus(character)
+	return (math.ceil(caracts.get("R", 1) / 20) + bonus_pv,
+			math.ceil(caracts.get("Vol", 1) / 20) + bonus_pm)
 
 
 def esquive_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> int:
