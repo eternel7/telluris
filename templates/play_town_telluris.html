@@ -1671,9 +1671,18 @@
 			grid-auto-columns: 1fr;
 			gap: 10px;
 		}
+		/* Flex centré + hauteur MINIMALE : en mobile, « 👤 PERSONNAGE ★ » passait sur deux
+		   lignes dans une hauteur fixe de 45px (débordement, contenu décentré). */
 		.manage-btn {
-			padding: 10px;
-			height : 45px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+			min-width: 0;
+			min-height: 45px;
+			padding: 6px 8px;
+			line-height: 1.15;
+			text-align: center;
 			background: #222;
 			border: 2px solid var(--border-color);
 			color: var(--text-color);
@@ -1681,6 +1690,8 @@
 			cursor: pointer;
 			text-transform: uppercase;
 		}
+		.manage-btn[hidden] { display: none; } /* sinon `display:flex` l'emporte sur `hidden` (👥 groupe vide) */
+		.manage-btn .pts-indic { margin-left: 0; flex-shrink: 0; }
 		/* Zoom : une case est un CARRÉ de `--cell`, choisi pour que les `--dist-view` cases
 		   visibles remplissent la zone en largeur OU en hauteur (fenêtre carrée). La portée
 		   de vue ne change pas : seul l'agrandissement varie. L'image est mise à l'échelle
