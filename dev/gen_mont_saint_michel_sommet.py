@@ -16,13 +16,14 @@
 # Seigneur quel que soit le profil tiré (fourchette posée sur l'espèce) : le grade ne joue que
 # sur son XP.
 #
-# IMAGE : `templates/resources/battle_maps/mont_saint_michel_sommet.jpg` (1376 × 768, 30 × 17
-# cases comme les donjons d'Orléans). `--image-provisoire` dessine une image de travail tirée
-# de la grille même (sans elle, /play rendrait un 404 au premier joueur arrivé là-haut) ; à
-# remplacer par l'image générée avec le prompt ci-dessous, puis recaler la grille dans
-# l'éditeur. ⚠️ L'option n'écrase jamais une image existante.
+# IMAGE : `templates/resources/battle_maps/mont_saint_michel_sommet.jpg` (1408 × 768, Auteur
+# 16/11, vue trois-quarts) ; grille 30 × 17 RELEVÉE À L'ŒIL sur cette image (`PLATEAU`, rangée par
+# rangée, moins `obstacles()`) : plateau d'herbe et de granit praticable, chapelle, foyer et
+# rochers bloquants, escalier taillé en diagonale (de la grève (13,15) au plateau (16,11)).
+# L'arrivée est EN HAUT de l'escalier : le combat se joue sur le plateau, pas dans un goulot de
+# deux cases que les grands jetons (géants 4 × 3) ne franchissent pas.
 #
-# Prompt (docs/prompts_images.md § 0.1 et § 0.5 quater) :
+# Prompt d'origine (docs/prompts_images.md § 0.1 et § 0.5 quater) :
 #   Réalise l'image du sommet du Mont-Saint-Michel, vu du dessus, au milieu des grèves d'une
 #   baie immense. Un plateau de granit gris battu des vents, couvert d'herbe rase et de
 #   lichens, occupe presque toute l'image ; ses bords tombent en falaises abruptes sur le sable
@@ -38,7 +39,7 @@
 #   Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune
 #   signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
 #
-# Usage : python dev/gen_mont_saint_michel_sommet.py [jsons/telluris-dump-….json] [--image-provisoire]
+# Usage : python dev/gen_mont_saint_michel_sommet.py [jsons/telluris-dump-….json]
 #         (sans dump : le plus récent)
 # Sortie (UN seul fichier, CLAUDE.md §18) : jsons/mont_saint_michel_sommet_a_importer.json
 #   lieu:sommet_du_mont_saint_michel et link:sommet_du_mont_saint_michel_to_france — deux docs
@@ -47,7 +48,6 @@
 import glob
 import json
 import os
-import random
 import sys
 from collections import deque
 
@@ -64,52 +64,55 @@ LINK_ID = "link:sommet_du_mont_saint_michel_to_france"
 FRANCE = "lieu:france"
 MONT_FRANCE = (23, 14)          # l'îlot dessiné sur la carte de France
 IMAGE = "mont_saint_michel_sommet.jpg"
-IMAGE_TAILLE = (1376, 768)
+IMAGE_TAILLE = (1408, 768)
 COLS, ROWS = 30, 17
-ARRIVEE = (15, 15)              # haut de l'escalier taillé, au sud
+ARRIVEE = (15, 11)              # haut de l'escalier taillé, au sud
 REAPPARITION_MIN = 5
 
-VIDE, SOL, FALAISE = 0, 1, 3
+VIDE, SOL = 0, 1
 
 DESCRIPTION = ("Le sommet du mont, au milieu des grèves : un plateau de granit battu des vents, "
 			   "les murs effondrés d'une chapelle et un grand foyer cerné d'os rongés. "
 			   "Les pêcheurs de la baie n'y montent pas.")
 
 
-def grille() -> list:
-	"""Terrain du sommet : plateau elliptique (1) ourlé de falaises (3), mer et grèves autour
-	(0) ; escalier au sud ; murs de la chapelle (0) au nord-ouest, porte au sud et brèche à
-	l'est ; foyer et blocs de granit (0)."""
-	cx, cy, rx, ry = 14.5, 8.0, 13.6, 7.4
-	cells = []
-	for y in range(ROWS):
-		ligne = []
-		for x in range(COLS):
-			d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
-			ligne.append(SOL if d <= 1.0 else (FALAISE if d <= 1.25 else VIDE))
-		cells.append(ligne)
-	for y in range(13, ROWS):                       # escalier depuis la grève
-		for x in (14, 15):
-			cells[y][x] = SOL
-	for x, y in obstacles():
-		cells[y][x] = VIDE
-	return cells
-
-
-FOYER = ((18, 7), (19, 7))
-BLOCS = ((22, 4), (24, 11), (9, 11), (26, 8))
-
-
-def murs_chapelle() -> list:
-	"""Pourtour de la chapelle (4,3)-(10,7), porte au sud (7,7) et brèche à l'est (10,5)."""
-	x0, y0, x1, y1 = 4, 3, 10, 7
-	tour = {(x, y) for x in range(x0, x1 + 1) for y in (y0, y1)}
-	tour |= {(x, y) for y in range(y0, y1 + 1) for x in (x0, x1)}
-	return sorted(tour - {(7, y1), (x1, 5)})
+# Cases praticables de chaque rangée, intervalles INCLUS (relevé sur l'image).
+PLATEAU = {
+	3: [(13, 20)],
+	4: [(12, 20), (25, 25)],
+	5: [(12, 22), (25, 25)],
+	6: [(12, 25)],
+	7: [(6, 25)],
+	8: [(6, 25)],
+	9: [(6, 25)],
+	10: [(6, 25)],
+	11: [(7, 24)],
+	12: [(15, 16)],          # escalier taillé, de haut en bas vers le sud-ouest
+	13: [(15, 16)],
+	14: [(14, 15)],
+	15: [(13, 14)],
+}
+FOYER = ((19, 6), (20, 6), (21, 6), (19, 7), (20, 7), (21, 7))
+ROCHERS = ((19, 4), (15, 7), (8, 9), (9, 9), (19, 10), (20, 10), (19, 11), (20, 11))
 
 
 def obstacles() -> list:
-	return murs_chapelle() + list(FOYER) + list(BLOCS)
+	"""Cases du plateau rendues infranchissables : foyer à broche, rochers. La chapelle (6-11,
+	1-6) est HORS du plateau relevé : ses murs et son intérieur restent à 0."""
+	return list(FOYER) + list(ROCHERS)
+
+
+def grille() -> list:
+	"""Terrain du sommet : 1 sur le plateau et l'escalier, 0 ailleurs (falaises, grèves,
+	chapelle, foyer, rochers)."""
+	cells = [[VIDE] * COLS for _ in range(ROWS)]
+	for y, spans in PLATEAU.items():
+		for x0, x1 in spans:
+			for x in range(x0, x1 + 1):
+				cells[y][x] = SOL
+	for x, y in obstacles():
+		cells[y][x] = VIDE
+	return cells
 
 
 def joignables(cells, depart) -> set:
@@ -182,59 +185,13 @@ def verifier(docs: dict, cells) -> None:
 		sys.exit("Le plateau n'est pas d'un seul tenant depuis l'arrivée.")
 	if combat_arrivee.spec(lieu_doc(cells)) is None:
 		sys.exit("Bloc combat_arrivee illisible.")
-
-
-def image_provisoire(cells, chemin: str) -> None:
-	"""Image de TRAVAIL tirée de la grille (à remplacer par l'image du prompt)."""
-	from PIL import Image, ImageDraw, ImageFilter
-	rnd = random.Random(1408)
-	w, h = IMAGE_TAILLE
-	cw, ch = w / COLS, h / ROWS
-	img = Image.new("RGB", (w, h), (168, 150, 112))
-	dr = ImageDraw.Draw(img)
-	# grève et filets d'eau
-	for _ in range(900):
-		x, y = rnd.uniform(0, w), rnd.uniform(0, h)
-		dr.ellipse([x, y, x + rnd.uniform(20, 90), y + rnd.uniform(4, 14)],
-				   fill=(rnd.randint(70, 95), rnd.randint(110, 130), rnd.randint(130, 150)))
-	for y in range(ROWS):
-		for x in range(COLS):
-			v = cells[y][x]
-			box = [x * cw, y * ch, (x + 1) * cw, (y + 1) * ch]
-			if v == FALAISE:
-				g = rnd.randint(95, 120)
-				dr.rectangle(box, fill=(g, g - 4, g - 12))
-			elif v == SOL:
-				dr.rectangle(box, fill=(rnd.randint(110, 125), rnd.randint(118, 132), rnd.randint(82, 95)))
-	img = img.filter(ImageFilter.GaussianBlur(6))
-	dr = ImageDraw.Draw(img)
-	for _ in range(500):                            # lichens et cailloux
-		x, y = rnd.randrange(COLS), rnd.randrange(ROWS)
-		if cells[y][x] == SOL:
-			px, py = (x + rnd.random()) * cw, (y + rnd.random()) * ch
-			r = rnd.uniform(2, 6)
-			c = rnd.choice([(150, 148, 135), (92, 98, 70), (175, 170, 120)])
-			dr.ellipse([px - r, py - r, px + r, py + r], fill=c)
-	for x, y in obstacles():                        # murs, blocs, foyer
-		box = [x * cw + 2, y * ch + 2, (x + 1) * cw - 2, (y + 1) * ch - 2]
-		if (x, y) in FOYER:
-			dr.rectangle(box, fill=(55, 45, 38))
-			dr.ellipse([box[0] + 8, box[1] + 8, box[2] - 8, box[3] - 8], fill=(214, 96, 34))
-		else:
-			dr.rectangle(box, fill=(128, 126, 118), outline=(70, 68, 62), width=3)
-	dr.line([18 * cw, 7.5 * ch, 20 * cw, 7.5 * ch], fill=(40, 40, 44), width=5)  # broche
-	for _ in range(40):                             # os autour du foyer
-		px, py = rnd.uniform(16, 22) * cw, rnd.uniform(5.5, 9.5) * ch
-		dr.line([px, py, px + rnd.uniform(-14, 14), py + rnd.uniform(-8, 8)],
-				fill=(225, 218, 196), width=3)
-	for i in range(4):                              # marches
-		y = (13 + i) * ch + ch / 2
-		dr.line([14 * cw + 4, y, 16 * cw - 4, y], fill=(80, 76, 70), width=3)
-	for x in range(COLS + 1):                       # quadrillage discret
-		dr.line([x * cw, 0, x * cw, h], fill=(60, 60, 60), width=1)
-	for y in range(ROWS + 1):
-		dr.line([0, y * ch, w, y * ch], fill=(60, 60, 60), width=1)
-	img.save(chemin, quality=90)
+	from PIL import Image
+	chemin = os.path.join(RACINE, "templates", "resources", "battle_maps", IMAGE)
+	if not os.path.exists(chemin):
+		sys.exit(f"{IMAGE} absente : /play rendrait un 404 au sommet.")
+	with Image.open(chemin) as img:
+		if img.size != IMAGE_TAILLE:
+			sys.exit(f"{IMAGE} fait {img.size}, la grille est relevée sur {IMAGE_TAILLE}.")
 
 
 def main(argv):
@@ -247,13 +204,6 @@ def main(argv):
 	with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8", newline="\n") as f:
 		json.dump(sortie, f, ensure_ascii=False, indent=1)
 	print(f"{SORTIE} : {len(sortie)} docs (dump {os.path.basename(dump)})")
-	if "--image-provisoire" in argv:
-		chemin = os.path.join(RACINE, "templates", "resources", "battle_maps", IMAGE)
-		if os.path.exists(chemin):
-			print(f"{IMAGE} existe déjà : non écrasée.")
-		else:
-			image_provisoire(cells, chemin)
-			print(f"image provisoire : {chemin}")
 
 
 if __name__ == "__main__":
