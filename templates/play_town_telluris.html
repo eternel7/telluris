@@ -5350,12 +5350,15 @@
 				const data = await response.json();
 				// Le guide prévient avant de quitter sa cité : rien n'a bougé côté serveur.
 				if (data.guide_avertissement) { _ouvrirGuideDepart(data.guide_avertissement, () => moveTo(linkId, true)); return; }
-				// Donjon à étages : la connexion ouvre la descente (un combat), sans déplacer.
+				// Notifs d'arrivée AVANT le départ au combat : un gardien de lieu (`combat_arrivee`)
+				// ouvre le combat APRÈS l'arrivée réelle (XP de découverte, escortes…), relues au
+				// retour sur /play. Inerte pour un donjon à étages (rien de tel dans la réponse).
+				_stockerNotifsArrivee(data);
+				// Donjon à étages (sans déplacer) ou gardien du lieu d'arrivée : on part au combat.
 				if (data.combat_id) {
 					window.location.href = '/combat/' + data.combat_id;
 					return;
 				}
-				_stockerNotifsArrivee(data);
 				if (await _lancerCombatZone(data.zone_event)) return;
 				window.location.reload(true);
 			} else {
