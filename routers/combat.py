@@ -284,6 +284,8 @@ def _demarrer_combat(body: StartCombatRequest, current_user: dict):
             profil_weights=profil_weights,
             espece_weights=focalisation.espece_weights_focus(character),
             affinites=get_doc(composition_rencontre.DOC_ID),
+            # Fourchette d'effectif (`espece.effectif`) : un spécimen de plus par paire.
+            compagnons=len(compagnons),
         )
     if not monstres:
         return {"combat_id": None}
