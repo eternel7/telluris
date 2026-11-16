@@ -178,10 +178,10 @@ function colBesoinsHtml(d) {
 function colDonsHtml(d) {
 	const lignes = (d.dons_possibles || []).map(o => `<div class="prop-ligne"><div class="prop-txt">
 		<strong>${_colE(o.icon)} ${_colE(o.nom)}</strong>
-		<span class="q-desc">${_colE(o.stock_label)} +${_colE(o.unites)}</span></div>
-		<button class="sh-drop-btn" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colDonner(this)">Donner</button></div>`).join('');
+		<span class="q-desc">${o.porteur ? `🎒 ${_colE(o.porteur)} · ` : ''}${_colE(o.stock_label)} +${_colE(o.unites)}</span></div>
+		<button class="sh-drop-btn" data-sac="${_colE(o.sac || '')}" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colDonner(this)">Donner</button></div>`).join('');
 	return `<section class="prop-section"><h3>🎁 ${d.role === 'fondateur' ? 'Verser aux réserves' : 'Donner au lieu'}</h3>
-		<div class="prop-liste">${lignes || '<div class="sell-empty">Rien dans votre sac dont le lieu ait l\'usage.</div>'}</div></section>`;
+		<div class="prop-liste">${lignes || '<div class="sell-empty">Rien dans les sacs du groupe dont le lieu ait l\'usage.</div>'}</div></section>`;
 }
 
 function _colFacteurs(bloc) {
@@ -461,7 +461,7 @@ async function _colAction(url, corps, apres) {
 }
 
 function colDonner(btn) {
-	_colAction('api/colonisation/donner', { index: +btn.dataset.index, item_id: btn.dataset.item },
+	_colAction('api/colonisation/donner', { sac: btn.dataset.sac || null, index: +btn.dataset.index, item_id: btn.dataset.item },
 		d => d.don && showToast(`${d.don.nom} : ${d.don.stock} +${d.don.unites}`));
 }
 function colFeu(btn) { _colAction('api/colonisation/feu', { reglage: btn.dataset.reglage }); }

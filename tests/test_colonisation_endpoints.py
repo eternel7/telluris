@@ -243,6 +243,41 @@ def test_le_visiteur_lit_en_mots_donne_et_ne_decide_de_rien(monde):
 	assert any("Milo donne Pain" in j["texte"] for j in carnet)
 
 
+def test_on_donne_depuis_tout_le_groupe_compagnons_montures_et_contenants(monde):
+	"""Le don puise dans les sacs du GROUPE : compagnon, monture, contenant ouvert (sac virtuel
+	du principal comme d'un porteur). Le sac d'autrui n'est pas adressable."""
+	rc = monde["rc"]
+	monde["docs"]["item:besace"] = {"_id": "item:besace", "type": "item", "nom": "Besace profonde",
+									"categorie": "outil", "sous_categorie": "contenant", "slots": [], "poids": 0.5,
+									"tags": ["contenant", "non_personnalisable"], "contenant": {"capacite_kg": 10}}
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	av = {"_id": "aventurier:1", "type": "aventurier", "statut": "embauche", "embauche_par": "character:v",
+		  "prenom": "Bo", "nom": "", "caracteristiques_current": dict(CARACTS),
+		  "inventaire": ["item:pain", {"item": "item:besace", "contenu": ["item:pain"]}]}
+	mule = {"_id": "monture:1", "type": "monture", "statut": "acquise", "acquise_par": "character:v",
+			"nom": "Mule", "inventaire": ["item:pain"]}
+	etranger = {"_id": "aventurier:2", "type": "aventurier", "statut": "embauche", "embauche_par": "character:x",
+				"prenom": "Nul", "nom": "", "inventaire": ["item:pain"]}
+	for d in (av, mule, etranger):
+		monde["docs"][d["_id"]] = d
+	visiteur = _perso("v", lieu=imp_id, position=dict(fondateur["position"]), groupe=[av["_id"], etranger["_id"]],
+					  montures=[mule["_id"]], inventaire=[{"item": "item:besace", "contenu": ["item:pain"]}])
+	dons = _appel(monde, visiteur, rc.ici, None)["dons_possibles"]
+	assert [(d["sac"], d["porteur"]) for d in dons] == [
+		("aventurier:1", "Bo"), ("monture:1", "Mule"),
+		("character:v#0", "Besace profonde"), ("aventurier:1#1", "Besace profonde")]
+	assert _refus(monde, visiteur, rc.donner, None, {"sac": "aventurier:2", "index": 0, "item_id": "item:pain"}) == 404
+	for sac, idx in (("aventurier:1#1", 0), ("character:v#0", 0), ("aventurier:1", 0), ("monture:1", 0)):
+		rep = _appel(monde, visiteur, rc.donner, None, {"sac": sac, "index": idx, "item_id": "item:pain"})
+		assert rep["don"]["nom"] == "Pain"
+	assert monde["docs"]["aventurier:1"]["inventaire"] == [{"item": "item:besace"}]   # pain donné, besace vidée
+	assert monde["docs"]["monture:1"]["inventaire"] == []
+	assert visiteur["inventaire"] == [{"item": "item:besace"}]
+	assert monde["docs"]["aventurier:2"]["inventaire"] == ["item:pain"]
+	assert rep["dons_possibles"] == [] and rep["role"] == col.SOUTIEN
+
+
 def test_le_fondateur_choisit_l_icone_de_la_carte_le_visiteur_non(monde, monkeypatch):
 	rc = monde["rc"]
 	fondateur = _perso()
