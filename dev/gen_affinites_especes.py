@@ -62,6 +62,8 @@ BANDES = [
 	  "nuee_de_scarabees"]),
 	("grand_nord", "Grand Nord",
 	 ["ours_polaire", "rennes", "boeufs_musques", "phoques_et_morses", "loup", "draugr", "ulfhedinn"]),
+	# Lycaon (chef, Auteur 16/11) : sans bande, il n'aurait jamais de suite.
+	("meute_de_lycaon", "Meute de Lycaon", ["lycaon", "loup", "loup_geant"]),
 	("gardiens_du_nil", "Gardiens du Nil",
 	 ["fils_de_sobek", "crocodile", "ammit", "sphinx", "momie", "nuee_de_scarabees"]),
 ]

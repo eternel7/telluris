@@ -487,3 +487,85 @@ def test_generateur_effectifs_par_tags_et_rang():
 	assert [d["_id"] for d in sortie] == [loup["_id"]]
 	assert {k: v for k, v in sortie[0].items() if k != gen_eff.CHAMP} == loup
 	assert gen_eff.delta(sortie, {}) == []   # rejeu : rien de plus
+
+
+# ── Exceptions par tag : nuée, chef, unique (Auteur, 16/11) ───────────────────
+
+def test_nuee_ignore_la_fourchette_et_depense_le_budget():
+	# Fourchette posée à la main : ignorée, le budget seul décide (100 / 10 = 10 rats).
+	rat = _espece("rat", tags=["nuee"], effectif=[2, 2])
+	m = combat.instantiate_groupes([rat], [], 100, _couts({"espece:rat": 10}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == 10
+
+
+def test_nuee_bornee_par_son_plafond_propre():
+	from models import character_stats
+	rat = _espece("rat", tags=["nuee"])
+	m = combat.instantiate_groupes([rat], [], 10_000, _couts({"espece:rat": 1}), plafond=8,
+								   proba_second=0, affinites=_aff(), rand=_Seq([0.0]))
+	assert len(m) == max(8, character_stats.RENCONTRE_PLAFOND_NUEE)
+
+
+def test_nuee_grades_libres_sans_chef():
+	rat = _espece("rat", tags=["nuee"])
+	# random 0.99 relèverait un chef de 2 crans : une nuée n'en a pas, tous restent au premier tiré.
+	m = combat.instantiate_groupes([rat], list(_P.values()), 1000, lambda e, p: 10 * p["niveau"],
+								   plafond=8, proba_second=0, affinites=_aff(), rand=_Seq([0.99]))
+	assert {x["profil_id"] for x in m} == {"profil:p1"}
+
+
+def test_nuee_le_second_groupe_se_sert_d_abord():
+	rat = _espece("rat", tags=["nuee"])
+	loup = _espece("loup", effectif=[2, 2])
+	aff = _aff(bandes=[{"id": "b", "especes": ["rat", "loup"]}], diversite_pleine=1)
+	m = combat.instantiate_groupes([rat, loup], [], 100, _couts({"espece:rat": 10, "espece:loup": 10}),
+								   plafond=8, proba_second=1.0, affinites=aff, rand=_Seq([0.0]))
+	ids = [x["espece_id"] for x in m]
+	assert ids[:2] == ["espece:loup"] * 2           # le second groupe d'abord, sa fourchette entière
+	assert ids[2:] == ["espece:rat"] * 8            # la nuée dépense tout le reste (80 / 10)
+
+
+def test_chef_mene_une_suite_garantie_sur_sa_part():
+	from models import character_stats
+	roi = _espece("roi", tags=["boss", "chef"])
+	squelette = _espece("squelette", effectif=[3, 3])
+	aff = _aff(bandes=[{"id": "tertre", "especes": ["roi", "squelette"]}])
+	couts = lambda e, p: 10 * p["niveau"]
+	# proba_second = 0 : la suite d'un chef ne dépend pas de la chance du second groupe.
+	m = combat.instantiate_groupes([roi, squelette], list(_P.values()), 100, couts, plafond=8,
+								   proba_second=0, affinites=aff, rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m] == ["espece:roi"] + ["espece:squelette"] * 3
+	# Le chef relève son grade sur la part laissée par la suite (60 → p4 à 40 tient).
+	part_chef = 100 * (1 - character_stats.RENCONTRE_CHEF_SUITE_PART)
+	assert 10 * int(m[0]["profil_id"][-1]) <= part_chef
+
+
+def test_chef_sans_association_au_pool_vient_seul():
+	roi = _espece("roi", tags=["boss", "chef"])
+	m = combat.instantiate_groupes([roi, _espece("cerf")], [], 100, _couts({"espece:roi": 10,
+																			"espece:cerf": 1}),
+								   plafond=8, proba_second=1.0, affinites=_aff(), rand=_Seq([0.0]))
+	assert [x["espece_id"] for x in m] == ["espece:roi"]
+
+
+def test_chef_exige_un_solitaire():
+	r = compo.regles(_aff())
+	assert compo.est_chef(_espece("roi", tags=["boss", "chef"]), r)
+	assert not compo.est_chef(_espece("orc", tags=["chef"]), r)
+	assert compo.est_solitaire(_espece("kraken", tags=["unique"]), r)
+	assert not compo.est_nuee(_espece("x", tags=["boss", "nuee"]), r)
+
+
+def test_generateur_pose_les_tags_et_retire_la_fourchette_des_nuees():
+	import gen_effectifs_especes as gen_eff
+	rat = {"_id": "espece:rat_geant", "type": "espece", "tags": ["animal", "vermine"], "effectif": [3, 8]}
+	kraken = {"_id": "espece:kraken", "type": "espece", "tags": ["legendaire"], "effectif": [2, 2]}
+	sortie = {d["_id"]: d for d in gen_eff.delta([rat, kraken], {})}
+	assert sortie["espece:rat_geant"]["tags"] == ["animal", "vermine", "nuee"]
+	assert gen_eff.CHAMP not in sortie["espece:rat_geant"]
+	assert "unique" in sortie["espece:kraken"]["tags"] and sortie["espece:kraken"][gen_eff.CHAMP] == [1, 1]
+	assert gen_eff.delta(list(sortie.values()), {}) == []   # rejeu : rien de plus
+	ids = {f"espece:{e}" for es in gen_eff.TAGS_POSES.values() for e in es}
+	assert gen_eff.especes_inconnues(ids) == []
+	assert gen_eff.especes_inconnues(ids - {"espece:kraken"}) == ["espece:kraken"]

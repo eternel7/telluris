@@ -47,7 +47,8 @@
       "non_mort",
       "guerrier",
       "boss",
-      "humanoide"
+      "humanoide",
+      "chef"
     ],
     "items": [
       "item:Morgenstern",
@@ -620,16 +621,13 @@
       "animal",
       "venin",
       "proie",
-      "ia_fuyard_40"
+      "ia_fuyard_40",
+      "nuee"
     ],
     "proprietes": {},
     "animation": "animation:son_insecte_01",
     "competences": [
       "competence:monstre_venin_faible"
-    ],
-    "effectif": [
-      2,
-      3
     ]
   },
   {
@@ -749,7 +747,8 @@
       "legendaire",
       "humanoide",
       "insensible_furtivite",
-      "ia_hit_and_run_2"
+      "ia_hit_and_run_2",
+      "chef"
     ],
     "items": [
       "item:Epee_une_main_benie",
@@ -820,7 +819,8 @@
       "humanoide",
       "insensible_furtivite",
       "magie_sainte_9",
-      "ia_artilleur"
+      "ia_artilleur",
+      "chef"
     ],
     "items": [
       "item:Baguette_ouvragee",
@@ -1202,14 +1202,11 @@
       "demon",
       "petite_taille",
       "monstre",
-      "ia_fuyard_40"
+      "ia_fuyard_40",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_gobelin_01",
-    "effectif": [
-      3,
-      8
-    ]
+    "animation": "animation:son_gobelin_01"
   },
   {
     "_id": "espece:bete_de_l_apocalypse",
@@ -1991,14 +1988,11 @@
       "vol",
       "nocturne",
       "proie",
-      "insensible_furtivite"
+      "insensible_furtivite",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_12",
-    "effectif": [
-      2,
-      3
-    ]
+    "animation": "animation:son_bete_12"
   },
   {
     "_id": "espece:chauve_souris_geante",
@@ -2053,15 +2047,12 @@
       "predateur",
       "insensible_furtivite",
       "ia_hit_and_run",
-      "ia_predateur"
+      "ia_predateur",
+      "nuee"
     ],
     "proprietes": {},
     "animation": "animation:son_bete_13",
-    "armure_naturelle": 1,
-    "effectif": [
-      2,
-      3
-    ]
+    "armure_naturelle": 1
   },
   {
     "_id": "espece:cheval",
@@ -2477,7 +2468,8 @@
       "ia_predateur",
       "ia_artilleur_mage",
       "ia_artilleur_heros_mage",
-      "ia_artilleur_seigneur_mage"
+      "ia_artilleur_seigneur_mage",
+      "chef"
     ],
     "items": [
       "item:Rapiere",
@@ -2546,14 +2538,11 @@
       "non_mort",
       "vol",
       "predateur",
-      "ia_hit_and_run"
+      "ia_hit_and_run",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_05",
-    "effectif": [
-      2,
-      3
-    ]
+    "animation": "animation:son_bete_05"
   },
   {
     "_id": "espece:coursier_elfique",
@@ -2847,13 +2836,10 @@
     "tags": [
       "ange",
       "celeste",
-      "petite_taille"
+      "petite_taille",
+      "nuee"
     ],
-    "proprietes": {},
-    "effectif": [
-      3,
-      8
-    ]
+    "proprietes": {}
   },
   {
     "_id": "espece:cwn_annwn",
@@ -3038,7 +3024,8 @@
       "boss",
       "humanoide",
       "magie_necromancie_4",
-      "magie_illusoire_3"
+      "magie_illusoire_3",
+      "chef"
     ],
     "items": [
       "item:Rapiere",
@@ -3180,7 +3167,8 @@
       "magie_demonologie_10_seigneur_mage",
       "ia_artilleur_mage",
       "ia_artilleur_heros_mage",
-      "ia_artilleur_seigneur_mage"
+      "ia_artilleur_seigneur_mage",
+      "chef"
     ],
     "items": [
       "item:Sceptre_os",
@@ -3248,7 +3236,8 @@
       "infernal",
       "boss",
       "legendaire",
-      "humanoide"
+      "humanoide",
+      "chef"
     ],
     "items": [
       "item:Kanabo",
@@ -3874,7 +3863,8 @@
       "souffle",
       "regeneration",
       "legendaire",
-      "predateur"
+      "predateur",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_dragon_02",
@@ -3884,8 +3874,8 @@
     ],
     "armure_naturelle": 2,
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -4185,14 +4175,11 @@
       "animal",
       "proie",
       "petite_taille",
-      "ia_fuyard_50"
+      "ia_fuyard_50",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_11",
-    "effectif": [
-      3,
-      8
-    ]
+    "animation": "animation:son_bete_11"
   },
   {
     "_id": "espece:elementaux",
@@ -4422,7 +4409,7 @@
     "animation": "animation:son_gobelin_02",
     "effectif": [
       3,
-      8
+      6
     ]
   },
   {
@@ -4651,13 +4638,10 @@
       "magique",
       "petite_taille",
       "magie_illusoire_2",
-      "ia_artilleur"
+      "ia_artilleur",
+      "nuee"
     ],
-    "proprietes": {},
-    "effectif": [
-      3,
-      8
-    ]
+    "proprietes": {}
   },
   {
     "_id": "espece:fils_de_sobek",
@@ -5205,7 +5189,7 @@
     "animation": "animation:son_gobelin_03",
     "effectif": [
       3,
-      8
+      6
     ]
   },
   {
@@ -5337,7 +5321,7 @@
     "animation": "animation:son_gobelin_05",
     "effectif": [
       3,
-      8
+      6
     ]
   },
   {
@@ -5749,7 +5733,8 @@
       "souffle",
       "legendaire",
       "predateur",
-      "ia_hit_and_run_2"
+      "ia_hit_and_run_2",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_dragon_01",
@@ -5758,8 +5743,8 @@
     ],
     "armure_naturelle": 5,
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -5879,7 +5864,8 @@
       "magique",
       "legendaire",
       "magie_elementaire_8",
-      "ia_hit_and_run_2"
+      "ia_hit_and_run_2",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_bete_03",
@@ -5888,8 +5874,8 @@
     ],
     "armure_naturelle": 2,
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -6188,7 +6174,8 @@
       "magie_necromancie_6",
       "ia_artilleur_mage",
       "ia_artilleur_heros_mage",
-      "ia_artilleur_seigneur_mage"
+      "ia_artilleur_seigneur_mage",
+      "chef"
     ],
     "items": [
       "item:Epee_batarde",
@@ -6547,7 +6534,8 @@
     "tags": [
       "monstre",
       "regeneration",
-      "legendaire"
+      "legendaire",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_visqueux_02",
@@ -6555,8 +6543,8 @@
       "competence:monstre_regeneration"
     ],
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -6918,7 +6906,8 @@
     "tags": [
       "monstre",
       "aquatique",
-      "legendaire"
+      "legendaire",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_visqueux_03",
@@ -6927,8 +6916,8 @@
     ],
     "armure_naturelle": 1,
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -7126,7 +7115,7 @@
     "animation": "animation:son_gobelin_02",
     "effectif": [
       3,
-      8
+      6
     ]
   },
   {
@@ -7428,14 +7417,11 @@
       "animal",
       "proie",
       "petite_taille",
-      "ia_fuyard_50"
+      "ia_fuyard_50",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_13",
-    "effectif": [
-      3,
-      8
-    ]
+    "animation": "animation:son_bete_13"
   },
   {
     "_id": "espece:loup",
@@ -7660,7 +7646,8 @@
       "malediction",
       "legendaire",
       "boss",
-      "ia_meute"
+      "ia_meute",
+      "chef"
     ],
     "proprietes": {},
     "animation": "animation:son_loup_02",
@@ -8743,16 +8730,13 @@
       "monstre",
       "insecte",
       "essaim",
-      "souterrain"
+      "souterrain",
+      "nuee"
     ],
     "proprietes": {},
     "animation": "animation:son_insecte_03",
     "competences": [
       "competence:monstre_venin"
-    ],
-    "effectif": [
-      2,
-      3
     ]
   },
   {
@@ -9394,14 +9378,11 @@
       "animal",
       "petite_taille",
       "proie",
-      "ia_fuyard_50"
+      "ia_fuyard_50",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_13",
-    "effectif": [
-      3,
-      8
-    ]
+    "animation": "animation:son_bete_13"
   },
   {
     "_id": "espece:phenix",
@@ -9636,7 +9617,8 @@
       "monstre",
       "aquatique",
       "froid",
-      "legendaire"
+      "legendaire",
+      "unique"
     ],
     "proprietes": {},
     "animation": "animation:son_visqueux_05",
@@ -9646,8 +9628,8 @@
     ],
     "armure_naturelle": 1,
     "effectif": [
-      2,
-      2
+      1,
+      1
     ]
   },
   {
@@ -9706,8 +9688,8 @@
     },
     "animation": "animation:son_bete_01",
     "effectif": [
-      3,
-      8
+      2,
+      3
     ]
   },
   {
@@ -9763,7 +9745,8 @@
       "legendaire",
       "humanoide",
       "insensible_furtivite",
-      "magie_demonologie_9"
+      "magie_demonologie_9",
+      "chef"
     ],
     "items": [
       "item:Da_dao",
@@ -9942,14 +9925,11 @@
       "animal",
       "vermine",
       "ia_meute",
-      "ia_fuyard_20"
+      "ia_fuyard_20",
+      "nuee"
     ],
     "proprietes": {},
-    "animation": "animation:son_bete_04",
-    "effectif": [
-      3,
-      6
-    ]
+    "animation": "animation:son_bete_04"
   },
   {
     "_id": "espece:reine_lhamia",
@@ -10001,7 +9981,8 @@
       "boss",
       "humanoide",
       "magie_necromancie_5",
-      "magie_illusoire_5"
+      "magie_illusoire_5",
+      "chef"
     ],
     "items": [
       "item:Rapiere",
@@ -10127,8 +10108,8 @@
     "proprietes": {},
     "animation": "animation:son_loup_01",
     "effectif": [
-      3,
-      8
+      2,
+      3
     ]
   },
   {
@@ -10295,7 +10276,8 @@
       "undead",
       "non_mort",
       "boss",
-      "humanoide"
+      "humanoide",
+      "chef"
     ],
     "items": [
       "item:Epee_longue",
@@ -10369,7 +10351,8 @@
       "humanoide",
       "insensible_furtivite",
       "magie_necromancie_10",
-      "ia_artilleur"
+      "ia_artilleur",
+      "chef"
     ],
     "items": [
       "item:Baguette_ouvragee",
@@ -10671,7 +10654,8 @@
       "non_mort",
       "guerrier",
       "boss",
-      "humanoide"
+      "humanoide",
+      "chef"
     ],
     "items": [
       "item:Epee_longue",
@@ -10750,7 +10734,8 @@
       "divin",
       "humanoide",
       "magie_sainte_10",
-      "ia_hit_and_run_2"
+      "ia_hit_and_run_2",
+      "chef"
     ],
     "items": [
       "item:Epee_une_main_benie",
@@ -12812,6 +12797,15 @@
         ]
       },
       {
+        "id": "meute_de_lycaon",
+        "nom": "Meute de Lycaon",
+        "especes": [
+          "espece:lycaon",
+          "espece:loup",
+          "espece:loup_geant"
+        ]
+      },
+      {
         "id": "gardiens_du_nil",
         "nom": "Gardiens du Nil",
         "especes": [
@@ -12988,7 +12982,14 @@
     "formes": {
       "solitaire_tags": [
         "boss",
-        "geant"
+        "geant",
+        "unique"
+      ],
+      "nuee_tags": [
+        "nuee"
+      ],
+      "chef_tags": [
+        "chef"
       ],
       "meute_tags": [
         "ia_meute"

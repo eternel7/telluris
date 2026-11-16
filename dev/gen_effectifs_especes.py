@@ -5,9 +5,13 @@
 # de l'espèce fixe la taille du groupe, le budget de menace n'en règle plus que les grades.
 #
 # Heuristique PAR TAGS (la première règle qui correspond, motif suffixé compris) :
-#   boss / géant 1-1 · meute 3-6 · rôdeur (embuscade, furtif) 1-2 · petite taille / vermine 3-8 ·
-#   humanoïde 3-6 · sinon 2-3 ; légendaire : au plus 2 ; puis le RANG resserre le max
-#   (`RESSERREMENT`, jamais sous le min). Rang = `potentiel.rang_espece` (celui de /admin/table).
+#   boss / géant / unique 1-1 · meute 3-6 · rôdeur (embuscade, furtif) 1-2 · humanoïde 3-6 ·
+#   sinon 2-3 ; légendaire : au plus 2 ; puis le RANG resserre le max (`RESSERREMENT`, jamais
+#   sous le min). Rang = `potentiel.rang_espece` (celui de /admin/table). NUÉE : AUCUN champ
+#   (le budget seul décide, `composition.est_nuee`) — retiré s'il était posé.
+#
+# TAGS D'EXCEPTION (Auteur, 16/11) posés sur des listes VALIDÉES (`TAGS_POSES`), jamais retirés
+# d'une espèce hors liste : `nuee`, `chef` (solitaire qui mène une suite), `unique` (solitaire).
 #
 # Sortie UNIQUE (CLAUDE.md §18) : les espèces dont le champ diffère + `rules:affinites_especes`
 # (`gen_affinites_especes.construire`) s'il diffère du dump — la fourchette n'est lue qu'avec lui.
@@ -31,11 +35,22 @@ from utils import composition_rencontre as composition  # noqa: E402
 SORTIE = "jsons/effectifs_rencontres_a_importer.json"
 CHAMP = "effectif"
 
+# Listes validées par l'Auteur (questionnaire du 16/11).
+TAGS_POSES = {
+	"nuee": ["rat_geant", "chauve_souris", "chauve_souris_geante", "corneille_noire", "ecureuil",
+			 "lievre", "petits_animaux_divers", "araignee", "besien", "fee", "cupidon",
+			 "nuee_de_scarabees"],
+	"chef": ["comte_vampire", "dearg_due", "abhartach", "roi_des_tombes", "roi_liche",
+			 "seigneur_du_sang", "reine_lhamia", "prince_demon", "demon_majeur_de_la_destinee",
+			 "demon_majeur_de_la_destruction", "seraphin", "archange_de_l_ordre",
+			 "archange_du_savoir", "gwyn_ap_nudd", "lycaon"],
+	"unique": ["kraken", "polar_kraken", "hydre", "dragon_hydre", "grand_dragon", "grand_phenix"],
+}
+
 REGLES = [
-	(["boss", "geant"], (1, 1)),
+	(["boss", "geant", "unique"], (1, 1)),
 	(["ia_meute"], (3, 6)),
 	(["ia_embuscade", "furtif"], (1, 2)),
-	(["petite_taille", "vermine"], (3, 8)),
 	(["humanoide"], (3, 6)),
 ]
 DEFAUT = (2, 3)
@@ -44,8 +59,22 @@ LEGENDAIRE_MAX = 2
 RESSERREMENT = {"B": 1, "A": 2, "S": 3, "S+": 3}
 
 
-def fourchette_pour(tags, rang: str | None) -> list:
-	"""[min, max] voulu pour une espèce de ces tags et de ce rang (None : pas de resserrement)."""
+def tags_voulus(doc: dict) -> list:
+	"""Tags du doc + ceux de `TAGS_POSES` qui le visent (ordre gardé, ajout en fin)."""
+	tags = list(doc.get("tags") or [])
+	slug = doc["_id"].split(":", 1)[-1]
+	for tag, especes in TAGS_POSES.items():
+		if slug in especes and tag not in tags:
+			tags.append(tag)
+	return tags
+
+
+def fourchette_pour(tags, rang: str | None) -> list | None:
+	"""[min, max] voulu pour une espèce de ces tags et de ce rang (None : pas de resserrement) ;
+	None pour une NUÉE, qui n'a pas de fourchette."""
+	if composition.tag_correspond(tags or [], ["nuee"]) and not composition.tag_correspond(
+			tags or [], ["boss", "geant", "unique"]):
+		return None
 	mn, mx = DEFAUT
 	for motifs, f in REGLES:
 		if composition.tag_correspond(tags or [], motifs):
@@ -59,13 +88,26 @@ def fourchette_pour(tags, rang: str | None) -> list:
 
 
 def delta(especes: list, rangs: dict) -> list:
-	"""Espèces dont le champ diffère de la règle, ENTIÈRES, champ posé."""
+	"""Espèces dont les tags ou le champ diffèrent de la règle, ENTIÈRES, tags et champ posés
+	(champ retiré pour une nuée)."""
 	out = []
 	for doc in especes:
-		voulu = fourchette_pour(doc.get("tags"), rangs.get(doc["_id"]))
-		if doc.get(CHAMP) != voulu:
-			out.append({**doc, CHAMP: voulu})
+		tags = tags_voulus(doc)
+		voulu = fourchette_pour(tags, rangs.get(doc["_id"]))
+		if doc.get(CHAMP) == voulu and list(doc.get("tags") or []) == tags:
+			continue
+		neuf = {k: v for k, v in doc.items() if k != CHAMP}
+		if "tags" in doc or tags:
+			neuf["tags"] = tags
+		if voulu is not None:
+			neuf[CHAMP] = voulu
+		out.append(neuf)
 	return out
+
+
+def especes_inconnues(ids: set) -> list:
+	"""Espèces de `TAGS_POSES` absentes du dump (liste vide = tout est là)."""
+	return sorted({f"espece:{e}" for es in TAGS_POSES.values() for e in es} - ids)
 
 
 def affinites_a_importer(docs: list) -> list:
@@ -93,6 +135,9 @@ def main() -> None:
 	rangs, erreurs = gen_arm.rangs_du_dump(docs)
 	for e in erreurs:
 		print(f"⚠️ rang illisible : {e}")
+	inconnues = especes_inconnues({d.get("_id") for d in docs})
+	if inconnues:
+		sys.exit(f"Espèces à taguer inconnues du dump : {', '.join(inconnues)}")
 	especes = sorted((d for d in docs if isinstance(d, dict) and d.get("type") == "espece"),
 					 key=lambda d: d["_id"])
 	sortie = delta(especes, rangs) + affinites_a_importer(docs)
@@ -105,8 +150,8 @@ def main() -> None:
 		f.write("\n")
 	compte: dict = {}
 	for d in sortie:
-		if CHAMP in d:
-			cle = f"{d[CHAMP][0]}-{d[CHAMP][1]}"
+		if d.get("type") == "espece":
+			cle = f"{d[CHAMP][0]}-{d[CHAMP][1]}" if CHAMP in d else "nuée"
 			compte[cle] = compte.get(cle, 0) + 1
 	print(f"{len(especes)} espèces, {len(sortie)} docs → {a.sortie}")
 	print("Fourchettes : " + ", ".join(f"{k} × {v}" for k, v in sorted(compte.items())))

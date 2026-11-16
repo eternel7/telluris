@@ -11,7 +11,10 @@
 #     une association tirée parmi celles qui ont un candidat au pool, sinon espèce au hasard.
 #     Chance = `RENCONTRE_SECOND_GROUPE_PROBA` × min(1, candidats / `diversite_pleine`) ;
 #   • FOURCHETTE d'effectif propre à l'espèce (champ `effectif` du doc `espece:*`, Auteur 16/11) :
-#     le nombre est tiré dedans, le budget ne règle plus que les grades ; prime sur meute/rôdeur.
+#     le nombre est tiré dedans, le budget ne règle plus que les grades ; prime sur meute/rôdeur ;
+#   • EXCEPTIONS par tag (Auteur, 16/11) : NUÉE (`nuee` : sans fourchette, grades libres, tout le
+#     budget, plafond `RENCONTRE_PLAFOND_NUEE`) ; CHEF (`chef` sur un solitaire : suite GARANTIE
+#     tirée dans ses associations, `RENCONTRE_CHEF_SUITE_PART` du budget) ; UNIQUE (solitaire).
 #
 # Doc ABSENT ⇒ `combat.instantiate_groupes` garde le comportement d'avant (CLAUDE.md §4) ;
 # doc présent, clé absente ⇒ la valeur de `DEFAUTS`.
@@ -28,8 +31,13 @@ DEFAUTS = {
 	"bandes": [],
 	"familles_tags": [],
 	"formes": {
-		# Sans « legendaire » (Auteur, 16/11) : une espèce légendaire peut venir à plusieurs.
-		"solitaire_tags": ["boss", "geant"],
+		# Sans « legendaire » (Auteur, 16/11) : une espèce légendaire peut venir à plusieurs ;
+		# `unique` = créature dont il n'existe qu'une (kraken, grand phénix…).
+		"solitaire_tags": ["boss", "geant", "unique"],
+		# NUÉE : aucune fourchette, grades libres, dépense tout le budget (Auteur, 16/11).
+		"nuee_tags": ["nuee"],
+		# CHEF : un solitaire qui mène une suite tirée dans ses associations.
+		"chef_tags": ["chef"],
 		"meute_tags": ["ia_meute"],
 		"meute_min": 2,
 		"rodeur_tags": ["ia_embuscade", "furtif"],
@@ -80,6 +88,16 @@ def _filtre(espece, tags, exclure=()) -> bool:
 
 def est_solitaire(espece, r) -> bool:
 	return tag_correspond(_tags(espece), r["formes"].get("solitaire_tags"))
+
+
+def est_nuee(espece, r) -> bool:
+	"""Nuée : ni solitaire ni fourchette ; le nombre sort du budget (plafond propre)."""
+	return not est_solitaire(espece, r) and tag_correspond(_tags(espece), r["formes"].get("nuee_tags"))
+
+
+def est_chef(espece, r) -> bool:
+	"""Chef : un SOLITAIRE qui mène une suite d'une autre espèce (le tag seul n'y suffit pas)."""
+	return est_solitaire(espece, r) and tag_correspond(_tags(espece), r["formes"].get("chef_tags"))
 
 
 def est_meute(espece, r) -> bool:

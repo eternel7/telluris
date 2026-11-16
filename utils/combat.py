@@ -4063,7 +4063,13 @@ def _instantiate_groupes_composes(
 	par paire de `compagnons` ; elle prime sur meute / rôdeur (pas sur solitaire). Le budget ne
 	règle alors que les GRADES : une part par spécimen, SANS le bonus de compagnons (ils
 	ajoutent des spécimens, pas des crans). Chef relevé tant que la suite au plus bas grade
-	tient dans la part du groupe, suite tirée parmi les grades que sa part paie."""
+	tient dans la part du groupe, suite tirée parmi les grades que sa part paie.
+
+	EXCEPTIONS par tag (Auteur, 16/11) : NUÉE — sans fourchette, grades libres, un spécimen de
+	plus tant que le budget le paie, jusqu'à `RENCONTRE_PLAFOND_NUEE` ; si le second groupe passe,
+	il se sert d'abord sur la moitié du budget. CHEF (solitaire tagué) — suite GARANTIE tirée dans
+	ses associations présentes au pool (aucune ⇒ seul), sur `RENCONTRE_CHEF_SUITE_PART` du budget
+	réservée ; le chef relève son grade sur le reste."""
 	monstres: list = []
 	restant = max(0.0, float(budget or 0))
 	decalage = max(0, int(compagnons or 0)) // 2
@@ -4150,6 +4156,20 @@ def _instantiate_groupes_composes(
 				chef = mieux
 			ajouter(chef)
 			return
+		if composition.est_nuee(espece, r):
+			# NUÉE : grades libres, un spécimen de plus tant que le budget le paie, jusqu'au
+			# plafond des nuées (ou de l'association : les charognards restent peu nombreux).
+			plaf = max(plafond, character_stats.RENCONTRE_PLAFOND_NUEE)
+			if max_n is not None:
+				plaf = min(plaf, len(monstres) + max_n)
+			premier = True
+			while len(monstres) < plaf:
+				profil = tirer_profil(cands)
+				if not premier and cout(espece, profil) > restant:
+					return
+				ajouter(profil)
+				premier = False
+			return
 		if effectif is not None:
 			n, part = effectif
 			plus_bas = au(ech[0]) if ech else None
@@ -4220,9 +4240,34 @@ def _instantiate_groupes_composes(
 			return tirer(assoc[nom]), nom
 		return tirer(autres), None
 
+	def fourche(espece):
+		"""Fourchette d'effectif, sauf pour une nuée (le budget seul décide)."""
+		return None if composition.est_nuee(espece, r) else composition.fourchette(espece)
+
+	def avec_budget(montant, action):
+		"""Exécute `action` avec `montant` pour seul budget ; le reste est rendu ensuite."""
+		nonlocal restant
+		mis_de_cote = max(0.0, restant - montant)
+		restant -= mis_de_cote
+		action()
+		restant += mis_de_cote
+
+	def remplir_suite(seconde, nom, montant, deja):
+		"""Second groupe sur `montant` seulement : sa fourchette (grades sur une part par
+		spécimen, sans bonus de compagnons), ou — nuée, sans champ — le budget dépensé."""
+		fuite = composition.fuite_association(nom, r)
+		if fourche(seconde) is None:
+			avec_budget(montant, lambda: remplir(seconde, max_n=composition.plafond_association(nom, r),
+												 fuite=fuite, meneur=False))
+			return
+		m0, n2 = nombre(seconde, nom, deja)
+		if n2 > 0:
+			avec_budget(montant, lambda: remplir(seconde, fuite=fuite, meneur=False,
+												 effectif=(n2, montant / facteur / m0 * n2)))
+
 	def nombre(espece, nom, deja):
 		"""`(n0, n)` : effectif tiré SANS compagnons, puis décalé et borné (plafond, association)."""
-		n0 = composition.tirer_effectif(composition.fourchette(espece), rand)
+		n0 = composition.tirer_effectif(fourche(espece), rand)
 		n = n0 + decalage
 		borne = composition.plafond_association(nom, r)
 		if borne is not None:
@@ -4230,7 +4275,28 @@ def _instantiate_groupes_composes(
 		return n0, max(0, min(n, plafond - deja))
 
 	principale = tirer(pool)
-	f1 = None if composition.est_solitaire(principale, r) else composition.fourchette(principale)
+	if composition.est_chef(principale, r):
+		# CHEF : suite GARANTIE, tirée dans ses associations présentes au pool (sinon il vient
+		# seul) ; `RENCONTRE_CHEF_SUITE_PART` du budget lui est réservée, le chef relève son
+		# grade sur le reste.
+		autres = composition.candidats_second(principale, pool, r)
+		assoc = composition.associations(principale, autres, r)
+		if assoc:
+			nom = rand.choice(sorted(assoc))
+			seconde = tirer(assoc[nom])
+			reserve = restant * character_stats.RENCONTRE_CHEF_SUITE_PART
+			avec_budget(restant - reserve, lambda: remplir(principale))
+			remplir_suite(seconde, nom, reserve, len(monstres))
+			return monstres
+	if composition.est_nuee(principale, r):
+		# NUÉE : si le second groupe passe, il se sert D'ABORD (moitié du budget), puis la nuée
+		# dépense tout ce qui reste.
+		second = choisir_second(principale)
+		if second is not None:
+			remplir_suite(second[0], second[1], restant / 2, 0)
+		remplir(principale)
+		return monstres
+	f1 = None if composition.est_solitaire(principale, r) else fourche(principale)
 	if f1 is None:
 		remplir(principale)
 		if composition.est_solitaire(principale, r):
@@ -4238,15 +4304,7 @@ def _instantiate_groupes_composes(
 		second = choisir_second(principale)
 		if second is None:
 			return monstres
-		seconde, nom = second
-		if composition.fourchette(seconde) is None:
-			remplir(seconde, max_n=composition.plafond_association(nom, r),
-					fuite=composition.fuite_association(nom, r), meneur=False)
-			return monstres
-		m0, n2 = nombre(seconde, nom, len(monstres))
-		if n2 > 0:
-			remplir(seconde, fuite=composition.fuite_association(nom, r), meneur=False,
-					effectif=(n2, restant / facteur / m0 * n2))
+		remplir_suite(second[0], second[1], restant, len(monstres))
 		return monstres
 
 	# Principale à fourchette : les deux effectifs d'abord, puis le budget partagé par spécimen.
@@ -4257,14 +4315,14 @@ def _instantiate_groupes_composes(
 	m0, n2, seconde, nom = 0, 0, None, None
 	if second is not None:
 		seconde, nom = second
-		if composition.fourchette(seconde) is None:
+		if fourche(seconde) is None:
 			m0, n2 = 1, 1   # dépense le reste du budget, comme avant ; pèse un spécimen
 		else:
 			m0, n2 = nombre(seconde, nom, n1)
 	part = restant / facteur / (n0 + (m0 if n2 > 0 else 0))
 	remplir(principale, effectif=(n1, part * n1))
 	if seconde is not None and n2 > 0:
-		if composition.fourchette(seconde) is None:
+		if fourche(seconde) is None:
 			remplir(seconde, max_n=composition.plafond_association(nom, r),
 					fuite=composition.fuite_association(nom, r), meneur=False)
 		else:
