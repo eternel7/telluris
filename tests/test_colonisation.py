@@ -936,6 +936,13 @@ def test_le_visiteur_lit_en_mots_le_fondateur_a_les_chiffres():
 														  and not d.get("toutes_categories")
 														  and col.palier_atteint(reg, imp["palier"], d.get("palier_min"))}
 	assert not any(c["id"] == "ferme" for c in fondateur["catalogue"])        # la ferme attend le Hameau
+	# les fortifications aussi : seules celles du palier courant, plus celles déjà en place
+	assert {f["id"] for f in fondateur["fortifications"]} == {
+		f["id"] for f in reg["fortifications"] if col.palier_atteint(reg, imp["palier"], f.get("palier_min"))}
+	assert len(fondateur["fortifications"]) < len(reg["fortifications"])     # le campement n'ouvre pas tout
+	loin = next(f for f in reg["fortifications"] if not col.palier_atteint(reg, imp["palier"], f.get("palier_min")))
+	imp["fortifications"] = [loin["id"]]
+	assert loin["id"] in {f["id"] for f in col.vue(imp, reg, col.FONDATEUR, site, [], CAT_PROP, now=10)["fortifications"]}
 	assert set(reg["menace"]["attaque_proba"]) == {p["id"] for p in col.paliers(reg)}
 
 

@@ -2742,8 +2742,12 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 			"requis_pour": (palier_def(reg, f.get("requis_pour")) or {}).get("label"),
 			"refus": "" if f.get("id") in (imp.get("fortifications") or [])
 			else peut_ouvrir_chantier({**imp, "chantier": None}, reg, employes, CHANTIER_FORTIFICATION, f.get("id"))[1],
-		} for f in reg.get("fortifications") or []],
-		"chantier": ({**imp["chantier"], "reste": reste_chantier(imp)} if imp.get("chantier") else None),
+		} for f in reg.get("fortifications") or []
+			# Seules les défenses que le palier COURANT ouvre (comme `catalogue_achats`) ;
+			# une défense déjà en place reste listée.
+			if f.get("id") in (imp.get("fortifications") or [])
+			or palier_atteint(reg, imp.get("palier"), f.get("palier_min"))],
+		"chantier":({**imp["chantier"], "reste": reste_chantier(imp)} if imp.get("chantier") else None),
 		"palier_suivant": conditions_palier(imp, reg, employes),
 		"menace": {"etape": _int((imp.get("menace") or {}).get("etape")),
 				   "mot": menace_mots.get(str(_int((imp.get("menace") or {}).get("etape"))), ""),
