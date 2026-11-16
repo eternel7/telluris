@@ -1281,6 +1281,31 @@ def test_les_fonctions_des_echelons_sont_cumulatives_et_suivent_le_palier():
 	assert len([b for b in imp["batiments"] if b["type"] == "maison_guilde"]) == 1   # une seule maison
 
 
+def test_la_vue_ne_presente_que_l_echelon_que_le_palier_ouvre():
+	reg = _reg()
+	assert col.vue_guilde(_perso(), _imp(reg), reg, [], [], now=1)["suivant"] is None     # campement : rien
+	premier = col.echelons(reg)[0]
+	assert col.vue_guilde(_perso(), _imp(reg, premier["palier"]), reg, [], [], now=1)["suivant"]["id"] == premier["id"]
+	imp = _guilde(reg)
+	suivant = col.echelon_suivant(imp, reg)
+	assert not col.palier_atteint(reg, imp["palier"], suivant["palier"])
+	assert col.vue_guilde(_perso(), imp, reg, [], [], now=1)["suivant"] is None
+	imp["palier"] = suivant["palier"]
+	assert col.vue_guilde(_perso(), imp, reg, [], [], now=1)["suivant"]["id"] == suivant["id"]
+
+
+def test_les_postes_de_specialistes_n_ouvrent_qu_avec_leur_fonction():
+	reg = _reg()
+	imp = _guilde(reg)
+	assert "specialistes" not in col.fonctions(imp, reg)
+	libres = {p["metier"] for p in col.postes_libres(imp, reg, [])}
+	assert not libres & set(col.METIERS_SPECIALISTES)
+	ouvre = next(e for e in col.echelons(reg) if "specialistes" in (e.get("fonctions") or []))
+	imp["guilde"]["echelon"] = ouvre["id"]
+	libres = {p["metier"] for p in col.postes_libres(imp, reg, [])}
+	assert set(col.METIERS_SPECIALISTES) <= libres
+
+
 def test_defense_et_attraction_de_la_guilde():
 	reg = _reg()
 	imp = _guilde(reg)

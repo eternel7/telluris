@@ -103,7 +103,12 @@ test('une demande en attente remplace le champ de demande', () => {
 
 test('le fondateur a tous les onglets, les chiffres et toutes les décisions', () => {
 	const d = gerant('fondateur');
-	assert.strictEqual((colImplantationHtml(d, 'site').match(/data-onglet=/g) || []).length, COL_ONGLETS.length);
+	const fondable = Object.assign({}, d, { guilde: { existe: false, suivant: { label: 'Auberge', prix: 1, palier: 'Village', refus: '' } } });
+	assert.strictEqual((colImplantationHtml(fondable, 'site').match(/data-onglet=/g) || []).length, COL_ONGLETS.length);
+	// guilde ni fondée ni fondable au palier courant : pas d'onglet, et l'onglet demandé retombe sur le Site
+	const sansGuilde = Object.assign({}, d, { guilde: { existe: false, suivant: null } });
+	assert.ok(!colImplantationHtml(sansGuilde, 'site').includes('data-onglet="guilde"'));
+	assert.strictEqual(colImplantationHtml(sansGuilde, 'guilde'), colImplantationHtml(sansGuilde, 'site'));
 	const html = tout(d);
 	for (const attendu of ['colConstruire', 'colPoser', 'colChantier', 'colFeu', 'colOuvrirEmbauche', 'colExclure',
 		'colRepondre', 'colReparer', 'Carnet', '(2/3)', 'Défense physique : 4/20', 'Morts récentes : -8', 'Feu : +5'])
