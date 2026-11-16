@@ -112,6 +112,35 @@ def test_tag_reference_objet_avec_poids_d_instance():
 	assert expedition.porteur_avec_tag(_get_item, [perso], TAG) is True
 
 
+# ── outils_partages : ce que le client lit pour griser 🪓 / 🔪 ────────────────────
+
+def _base(*docs):
+	tous = {**_ITEMS, **{d["_id"]: d for d in docs}}
+	return tous.get
+
+
+def test_outils_partages_hache_d_un_compagnon_vaut_pour_le_principal():
+	"""Le bug d'origine : troncs au sol, hache en main du compagnon, bouton 🪓 grisé chez
+	le principal. Le bloc publié doit dire « oui » depuis le principal."""
+	av = _compagnon("aventurier:1", slots={"main_droite": "item:hache"})
+	perso = _joueur(groupe=[av["_id"]])
+	assert expedition.outils_partages(perso, _base(av)) == {"coupe_bois": True, "tranchant": False}
+
+
+def test_outils_partages_ignore_la_hache_d_une_monture():
+	"""Même règle que `/api/couper` (`groupe_effectif`) : une bête porte, elle ne coupe pas."""
+	mon = _monture("monture:1", inventaire=["item:hache"])
+	perso = _joueur(montures=[mon["_id"]])
+	assert expedition.outils_partages(perso, _base(mon))["coupe_bois"] is False
+
+
+def test_outils_partages_lit_les_tags_des_variables_de_monde(monkeypatch):
+	lame = {"_id": "item:lame", "type": "item", "nom": "Lame", "tags": ["lame_maison"]}
+	monkeypatch.setattr(character_stats, "CARCASSE_TRANCHANT_TAG", "lame_maison")
+	perso = _joueur(inventaire=["item:lame"])
+	assert expedition.outils_partages(perso, _base(lame))["tranchant"] is True
+
+
 # ── meilleur_negociateur : le Cha BUFFÉ, sous condition de confiance ─────────────
 
 def test_negociateur_compagnon_au_cha_buffe_bat_le_principal():

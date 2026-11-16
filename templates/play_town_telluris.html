@@ -6002,7 +6002,15 @@ function _majIndicateursPoints() {
 // Chaque payload qui le change (recrutement, étable, guide, GET api/groupe) porte
 // `groupe_visible` ; un payload sans la clé ne touche à rien.
 function _majBoutonGroupe(data) {
-	if (!data || !('groupe_visible' in data)) return;
+	if (!data) return;
+	// Le groupe a pu changer (embauche, renvoi, départ) : la hache d'un compagnon arrive ou
+	// s'en va avec lui — les boutons 🪓/🔪 du sac et du sol se regrisent en conséquence.
+	if (data.outils_groupe) {
+		const avant = JSON.stringify(_outilsGroupe);
+		_outilsGroupe = data.outils_groupe;
+		if (JSON.stringify(_outilsGroupe) !== avant) { _refreshInventaire(); _refreshSol(); }
+	}
+	if (!('groupe_visible' in data)) return;
 	const btn = document.getElementById('btn-groupe');
 	if (btn) btn.hidden = !data.groupe_visible;
 }
@@ -6747,6 +6755,9 @@ let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }
 // les coûts effectifs que portent déjà les payloads de sorts/compétences.
 let _chargeMagie  = {{ charge_magie | tojson | safe }};
 let _effetsActifs = {{ effets_actifs | tojson | safe }};
+// Outils PARTAGÉS par l'expédition (`expedition.outils_partages`) : hache / lame portées par
+// le principal OU un compagnon. Resynchronisés par `outils_groupe` de chaque payload d'inventaire.
+let _outilsGroupe = {{ outils_groupe | tojson | safe }} || {};
 // Mode « fiche compagnon » — déclarés ICI (et non près de openCompagnonSheet) car le premier
 // rendu (_refreshSol/_refreshInventaire → _hasOutilCoupe) les lit à l'init, avant ce bloc :
 // une déclaration `let` plus bas les mettrait en zone morte temporelle (TDZ → ReferenceError).
@@ -7698,19 +7709,12 @@ function _estDecoupable(item) {
 function _estCoupable(item) {
 	return !!item && (item.tags || []).some(t => String(t).toLowerCase() === 'a_couper');
 }
-// Scan du sac ET de l'équipement pour un tag donné. L'outil est PARTAGÉ par le groupe
-// (miroir de expedition.porteur_avec_tag côté serveur). En mode compagnon, _inventaire/_slots
-// sont ceux du compagnon affiché ; le principal (qui porte souvent la hache ou le couteau)
-// est rangé dans le snapshot — on l'inclut pour ne pas griser à tort.
-function _porteLeTag(tag) {
-	const hasTag = o => o && (o.tags || []).some(t => String(t).toLowerCase() === tag);
-	const scan = (inv, slots) => (inv || []).some(hasTag) || Object.values(slots || {}).some(hasTag);
-	if (scan(_inventaire, _slots)) return true;
-	if (_compagnonActif && _sheetSnap && scan(_sheetSnap.inventaire, _sheetSnap.slots)) return true;
-	return false;
-}
-function _hasOutilCoupe()    { return _porteLeTag('outil_coupe_bois'); }
-function _hasArmeTranchante(){ return _porteLeTag('tranchant'); }
+// L'outil est PARTAGÉ par l'expédition : c'est le SERVEUR qui dit si un membre (principal ou
+// compagnon) le porte (`_outilsGroupe`, mêmes porteurs et mêmes tags que `/api/couper`).
+// ⚠️ Ne pas rescanner `_inventaire` ici : il ne contient que le personnage AFFICHÉ — une hache
+// dans la main d'un compagnon laissait le bouton grisé chez le principal.
+function _hasOutilCoupe()    { return !!_outilsGroupe.coupe_bois; }
+function _hasArmeTranchante(){ return !!_outilsGroupe.tranchant; }
 function _couperBtn(idx, itemId, source, item) {
 	const carc = _estDecoupable(item);
 	const tool = carc ? _hasArmeTranchante() : _hasOutilCoupe();
@@ -8759,6 +8763,7 @@ function _applyInventoryPayload(data) {
 	_objetsAuSol = data.objets_au_sol;
 	_slots       = data.slots;
 	if (typeof data.charge_max === 'number') _chargeMax = data.charge_max;
+	if (data.outils_groupe) _outilsGroupe = data.outils_groupe;
 	// Palier de canalisation recalculé par le serveur au même endroit que la charge : sans
 	// cette ligne, il resterait figé sur le dernier chargement de la page.
 	if (data.charge_magie) { _chargeMagie = data.charge_magie; _renderSorts(_sorts); }
@@ -13815,7 +13820,10 @@ async function transfererItem(sens, index, itemId) {
 		_inventaire = data.principal.inventaire;
 		_slots      = data.principal.slots;
 		_chargeMax  = data.principal.charge_max;
+		// Une hache confiée à une MONTURE quitte les outils de l'expédition (bête ≠ bûcheron).
+		if (data.principal.outils_groupe) _outilsGroupe = data.principal.outils_groupe;
 		_refreshInventaire();
+		_refreshSol();
 		_refreshChargeGauge();
 		_appliquerFiche(data.fiche);   // un grimoire passé à un compagnon ferme son sort
 		if (_grpEtat) {
