@@ -271,6 +271,14 @@ def test_on_donne_depuis_tout_le_groupe_compagnons_montures_et_contenants(monde)
 	for sac, idx in (("aventurier:1#1", 0), ("character:v#0", 0), ("aventurier:1", 0), ("monture:1", 0)):
 		rep = _appel(monde, visiteur, rc.donner, None, {"sac": sac, "index": idx, "item_id": "item:pain"})
 		assert rep["don"]["nom"] == "Pain"
+		# le sac du PORTEUR réel revient à part (sac virtuel → son porteur), jamais celui du principal
+		porteur = sac.split("#")[0]
+		if porteur == visiteur["_id"]:
+			assert "compagnon_id" not in rep and "compagnon" not in rep
+		else:
+			assert rep["compagnon_id"] == porteur
+			assert [o["_id"] for o in rep["compagnon"]["inventaire"]] == [
+				_id for r in monde["docs"][porteur]["inventaire"] for _id in [r["item"] if isinstance(r, dict) else r]]
 	assert monde["docs"]["aventurier:1"]["inventaire"] == [{"item": "item:besace"}]   # pain donné, besace vidée
 	assert monde["docs"]["monture:1"]["inventaire"] == []
 	assert visiteur["inventaire"] == [{"item": "item:besace"}]

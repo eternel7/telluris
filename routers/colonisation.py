@@ -417,9 +417,14 @@ async def donner(current_user: Annotated[dict, Depends(get_current_user)], body:
 	porteur = contenants.porteurs_reels([sac])[0]
 	_sauver(imp, porteur)
 	role = colonisation.role_de(character, imp)        # un premier don fait un soutien
-	return _payload(character, imp, reg, role, extra={
-		"don": {"stock": stock, "unites": entre, "nom": item.get("nom", "")},
-		"inventaire_payload": _inventory_payload(character)})
+	extra = {"don": {"stock": stock, "unites": entre, "nom": item.get("nom", "")},
+			 "inventaire_payload": _inventory_payload(character)}
+	if porteur is not character:
+		# Sac d'un compagnon / d'une monture allégé : son payload voyage à part (Convention §10),
+		# jamais à la place de celui du principal — sac du porteur, sol du joueur.
+		extra["compagnon_id"] = porteur.get("_id")
+		extra["compagnon"] = _inventory_payload(porteur, character)
+	return _payload(character, imp, reg, role, extra=extra)
 
 
 @colonisation_router.post("/colonisation/feu")

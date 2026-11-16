@@ -440,6 +440,8 @@ function colRendre(d) {
 	_colData = d; _colVue = 'ici';
 	updatePurse(d.purse);
 	if (d.inventaire_payload) _applyInventoryPayload(d.inventaire_payload);
+	// Don puisé dans le sac d'un compagnon / d'une monture (ou d'un contenant qu'il porte).
+	if (d.compagnon_id) _resyncSacPorteur(d.compagnon_id, d.compagnon);
 	(d.evenements || []).forEach(t => showToast(t));
 	_colEcrire('🏕️ ' + (d.label || 'Implantation'), colImplantationHtml(d, _colOnglet));
 }
