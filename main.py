@@ -55,6 +55,8 @@ from utils import competences as competences_util
 from utils import slots_actions
 from utils import focalisation
 from utils import traces as traces_util
+from utils import traversee as traversee_util
+from utils import bruit as bruit_util
 from utils import expedition as expedition_util
 from utils import pnj as pnj_util
 from utils import intro as intro_util
@@ -1305,6 +1307,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 				if dimensions and grid_doc.get("cells") else None),
 			"clic_portee": character_stats.CLIC_PORTEE_MAX,
 			"traces": traces_ici,
+			# Bruit du groupe (`utils/bruit.py`) : indicateur 🤫/👣/📣, resynchronisé à chaque pas.
+			"bruit": bruit_util.bloc_ici(character, grid_doc, get_doc,
+				en_mer=traversee_util.en_mer(character), est_ville=lieu_est_ville_image(grid_doc)),
 			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
 			"volant": vol_util.vol_actif(character),
 			"chute_vol": chute_vol,

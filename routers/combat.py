@@ -47,6 +47,7 @@ from utils import chasse
 from utils import apport
 from utils import xp_monstre
 from utils import composition_rencontre
+from utils import bruit as bruit_util
 from models import character_stats
 
 combat_router = APIRouter()
@@ -264,6 +265,15 @@ def _demarrer_combat(body: StartCombatRequest, current_user: dict):
     nb_monstres = 1 + len(compagnons) // 2
     budget = (character_stats.RENCONTRE_BUDGET * max(0.0, float(body.intensite or 0))
               * (1 + character_stats.RENCONTRE_BUDGET_COMPAGNON * len(compagnons)))
+    # BRUIT du groupe (`utils/bruit.py`) : position dans la fourchette d'effectif et chance du
+    # second groupe, en zone de nature seulement (ni ville, ni mer). Les montures et les escortés
+    # y comptent — ils ne relèvent toujours PAS le budget (les grades).
+    bruit = None
+    if bruit_util.s_applique(depart_lieu, en_mer=traversee.en_mer(character),
+                             est_ville=_is_town_lieu(depart_lieu)):
+        bruit = bruit_util.mesurer(
+            character, compagnons, montures_groupe, proteges_groupe, carried_weight,
+            lambda p: montures.charge_max_porteur(p, get_doc))["points"]
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
     # Focalisation : l'espèce ciblée pèse plus lourd dans le tirage (si présente au pool).
     if situee:
@@ -284,8 +294,10 @@ def _demarrer_combat(body: StartCombatRequest, current_user: dict):
             profil_weights=profil_weights,
             espece_weights=focalisation.espece_weights_focus(character),
             affinites=get_doc(composition_rencontre.DOC_ID),
-            # Fourchette d'effectif (`espece.effectif`) : un spécimen de plus par paire.
+            # Fourchette d'effectif (`espece.effectif`) : un spécimen de plus par paire — sauf
+            # avec le bruit, qui place l'effectif dans la fourchette.
             compagnons=len(compagnons),
+            bruit=bruit,
         )
     if not monstres:
         return {"combat_id": None}

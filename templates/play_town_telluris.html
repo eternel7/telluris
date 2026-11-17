@@ -1299,6 +1299,13 @@
 		.sh-ville-body .sh-relation.hidden { display: none; }
 		/* Chips d'effets actifs (consommables) — colonne gauche de la fiche + onglet stats. */
 		.sh-effets-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+		/* Bruit du groupe : pastille cliquable (le détail part en toast — un `title` ne
+		   s'affiche pas au doigt). */
+		.bruit-indic { display: inline-block; margin-top: 8px; font: inherit; font-size: 0.8rem; padding: 3px 10px; background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
+		.bruit-indic[hidden] { display: none; }
+		.bruit-indic.bruit-discret { border-color: #5d8a5d; }
+		.bruit-indic.bruit-audible { border-color: #b08d3c; }
+		.bruit-indic.bruit-bruyant { border-color: #b0503c; }
 		.sh-effets-chips:not(:empty) { margin-top: 8px; }
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: normal; overflow-wrap: break-word; max-width: 100%; box-sizing: border-box; }
 		/* Le compteur (« 🔄4 PM/round », « 2 rounds ») reste d'un bloc : seul le libellé se replie. */
@@ -2338,6 +2345,10 @@
 			<!-- Effets actifs (consommables) : miroir du panneau latéral, resynchronisé
 			     à chaque déplacement via _renderEffetsActifs (rep.effets_actifs). -->
 			<div id="sh-effets-actifs-panel" class="sh-effets-chips"></div>
+			<!-- Bruit du groupe (utils/bruit.py) : 🤫 / 👣 / 📣, masqué hors zone de nature
+			     (ville, mer). Bloc `bruit` de /play puis de chaque pas (`_majBruit`). -->
+			<button type="button" id="bruit-indic" class="bruit-indic" hidden
+				onclick="_detaillerBruit()"></button>
 		{% endcall %}
 		</section>
 		<footer class="management-footer">
@@ -4667,6 +4678,7 @@
 				buildLocationslist();
 				_majHaloPassages();
 				_annoncerTraces(rep.traces);
+				_majBruit(rep.bruit);
 				updateControls();
 				updateVitals(rep.vitals);
 				_notifierTransportsEchoues(rep);
@@ -5017,6 +5029,35 @@
 	// Après le chargement : `showToast` est défini dans un script plus bas.
 	window.addEventListener('load', _majHaloPassages);
 	window.addEventListener('load', () => _annoncerTraces({{ traces | tojson | safe }}));
+
+	// ── Bruit du groupe (`utils/bruit.py`) ──────────────────────────────────────
+	// Bloc `bruit` de /play puis de chaque pas ; null hors zone de nature ⇒ pastille masquée.
+	// Le serveur tranche (effectif, second groupe, fréquence des combats) : ceci n'est qu'un
+	// affichage de son calcul.
+	let _bruit = null;
+	function _texteBruit(b) {
+		const detail = (b.sources || []).map(s => s.cle === 'charge'
+			? `${s.libelle} ${Math.round((s.taux || 0) * 100)} % (+${s.points})`
+			: `${s.libelle}${s.nb > 1 ? ' ×' + s.nb : ''} (+${s.points})`).join(' · ');
+		const effet = { discret: 'les rencontres sont plus rares et moins nombreuses',
+			audible: 'les rencontres suivent leur cours ordinaire',
+			bruyant: 'les rencontres sont plus fréquentes et plus nombreuses' }[b.niveau] || '';
+		return `${b.libelle} — ${effet}. Bruit ${b.points} : ${detail}`;
+	}
+	function _majBruit(b) {
+		_bruit = b || null;
+		const el = document.getElementById('bruit-indic');
+		if (!el) return;
+		if (!_bruit) { el.hidden = true; return; }
+		el.hidden = false;
+		el.textContent = _bruit.libelle;
+		el.className = 'bruit-indic bruit-' + _bruit.niveau;
+		el.title = _texteBruit(_bruit);
+	}
+	function _detaillerBruit() {
+		if (_bruit) showToast(_texteBruit(_bruit));
+	}
+	window.addEventListener('load', () => _majBruit({{ bruit | tojson | safe }}));
 	// Les deux fonctions ci-dessous ne font plus que POSER LEURS PRÉDICATS : le parcours du
 	// DOM vit dans `templates/scripts/deplacement.js`, partagé avec le combat et le mode test
 	// de l'éditeur (cf. CLAUDE.md § Pavé de déplacement partagé).

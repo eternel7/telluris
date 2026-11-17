@@ -43,6 +43,7 @@ from utils import consommables
 from utils import charge_magie
 from utils import vol as vol_util
 from utils import traversee as traversee_util
+from utils import bruit as bruit_util
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -563,8 +564,24 @@ def _evenement_de_zone(character: dict, lieu_doc: dict, pos: dict) -> tuple:
 	zone_defs = load_zone_defs_for_lieu(lieu_peuple, get_doc)
 	zone_event = resolve_zone_event(
 		pos["x"], pos["y"], lieu_peuple["zone_influences"], zone_defs,
-		boost=focalisation.boost_zone_event(character, lieu_peuple))
+		boost=focalisation.boost_zone_event(character, lieu_peuple),
+		facteur_combat=_facteur_combat_bruit(character, lieu_doc))
 	return zone_event, lieu_peuple
+
+
+def _bruit_payload(character: dict, lieu_doc: dict | None) -> dict | None:
+	"""Bloc `bruit` de l'indicateur de /play (None hors de sa portée : ville, mer)."""
+	return bruit_util.bloc_ici(character, lieu_doc, get_doc, en_mer=traversee_util.en_mer(character),
+							   est_ville=lieu_est_ville_image(lieu_doc))
+
+
+def _facteur_combat_bruit(character: dict, lieu_doc: dict) -> float:
+	"""Multiplicateur de fréquence des COMBATS de zone selon le bruit du groupe
+	(`utils/bruit.py`) ; 1 hors de sa portée (ville, mer) ou mécanique inactive."""
+	if not bruit_util.s_applique(lieu_doc, en_mer=traversee_util.en_mer(character),
+								 est_ville=lieu_est_ville_image(lieu_doc)):
+		return 1.0
+	return bruit_util.facteur_combat(bruit_util.du_groupe(character, get_doc)["points"])
 
 
 def _zone_event_payload(zone_event: dict | None) -> dict | None:
@@ -768,7 +785,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 		_apply_world_turn_groupe(character, xp_partage, compagnons,
 								 montures_groupe, groupe_avant),
 		xp_partage)
-	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "bruit": _bruit_payload(character, lieu_doc), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 
 
 def _guide_au_franchissement(character: dict, lieu_doc: dict, move: dict,
@@ -990,7 +1007,7 @@ def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "colonie_offre": colonisation.offre_fonder(character_to_update, lieu_doc, character_to_update["position"], get_doc, find_docs, connexions_du_lieu), "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc), "traces": traces_util.traces_ici(character_to_update, lieu_doc, get_doc, find_docs, expedition.membres(character_to_update, get_doc), lieu_est_ville_image(lieu_doc))}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "bruit": _bruit_payload(character_to_update, lieu_doc), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "colonie_offre": colonisation.offre_fonder(character_to_update, lieu_doc, character_to_update["position"], get_doc, find_docs, connexions_du_lieu), "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc), "traces": traces_util.traces_ici(character_to_update, lieu_doc, get_doc, find_docs, expedition.membres(character_to_update, get_doc), lieu_est_ville_image(lieu_doc))}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

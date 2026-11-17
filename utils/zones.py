@@ -87,6 +87,7 @@ def resolve_zone_event(
     zone_defs: dict,
     boost: dict | None = None,
     rand_fn=None,
+    facteur_combat: float = 1.0,
 ) -> dict | None:
     """
     Resolve a movement event from all active zones at (px, py).
@@ -96,6 +97,12 @@ def resolve_zone_event(
     localisation : zone_def ids, ou `<zone>@<i>` d'un placement à contenu propre) est active. Ne touche PAS à la probabilité de déclenchement.
 
     `rand_fn` : tirage de déclenchement injectable (tests) — `random.random` par défaut.
+
+    `facteur_combat` (BRUIT du groupe, `utils/bruit.py`) : multiplie la probabilité d'un
+    COMBAT, sans toucher à celle des autres événements. Avec I l'intensité et s la part des
+    combats dans la table (boost compris) : déclenchement à min(1, I·(s·f + 1 − s)) puis poids
+    des combats × f ⇒ P(combat) = I·s·f et P(autre) = I·(1 − s) (au plafond de 1 près).
+    L'`intensite` renvoyée reste I : elle règle le budget de menace, que le bruit ne touche pas.
 
     Returns {"type", "tags", "zones_actives", "intensite", "modificateurs"} or None.
     """
@@ -116,8 +123,6 @@ def resolve_zone_event(
         return None
 
     proba_globale = max(intensity for intensity, _ in active)
-    if (rand_fn or random.random)() >= proba_globale:
-        return None
 
     # Composite weighted event table
     boost_actif = bool(
@@ -132,6 +137,18 @@ def resolve_zone_event(
                 w *= boost["mult"]
             entries.append(entry)
             weights.append(w)
+
+    proba_tirage = proba_globale
+    f = max(0.0, float(facteur_combat if facteur_combat is not None else 1.0))
+    total = sum(weights)
+    if f != 1.0 and total > 0:
+        part_combat = sum(w for e, w in zip(entries, weights) if e.get("type") == "combat") / total
+        if part_combat > 0:
+            proba_tirage = min(1.0, proba_globale * (part_combat * f + 1 - part_combat))
+            weights = [w * f if e.get("type") == "combat" else w for e, w in zip(entries, weights)]
+
+    if (rand_fn or random.random)() >= proba_tirage:
+        return None
 
     if not entries:
         return None
