@@ -126,6 +126,13 @@ PROFIL_PAR_ESPECE: dict[str, str] = {
 	"homme_arbre":     "humanoide",
 	# Oiseau coureur : ailes et deux pattes, mais pas le tag `vol`.
 	"autruches":       "aile",
+	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11) : corps d'Anthrope ou
+	# de bipède sans le tag `humanoide` (qui en ferait une bande de 3-6 armée).
+	"teryel":          "humanoide",
+	"wendigo":         "humanoide",
+	"mapinguari":      "humanoide",
+	"camazotz":        "humanoide_aile",
+	"jorogumo":        "arachnide",
 }
 
 

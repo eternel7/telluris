@@ -251,6 +251,8 @@ TABLE = {
 		"Kanabo", "Hache_de_guerre",
 		"Braies_fourrure", "Etole_de_fourrure", "Bracelets_os",
 	],
+	# Esprit-guerrier des montagnes du Japon (dev/gen_monstres_legendes.py, 17/11) : maître du sabre.
+	"tengu": ["Katana"],
 	# Chasseur du Nord en peau de loup (Auteur, 14/10) : hache, écu, fourrures — pas d'armure lourde.
 	"ulfhedinn": [
 		"Hache_de_guerre", "Hache_a_deux_mains", "Ecu",

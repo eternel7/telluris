@@ -1,5 +1,7 @@
 # Monstres à créer — liste mise de côté (15/11/2026)
 
+> ✅ **Créés le 17/11/2026** par `dev/gen_monstres_legendes.py` (+ la **Mère-gelée**, slime colossal) → `jsons/monstres_legendes_a_importer.json`. Décisions de l'Auteur : Asie et Amériques en régions dormantes `asie` / `ameriques` ; les 6 boss au bestiaire seul ; lapin cornu dans la Forêt de Saint-Loup et la Clairière du charbonnier ; slime et Mère-gelée à placer plus tard ; qilin et baku rares et fuyards.
+
 Candidats au bestiaire, à créer dans une prochaine session (doc `espece:*`, image, profils, zones de rencontre).
 
 **Critères de sélection**

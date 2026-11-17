@@ -42,6 +42,8 @@ FEMININS = {
 	"reine_lhamia", "silat", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 	# Faune des zones par biome (dev/gen_zones_biomes.py, 16/11), noms de groupe au pluriel.
 	"antilopes", "autruches", "hyenes", "tortues_marines",
+	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
+	"mere_gelee", "teryel", "jorogumo", "pontianak",
 }
 
 MASCULINS = {
@@ -72,6 +74,11 @@ MASCULINS = {
 	# Faune des zones par biome (dev/gen_zones_biomes.py, 16/11).
 	"singes", "grands_singes", "hippopotames", "flamants", "elephants", "buffles", "rennes",
 	"boeufs_musques", "bisons", "yacks", "phoques_et_morses",
+	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
+	"kelpie", "each_uisge", "dullahan", "barghest", "nuckelavee", "slime", "lapin_cornu", "roc",
+	"impundulu", "tokoloshe", "inkanyamba", "kappa", "tengu", "gashadokuro", "qilin", "baku",
+	"wendigo", "oiseau_tonnerre", "mapinguari", "ahuizotl", "camazotz", "mngwa", "adze",
+	"mokele_mbembe", "kongamato",
 }
 
 PLURIELS = {

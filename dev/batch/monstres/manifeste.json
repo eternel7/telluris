@@ -5,7 +5,9 @@
 		"batches/qymk7p7uk9rq0en7lrjjsen171a75woacwis",
 		"batches/l94ks0kam36e79ky5tmvfcii5i26usqqyaxg",
 		"batches/ddrtlp4c99moy5s4hh2tnbe99i42ikrizx5z",
-		"batches/yhtvxdouo8teniyxx1lqp5ga6b6uchycrv4y"
+		"batches/yhtvxdouo8teniyxx1lqp5ga6b6uchycrv4y",
+		"batches/ob6ocktn2y6mfietpd9wl0xyzj177gs75vdu",
+		"batches/nm1sa3ouwgnkwscgh270xpoqju5e5s02tx0x"
 	],
 	"images": {
 		"apep": "apep_transparent.png",
@@ -63,7 +65,36 @@
 		"rennes": "rennes_transparent.png",
 		"serpopard": "serpopard_transparent.png",
 		"succube": "succube_transparent.png",
-		"spectre": "spectre_transparent.png"
+		"spectre": "spectre_transparent.png",
+		"dullahan": "dullahan_transparent.webp",
+		"barghest": "barghest_transparent.webp",
+		"nuckelavee": "nuckelavee_transparent.webp",
+		"slime": "slime_transparent.webp",
+		"mere_gelee": "mere_gelee_transparent.webp",
+		"lapin_cornu": "lapin_cornu_transparent.webp",
+		"roc": "roc_transparent.webp",
+		"teryel": "teryel_transparent.webp",
+		"impundulu": "impundulu_transparent.webp",
+		"tokoloshe": "tokoloshe_transparent.webp",
+		"inkanyamba": "inkanyamba_transparent.webp",
+		"tengu": "tengu_transparent.webp",
+		"gashadokuro": "gashadokuro_transparent.webp",
+		"qilin": "qilin_transparent.webp",
+		"baku": "baku_transparent.webp",
+		"wendigo": "wendigo_transparent.webp",
+		"oiseau_tonnerre": "oiseau_tonnerre_transparent.webp",
+		"mapinguari": "mapinguari_transparent.webp",
+		"ahuizotl": "ahuizotl_transparent.webp",
+		"camazotz": "camazotz_transparent.webp",
+		"mngwa": "mngwa_transparent.webp",
+		"adze": "adze_transparent.webp",
+		"mokele_mbembe": "mokele_mbembe_transparent.webp",
+		"kongamato": "kongamato_transparent.webp",
+		"kelpie": "kelpie_transparent.webp",
+		"each_uisge": "each_uisge_transparent01.webp",
+		"kappa": "kappa_transparent01.webp",
+		"jorogumo": "jorogumo_transparent01.webp",
+		"pontianak": "pontianak_transparent.webp"
 	},
 	"remplacees": [
 		{
@@ -85,6 +116,34 @@
 		{
 			"cle": "spectre",
 			"fichier": "spectre_transparent.png"
+		},
+		{
+			"cle": "kelpie",
+			"fichier": "kelpie_transparent.webp"
+		},
+		{
+			"cle": "each_uisge",
+			"fichier": "each_uisge_transparent.webp"
+		},
+		{
+			"cle": "jorogumo",
+			"fichier": "jorogumo_transparent.webp"
+		},
+		{
+			"cle": "pontianak",
+			"fichier": "pontianak_transparent.webp"
+		},
+		{
+			"cle": "kappa",
+			"fichier": "kappa_transparent.webp"
+		},
+		{
+			"cle": "kelpie",
+			"fichier": "kelpie_transparent01.webp"
+		},
+		{
+			"cle": "pontianak",
+			"fichier": "pontianak_transparent01.webp"
 		}
 	]
 }

@@ -166,6 +166,16 @@ COMPETENCES = {
 	"regeneration": _passive(
 		"Régénération", "💚", "Ses plaies se referment à vue d'œil.",
 		"soi", {"regen_pv": "{R/10}"}),
+	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
+	"foudre": _active(
+		"Foudre", "⚡", "Un claquement d'ailes, et l'éclair tombe sur celui que la bête a choisi.",
+		"ennemi", 5, "magique", {"degats": "3D8+{Vol/10}"}, 3,
+		animation="animation:capa_foudre"),
+	"devoreur_de_reves": _active(
+		"Mangeur de songes", "🌙",
+		"La trompe effleure le front : les rêves s'en vont, et l'espoir avec eux.",
+		"ennemi", 2, "magique", {"degats_pm": "3D6", "buffs": {"Vol": -10}, "duree": 2}, 3,
+		animation="animation:capa_illusion"),
 }
 
 # Espèce → compétences innées (suffixes de COMPETENCES).
@@ -196,7 +206,22 @@ for _c, _especes in {
 	"malediction_du_tombeau": ["momie", "roi_des_tombes"],
 	"embrasement": ["phenix", "grand_phenix", "ifrit"],
 	"hurlement_de_meute": ["loup_garou", "lycaon", "faoladh"],
-	"regeneration": ["troll", "hydre", "dragon_hydre", "balaur", "zmey_gorynych"],
+	"regeneration": ["troll", "hydre", "dragon_hydre", "balaur", "zmey_gorynych", "mere_gelee"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
+# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
+for _c, _especes in {
+	"etreinte": ["kelpie", "each_uisge", "mere_gelee", "inkanyamba", "kappa", "gashadokuro", "ahuizotl"],
+	"hurlement_terrifiant": ["dullahan", "barghest", "nuckelavee", "wendigo", "mapinguari"],
+	"souffle_empoisonne": ["nuckelavee", "mapinguari"],
+	"charme": ["teryel", "jorogumo", "pontianak"],
+	"toile": ["jorogumo"],
+	"venin": ["jorogumo"],
+	"lamentation": ["pontianak"],
+	"morsure_vampirique": ["adze"],
+	"foudre": ["impundulu", "oiseau_tonnerre"],
+	"devoreur_de_reves": ["baku"],
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
@@ -246,6 +271,16 @@ MAGIE = {
 	"prince_demon": ["magie_demonologie_9"],
 	"succube": ["magie_demonologie_2"],
 	"incube": ["magie_demonologie_2"],
+	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
+	"teryel": ["magie_illusoire_3"],
+	"impundulu": ["magie_elementaire_4"],
+	"tokoloshe": ["magie_illusoire_2"],
+	"inkanyamba": ["magie_elementaire_6"],
+	"tengu": ["magie_elementaire_3"],
+	"qilin": ["magie_sainte_4"],
+	"baku": ["magie_illusoire_4"],
+	"jorogumo": ["magie_illusoire_3"],
+	"oiseau_tonnerre": ["magie_elementaire_6"],
 }
 
 # Tags d'IA.
@@ -281,6 +316,20 @@ for _tag, _especes in {
 	"ia_artilleur_seigneur_mage": ["vampire", "comte_vampire", "nosferatu", "gwyn_ap_nudd",
 								   "demon_majeur_de_la_destinee"],
 	"ia_artilleur_apprenti": ["gobelin_chamanique"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11). Qilin et baku : rares et
+# non agressifs (Auteur), ils fuient plutôt que d'attaquer.
+for _tag, _especes in {
+	"ia_embuscade": ["kelpie", "each_uisge", "barghest", "teryel", "inkanyamba", "kappa", "gashadokuro",
+					 "jorogumo", "ahuizotl"],
+	"ia_hit_and_run": ["lapin_cornu", "roc", "impundulu", "tokoloshe", "tengu", "oiseau_tonnerre",
+					   "camazotz", "adze", "kongamato"],
+	"ia_predateur": ["each_uisge", "dullahan", "barghest", "nuckelavee", "wendigo", "mngwa", "pontianak"],
+	"ia_fuyard_50": ["qilin", "baku"],
+	"ia_fuyard_40": ["tokoloshe"],
+	"ia_berserker": ["mapinguari", "mokele_mbembe"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)
