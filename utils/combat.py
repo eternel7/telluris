@@ -46,6 +46,7 @@ from utils import journal
 from utils import pieges as pieges_util
 from utils import tresor as tresor_util
 from utils import vol as vol_util
+from utils import bruit as bruit_util
 from utils import images_monstres
 from utils import contenants as contenants_util
 from utils import xp_monstre
@@ -3976,6 +3977,7 @@ def instantiate_groupes(
 	plafond: int | None = None, proba_second: float | None = None,
 	profil_weights: dict | None = None, espece_weights: dict | None = None,
 	rand=None, affinites: dict | None = None, compagnons: int = 0,
+	bruit: float | None = None,
 ) -> list:
 	"""Rencontre GROUPÉE PAR ESPÈCE (Auteur, 15/11) : une espèce principale tirée dans
 	`especes` (pondérée par `espece_weights`, la focalisation), dont les spécimens dépensent
@@ -3994,11 +3996,21 @@ def instantiate_groupes(
 	ASSOCIÉ (`_instantiate_groupes_composes`, règles dans `utils/composition_rencontre`).
 	Absent ⇒ le comportement d'avant, à la lettre — et le champ `effectif` des espèces (la
 	fourchette) n'est lu qu'AVEC ce doc. `compagnons` = taille du groupe du joueur : `budget`
-	l'inclut déjà (× (1 + `RENCONTRE_BUDGET_COMPAGNON` × n)) ; la fourchette l'en retire."""
+	l'inclut déjà (× (1 + `RENCONTRE_BUDGET_COMPAGNON` × n)) ; la fourchette l'en retire.
+
+	`bruit` = points de bruit du groupe (`utils/bruit.py`, Auteur 17/11) : avec la fourchette,
+	l'effectif est tiré à la POSITION que donne le bruit (seul ⇒ bas, convoi ⇒ haut, jamais
+	au-delà) au lieu du milieu décalé par les compagnons, et la part de budget par spécimen se
+	calcule sur le milieu de la fourchette (grades inchangés) ; la chance du second groupe est
+	multipliée par `bruit.facteur_second`. None (ou mécanique inactive) ⇒ comportement d'avant."""
 	rand = rand or random
 	plafond = max(1, int(plafond if plafond is not None else character_stats.RENCONTRE_PLAFOND))
 	if proba_second is None:
 		proba_second = character_stats.RENCONTRE_SECOND_GROUPE_PROBA
+	if bruit is not None and not bruit_util.actif():
+		bruit = None
+	if bruit is not None:
+		proba_second = min(1.0, float(proba_second) * bruit_util.facteur_second(bruit))
 	pool = list(especes or [])
 	if not pool:
 		return []
@@ -4006,7 +4018,7 @@ def instantiate_groupes(
 	if regles:
 		return _instantiate_groupes_composes(
 			pool, profils, budget, cout_fn, plafond, proba_second, profil_weights,
-			espece_weights, rand, regles, compagnons)
+			espece_weights, rand, regles, compagnons, bruit)
 
 	def tirer(candidats):
 		if espece_weights:
@@ -4045,7 +4057,7 @@ def instantiate_groupes(
 def _instantiate_groupes_composes(
 	pool: list, profils: list, budget: float, cout_fn, plafond: int, proba_base: float,
 	profil_weights: dict | None, espece_weights: dict | None, rand, r: dict,
-	compagnons: int = 0,
+	compagnons: int = 0, bruit: float | None = None,
 ) -> list:
 	"""Rencontre COMPOSÉE (Auteur, 15/11) — `instantiate_groupes` avec `rules:affinites_especes`.
 
@@ -4266,9 +4278,16 @@ def _instantiate_groupes_composes(
 												 effectif=(n2, montant / facteur / m0 * n2)))
 
 	def nombre(espece, nom, deja):
-		"""`(n0, n)` : effectif tiré SANS compagnons, puis décalé et borné (plafond, association)."""
-		n0 = composition.tirer_effectif(fourche(espece), rand)
-		n = n0 + decalage
+		"""`(n0, n)` : effectif tiré SANS compagnons, puis décalé et borné (plafond, association).
+		Avec le BRUIT : `n` tiré à la position du bruit (sans décalage), `n0` = milieu de la
+		fourchette — la part de budget par spécimen, donc les grades, ne suivent pas l'effectif."""
+		if bruit is not None:
+			f = fourche(espece)
+			n0 = bruit_util.milieu(f)
+			n = bruit_util.tirer_effectif(f, bruit_util.position_fourchette(bruit), rand)
+		else:
+			n0 = composition.tirer_effectif(fourche(espece), rand)
+			n = n0 + decalage
 		borne = composition.plafond_association(nom, r)
 		if borne is not None:
 			n = min(n, borne)
