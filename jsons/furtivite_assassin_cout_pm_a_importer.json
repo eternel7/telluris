@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "competence:furtivite",
+    "type": "competence",
+    "nom": "Furtivité",
+    "icon": "🥷",
+    "animation": "animation:capa_furtif",
+    "description": "Il s'efface : tant qu'il ne frappe pas, les ennemis doivent le repérer avant de venir à lui. Frapper le révèle — mais il peut se fondre à nouveau dans les ombres.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 3,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "furtivite": 1
+    }
+  }
+]
