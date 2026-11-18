@@ -236,6 +236,24 @@ DEFAUTS = {
 						  "coffre_associe_kg": 30, "colons_max": 5, "colons_distance_max": 25,
 						  "colons_duree_s": 2 * JOUR_S},
 	"intendant_economie": 0.1,    # part de nourriture épargnée (non cumulatif)
+	# Autonomie des approvisionnements : ce que les PNJ font SANS le joueur.
+	# - `glanage` : unités par habitant COMPTÉ et par jour (× facteur de l'axe `glanage_axes`).
+	# - `soignant` : médicaments par soignant au poste et par jour (× facteur de son axe).
+	# - Achats de l'intendant (consignes par stock du fondateur, éteintes par défaut) : jusqu'au
+	#   seuil « bas », sur la caisse du lieu, plafond de dépense par jour : boutiques du lieu
+	#   d'abord, puis convoi du charretier vers la cité la plus proche (`prix_unite_cite` majoré
+	#   de `majoration_par_case` par case, livré `duree_par_case_s` × distance plus tard),
+	#   enfin troc d'un surplus (`troc_taux` unités données pour une reçue ; négociant : `troc_taux_negociant`).
+	"approvisionnement": {
+		"glanage": {"nourriture": 0.3, "bois": 0.2},
+		"glanage_axes": {"nourriture": "nourriture", "bois": "materiaux"},
+		"soignant": {"par_jour": 1.0, "axe": "nourriture"},
+		"plafond_jour_defaut": 500,
+		"prix_unite_cite": {"nourriture": 4, "bois": 6, "materiaux": 15, "medicaments": 40},
+		"majoration_par_case": 0.02, "duree_par_case_s": 600, "livraisons_max": 4,
+		"troc_taux": 2.0, "troc_taux_negociant": 1.5,
+		"metiers_charretier": ["charretier"],
+	},
 	"reparation_materiaux": 5,
 	"candidats_duree_s": JOUR_S,
 	# Fiche de site (§ 3) : mots-clés cherchés dans les `terrain_tags` des zones qui couvrent
@@ -2015,6 +2033,10 @@ def _passe(imp: dict, reg: dict, site: dict, employes: list, instant: int, pas: 
 		gain = _num(produit.get("par_jour")) * part * facteur_axe(site, produit.get("axe"), reg)
 		s = produit.get("stock")
 		stocks[s] = min(float(capacite), _num(stocks.get(s)) + gain)
+	# Glanage des comptés, simples des soignants, convois arrivés.
+	for s, gain in production_autonome(imp, reg, site, employes).items():
+		stocks[s] = min(float(capacite), _num(stocks.get(s)) + gain * part)
+	livrer(imp, reg, instant, bilan)
 
 	# 2. Consommation : bouches et feu.
 	economie = _num(reg.get("intendant_economie")) if _du_role(imp, reg, employes, "intendants") else 0.0
@@ -2279,6 +2301,185 @@ def relever_caisse(imp: dict, fondateur: dict, now: int | None = None) -> int:
 	if montant:
 		noter(imp, f"Caisse relevée : {montant} cu.", now)
 	return montant
+
+
+# ── Autonomie des approvisionnements ─────────────────────────────────────────────────
+
+def production_autonome(imp: dict, reg: dict, site: dict, employes: list) -> dict:
+	"""{stock: unités PAR JOUR} produites sans métier producteur : le glanage de la population
+	COMPTÉE (nourriture, petit bois) et les simples des soignants au poste (médicaments).
+	Pondérées par le site (`facteur_axe`) ; jamais au-delà de la capacité (l'appelant borne)."""
+	appro = reg.get("approvisionnement") or {}
+	axes = appro.get("glanage_axes") or {}
+	out = {}
+	pop = _int(imp.get("population"))
+	if pop > 0:
+		for s, par_tete in (appro.get("glanage") or {}).items():
+			gain = pop * _num(par_tete) * facteur_axe(site, axes.get(s), reg)
+			if gain > 0:
+				out[s] = out.get(s, 0.0) + gain
+	soin = appro.get("soignant") or {}
+	n = len(_du_role(imp, reg, employes, "soignants"))
+	if n and _num(soin.get("par_jour")) > 0:
+		out["medicaments"] = out.get("medicaments", 0.0) \
+			+ n * _num(soin.get("par_jour")) * facteur_axe(site, soin.get("axe"), reg)
+	return out
+
+
+def consigne(imp: dict, reg: dict, stock: str) -> dict:
+	"""Consigne d'achat du fondateur pour ce stock : `{"acheter", "plafond_jour"}`. Absente ⇒
+	l'intendant n'achète pas (aucune migration)."""
+	c = (imp.get("consignes") or {}).get(stock) or {}
+	defaut = _int((reg.get("approvisionnement") or {}).get("plafond_jour_defaut"), 500)
+	return {"acheter": bool(c.get("acheter")),
+			"plafond_jour": max(0, _int(c.get("plafond_jour"), defaut)) if "plafond_jour" in c else defaut}
+
+
+PLAFOND_JOUR_MAX = 1000 * OR        # borne d'une saisie : au-delà, aucun sens en jeu
+
+
+def regler_consigne(imp: dict, reg: dict, stock, acheter, plafond_jour) -> tuple[bool, str]:
+	"""Le fondateur règle l'achat automatique d'un stock (interrupteur + plafond par jour)."""
+	if stock not in (reg.get("stocks") or []):
+		return False, "Réserve inconnue."
+	try:
+		plafond = int(plafond_jour)
+	except (TypeError, ValueError):
+		return False, "Plafond invalide."
+	if not 0 <= plafond <= PLAFOND_JOUR_MAX:
+		return False, "Plafond hors bornes."
+	imp.setdefault("consignes", {})[stock] = {"acheter": bool(acheter), "plafond_jour": plafond}
+	return True, ""
+
+
+def en_route(imp: dict, stock: str) -> float:
+	return sum(_num(l.get("unites")) for l in imp.get("livraisons") or [] if l.get("stock") == stock)
+
+
+def livrer(imp: dict, reg: dict, instant: int, bilan: dict | None = None) -> None:
+	"""Les convois du charretier arrivés à `instant` versent leur charge (dans la capacité ; le
+	surplus est perdu, comme un don à un stock plein)."""
+	restants, labels = [], reg.get("stocks_labels") or {}
+	for l in imp.get("livraisons") or []:
+		if _int(l.get("arrivee")) > instant:
+			restants.append(l)
+			continue
+		s = l.get("stock")
+		place = max(0.0, stockage(imp, reg) - _num(imp["stocks"].get(s)))
+		entre = round(min(_num(l.get("unites")), place), 1)
+		imp["stocks"][s] = _num(imp["stocks"].get(s)) + entre
+		if bilan is not None:
+			bilan["evenements"].append(f"Le convoi de {l.get('cite') or 'la cité'} est arrivé : {labels.get(s, s)} +{entre}.")
+	if "livraisons" in imp:
+		imp["livraisons"] = restants
+
+
+def approvisionner(imp: dict, reg: dict, employes: list, boutiques: list, get_doc_fn, resolve_item,
+				   stock_de_fn, passes: int, cite: dict | None = None, rand=random,
+				   now: int | None = None) -> dict:
+	"""L'intendant AU POSTE comble les stocks bas que le fondateur a mis en consigne, jusqu'au
+	seuil « bas », sur la caisse du lieu et dans le plafond du jour (× temps écoulé) :
+	1. boutiques du lieu (au-dessus de leur cible, moins cher d'abord, `prix_achat_boutique`) ;
+	2. convoi du charretier vers `cite` (`{"label", "distance"}`), payé au départ, livré plus tard ;
+	3. troc d'un SURPLUS d'un autre stock (au-delà de `surplus_facteur` × son seuil).
+	`stock_de_fn(item_doc)` → règle de dépôt ou None. Rend `{"depense", "evenements", "touchees"}` ;
+	mute `imp` et les boutiques touchées (l'appelant sauve)."""
+	from utils import echanges_cite
+	now = now_epoch() if now is None else now
+	bilan = {"depense": 0, "evenements": [], "touchees": []}
+	if passes <= 0 or not _du_role(imp, reg, employes, "intendants"):
+		return bilan
+	appro = reg.get("approvisionnement") or {}
+	conf = reg.get("echanges") or {}
+	labels = reg.get("stocks_labels") or {}
+	jours = passes * max(60, _int((reg.get("temps") or {}).get("passe_s"), 3600)) / JOUR_S
+	seuils = seuils_stocks(imp, reg, employes)
+	capacite = float(stockage(imp, reg))
+	stocks = imp.setdefault("stocks", {})
+	negociant = negociant_de(imp, reg, employes)
+	ctx = echanges_cite.Contexte.libre(imp.get("fondateur"), conf, None, negociant, get_doc_fn, rand, now)
+	charretier = any(e.get("metier") in (appro.get("metiers_charretier") or []) for e in au_poste(imp, reg, employes))
+	journal = []
+
+	# Offres des boutiques du lieu, lues une fois : (boutique, item, règle de dépôt).
+	offres = []
+	for b in boutiques or []:
+		for e in b.get("stock_vente") or []:
+			doc = resolve_item(e.get("item_id")) or {}
+			regle = stock_de_fn(doc) if doc else None
+			if regle:
+				offres.append((b, doc, regle))
+
+	for s in reg.get("stocks") or []:
+		c = consigne(imp, reg, s)
+		if not c["acheter"]:
+			continue
+		budget = int(c["plafond_jour"] * jours)
+		manque = min(seuils.get(s, 0), capacite) - _num(stocks.get(s)) - en_route(imp, s)
+		recu, depense = 0.0, 0
+		# 1. Les boutiques du lieu.
+		while manque > 0:
+			prix_offres = [(p, j) for j, (b, doc, regle) in enumerate(offres) if regle.get("stock") == s
+						   and (p := echanges_cite.prix_achat_boutique(ctx, b, doc)) is not None]
+			if not prix_offres:
+				break
+			prix, j = min(prix_offres)
+			if prix > budget - depense or prix > _int(imp.get("caisse_cuivre")):
+				break
+			b, doc, regle = offres[j]
+			echanges_cite._retirer_rayon(b, doc.get("_id"))
+			entre = min(unites_de_item(doc, regle), capacite - _num(stocks.get(s)))
+			stocks[s] = round(_num(stocks.get(s)) + entre, 4)
+			imp["caisse_cuivre"] = _int(imp.get("caisse_cuivre")) - prix
+			depense += prix
+			recu += entre
+			manque -= entre
+			ctx.touchees[b.get("_id")] = b
+			ctx.noter("achat", doc, b, 1, -prix)
+		achats = depense
+		# 2. Le convoi vers la cité (un par stock en route à la fois).
+		if manque >= 1 and charretier and cite and en_route(imp, s) == 0 \
+				and len(imp.get("livraisons") or []) < _int(appro.get("livraisons_max"), 4):
+			d = _int(cite.get("distance"))
+			prix_u = _num((appro.get("prix_unite_cite") or {}).get(s)) * (1 + _num(appro.get("majoration_par_case")) * d)
+			if prix_u > 0:
+				n = int(min(manque, (budget - depense) / prix_u, _int(imp.get("caisse_cuivre")) / prix_u))
+				if n >= 1:
+					cout = int(math.ceil(n * prix_u))
+					imp["caisse_cuivre"] = _int(imp.get("caisse_cuivre")) - cout
+					depense += cout
+					manque -= n
+					imp.setdefault("livraisons", []).append({
+						"stock": s, "unites": n, "cout": cout, "cite": cite.get("label") or "",
+						"arrivee": now + max(1, d) * _int(appro.get("duree_par_case_s"), 600)})
+					journal.append({"sens": "convoi", "item": labels.get(s, s), "lieu": cite.get("label") or "",
+									"qty": n, "cuivre": -cout, "t": now})
+					bilan["evenements"].append(f"Le charretier part pour {cite.get('label') or 'la cité'} : {labels.get(s, s)} +{n} attendus.")
+		# 3. Le troc d'un surplus.
+		if manque > 0:
+			taux = _num(appro.get("troc_taux_negociant" if negociant else "troc_taux"), 2) or 2
+			for o in reg.get("stocks") or []:
+				if o == s or manque <= 0:
+					continue
+				surplus = _num(stocks.get(o)) - _num(conf.get("surplus_facteur"), 2) * seuils.get(o, 0)
+				n = round(min(manque, surplus / taux, capacite - _num(stocks.get(s))), 1)
+				if n < 0.1:
+					continue
+				stocks[o] = round(_num(stocks.get(o)) - n * taux, 4)
+				stocks[s] = round(_num(stocks.get(s)) + n, 4)
+				recu += n
+				manque -= n
+				journal.append({"sens": "troc", "item": f"{labels.get(o, o)} → {labels.get(s, s)}", "lieu": "",
+								"qty": n, "cuivre": 0, "t": now})
+		if recu >= 0.1:
+			bilan["evenements"].append(f"L'intendant a réapprovisionné : {labels.get(s, s)} +{round(recu, 1)}"
+									   + (f" ({achats} cu)." if achats else "."))
+		bilan["depense"] += depense
+	journal = [dict(v, t=now) for v in ctx.journal.values()] + journal
+	if journal:
+		imp["echanges_journal"] = (journal + list(imp.get("echanges_journal") or []))[:_int(conf.get("journal_max"), 20)]
+	bilan["touchees"] = list(ctx.touchees.values())
+	return bilan
 
 
 def lieu_de_nuit(lieu_doc: dict, get_doc_fn) -> dict:
@@ -2769,6 +2970,16 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"negoce": {"negociant": bool(negociant_de(imp, reg, employes)), "caisse": _int(imp.get("caisse_cuivre")),
 				   "caisse_max": caisse_max(imp, reg, employes),
 				   "journal": list(imp.get("echanges_journal") or [])[:10]},
+		"approvisionnement": {
+			"intendant": bool(_du_role(imp, reg, employes, "intendants")),
+			"charretier": any(e.get("metier") in ((reg.get("approvisionnement") or {}).get("metiers_charretier") or [])
+							  for e in au_poste(imp, reg, employes)),
+			"autonome": {s: round(v, 1) for s, v in production_autonome(imp, reg, site, employes).items()},
+			"consignes": [{"stock": s, "label": labels.get(s, s), **consigne(imp, reg, s)} for s in reg.get("stocks") or []],
+			"livraisons": [{"stock": l.get("stock"), "label": labels.get(l.get("stock"), l.get("stock")),
+							"unites": l.get("unites"), "cite": l.get("cite"), "arrivee": _int(l.get("arrivee"))}
+						   for l in imp.get("livraisons") or []],
+		},
 	})
 	if role == FONDATEUR:
 		base.update({

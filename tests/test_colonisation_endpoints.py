@@ -448,6 +448,32 @@ def test_la_caisse_se_releve_et_la_vente_se_regle_par_pnj(monde):
 	assert _refus(monde, visiteur, rc.employe_vente, None, {"employe_id": "employe:agri", "vente": True}) == 403
 
 
+def test_la_consigne_d_achat_fait_partir_le_charretier_vers_la_cite(monde):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1})
+	assert "approvisionnement" not in _appel(monde, visiteur, rc.ici, None)
+	assert _refus(monde, visiteur, rc.consigne, None, {"stock": "nourriture", "acheter": True, "plafond_jour": 10}) == 403
+	assert _refus(monde, fondateur, rc.consigne, None, {"stock": "or", "acheter": True, "plafond_jour": 10}) == 400
+	rep = _appel(monde, fondateur, rc.consigne, None, {"stock": "nourriture", "acheter": True, "plafond_jour": 100000})
+	assert next(c for c in rep["approvisionnement"]["consignes"] if c["stock"] == "nourriture")["acheter"] is True
+	imp = monde["docs"][imp_id]
+	imp["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [2, 2]}, {"id": "b_c", "type": "comptoir", "pos": [3, 3]}]
+	for metier, poste in (("intendant", "b_e"), ("charretier", "b_c")):
+		e = {"_id": f"employe:{metier}", "type": "employe", "metier": metier, "poste": poste, "statut": "employe",
+			 "propriete": imp_id, "prenom": "A", "nom": metier}
+		monde["docs"][e["_id"]] = e
+	imp["employes"] = ["employe:intendant", "employe:charretier"]
+	imp["stocks"]["nourriture"] = 0
+	imp["caisse_cuivre"] = 100000
+	imp["rattrape_at"] -= 2 * _reg(monde)["temps"]["passe_s"]
+	rep = _appel(monde, fondateur, rc.ici, None)
+	[l] = rep["approvisionnement"]["livraisons"]
+	assert l["cite"] == "Cité" and l["stock"] == "nourriture" and l["unites"] >= 1
+	assert monde["docs"][imp_id]["caisse_cuivre"] < 100000 and rep["approvisionnement"]["charretier"]
+
+
 def test_l_attaque_se_joue_aux_cotes_des_gardes_et_son_issue_revient_au_lieu(monde):
 	from utils import combat as combat_util
 	rc = monde["rc"]

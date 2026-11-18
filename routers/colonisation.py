@@ -133,11 +133,19 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 	evenements = list(bilan["evenements"])
 	if bilan["passes"] or bilan.get("evenements_attente") or imp.get("fondateur_rang") != avant:
 		# La production vend son surplus aux boutiques du lieu (2 jours au plus, § 8).
-		vente = colonisation.echanger(imp, reg, employes, echanges_cite.boutiques_cite(imp["_id"], find_docs),
+		boutiques = echanges_cite.boutiques_cite(imp["_id"], find_docs)
+		vente = colonisation.echanger(imp, reg, employes, boutiques,
 									  get_doc, resolve_item_ref, bilan["passes"], site=site, find_docs_fn=find_docs)
 		if vente["gain"]:
 			evenements.append(f"La production s'est vendue : {vente['gain']} cu en caisse.")
-		for d in (bilan["employes_touches"] + vente["touchees"]
+		# L'intendant comble les stocks bas mis en consigne (boutiques, convoi, troc).
+		appro = colonisation.approvisionner(
+			imp, reg, employes, boutiques, get_doc, resolve_item_ref,
+			lambda item: colonisation.stock_de_item(item, filtres_boutique.filtres_item(item), reg),
+			bilan["passes"], cite=_cite_du_convoi(imp, reg))
+		evenements.extend(appro["evenements"])
+		vues = {d.get("_id") for d in vente["touchees"]}
+		for d in (bilan["employes_touches"] + vente["touchees"] + [b for b in appro["touchees"] if b.get("_id") not in vues]
 				  + colonisation.synchroniser_tenanciers(imp, reg, employes, get_doc)):
 			save_doc(d)
 		negociant = colonisation.negociant_de(imp, reg, employes)
@@ -145,6 +153,22 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 			save_doc(negociant)
 		save_doc(imp)        # best-effort : un conflit sera rejoué au prochain passage
 	return evenements
+
+
+def _cite_du_convoi(imp: dict, reg: dict) -> dict | None:
+	"""`{"label", "distance"}` de la cité la plus proche, où part le charretier ; None si aucun
+	convoi ne peut partir (aucune consigne d'achat, aucune cité reliée au pays). Lu seulement
+	quand une consigne est active : les connexions du pays ne se relisent pas à chaque passage."""
+	if not any(colonisation.consigne(imp, reg, s)["acheter"] for s in reg.get("stocks") or []):
+		return None
+	pays = imp.get("lieu_parent")
+	pos = (imp.get("origine") or {}).get("pos")
+	if not pays or not pos:
+		return None
+	proches = colonisation.cites_de_la_charte(colonisation.lieux_relies(connexions_du_lieu(pays), pays, get_doc), pos)
+	if not proches:
+		return None
+	return {"label": proches[0].get("label") or "", "distance": colonisation.distance(proches[0]["pos"], pos)}
 
 
 def _images_des_villes() -> dict:
@@ -433,6 +457,19 @@ async def feu(current_user: Annotated[dict, Depends(get_current_user)], body: di
 	_exiger(role, colonisation.FONDATEUR)
 	if colonisation.regler_feu(imp, reg, body.get("reglage")):
 		_sauver(imp)
+	return _payload(character, imp, reg, role)
+
+
+@colonisation_router.post("/colonisation/consigne")
+async def consigne(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le fondateur règle l'achat automatique d'une réserve par l'intendant : interrupteur et
+	plafond de dépense par jour, sur la caisse du lieu."""
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	ok, motif = colonisation.regler_consigne(imp, reg, body.get("stock"), body.get("acheter"), body.get("plafond_jour"))
+	if not ok:
+		raise HTTPException(status_code=400, detail=motif)
+	_sauver(imp)
 	return _payload(character, imp, reg, role)
 
 

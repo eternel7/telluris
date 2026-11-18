@@ -4,6 +4,7 @@ Décisions verrouillées : docs/lore/systemes/20261112_voie_de_colonisation.md. 
 mémoire, bâties par le générateur (`gen.generer` sur un dump vide) : aucun fichier de `jsons/`."""
 
 import copy
+import math
 import os
 import random
 import sys
@@ -1072,6 +1073,157 @@ def test_le_surplus_de_production_se_vend_aux_boutiques_du_lieu(monkeypatch):
 	monkeypatch.setattr(echanges_cite, "prix_vente_boutique", lambda ctx, b, doc: None)
 	imp3, agri3 = _vente(reg)
 	assert col.echanger(imp3, reg, [agri3], [boulangerie], {}.get, items.get, 5, rand=random.Random(0))["gain"] == 0
+
+
+# ── Autonomie des approvisionnements ─────────────────────────────────────────────────
+
+def test_les_comptes_glanent_et_les_soignants_font_des_simples():
+	reg = _reg()
+	appro = reg["approvisionnement"]
+	site = {"nourriture": {"note": 2}, "materiaux": {"note": 0}}
+	imp = _imp(reg, population=4)
+	auto = col.production_autonome(imp, reg, site, [])
+	assert auto["nourriture"] == 4 * appro["glanage"]["nourriture"] * col.facteur_axe(site, "nourriture", reg)
+	assert auto["bois"] == 4 * appro["glanage"]["bois"] * col.facteur_axe(site, "materiaux", reg)
+	assert "medicaments" not in auto
+	# le glanage couvre une part des bouches des comptés, jamais toutes (sinon plus de besoin)
+	assert auto["nourriture"] < 4 * reg["consommation"]["nourriture_par_habitant_jour"]
+	# personne de compté : aucun glanage ; un soignant au poste : des simples
+	vide = _imp(reg)
+	vide["batiments"] = [{"id": "b_h", "type": "habitation", "pos": [1, 1]}]
+	medecin = _employe(vide, "medecin", "b_h")
+	auto = col.production_autonome(vide, reg, site, [medecin])
+	assert set(auto) == {"medicaments"}
+	assert auto["medicaments"] == appro["soignant"]["par_jour"] * col.facteur_axe(site, appro["soignant"]["axe"], reg)
+	# poste endommagé : plus de simples
+	vide["batiments"][0]["endommage"] = True
+	assert col.production_autonome(vide, reg, site, [medecin]) == {}
+
+
+def test_une_passe_ajoute_le_glanage_dans_la_capacite():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	site = {"nourriture": {"note": 3}, "materiaux": {"note": 3}}
+	imp = _imp(reg, population=2, rattrape_at=0, feu="reduit",
+			   stocks={"nourriture": 20.0, "bois": 20.0, "materiaux": 0.0, "medicaments": 99.0})
+	sans = copy.deepcopy(imp)
+	sans["population"] = 0
+	col.rattraper(imp, reg, site, [], now=pas, rand=Hasard())
+	col.rattraper(sans, reg, site, [], now=pas, rand=Hasard())
+	# même consommation de bois ; la nourriture diffère du glanage MOINS les bouches des comptés
+	gl = col.production_autonome(imp, reg, site, [])
+	part = pas / col.JOUR_S
+	assert round(imp["stocks"]["bois"] - sans["stocks"]["bois"], 3) == round(gl["bois"] * part, 3)
+	attendu = (gl["nourriture"] - 2 * reg["consommation"]["nourriture_par_habitant_jour"]) * part
+	assert round(imp["stocks"]["nourriture"] - sans["stocks"]["nourriture"], 3) == round(attendu, 3)
+
+
+def test_la_consigne_est_eteinte_par_defaut_et_bornee():
+	reg = _reg()
+	imp = _imp(reg)
+	defaut = reg["approvisionnement"]["plafond_jour_defaut"]
+	assert col.consigne(imp, reg, "nourriture") == {"acheter": False, "plafond_jour": defaut}
+	assert col.regler_consigne(imp, reg, "nourriture", True, 300) == (True, "")
+	assert col.consigne(imp, reg, "nourriture") == {"acheter": True, "plafond_jour": 300}
+	assert not col.regler_consigne(imp, reg, "or_pur", True, 10)[0]
+	assert not col.regler_consigne(imp, reg, "bois", True, -1)[0]
+	assert not col.regler_consigne(imp, reg, "bois", True, col.PLAFOND_JOUR_MAX + 1)[0]
+	assert not col.regler_consigne(imp, reg, "bois", True, "beaucoup")[0]
+
+
+def _appro(reg, caisse=10000, charretier=False, **stocks):
+	imp = _imp(reg, "bourgade", caisse_cuivre=caisse,
+			   stocks={"nourriture": 0.0, "bois": 0.0, "materiaux": 0.0, "medicaments": 0.0, **stocks})
+	imp["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [1, 1]}, {"id": "b_c", "type": "comptoir", "pos": [2, 2]}]
+	employes = [_employe(imp, "intendant", "b_e")]
+	if charretier:
+		employes.append(_employe(imp, "charretier", "b_c", 1))
+	return imp, employes
+
+
+NOURRITURE = {"stock": "nourriture", "unites_par_kg": 1}
+PAIN = {"_id": "item:pain", "nom": "Pain", "poids": 1}
+
+
+def _stock_de(doc):
+	return NOURRITURE if doc.get("_id") == "item:pain" else None
+
+
+def test_l_intendant_n_achete_que_ce_que_le_fondateur_a_mis_en_consigne(monkeypatch):
+	from utils import echanges_cite
+	reg = _reg()
+	monkeypatch.setattr(echanges_cite, "prix_achat_boutique", lambda ctx, b, doc: 10)
+	boutique = {"_id": "lieu:colonie_b", "stock_vente": [{"item_id": "item:pain", "qty": 50}]}
+	imp, employes = _appro(reg)
+	# sans consigne : rien
+	bilan = col.approvisionner(imp, reg, employes, [boutique], {}.get, {"item:pain": PAIN}.get, _stock_de, 24, now=5)
+	assert bilan["depense"] == 0 and imp["stocks"]["nourriture"] == 0
+	# consigne, mais sans intendant au poste : rien
+	col.regler_consigne(imp, reg, "nourriture", True, 1000)
+	assert col.approvisionner(imp, reg, [], [boutique], {}.get, {"item:pain": PAIN}.get, _stock_de, 24, now=5)["depense"] == 0
+	# l'intendant achète jusqu'au seuil bas, sur la caisse, et le rayon de la boutique baisse
+	seuil = col.seuils_stocks(imp, reg, employes)["nourriture"]
+	bilan = col.approvisionner(imp, reg, employes, [boutique], {}.get, {"item:pain": PAIN}.get, _stock_de, 24, now=5)
+	assert imp["stocks"]["nourriture"] >= seuil and imp["stocks"]["nourriture"] - seuil < 1
+	n = imp["stocks"]["nourriture"]
+	assert bilan["depense"] == 10 * n and imp["caisse_cuivre"] == 10000 - bilan["depense"]
+	assert boutique["stock_vente"][0]["qty"] == 50 - n and bilan["touchees"] == [boutique]
+	assert imp["echanges_journal"][0]["sens"] == "achat"
+	# le plafond du jour borne la dépense (× le temps écoulé : une passe = 1/24 de jour)
+	imp2, employes2 = _appro(reg)
+	col.regler_consigne(imp2, reg, "nourriture", True, 240)
+	bilan = col.approvisionner(imp2, reg, employes2, [boutique], {}.get, {"item:pain": PAIN}.get, _stock_de, 1, now=5)
+	assert bilan["depense"] == 10 and imp2["stocks"]["nourriture"] == 1
+	# caisse vide : rien
+	imp3, employes3 = _appro(reg, caisse=0)
+	col.regler_consigne(imp3, reg, "nourriture", True, 1000)
+	assert col.approvisionner(imp3, reg, employes3, [boutique], {}.get, {"item:pain": PAIN}.get, _stock_de, 24, now=5)["depense"] == 0
+
+
+def test_le_charretier_part_en_cite_et_le_convoi_arrive_au_rattrapage():
+	reg = _reg()
+	appro = reg["approvisionnement"]
+	imp, employes = _appro(reg, charretier=True)
+	col.regler_consigne(imp, reg, "nourriture", True, 100000)
+	cite = {"label": "Cité", "distance": 10}
+	seuil = col.seuils_stocks(imp, reg, employes)["nourriture"]
+	bilan = col.approvisionner(imp, reg, employes, [], {}.get, {}.get, _stock_de, 24, cite=cite, now=1000)
+	[l] = imp["livraisons"]
+	prix_u = appro["prix_unite_cite"]["nourriture"] * (1 + appro["majoration_par_case"] * 10)
+	assert l["unites"] == int(seuil) and l["cout"] == int(math.ceil(l["unites"] * prix_u))
+	assert l["arrivee"] == 1000 + 10 * appro["duree_par_case_s"] and imp["caisse_cuivre"] == 10000 - l["cout"]
+	assert imp["stocks"]["nourriture"] == 0 and bilan["evenements"]
+	# un convoi en route compte : pas de second départ
+	col.approvisionner(imp, reg, employes, [], {}.get, {}.get, _stock_de, 24, cite=cite, now=1001)
+	assert len(imp["livraisons"]) == 1
+	# arrivée : versé au stock au premier instant qui passe l'échéance
+	evenements = {"evenements": []}
+	col.livrer(imp, reg, l["arrivee"] - 1, evenements)
+	assert imp["livraisons"] and imp["stocks"]["nourriture"] == 0
+	col.livrer(imp, reg, l["arrivee"], evenements)
+	assert imp["livraisons"] == [] and imp["stocks"]["nourriture"] == l["unites"] and evenements["evenements"]
+	# sans charretier, aucune cité : pas de convoi
+	imp2, employes2 = _appro(reg)
+	col.regler_consigne(imp2, reg, "nourriture", True, 100000)
+	col.approvisionner(imp2, reg, employes2, [], {}.get, {}.get, _stock_de, 24, cite=cite, now=1000)
+	assert not imp2.get("livraisons")
+
+
+def test_l_intendant_troque_un_surplus_a_perte_moindre_avec_un_negociant():
+	reg = _reg()
+	appro = reg["approvisionnement"]
+	imp, employes = _appro(reg, caisse=0, bois=60.0)
+	col.regler_consigne(imp, reg, "nourriture", True, 1000)
+	seuils = col.seuils_stocks(imp, reg, employes)
+	surplus = 60.0 - reg["echanges"]["surplus_facteur"] * seuils["bois"]
+	assert surplus > 0
+	col.approvisionner(imp, reg, employes, [], {}.get, {}.get, _stock_de, 24, now=5)
+	recu = imp["stocks"]["nourriture"]
+	assert recu == round(min(seuils["nourriture"], surplus / appro["troc_taux"]), 1) and recu > 0
+	assert round(imp["stocks"]["bois"], 3) == round(60.0 - recu * appro["troc_taux"], 3)
+	assert imp["stocks"]["bois"] >= reg["echanges"]["surplus_facteur"] * seuils["bois"] - 0.1   # jamais sous le surplus
+	assert imp["echanges_journal"][0]["sens"] == "troc"
+	assert appro["troc_taux_negociant"] < appro["troc_taux"]
 
 
 def _metier(reg, ident):

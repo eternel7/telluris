@@ -264,6 +264,7 @@ function colOngletPopulationHtml(d) {
 		<span>Logements : ${_colE(d.population + d.nommes)} / ${_colE(d.logements)}</span>
 		<span>Blessés et malades : ${_colE(d.souffrants)}</span></div></section>
 		<section class="prop-section"><h3>📦 Réserves</h3><div class="prop-caps">${stocks}</div></section>
+		${colApproHtml(d)}
 		<section class="prop-section"><h3>🙂 Moral : ${_colE(d.moral.mot)} (${_colE(d.moral.valeur)})</h3><div class="prop-caps">${_colFacteurs(d.moral)}</div></section>`;
 	if (d.role === 'fondateur') {
 		html += `<section class="prop-section"><h3>🔥 Feu</h3><div class="prop-ligne"><div class="prop-txt">
@@ -282,6 +283,33 @@ function colOngletPopulationHtml(d) {
 			${d.role === 'fondateur' && !d.chantier ? `<button class="sh-drop-btn" data-genre="statut" ${s.pret ? '' : 'disabled'} onclick="colChantier(this)">Ouvrir le chantier</button>` : ''}</div></section>`;
 	}
 	return html + colChantierHtml(d);
+}
+
+// Autonomie des approvisionnements : glanage et simples (lecture), consignes d'achat de
+// l'intendant (fondateur), convois du charretier en route.
+function colApproHtml(d) {
+	const a = d.approvisionnement;
+	if (!a) return '';
+	const libelles = {};
+	(d.stocks || []).forEach(s => { libelles[s.stock] = s.label; });
+	const auto = Object.entries(a.autonome || {}).map(([s, v]) => `<span>${_colE(libelles[s] || s)} +${_colE(v)} / jour</span>`).join('');
+	const fondateur = d.role === 'fondateur';
+	const consignes = (a.consignes || []).map(c => `<div class="prop-ligne"><div class="prop-txt">
+		<strong>${_colE(c.label)}</strong>
+		<span class="q-desc">${c.acheter ? `L'intendant achète, ${_prixTexte(c.plafond_jour)} par jour au plus.` : 'Pas d\'achat automatique.'}</span></div>
+		${fondateur ? `<label class="q-desc"><input type="checkbox" class="col-consigne-acheter" data-stock="${_colE(c.stock)}" ${c.acheter ? 'checked' : ''}> acheter</label>
+		<input type="number" min="0" step="10" class="col-consigne-plafond" data-stock="${_colE(c.stock)}" value="${_colE(c.plafond_jour)}" style="width:6em" aria-label="Plafond par jour (cuivre)">
+		<button class="sh-drop-btn" data-stock="${_colE(c.stock)}" onclick="colConsigne(this)">Enregistrer</button>` : ''}</div>`).join('');
+	const temps = t => { const m = Math.max(0, Math.round((t * 1000 - Date.now()) / 60000)); return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`; };
+	const convois = (a.livraisons || []).map(l => `<span>🛒 ${_colE(l.label)} +${_colE(l.unites)} de ${_colE(l.cite)} — dans ${_colE(temps(l.arrivee))}</span>`).join('');
+	const qui = a.intendant
+		? `L'intendant comble les réserves en consigne jusqu'au seuil bas : boutiques du lieu d'abord${a.charretier ? ', puis convoi du charretier vers la cité' : ''}, enfin troc d'un surplus. Payé sur la caisse du lieu.`
+		: 'Sans intendant au poste (entrepôt), personne n\'achète ni ne troque pour le lieu.';
+	return `<section class="prop-section"><h3>🧺 Approvisionnement</h3>
+		${auto ? `<span class="q-desc">Sans métier : glanage des habitants, simples des soignants.</span><div class="prop-caps">${auto}</div>` : ''}
+		<span class="q-desc">${qui}</span>
+		<div class="prop-liste">${consignes}</div>
+		${convois ? `<div class="prop-caps">${convois}</div>` : ''}</section>`;
 }
 
 function colChantierHtml(d) {
@@ -337,7 +365,7 @@ function colOngletBatimentsHtml(d) {
 function colNegoceHtml(d) {
 	const n = d.negoce;
 	if (!n) return '';
-	const lignes = (n.journal || []).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${j.sens === 'crieur' ? '📣' : '⚖️'} ${_colE(j.qty)} × ${_colE(j.item)} → ${_colE(j.lieu)} : ${_prixTexte(j.cuivre)}</span></div></div>`).join('');
+	const lignes = (n.journal || []).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${({ crieur: '📣', achat: '🛒', convoi: '🐴', troc: '🔁' })[j.sens] || '⚖️'} ${_colE(j.qty)} × ${_colE(j.item)} → ${_colE(j.lieu)} : ${_prixTexte(j.cuivre)}</span></div></div>`).join('');
 	return `<section class="prop-section"><h3>⚖️ Négoce</h3><div class="prop-ligne"><div class="prop-txt">
 		<span class="q-desc">${n.negociant ? 'Le négociant vend le surplus de production aux boutiques du lieu.' : 'Sans négociant au comptoir, le surplus se vend moins cher.'}</span>
 		<span class="sell-prix">💰 Caisse : ${_prixTexte(n.caisse)} / ${_prixTexte(n.caisse_max)}</span></div>
@@ -485,6 +513,15 @@ async function colTaniere() {
 	if (d && d.combat_id) window.location.href = '/combat/' + encodeURIComponent(d.combat_id);
 }
 function colVente(btn) { _colAction('api/colonisation/employe/vente', { employe_id: btn.dataset.id, vente: !!btn.dataset.vente }); }
+function colConsigne(btn) {
+	// Valeurs lues dans le DOM (jamais interpolées dans un onclick).
+	const stock = btn.dataset.stock;
+	const pick = cls => Array.from(document.querySelectorAll('.' + cls)).find(el => el.dataset.stock === stock);
+	const acheter = pick('col-consigne-acheter');
+	const plafond = pick('col-consigne-plafond');
+	_colAction('api/colonisation/consigne', { stock, acheter: !!(acheter && acheter.checked), plafond_jour: parseInt(plafond && plafond.value, 10) || 0 },
+		() => showToast('Consigne enregistrée.'));
+}
 function colReleverCaisse() {
 	_colAction('api/colonisation/caisse/relever', {}, d => showToast(`Caisse relevée : ${_prixTexte(d.releve)}.`));
 }
