@@ -233,4 +233,19 @@ test('don depuis le sac d’un compagnon : son sac est resynchronisé, après ce
 	assert.deepStrictEqual(appels, [['principal', principal]], 'don du principal : aucun sac de porteur');
 });
 
+test('approvisionnement : consignes au fondateur seul, lecture pour l\'associé, rien au visiteur', () => {
+	const appro = {
+		intendant: true, charretier: true, autonome: { bois: 0.6 },
+		consignes: [{ stock: 'bois', label: MECHANT, acheter: true, plafond_jour: 300 }],
+		livraisons: [{ stock: 'bois', label: 'Bois', unites: 12, cite: MECHANT, arrivee: Date.now() / 1000 + 3600 }],
+	};
+	const f = colOngletPopulationHtml(gerant('fondateur', { approvisionnement: appro }));
+	assert.ok(f.includes('colConsigne(this)') && f.includes('class="col-consigne-plafond" data-stock="bois"'));
+	assert.ok(!f.includes(MECHANT) && f.includes('Bois +0.6 / jour') && f.includes('de &lt;script&gt;'));
+	const a = colOngletPopulationHtml(gerant('associe', { approvisionnement: appro }));
+	assert.ok(a.includes('🧺 Approvisionnement') && !a.includes('colConsigne') && !a.includes(MECHANT));
+	assert.ok(!colOngletPopulationHtml(gerant('fondateur')).includes('🧺'), 'sans bloc, aucune section');
+	assert.ok(!tout(visiteur()).includes('🧺'));
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);
