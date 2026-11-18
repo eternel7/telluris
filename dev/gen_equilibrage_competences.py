@@ -27,7 +27,7 @@
 # Usage : python dev/gen_equilibrage_competences.py
 # Sorties :
 #   jsons/equilibrage_competences_a_importer.json
-#   docs/equilibrage_competences.md   (GÉNÉRÉ : la liste à relire)
+#   docs/lore/systemes/20261118_equilibrage_des_competences.md   (GÉNÉRÉ, visible dans /admin/lore)
 
 import copy
 import glob
@@ -44,7 +44,7 @@ sys.path.insert(0, RACINE)
 from utils import exigence_caract   # noqa: E402
 
 SORTIE = "jsons/equilibrage_competences_a_importer.json"
-DOC = "docs/equilibrage_competences.md"
+DOC = "docs/lore/systemes/20261118_equilibrage_des_competences.md"   # lu par /admin/lore
 
 SEUIL_HORS_NORME = 1.3
 SEUIL_TRES_HORS_NORME = 1.8
@@ -297,7 +297,7 @@ def main():
 	with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8") as f:
 		json.dump(ecrits, f, ensure_ascii=False, indent=1)
 
-	lignes = ["# Équilibrage des compétences (GÉNÉRÉ par dev/gen_equilibrage_competences.py)", "",
+	lignes = ["# Équilibrage des compétences", "", "*GÉNÉRÉ par `dev/gen_equilibrage_competences.py` — ne pas retoucher à la main.*", "",
 			  f"Dump : `{os.path.basename(chemin)}` · {len(ecrits)} docs écrits · "
 			  f"{len(passives)} passives réécrites · {len(hors_norme)} compétences hors norme.", "",
 			  "## Compétences hors norme → exigences", "",

@@ -1,4 +1,6 @@
-# Équilibrage des compétences (GÉNÉRÉ par dev/gen_equilibrage_competences.py)
+# Équilibrage des compétences
+
+*GÉNÉRÉ par `dev/gen_equilibrage_competences.py` — ne pas retoucher à la main.*
 
 Dump : `telluris-dump-20261117-213321.json` · 330 docs écrits · 124 passives réécrites · 218 compétences hors norme.
 
