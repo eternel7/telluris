@@ -98,6 +98,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Prompt système magie poids porté](systemes/20260919_prompt_systeme_magie_poids_porte.md) — 19/09/2026 — Dans mon jeu Telluris rpg stratégique 2D, je souhaite que le poids porté influence la pratique de la magie. Décris un système qui serait coh…
 - [Progression des lieux de guilde](systemes/20260924_progression_des_lieux_de_guilde.md) — 24/09/2026 — je souhaite introduire l'achat/création de lieu de vie pour le personnage de mon jeu avec pour but final la création d'une guilde d'aventuri…
 - [Voie de colonisation — décisions de l'Auteur](systemes/20261112_voie_de_colonisation.md) — 12/11/2026 — Décisions arrêtées : sept paliers du Campement à la Ville, charte, fiche de site, sécurité et moral, menace, stocks, métiers, guilde du joueur, place des autres joueurs (visiteur, soutien, associé), interface (lieu modèle par palier et milieu, pose libre des bâtiments).
+- [La furtivité — tout le système](systemes/20261118_furtivite.md) — 18/11/2026 — État de combat : entrée furtive (passives selon le terrain, actives, sorts, donjons à étages), jet de détection (Vol/Int/Ag du monstre contre Ag + bonus + distance), critiques ×2/×4, ce qui rompt l'état, monstres insensibles, toutes les sources en jeu, et le bruit du groupe hors combat.
 
 ## 📦 Contenu (noms, recettes, prompts)
 
