@@ -244,6 +244,12 @@
 		   36 px suffisaient dans Chromium, pas sur téléphone (police de repli de « ➔ » plus
 		   haute) : 2 px de marge. `min-height` compte padding et bordure (border-box). */
 		#sub-locations-list-id .sub-loc-btn { min-height: 38px; }
+		/* « ⌛ Attendre un tour » : le sablier se retourne tant que le tour n'est pas rendu
+		   (cf. waitTurn) ; un demi-tour par itération, le sablier étant symétrique. */
+		.sablier-attente { display: inline-block; }
+		.sablier-attente.tourne { animation: sablier-retourne 0.7s ease-in-out infinite; }
+		@keyframes sablier-retourne { from { transform: rotate(0deg); } to { transform: rotate(180deg); } }
+		@media (prefers-reduced-motion: reduce) { .sablier-attente.tourne { animation-duration: 2s; } }
 		/* Récolte / Cap 🧭 : dépliage en hauteur + fondu (`_basculerDepliable`). Rendu ouvert
 		   par Jinja au chargement : aucune animation à l'arrivée, seulement en cours de jeu. */
 		.bloc-depliable {
@@ -2226,7 +2232,7 @@
 					{% if dimensions %}
 					{# Ex-case centrale du pavé. Comme avant, `verrouillerFleches` ne le touche pas
 					   (pas de `data-sdx`) : un double clic est absorbé par la garde `isMoving`. #}
-					<li><button class="sub-loc-btn" id="btn-attendre" onclick="waitTurn()">⌛ Attendre un tour</button></li>
+					<li><button class="sub-loc-btn" id="btn-attendre" onclick="waitTurn()"><span class="sablier-attente" aria-hidden="true">⌛</span> Attendre un tour</button></li>
 					{% endif %}
 					{# Une étable n'a aucun besoin : elle revend le harnachement (marche.puiser_revente). #}
 					{% if achat_sous_categories or est_negociant or est_etable %}
@@ -5325,7 +5331,22 @@
 	async function waitTurn(){
 		// Attendre un tour : pas de déplacement, mais on rejoue la résolution serveur
 		// (événements de zone re-testés à la position courante + régén PV hors combat).
-		await move(0, 0);
+		// Le sablier tourne jusqu'à ce que la main soit rendue, puis finit son demi-tour en
+		// cours (jamais d'arrêt de travers) ; garde `isMoving` : un double clic n'en relance rien.
+		const sablier = document.querySelector('#btn-attendre .sablier-attente');
+		const lance = sablier && !isMoving;
+		if (lance) {
+			sablier.onanimationiteration = null;
+			sablier.classList.add('tourne');
+		}
+		try {
+			await move(0, 0);
+		} finally {
+			if (lance) sablier.onanimationiteration = () => {
+				sablier.onanimationiteration = null;
+				sablier.classList.remove('tourne');
+			};
+		}
 	}
 	// Combat d'un événement de zone : un pas, un lien, une case de traversée. Renvoie true si
 	// la page part vers le combat (l'appelant s'arrête là).
