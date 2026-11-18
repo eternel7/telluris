@@ -229,6 +229,19 @@ html:not(.vue-portrait) #btn-slots-edit:hover:not(:disabled) { background: #2a2a
 html:not(.vue-portrait) #btn-slots-edit:active:not(:disabled) { transform: none; }
 html:not(.vue-portrait) .passer-barre:disabled { opacity: 0.35; cursor: default; }
 .passer-barre > svg { width: 22px; height: 22px; }
+/* Attente de son tour : le sablier se retourne en boucle (demi-tour, pause, demi-tour) et
+   reste lisible malgré `disabled`. Posé par `_sablierAttente`. */
+@keyframes sablier-retourne {
+	0%, 15%   { transform: rotate(0deg); }
+	45%, 65%  { transform: rotate(180deg); }
+	95%, 100% { transform: rotate(360deg); }
+}
+html:not(.vue-portrait) .passer-barre.en-attente:disabled,
+.passer-tour #btn-passer.en-attente:disabled { opacity: 0.8; }
+.btn-passer.en-attente > svg { animation: sablier-retourne 2s ease-in-out infinite; transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: reduce) {
+	.btn-passer.en-attente > svg { animation-duration: 6s; }
+}
 /* Fond SEMI-TRANSPARENT en portrait : la carte reste lisible sous les barres flottantes. */
 html.vue-portrait .barres-bas > .action-bar,
 html.vue-portrait .barres-bas > .tour-header { background: rgba(44, 44, 56, 0.55); }
@@ -4320,6 +4333,12 @@ function dirAvailable(data, sdx, sdy) {
 		&& navAllows(GRID.nav, j.pos.x, j.pos.y, wx, wy);
 }
 
+// Sablier qui TOURNE tant qu'on attend son tour (monstres, alliés non jouables, révélation du
+// journal) ; il s'arrête dès que la main revient. Seul point d'écriture de `.en-attente`.
+function _sablierAttente(enAttente) {
+	document.querySelectorAll('.btn-passer').forEach(b => b.classList.toggle('en-attente', !!enAttente));
+}
+
 function updateButtons(data) {
 	// ⚠️ Pendant la révélation du journal, l'affichage RETARDE volontairement sur l'état
 	// autoritatif : une cible peut être peinte debout alors qu'elle est déjà morte côté
@@ -4329,6 +4348,8 @@ function updateButtons(data) {
 	if (revealing) {
 		document.querySelectorAll('#move-controls .btn, .btn-passer, .action-btn, .slot-btn')
 			.forEach(el => el.disabled = true);
+		// La file du journal joue encore : la main n'est pas rendue tant qu'elle n'est pas finie.
+		_sablierAttente(data.status === 'active');
 		return;
 	}
 	const j        = activePlayer(data);
@@ -4346,6 +4367,7 @@ function updateButtons(data) {
 		b.disabled = !canMoveBudget(data);
 	});
 	document.querySelectorAll('.btn-passer').forEach(b => { b.disabled = !(isActive && isPlayer); });
+	_sablierAttente(isActive && !isPlayer);
 	document.getElementById('btn-confirm').disabled  = !canAct || targetableMonsters(currentMode).length === 0;
 	// ⚙ : entrer en édition COÛTE UNE ACTION → même condition qu'une action jouée.
 	// Exception : en édition, le bouton doit rester actif — c'est le seul moyen d'en sortir.
@@ -5102,7 +5124,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	// Passer, c'est rendre la main : le texte de charge (poids + palier 🔮) est celui d'un
 	// membre qui n'agit plus. On le vide AU CLIC, sans attendre la réponse ; il revient à la
 	// fin de l'action si le même membre garde la main (`finally`), sinon avec `/acteur`.
-	if (type === 'passer') _effacerPalierCharge();
+	if (type === 'passer') { _effacerPalierCharge(); _sablierAttente(true); }
 	busy = true;
 	document.querySelectorAll('#move-controls .btn, .btn-passer, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
