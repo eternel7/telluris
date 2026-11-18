@@ -138,3 +138,14 @@ def test_esquive_plafonnee_jamais_relevee():
 	assert gen.plafond_esquive({"niveau": 0, "effets": {"esquive": 10}}) == 4 * gen.bareme_principale(0, True)
 	assert gen.plafond_esquive({"niveau": 2, "effets": {"esquive": 3}}) == 3
 	assert gen.plafond_esquive({"niveau": 1, "effets": {"buffs": {"F": 1}}}) is None
+
+
+def test_passive_au_bareme_jamais_hors_norme():
+	# Les caracs d'une passive suivent le barème : seul ce qui s'y AJOUTE est mesuré.
+	pure = {"mode": "passive", "niveau": 1, "effets": {"buffs": {"F": 3}}}
+	assert gen.puissance(pure)[1] == 0
+	esquive = {"mode": "passive", "niveau": 1, "effets": {"buffs": {"F": 3}, "esquive": 4}}
+	assert gen.puissance(esquive)[1] == gen.puissance({"mode": "passive", "niveau": 1,
+														"effets": {"esquive": 4}})[1] > 0
+	# Aura : la part « groupe » de ses caracs compte.
+	assert gen.puissance(dict(pure, zone={"forme": "cercle", "rayon": 2}))[1] > 0

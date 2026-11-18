@@ -363,10 +363,6 @@
     "R": 5
    },
    "regen_pv": 1
-  },
-  "exigences": {
-   "F": 50,
-   "R": 35
   }
  },
  {
@@ -717,9 +713,6 @@
    "buffs": {
     "F": 3
    }
-  },
-  "exigences": {
-   "F": 29
   }
  },
  {
@@ -1091,10 +1084,6 @@
     "Int": 5
    },
    "regen_pm": 5
-  },
-  "exigences": {
-   "Vol": 60,
-   "Int": 45
   }
  },
  {
@@ -1203,9 +1192,6 @@
     "R": 4
    },
    "regen_pv": 1
-  },
-  "exigences": {
-   "R": 35
   }
  },
  {
@@ -2149,9 +2135,6 @@
    "buffs": {
     "Cha": 3
    }
-  },
-  "exigences": {
-   "Cha": 39
   }
  },
  {
@@ -2213,9 +2196,6 @@
     "R": 4
    },
    "regen_pv": 1
-  },
-  "exigences": {
-   "R": 35
   }
  },
  {
@@ -2380,10 +2360,6 @@
     "Cha": 5,
     "Vol": 5
    }
-  },
-  "exigences": {
-   "Cha": 60,
-   "Vol": 45
   }
  },
  {
@@ -2563,10 +2539,6 @@
     "Vol": 5,
     "Cha": 5
    }
-  },
-  "exigences": {
-   "Vol": 60,
-   "Cha": 45
   }
  },
  {
@@ -2946,9 +2918,6 @@
    "buffs": {
     "R": 3
    }
-  },
-  "exigences": {
-   "R": 29
   }
  },
  {
@@ -3494,10 +3463,6 @@
     "R": 5,
     "Vol": 5
    }
-  },
-  "exigences": {
-   "R": 50,
-   "Vol": 45
   }
  },
  {
@@ -3519,10 +3484,6 @@
     "Vol": 5,
     "Int": 5
    }
-  },
-  "exigences": {
-   "Vol": 60,
-   "Int": 45
   }
  },
  {
@@ -4356,10 +4317,6 @@
   },
   "arme": {
    "mode": "cac"
-  },
-  "exigences": {
-   "Ag": 47,
-   "Cha": 43
   }
  },
  {
@@ -4543,9 +4500,6 @@
    "buffs": {
     "Ag": 3
    }
-  },
-  "exigences": {
-   "Ag": 29
   }
  },
  {
@@ -4616,8 +4570,8 @@
    "esquive": 7
   },
   "exigences": {
-   "Ag": 50,
-   "F": 35
+   "Ag": 44,
+   "F": 32
   }
  },
  {
@@ -5303,10 +5257,6 @@
     "F": 4
    },
    "esquive": 3
-  },
-  "exigences": {
-   "R": 50,
-   "F": 35
   }
  },
  {
@@ -5633,9 +5583,6 @@
    "buffs": {
     "R": 3
    }
-  },
-  "exigences": {
-   "R": 29
   }
  },
  {
@@ -5750,24 +5697,6 @@
   }
  },
  {
-  "_id": "competence:poigne_d_acier",
-  "type": "competence",
-  "nom": "Poigne d'acier",
-  "icon": "✊",
-  "description": "Des années à serrer la garde : la main ne lâche plus rien.",
-  "vocation": "guerrier",
-  "niveau": 1,
-  "mode": "passive",
-  "effets": {
-   "buffs": {
-    "F": 3
-   }
-  },
-  "exigences": {
-   "F": 29
-  }
- },
- {
   "_id": "competence:poignet_souple",
   "type": "competence",
   "nom": "Poignet souple",
@@ -5783,9 +5712,6 @@
   },
   "arme": {
    "mode": "cac"
-  },
-  "exigences": {
-   "Ag": 29
   }
  },
  {
@@ -5899,6 +5825,26 @@
   }
  },
  {
+  "_id": "competence:pretre_aura_sainte",
+  "type": "competence",
+  "nom": "Aura sainte",
+  "icon": "🕊️",
+  "description": "Une paix lumineuse rayonne du prêtre : quiconque se tient à ses côtés sent ses plaies se refermer. Hors combat, tout le groupe en profite.",
+  "vocation": "pretre",
+  "niveau": 3,
+  "mode": "passive",
+  "effets": {
+   "regen_pv": 1
+  },
+  "zone": {
+   "forme": "carre",
+   "rayon": 1
+  },
+  "exigences": {
+   "Vol": 45
+  }
+ },
+ {
   "_id": "competence:projectile_arcanique",
   "type": "competence",
   "nom": "Projectile arcanique",
@@ -5938,10 +5884,6 @@
     "R": 5,
     "F": 2
    }
-  },
-  "exigences": {
-   "R": 44,
-   "F": 32
   }
  },
  {
@@ -6216,10 +6158,6 @@
     "Ag": 5,
     "V": 1
    }
-  },
-  "exigences": {
-   "Ag": 44,
-   "Ch": 32
   }
  },
  {
@@ -6580,6 +6518,23 @@
   }
  },
  {
+  "_id": "competence:sens_aiguises",
+  "type": "competence",
+  "nom": "Sens aiguisés",
+  "icon": "👃",
+  "description": "Il lit la forêt comme un livre : qui en sait le plus voit venir les coups de plus loin.",
+  "vocation": "forestier",
+  "niveau": 9,
+  "mode": "passive",
+  "effets": {
+   "esquive": "{Int/7}"
+  },
+  "exigences": {
+   "Ag": 50,
+   "Ch": 35
+  }
+ },
+ {
   "_id": "competence:seve_vive",
   "type": "competence",
   "nom": "Sève vive",
@@ -6935,9 +6890,6 @@
     "R": 1
    },
    "regen_pv": 1
-  },
-  "exigences": {
-   "R": 32
   }
  },
  {
@@ -7442,10 +7394,6 @@
     "Ag": 5,
     "V": 1
    }
-  },
-  "exigences": {
-   "Ag": 44,
-   "Vol": 42
   }
  },
  {
@@ -7562,10 +7510,6 @@
     "F": 5,
     "Vol": 2
    }
-  },
-  "exigences": {
-   "F": 44,
-   "Vol": 42
   }
  },
  {

@@ -191,6 +191,13 @@ def puissance(doc: dict) -> tuple:
 		+ 0.5 * _esperance(eff.get("drain_pv"), niv)
 	buffs = sum(abs(_valeur_buff(v, exigence_caract.seuil("F", niv))) for k, v in (eff.get("buffs") or {}).items()
 				if k != "V") + 5 * abs(_valeur_buff((eff.get("buffs") or {}).get("V", 0)))
+	passive = (doc.get("mode") or "passive") == "passive"
+	# PASSIVE : ses caracs suivent le barème, donc ne la rendent JAMAIS hors norme (décision du
+	# 18/11/2026) — seul ce qui S'AJOUTE compte : esquive, furtivité, régén… et la part « zone »
+	# d'une aura (ses caracs couvrent tout le groupe).
+	aura = buffs * (zone - 1.0) if passive else 0.0
+	if passive:
+		buffs = 0.0
 	sup = buffs + abs(_valeur_buff(eff.get("esquive", 0))) + 3 * abs(_valeur_buff(eff.get("regen_pv", 0))) \
 		+ 2 * abs(_valeur_buff(eff.get("regen_pm", 0))) + 0.5 * _valeur_buff(eff.get("furtivite", 0)) \
 		+ 0.5 * _valeur_buff(eff.get("pv", 0)) + 0.5 * _valeur_buff(eff.get("pm", 0)) \
@@ -200,7 +207,7 @@ def puissance(doc: dict) -> tuple:
 		sup *= min(5, int(duree)) if isinstance(duree, (int, float)) and duree else 2
 	if off > 0:
 		return "off", off * zone
-	return "sup", sup * zone
+	return "sup", sup * zone + aura
 
 
 # ── Exigences ────────────────────────────────────────────────────────────────────

@@ -1,30 +1,26 @@
 # Équilibrage des compétences (GÉNÉRÉ par dev/gen_equilibrage_competences.py)
 
-Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives réécrites · 238 compétences hors norme.
+Dump : `telluris-dump-20261117-213321.json` · 330 docs écrits · 124 passives réécrites · 218 compétences hors norme.
 
 ## Compétences hors norme → exigences
 
 | Vocation | Niv | Compétence | Mode | Famille | Puissance | Médiane | Ratio | Exigences |
 |---|---|---|---|---|---|---|---|---|
 | assassin | 0 | Frappe sournoise (`frappe_sournoise`) | active | off | 10.5 | 6.5 | 1.62 | Ag 26 |
-| assassin | 1 | Main froide (`main_froide`) | passive | sup | 3.0 | 2.0 | 1.50 | Ag 29 |
 | assassin | 2 | Coup dans le dos (`coup_dans_le_dos`) | active | off | 9.2 | 6.7 | 1.38 | Ag 32 |
 | assassin | 2 | Double lame (`double_lame`) | active | off | 10.7 | 6.7 | 1.60 | Ag 32 |
 | assassin | 3 | Perce-cœur (`perce_cur`) | active | off | 11.4 | 8.0 | 1.43 | Ag 35 |
 | assassin | 4 | Sang du contrat (`sang_du_contrat`) | active | off | 17.5 | 11.4 | 1.53 | Ag 38 |
-| assassin | 6 | Maître des ombres (`maitre_des_ombres`) | passive | sup | 14.0 | 7.0 | 2.00 | Ag 50 · F 35 |
+| assassin | 6 | Maître des ombres (`maitre_des_ombres`) | passive | sup | 7.0 | 5.0 | 1.40 | Ag 44 · F 32 |
 | assassin | 6 | Nuage toxique (`nuage_toxique`) | active | off | 24.4 | 18.0 | 1.36 | Ag 44 · F 32 |
 | assassin | 7 | Saignée silencieuse (`saignee_silencieuse`) | active | off | 39.1 | 20.8 | 1.88 | Ag 50 · F 35 |
 | assassin | 8 | Éventail de dagues (`eventail_de_dagues`) | active | off | 31.7 | 22.6 | 1.40 | Ag 50 · F 35 |
 | assassin | 8 | Oubli de la douleur (`oubli_de_la_douleur`) | active | off | 29.3 | 22.6 | 1.30 | Ag 50 · F 35 |
 | assassin | 10 | Exécution (`execution`) | active | off | 47.5 | 30.1 | 1.58 | Ag 50 · F 35 |
-| assassin | 10 | Ombre incarnée (`ombre_incarnee`) | passive | sup | 30.0 | 10.0 | 3.00 | Ag 50 · F 35 |
-| barbare | 1 | Bras noueux (`bras_noueux`) | passive | sup | 3.0 | 2.0 | 1.50 | F 29 |
-| barbare | 1 | Fils des steppes (`fils_des_steppes`) | passive | sup | 3.0 | 2.0 | 1.50 | R 29 |
+| assassin | 10 | Ombre incarnée (`ombre_incarnee`) | passive | sup | 20.0 | 9.0 | 2.22 | Ag 50 · F 35 |
 | barbare | 1 | Morsure du fer (`morsure_du_fer`) | active | off | 9.9 | 5.8 | 1.69 | F 29 |
 | barbare | 2 | Fracas (`fracas`) | active | off | 9.2 | 6.7 | 1.38 | F 32 |
 | barbare | 2 | Taille sauvage (`taille_sauvage`) | active | off | 10.7 | 6.7 | 1.60 | F 32 |
-| barbare | 3 | Conquérant (`conquerant`) | passive | sup | 7.0 | 5.0 | 1.40 | R 35 |
 | barbare | 3 | Fendeur de crânes (`fendeur_de_cranes`) | active | off | 11.4 | 8.0 | 1.43 | F 35 |
 | barbare | 3 | Frénésie (`frenesie`) | active | sup | 96.0 | 26.2 | 3.66 | F 41 |
 | barbare | 4 | Rage qui ronge (`hache_rouge`) | active | off | 16.7 | 11.4 | 1.46 | F 38 |
@@ -33,13 +29,11 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | barbare | 5 | Folie sanglante (`folie_sanglante`) | active | off | 19.3 | 14.2 | 1.36 | F 41 |
 | barbare | 6 | Annonce de sang (`annonce_de_sang`) | active | sup | 54.0 | 34.9 | 1.55 | F 44 · Ag 32 |
 | barbare | 6 | Griffe de la bête (`griffe_de_la_bete`) | active | off | 24.4 | 18.0 | 1.36 | F 44 · R 32 |
-| barbare | 6 | Vétéran (`veteran`) | passive | sup | 11.2 | 7.0 | 1.60 | F 44 · Vol 42 |
 | barbare | 7 | Festin du carnage (`tornade_de_fer`) | active | off | 43.9 | 20.8 | 2.11 | F 50 · R 35 |
 | barbare | 8 | Briseur de lignes (`briseur_de_lignes`) | active | off | 31.7 | 22.6 | 1.40 | F 50 · R 35 |
 | barbare | 8 | Furie du clan (`furie_du_clan`) | active | sup | 66.6 | 36.5 | 1.82 | R 50 · F 35 |
 | barbare | 8 | Griffes du grand ours (`griffes_du_grand_ours`) | active | off | 31.7 | 22.6 | 1.40 | F 50 · R 35 |
-| barbare | 10 | Avatar de la rage (`avatar_de_la_rage`) | passive | sup | 13.0 | 10.0 | 1.30 | F 50 · R 35 |
-| barbare | 10 | Danseur de guerre (`danseur_de_guerre`) | passive | sup | 22.0 | 10.0 | 2.20 | R 50 · F 35 |
+| barbare | 10 | Danseur de guerre (`danseur_de_guerre`) | passive | sup | 12.0 | 9.0 | 1.33 | R 50 · F 35 |
 | barbare | 10 | Sang pour sang (`sang_pour_sang`) | active | off | 55.8 | 30.1 | 1.85 | F 50 · R 35 |
 | barbare | 10 | Spasme de furie (`spasme_de_furie`) | active | off | 40.8 | 30.1 | 1.35 | F 50 · R 35 |
 | chaman | 1 | Griffe du loup (`griffe_du_loup`) | active | off | 7.8 | 5.8 | 1.33 | Vol 39 |
@@ -51,7 +45,6 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | chaman | 7 | Totem de guerre (`totem_de_guerre`) | active | sup | 58.2 | 42.9 | 1.36 | F 47 · Ag 33 |
 | chaman | 8 | Pluie des ancêtres (`orage_ancestral`) | active | sup | 51.2 | 36.5 | 1.40 | Vol 60 · R 35 |
 | chaman | 10 | Esprit Antique (`esprit_antique`) | active | sup | 215.0 | 75.4 | 2.85 | F 50 · R 35 |
-| chaman | 10 | Gardien des esprits (`gardien_des_esprits`) | passive | sup | 16.0 | 10.0 | 1.60 | Vol 60 · Int 45 |
 | demoniste | 1 | Pacte mineur (`pacte_mineur`) | active | off | 11.1 | 5.8 | 1.90 | Int 45 |
 | demoniste | 1 | Trait infernal (`trait_infernal`) | active | off | 7.8 | 5.8 | 1.33 | Int 39 |
 | demoniste | 2 | Sang pour le démon (`sang_pour_le_demon`) | active | off | 22.5 | 6.7 | 3.38 | Int 48 |
@@ -62,20 +55,16 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | demoniste | 6 | Soif du pacte (`rapt_d_ame`) | active | off | 43.3 | 18.0 | 2.41 | Int 60 · Vol 45 |
 | demoniste | 8 | Pacte de sang partagé (`pacte_de_sang_majeur`) | active | sup | 80.0 | 36.5 | 2.19 | Int 60 · F 35 |
 | demoniste | 9 | Banquet de l'abîme (`banquet_de_l_abime`) | active | off | 50.1 | 28.7 | 1.75 | Int 60 · Vol 45 |
-| demoniste | 10 | Âme gagée (`ame_gagee`) | passive | sup | 25.0 | 10.0 | 2.50 | Int 60 · Vol 45 |
+| demoniste | 10 | Âme gagée (`ame_gagee`) | passive | sup | 15.0 | 9.0 | 1.67 | Int 60 · Vol 45 |
 | demoniste | 10 | Invocation majeure (`invocation_majeure`) | active | sup | 230.0 | 75.4 | 3.05 | F 50 · Int 45 |
-| druide | 0 | Symbiose naturelle (`symbiose_naturelle`) | passive | sup | 4.0 | 2.0 | 2.00 | R 32 |
 | druide | 1 | Épines (`epines`) | active | off | 7.8 | 5.8 | 1.33 | Vol 39 |
-| druide | 3 | Ermite (`ermite`) | passive | sup | 7.0 | 5.0 | 1.40 | R 35 |
 | druide | 3 | Trait du chasseur (`trait_du_chasseur`) | active | off | 13.0 | 8.0 | 1.62 | Vol 45 |
 | druide | 4 | Racines dévorantes (`racines_devorantes`) | active | off | 29.2 | 11.4 | 2.56 | Vol 54 |
 | druide | 6 | Cercle de vie (`cercle_de_vie`) | active | sup | 56.3 | 34.9 | 1.61 | R 44 · Vol 42 |
 | druide | 6 | Mur de racines (`colere_de_la_foret`) | active | sup | 62.4 | 34.9 | 1.79 | Ag 44 · Vol 42 |
 | druide | 6 | Sève vive (`seve_vive`) | active | sup | 62.4 | 34.9 | 1.79 | R 44 · Vol 42 |
 | druide | 8 | Tempête de feuilles (`tempete_de_feuilles`) | active | off | 33.9 | 22.6 | 1.50 | Vol 60 · R 35 |
-| druide | 10 | Fils de la nature (`fils_de_la_nature`) | passive | sup | 25.6 | 10.0 | 2.56 | R 50 · Vol 45 |
-| duelliste | 1 | Élégance (`elegance`) | passive | sup | 3.0 | 2.0 | 1.50 | Cha 39 |
-| duelliste | 1 | Poignet souple (`poignet_souple`) | passive | sup | 3.0 | 2.0 | 1.50 | Ag 29 |
+| druide | 10 | Fils de la nature (`fils_de_la_nature`) | passive | sup | 15.6 | 9.0 | 1.73 | R 50 · Vol 45 |
 | duelliste | 2 | Défi d'honneur (`defi_d_honneur`) | active | sup | 30.9 | 23.1 | 1.33 | Ag 32 |
 | duelliste | 2 | Taille en tierce (`taille_en_tierce`) | active | off | 9.2 | 6.7 | 1.38 | Ag 32 |
 | duelliste | 3 | Botte de mousquetaire (`botte_de_mousquetaire`) | active | off | 13.0 | 8.0 | 1.62 | Ag 35 |
@@ -87,7 +76,6 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | duelliste | 6 | Éventail d'acier (`eventail_d_acier`) | active | off | 24.4 | 18.0 | 1.36 | Ag 44 · Cha 42 |
 | duelliste | 6 | Parade de maître (`parade_de_maitre`) | active | sup | 51.2 | 34.9 | 1.47 | Ag 44 · Cha 42 |
 | duelliste | 7 | Assaut de grâce (`assaut_de_grace`) | active | sup | 69.3 | 42.9 | 1.62 | Ag 47 · F 33 |
-| duelliste | 7 | Lame vivante (`lame_vivante`) | passive | sup | 11.0 | 7.0 | 1.57 | Ag 47 · Cha 43 |
 | duelliste | 8 | Inspiration du maître d'armes (`inspiration_du_maitre_d_armes`) | active | sup | 57.1 | 36.5 | 1.57 | Ag 50 · F 35 |
 | duelliste | 9 | Sang du duel (`sang_du_duel`) | active | off | 48.7 | 28.7 | 1.70 | Ag 50 · Cha 45 |
 | duelliste | 10 | Coup de l'Exécuteur (`coup_de_l_executeur`) | active | off | 47.5 | 30.1 | 1.58 | Ag 50 · Cha 45 |
@@ -109,13 +97,11 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | forestier | 4 | Lame et pointe (`lame_et_pointe`) | active | off | 17.6 | 11.4 | 1.54 | Ag 38 |
 | forestier | 5 | Appel du loup (`appel_du_loup`) | active | sup | 48.0 | 33.4 | 1.44 | Ag 41 |
 | forestier | 6 | Ombre des feuilles (`ombre_des_feuilles`) | active | sup | 56.7 | 34.9 | 1.62 | Ag 44 · Ch 32 |
-| forestier | 6 | Rôdeur (`rodeur`) | passive | sup | 10.0 | 7.0 | 1.43 | Ag 44 · Ch 32 |
 | forestier | 8 | Couteau du dépeceur (`couteau_du_depeceur`) | active | off | 43.9 | 22.6 | 1.95 | Ag 50 · Ch 35 |
 | forestier | 8 | Esprit de la forêt (`esprit_de_la_foret`) | active | sup | 57.1 | 36.5 | 1.57 | R 50 · Ag 35 |
+| forestier | 9 | Sens aiguisés (`sens_aiguises`) | passive | sup | 10.0 | 7.5 | 1.33 | Ag 50 · Ch 35 |
 | forestier | 10 | Trait du chasseur de monstres (`trait_du_chasseur_de_monstres`) | active | off | 45.5 | 30.1 | 1.51 | Ag 50 · Ch 35 |
 | guerrier | 1 | Cri de ralliement (`cri_de_ralliement`) | active | sup | 48.0 | 22.6 | 2.12 | F 35 |
-| guerrier | 1 | Peau tannée (`peau_tannee`) | passive | sup | 3.0 | 2.0 | 1.50 | R 29 |
-| guerrier | 1 | Poigne d'acier (`poigne_d_acier`) | passive | sup | 3.0 | 2.0 | 1.50 | F 29 |
 | guerrier | 2 | Coup de taille (`coup_de_taille`) | active | off | 9.2 | 6.7 | 1.38 | F 32 |
 | guerrier | 2 | Second souffle (`second_souffle`) | active | sup | 30.9 | 23.1 | 1.33 | R 32 |
 | guerrier | 2 | Taille horizontale (`taille_horizontale`) | active | off | 10.7 | 6.7 | 1.60 | F 32 |
@@ -125,23 +111,21 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | guerrier | 4 | Coup du maître de corps (`coup_du_maitre_de_corps`) | active | off | 17.5 | 11.4 | 1.53 | F 38 |
 | guerrier | 5 | Fauchage (`fauchage`) | active | off | 20.0 | 14.2 | 1.40 | F 41 |
 | guerrier | 5 | Ordre de la ligne (`ordre_de_la_ligne`) | active | sup | 44.0 | 33.4 | 1.32 | R 41 |
-| guerrier | 6 | Protecteur (`protecteur`) | passive | sup | 11.2 | 7.0 | 1.60 | R 44 · F 32 |
 | guerrier | 6 | Vague d'acier (`vague_d_acier`) | active | off | 24.4 | 18.0 | 1.36 | F 44 · R 32 |
 | guerrier | 7 | Lame tournoyante (`lame_tournoyante`) | active | off | 28.2 | 20.8 | 1.35 | F 47 · R 33 |
-| guerrier | 8 | Ossature de chêne (`ossature_de_chene`) | passive | sup | 12.0 | 8.0 | 1.50 | R 50 · F 35 |
 | guerrier | 9 | Bannière haute (`banniere_haute`) | active | sup | 85.6 | 57.1 | 1.50 | F 50 · R 35 |
 | guerrier | 10 | Brise-ligne (`brise_ligne`) | active | off | 57.6 | 30.1 | 1.91 | F 50 · R 35 |
 | illusionniste | 1 | Lueur aveuglante (`lueur_aveuglante`) | active | off | 7.8 | 5.8 | 1.33 | Int 39 |
 | illusionniste | 2 | Couleurs dansantes (`couleurs_dansantes`) | active | off | 12.0 | 6.7 | 1.80 | Int 48 |
 | illusionniste | 3 | Double illusoire (`double_illusoire`) | active | sup | 44.0 | 26.2 | 1.68 | Ag 35 |
 | illusionniste | 3 | Lame illusoire (`lame_illusoire`) | active | off | 12.2 | 8.0 | 1.53 | Int 45 |
-| illusionniste | 3 | Silhouette trouble (`silhouette_trouble`) | passive | sup | 8.0 | 5.0 | 1.60 | Ag 35 |
+| illusionniste | 3 | Silhouette trouble (`silhouette_trouble`) | passive | sup | 4.0 | 3.0 | 1.33 | Ag 35 |
 | illusionniste | 4 | Rêve apaisant (`reve_apaisant`) | active | sup | 48.0 | 28.3 | 1.69 | Int 48 |
 | illusionniste | 5 | Doubles multiples (`doubles_multiples`) | active | sup | 49.3 | 33.4 | 1.48 | Int 51 |
 | illusionniste | 6 | Éventail de confusion (`eventail_de_folie`) | active | sup | 56.3 | 34.9 | 1.61 | Int 54 · Ag 32 |
 | illusionniste | 7 | Dévoreur de rêves (`devoreur_de_reves`) | active | off | 40.4 | 20.8 | 1.94 | Int 60 · Ag 35 |
 | illusionniste | 7 | Spectacle (`spectacle`) | active | sup | 58.2 | 42.9 | 1.36 | Cha 57 · Vol 43 |
-| illusionniste | 10 | Présence effacée (`presence_effacee`) | passive | sup | 29.0 | 10.0 | 2.90 | Int 60 · Ag 35 |
+| illusionniste | 10 | Présence effacée (`presence_effacee`) | passive | sup | 19.0 | 9.0 | 2.11 | Int 60 · Ag 35 |
 | lettre | 1 | Fiole corrosive (`fiole_corrosive`) | active | off | 7.8 | 5.8 | 1.33 | Int 39 |
 | lettre | 2 | Poudre détonante (`poudre_detonante`) | active | off | 12.0 | 6.7 | 1.80 | Int 48 |
 | lettre | 3 | Formule de l'alchimiste (`formule_de_l_alchimiste`) | active | sup | 42.0 | 26.2 | 1.60 | Int 45 |
@@ -161,7 +145,6 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | mage | 6 | Dôme de déviation (`tourbillon_arcanique`) | active | sup | 56.0 | 34.9 | 1.60 | Int 54 · Vol 42 |
 | mage | 7 | Égide de bataille (`egide_de_bataille`) | active | sup | 58.2 | 42.9 | 1.36 | R 47 · Int 43 |
 | mage | 9 | Surcharge arcanique (`rayon_desintegrant`) | active | off | 44.4 | 28.7 | 1.55 | Int 60 · Vol 45 |
-| mage | 10 | Cœur de Nexus (`coeur_de_nexus`) | passive | sup | 20.0 | 10.0 | 2.00 | Vol 60 · Int 45 |
 | mage | 10 | Lame du mage-guerrier (`lame_du_mage_guerrier`) | active | off | 43.0 | 30.1 | 1.43 | Int 60 · Vol 45 |
 | menestrel | 0 | Ballade inspirante (`ballade_inspirante`) | active | sup | 55.0 | 22.6 | 2.43 | Cha 42 |
 | menestrel | 1 | Coup de luth (`coup_de_luth`) | active | off | 7.8 | 5.8 | 1.33 | Cha 39 |
@@ -172,17 +155,15 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | menestrel | 6 | Hymne de l'Étoile (`hymne_de_l_etoile`) | active | sup | 108.8 | 34.9 | 3.11 | Vol 60 · Cha 45 |
 | menestrel | 7 | Chanson de geste (`chanson_de_geste`) | active | sup | 58.2 | 42.9 | 1.36 | F 47 · R 33 |
 | menestrel | 8 | Hymne de victoire (`hymne_de_victoire`) | active | sup | 57.1 | 36.5 | 1.57 | Vol 60 · F 35 |
-| menestrel | 10 | Étoile (`etoile`) | passive | sup | 16.0 | 10.0 | 1.60 | Cha 60 · Vol 45 |
 | moine | 2 | Coup du dragon (`coup_du_dragon`) | active | off | 9.2 | 6.7 | 1.38 | Ag 32 |
 | moine | 3 | Garde du pèlerin (`garde_du_pelerin`) | active | sup | 36.0 | 26.2 | 1.37 | R 35 |
 | moine | 3 | Roue du vent (`roue_du_vent`) | active | off | 11.8 | 8.0 | 1.48 | Ag 35 |
 | moine | 3 | Poing du souffle (`souffle_interieur`) | active | off | 12.3 | 8.0 | 1.54 | Vol 45 |
 | moine | 5 | Chant du monastère (`chant_du_monastere`) | active | sup | 48.0 | 33.4 | 1.44 | Vol 51 |
 | moine | 6 | Mille poings (`mille_poings`) | active | off | 24.4 | 18.0 | 1.36 | Ag 44 · Vol 42 |
-| moine | 6 | Vagabond (`vagabond`) | passive | sup | 10.0 | 7.0 | 1.43 | Ag 44 · Vol 42 |
 | moine | 7 | Frappe de l'âme (`frappe_de_l_ame`) | active | off | 39.1 | 20.8 | 1.88 | Ag 50 · Vol 45 |
 | moine | 9 | Paix du sage (`paix_du_sage`) | active | sup | 85.6 | 57.1 | 1.50 | Vol 60 · R 35 |
-| moine | 10 | Ascète (`ascete`) | passive | sup | 25.0 | 10.0 | 2.50 | Vol 60 · Ag 35 |
+| moine | 10 | Ascète (`ascete`) | passive | sup | 15.0 | 9.0 | 1.67 | Vol 60 · Ag 35 |
 | moine | 10 | Souffle du Sensei (`souffle_du_sensei`) | active | sup | 115.2 | 75.4 | 1.53 | Vol 60 · Ag 35 |
 | necromancien | 1 | Sangsue (`sangsue`) | active | off | 20.3 | 5.8 | 3.47 | Int 45 |
 | necromancien | 1 | Toucher glacé (`toucher_glace`) | active | off | 7.8 | 5.8 | 1.33 | Int 39 |
@@ -201,16 +182,16 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | paladin | 4 | Soins du champ de bataille (`soins_du_champ_de_bataille`) | active | sup | 42.0 | 28.3 | 1.48 | Vol 48 |
 | paladin | 8 | Vœu du protecteur (`vu_du_protecteur`) | active | sup | 57.1 | 36.5 | 1.57 | R 50 · Vol 45 |
 | paladin | 9 | Croisade (`croisade`) | active | sup | 85.6 | 57.1 | 1.50 | F 50 · Vol 45 |
-| paladin | 10 | Exarque (`exarque`) | passive | sup | 16.0 | 10.0 | 1.60 | Vol 60 · Cha 45 |
 | pretre | 1 | Lumière sainte (`lumiere_sainte`) | active | off | 7.8 | 5.8 | 1.33 | Vol 39 |
 | pretre | 3 | Main du guérisseur (`main_du_guerisseur`) | active | sup | 42.0 | 26.2 | 1.60 | Vol 45 |
+| pretre | 3 | Aura sainte (`pretre_aura_sainte`) | passive | sup | 4.8 | 3.0 | 1.60 | Vol 45 |
 | pretre | 5 | Hymne (`hymne`) | active | sup | 48.0 | 33.4 | 1.44 | Vol 51 |
 | pretre | 6 | Bénédiction du Prophète (`benediction_du_prophete`) | active | sup | 84.0 | 34.9 | 2.40 | R 50 · Vol 45 |
 | pretre | 6 | Contrition (`colonne_de_lumiere`) | active | sup | 49.7 | 34.9 | 1.42 | F 44 · Vol 42 |
 | pretre | 8 | Bénédiction de masse (`benediction_de_masse`) | active | sup | 66.6 | 36.5 | 1.82 | Vol 60 · F 35 |
 | pretre | 9 | Vœu de lumière (`vu_de_lumiere`) | active | sup | 78.6 | 57.1 | 1.38 | R 50 · Vol 45 |
 | pretre | 10 | Oracle (`oracle`) | active | sup | 103.2 | 75.4 | 1.37 | Ch 50 · Vol 45 |
-| pretre | 10 | Thaumaturge (`thaumaturge`) | passive | sup | 22.0 | 10.0 | 2.20 | Vol 60 · Int 45 |
+| pretre | 10 | Thaumaturge (`thaumaturge`) | passive | sup | 12.0 | 9.0 | 1.33 | Vol 60 · Int 45 |
 | repurgateur | 1 | Lame d'argent (`lame_d_argent`) | active | off | 7.8 | 5.8 | 1.33 | Vol 39 |
 | repurgateur | 2 | Coup de pieu (`coup_de_pieu`) | active | off | 10.0 | 6.7 | 1.50 | Vol 42 |
 | repurgateur | 2 | Sang contre sang (`sang_contre_sang`) | active | off | 13.5 | 6.7 | 2.03 | Vol 48 |
@@ -221,7 +202,7 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | repurgateur | 8 | Sceau du proscrit (`feu_de_l_enfer_retourne`) | active | sup | 73.6 | 36.5 | 2.02 | Vol 60 · Ch 35 |
 | repurgateur | 8 | Pieu au cœur (`pieu_au_cur`) | active | off | 44.9 | 22.6 | 1.99 | Vol 60 · Ch 35 |
 | repurgateur | 9 | Veillée du chasseur (`rituel_d_exorcisme`) | active | sup | 86.1 | 57.1 | 1.51 | Vol 60 · Ch 35 |
-| repurgateur | 10 | Rejeton ou Saint (`rejeton_ou_saint`) | passive | sup | 22.0 | 10.0 | 2.20 | Vol 60 · Ch 35 |
+| repurgateur | 10 | Rejeton ou Saint (`rejeton_ou_saint`) | passive | sup | 12.0 | 9.0 | 1.33 | Vol 60 · Ch 35 |
 | repurgateur | 10 | Tueur de démon (`tueur_de_demon`) | active | off | 44.8 | 30.1 | 1.49 | Vol 60 · Ch 35 |
 | templier | 0 | Litanie protectrice (`litanie_protectrice`) | active | sup | 40.0 | 22.6 | 1.77 | R 26 |
 | templier | 2 | Frappe du gardien (`frappe_du_gardien`) | active | off | 9.2 | 6.7 | 1.38 | F 32 |
@@ -229,9 +210,8 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | templier | 3 | Ligne de l'ordre (`ligne_de_l_ordre`) | active | off | 15.1 | 8.0 | 1.88 | F 41 |
 | templier | 8 | Bastion (`bastion`) | active | sup | 66.6 | 36.5 | 1.82 | Vol 60 · R 35 |
 | templier | 9 | Sceau d'interdiction (`tempete_runique`) | active | sup | 85.6 | 57.1 | 1.50 | F 50 · R 35 |
-| templier | 10 | Gardien (`gardien`) | passive | sup | 16.0 | 10.0 | 1.60 | R 50 · Vol 45 |
 | templier | 10 | Verdict (`verdict`) | active | off | 52.8 | 30.1 | 1.75 | R 50 · Vol 45 |
-| voleur | 0 | Esquive (`esquive`) | passive | sup | 8.0 | 2.0 | 4.00 | Ag 32 |
+| voleur | 0 | Esquive (`esquive`) | passive | sup | 8.0 | 2.5 | 3.20 | Ag 32 |
 | voleur | 2 | Couteaux de lancer (`couteaux_de_lancer`) | active | off | 10.7 | 6.7 | 1.60 | Ag 32 |
 | voleur | 2 | Surin (`surin`) | active | off | 9.2 | 6.7 | 1.38 | Ag 32 |
 | voleur | 3 | Coup du pavé (`coup_du_pave`) | active | off | 11.4 | 8.0 | 1.43 | Ag 35 |
@@ -243,7 +223,7 @@ Dump : `telluris-dump-20261117-213321.json` · 329 docs écrits · 124 passives 
 | voleur | 8 | Feu grégeois de poche (`feu_gregeois_de_poche`) | active | off | 31.7 | 22.6 | 1.40 | Ag 50 · Ch 35 |
 | voleur | 9 | Bagout (`bagout`) | active | sup | 85.6 | 57.1 | 1.50 | Cha 60 · Ag 35 |
 | voleur | 9 | Lame dans la manche (`lame_dans_la_manche`) | active | off | 48.7 | 28.7 | 1.70 | Ag 50 · Ch 35 |
-| voleur | 10 | Maraudeur (`maraudeur`) | passive | sup | 30.0 | 10.0 | 3.00 | Ag 50 · Ch 35 |
+| voleur | 10 | Maraudeur (`maraudeur`) | passive | sup | 20.0 | 9.0 | 2.22 | Ag 50 · Ch 35 |
 
 ## Passives réécrites
 
