@@ -66,7 +66,7 @@ Dump : `telluris-dump-20261117-213321.json` · 330 docs écrits · 124 passives 
 | druide | 6 | Mur de racines (`colere_de_la_foret`) | active | sup | 62.4 | 34.9 | 1.79 | Ag 44 · Vol 42 |
 | druide | 6 | Sève vive (`seve_vive`) | active | sup | 62.4 | 34.9 | 1.79 | R 44 · Vol 42 |
 | druide | 8 | Tempête de feuilles (`tempete_de_feuilles`) | active | off | 33.9 | 22.6 | 1.50 | Vol 60 · R 35 |
-| druide | 10 | Fils de la nature (`fils_de_la_nature`) | passive | sup | 15.6 | 9.0 | 1.73 | R 50 · Vol 45 |
+| druide | 10 | Fils de la nature (`fils_de_la_nature`) | passive | sup | 15.6 | 9.0 | 1.73 | Vol 60 · R 35 |
 | duelliste | 2 | Défi d'honneur (`defi_d_honneur`) | active | sup | 30.9 | 23.1 | 1.33 | Ag 32 |
 | duelliste | 2 | Taille en tierce (`taille_en_tierce`) | active | off | 9.2 | 6.7 | 1.38 | Ag 32 |
 | duelliste | 3 | Botte de mousquetaire (`botte_de_mousquetaire`) | active | off | 13.0 | 8.0 | 1.62 | Ag 35 |
@@ -280,7 +280,7 @@ Dump : `telluris-dump-20261117-213321.json` · 330 docs écrits · 124 passives 
 | `etoile` | {"buffs": {"Cha": 10, "Vol": 5}} | {"buffs": {"Cha": 5, "Vol": 5}} |
 | `exalte` | {"buffs": {"Vol": 8}} | {"buffs": {"Vol": 5}} |
 | `exarque` | {"buffs": {"Vol": 10, "Cha": 4}} | {"buffs": {"Vol": 5, "Cha": 5}} |
-| `fils_de_la_nature` | {"buffs": {"R": 8}} | {"buffs": {"R": 5, "Vol": 5}} |
+| `fils_de_la_nature` | {"buffs": {"R": 8}} | {"buffs": {"Vol": 5, "R": 5}} |
 | `fils_des_steppes` | {"buffs": {"R": 5}} | {"buffs": {"R": 3}} |
 | `foi_inebranlable` | {"buffs": {"Vol": 4}} | {"buffs": {"Vol": 2}} |
 | `force_tranquille` | {"buffs": {"F": 4}} | {"buffs": {"F": 5, "R": 3}} |

@@ -2895,14 +2895,14 @@
   },
   "effets": {
    "buffs": {
-    "R": 5,
-    "Vol": 5
+    "Vol": 5,
+    "R": 5
    },
    "regen_pv": 2
   },
   "exigences": {
-   "R": 50,
-   "Vol": 45
+   "Vol": 60,
+   "R": 35
   }
  },
  {

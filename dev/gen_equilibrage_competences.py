@@ -61,6 +61,11 @@ SECONDAIRES = {
 	"demoniste": ["Int", "Vol", "R"], "pretre": ["Vol", "Int", "Cha"], "paladin": ["Vol", "R", "Cha"],
 	"templier": ["R", "Vol", "F"], "repurgateur": ["Vol", "Ch", "Int"], "menestrel": ["Cha", "Int", "Vol"],
 }
+# Carac PRINCIPALE imposée (slug → carac), quand la plus grosse valeur d'origine trahit la vocation.
+# Vérifiée contre le dump : un slug absent fait échouer le script.
+PRINCIPALES = {
+	"fils_de_la_nature": "Vol",   # druide : la Volonté d'abord, la Résistance en secondaire (18/11)
+}
 # Plafond humain de la carac SOURCE d'un bonus formulé (diviseur recalculé dessus).
 PLAFOND_SOURCE = {"F": 50, "R": 50, "Ag": 60, "Ch": 60, "Vol": 70, "Int": 70, "Cha": 80}
 
@@ -122,13 +127,16 @@ def reecrire_passive(doc: dict) -> dict | None:
 	autres_effets = any(k not in ("buffs",) for k in eff) or bool(doc.get("zone"))
 	if not ordre_carac:
 		return dict(buffs)
+	impose = PRINCIPALES.get(str(doc.get("_id", "")).split(":", 1)[-1])
+	if impose:
+		ordre_carac = [impose] + [k for k in ordre_carac if k != impose]
 	principale = ordre_carac[0]
 	secondaire = ordre_carac[1] if len(ordre_carac) > 1 else None
 	seul = not autres_effets and secondaire is None and not vitesse
 	out = {}
 	val_p = bareme_principale(niv, seul and niv < 5)
-	out[principale] = (_formule_bornee(buffs[principale], val_p)
-					   if isinstance(buffs[principale], str) else val_p)
+	v_p = buffs.get(principale)
+	out[principale] = _formule_bornee(v_p, val_p) if isinstance(v_p, str) else val_p
 	if vitesse:
 		out["V"] = 1      # la Vitesse (4 à 8) tient lieu de secondaire, à +1
 		return out
@@ -141,8 +149,8 @@ def reecrire_passive(doc: dict) -> dict | None:
 			out[secondaire] = _formule_bornee(v, val_s) if isinstance(v, str) else val_s
 	elif secondaire is not None:
 		out[secondaire] = 1
-		out[principale] = (_formule_bornee(buffs[principale], bareme_principale(niv, False))
-						   if isinstance(buffs[principale], str) else bareme_principale(niv, False))
+		out[principale] = (_formule_bornee(v_p, bareme_principale(niv, False))
+						   if isinstance(v_p, str) else bareme_principale(niv, False))
 	return out
 
 
@@ -245,6 +253,9 @@ def main():
 	docs = json.load(open(chemin, encoding="utf-8"))["docs"]
 	comps = [d for d in docs if d.get("type") == "competence" and d.get("vocation") not in (None, "monstre")]
 	neufs = {d["_id"]: copy.deepcopy(d) for d in comps}
+	orphelins = [k for k in PRINCIPALES if f"competence:{k}" not in neufs]
+	if orphelins:
+		sys.exit(f"PRINCIPALES cite des compétences absentes du dump : {orphelins}")
 
 	# 1. Passives réécrites AVANT la mesure : leur norme est celle d'après le barème.
 	passives = []

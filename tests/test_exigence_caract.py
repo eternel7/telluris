@@ -149,3 +149,12 @@ def test_passive_au_bareme_jamais_hors_norme():
 														"effets": {"esquive": 4}})[1] > 0
 	# Aura : la part « groupe » de ses caracs compte.
 	assert gen.puissance(dict(pure, zone={"forme": "cercle", "rayon": 2}))[1] > 0
+
+
+def test_principale_imposee_passe_en_tete():
+	slug = next(iter(gen.PRINCIPALES))
+	doc = {"_id": f"competence:{slug}", "vocation": "druide", "niveau": 10,
+		   "effets": {"buffs": {"R": 8}, "regen_pv": 2}}
+	out = gen.reecrire_passive(doc)
+	assert list(out)[0] == gen.PRINCIPALES[slug]
+	assert out["R"] == gen.bareme_secondaire(10)
