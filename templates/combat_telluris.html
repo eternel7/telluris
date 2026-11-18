@@ -4256,7 +4256,8 @@ function compTargets(c) { return capaCibles(c); }
 function compCastable(c) {
 	const j = me() || {};
 	// Exigence d'arme : `arme_ok` décidé au serveur (utils/exigence_arme), qui refuse aussi.
-	return c.arme_ok !== false && (j.currentPM || 0) >= coutPmCharge(c)
+	// Exigence de caractéristique : `exigence_ok` décidé au serveur, qui refuse aussi.
+	return c.arme_ok !== false && c.exigence_ok !== false && (j.currentPM || 0) >= coutPmCharge(c)
 		&& coutPvPayable(c) && !canalise()
 		&& (c.cible === 'soi' || capaCibles(c).length > 0);
 }
@@ -4894,6 +4895,7 @@ function compLabel(c) {
 	if (zone) parts.push(zone);
 	// Exigence d'arme : le motif d'une case grisée (texte du survol, jamais du HTML).
 	if (c.arme_requise) parts.push(`${c.arme_ok === false ? '⛔' : '🗡'} exige ${c.arme_requise}`);
+	if (c.exigence_requise) parts.push(`${c.exigence_ok === false ? '⛔' : '📐'} exige ${c.exigence_requise}`);
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${pmTexte(c)}` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }

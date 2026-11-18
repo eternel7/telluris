@@ -209,11 +209,23 @@ function _armeLabel(c) {
 	}
 	return ` · <span title="Arme à avoir en main">🗡 exige ${txt}</span>`;
 }
+// EXIGENCE DE CARACTÉRISTIQUE (`exigence_requise`, « Ag 38 · F 29 », servie par
+// utils/exigence_caract ; `exigence_ok` décidé au serveur sur les caracts BRUTES). Faux ⇒ ⛔,
+// « inactive » pour une compétence connue ; absent (catalogues d'admin) ⇒ neutre.
+function _exigenceLabel(c, apprise = true) {
+	if (!c || !c.exigence_requise) return '';
+	const txt = String(c.exigence_requise).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[ch]);
+	if (c.exigence_ok === false) {
+		const quoi = apprise ? 'inactive : exige' : 'exige';
+		return ` · <span class="capa-arme-manque" title="Caractéristiques brutes à atteindre">⛔ ${quoi} ${txt}</span>`;
+	}
+	return ` · <span title="Caractéristiques brutes exigées">📐 exige ${txt}</span>`;
+}
 // Ligne d'effets d'une compétence connue, sous sa description.
 function _compLigneDesc(c) {
 	let portee = '';
 	if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 	else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
 	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}`
-		+ _armeLabel(c) + _accordeLabel(c);
+		+ _armeLabel(c) + _exigenceLabel(c) + _accordeLabel(c);
 }

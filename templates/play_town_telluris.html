@@ -6529,6 +6529,10 @@ async function spendXp(statKey, useMaxBonus = false) {
 		_syncPoints(data.attribute_points);
 		_refreshDerivedStats(data.derived_stats);
 		_renderCaractsMod(data.caracts_detail);
+		// Exigences de caractéristique : une compétence se réactive, une apprenable s'ouvre.
+		if (data.competences) _renderCompetences(data.competences);
+		if (data.competences_apprenables) _renderCompetencesApprenables(data.competences_apprenables);
+		if (data.vitals) updateVitals(data.vitals, porteurActifId());
 	} catch (err) { console.error('Erreur spend_xp', err); }
 }
 
@@ -8580,8 +8584,8 @@ function _renderCompetences(list) {
 		const actions = c.mode === 'passive'
 			? pin + (c.action_piege
 				? _aideCombat('Action de combat : à placer dans la barre')
-				: c.arme_ok === false
-					? '<span class="sh-skill-lvl" title="Sans l\'arme requise, ce bonus ne compte pas">🛡 inactive</span>'
+				: c.arme_ok === false || c.exigence_ok === false
+					? '<span class="sh-skill-lvl" title="Arme ou caractéristiques requises manquantes : ce bonus ne compte pas">🛡 inactive</span>'
 					: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
@@ -8589,6 +8593,8 @@ function _renderCompetences(list) {
 				// la ligne d'effets (`_armeLabel`), rien à « utiliser » tant que l'arme manque.
 				: c.arme_ok === false
 					? '<span class="sh-skill-lvl" title="Équipez l\'arme requise">⛔ arme requise</span>'
+				: c.exigence_ok === false
+					? '<span class="sh-skill-lvl" title="Caractéristiques brutes insuffisantes">⛔ inactive</span>'
 					: _aideCombat('Utilisable en combat seulement'));
 		const pm = c.cout_pm ? `<span class="sh-sort-pm">${_pmLabel(c)}</span>` : '';
 		return `<div class="sh-skill" data-capa="c:${c.competence_id}">
@@ -8614,13 +8620,15 @@ function _renderCompetencesApprenables(list) {
 		return;
 	}
 	box.innerHTML = _capaListe(_competencesApprenables).map(c => {
-		const ok = _attributePoints >= c.cout_points;
+		// Exigence de caractéristique non remplie (`exigence_ok`, décidé au serveur) : la
+		// compétence reste listée (objectif visible), mais ne s'apprend pas.
+		const ok = _attributePoints >= c.cout_points && c.exigence_ok !== false;
 		const tag = c.mode === 'passive' ? '🛡 Passive' : '⚡ Active';
 		return `<div class="sh-skill">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}<span class="sh-skill-lvl">${tag}</span></div>
-				<div class="sh-skill-desc">Niv. ${c.niveau} · ${_sortEffetsLabel(c.effets)}${_compJetLabel(c)}${_conditionLabel(c)}</div>
+				<div class="sh-skill-desc">Niv. ${c.niveau} · ${_sortEffetsLabel(c.effets)}${_compJetLabel(c)}${_conditionLabel(c)}${_exigenceLabel(c, false)}</div>
 			</div>
 			<div class="sh-inv-actions">
 				<button type="button" class="sh-drop-btn" onclick="apprendreCompetence('${c.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${c.cout_points} pts)</button>
@@ -9361,7 +9369,7 @@ function _majCapaApprendre() {
 	if (!el) return;
 	const pts = _attributePoints || 0;
 	const m = _sortsMagies || {};
-	const n = (_competencesApprenables || []).filter(c => pts >= c.cout_points).length
+	const n = (_competencesApprenables || []).filter(c => pts >= c.cout_points && c.exigence_ok !== false).length
 		+ (_sortsApprenables || []).filter(s => s.grimoire_ok && pts >= s.cout_points).length
 		+ (m.achetables || []).filter(e => pts >= e.cout).length
 		+ (m.peut_apprendre ? (m.pratiquees || []).filter(e => e.montable && pts >= e.cout_montee).length : 0);

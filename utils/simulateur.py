@@ -82,7 +82,7 @@ from utils import jetons
 from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
 							  recompute_equipment_bonus, restriction_satisfaite)
 from utils.competences import (competence_utilisable_combat, condition_remplie,
-							   furtivite_passive, normaliser_competence)
+							   furtivite_passive, normaliser_competence, exigence_remplie)
 from utils.consommables import effet_instantane, est_consommable
 from utils.consommables import effets_de as effets_de_consommable
 from utils.slots_actions import slots_effectifs
@@ -484,6 +484,9 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 			if not comp or not competence_utilisable_combat(comp) or not condition_remplie(comp, map_tags):
 				continue
 			if exigence_arme.manquante(comp, armes):
+				continue
+			# Exigence de caractéristique non remplie : inactive en jeu, absente du duel.
+			if not exigence_remplie(character, comp):
 				continue
 			eff = comp["effets"]
 			if comp["cible"] != "ennemi" and _dissimule(eff):
