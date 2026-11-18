@@ -636,6 +636,9 @@ TEXTES_SORT = {
 			  "(jet {roll} / seuil {seuil})",
 	"miss": "{acteur} lance {nom} sur {cible} mais le sort se dissipe ! "
 			"(jet {roll} / seuil {seuil})",
+	"kill_sournois": "{acteur} lance {nom} — {sournois} — et pulvérise {cible} !",
+	"crit_sournois": "{acteur} lance {nom} — {sournois} : {cible} encaisse{ou} {dmg} "
+					 "dégâts ! (jet {roll} — PV : {pv}/{pv_max})",
 }
 TEXTES_COMPETENCE = {
 	"kill_crit": "{acteur} utilise {nom} — coup CRITIQUE — et élimine {cible} !",
@@ -649,6 +652,9 @@ TEXTES_COMPETENCE = {
 			  "(jet {roll} / seuil {seuil})",
 	"miss": "{acteur} utilise {nom} sur {cible} mais manque son coup ! "
 			"(jet {roll} / seuil {seuil})",
+	"kill_sournois": "{acteur} utilise {nom} — {sournois} — et élimine {cible} !",
+	"crit_sournois": "{acteur} utilise {nom} — {sournois} : {cible} encaisse{ou} {dmg} "
+					 "dégâts ! (jet {roll} — PV : {pv}/{pv_max})",
 }
 
 # ── Profil d'une CAPACITÉ — la seule chose qui distingue un sort d'une compétence ──
@@ -1028,6 +1034,9 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	elif dmg:
 		cle = "crit" if jet["critique"] else "hit"
 		kind, geles = cle, (joueur, monstre)
+	sournois = libelle_sournois(jet)
+	if sournois and cle in ("kill_crit", "crit"):
+		cle, ctx["sournois"] = f"{cle.split('_')[0]}_sournois", sournois
 	else:
 		# La ligne posée juste après par `_appliquer_effet_sur_cible` dira ce que la
 		# cible encaisse ; celle-ci ne gèle donc PAS la cible (elle ne la change pas).
@@ -5323,6 +5332,15 @@ def _attaque_furtive(attaquant: dict, defenseur: dict) -> bool:
 	return bool(attaquant.get("furtif")) and not defenseur.get("detecte")
 
 
+def libelle_sournois(jet: dict) -> str:
+	"""Libellé de journal d'un critique dû à la FURTIVITÉ, "" sinon : le critique
+	automatique d'un coup furtif qui touche (×2) est une « ATTAQUE SOURNOISE », une vraie
+	réussite critique en furtivité (×4) une « ATTAQUE SOURNOISE CRITIQUE »."""
+	if not (jet.get("furtif") and jet.get("critique")):
+		return ""
+	return "ATTAQUE SOURNOISE CRITIQUE" if jet.get("mult_degats") == 4 else "ATTAQUE SOURNOISE"
+
+
 def _resoudre_jet(attaquant: dict, defenseur: dict, seuil: int, furtif: bool = False) -> dict:
 	"""Un jet d100 offensif : {roll, seuil, touche, critique, fumble, mult_degats, furtif}.
 
@@ -7399,15 +7417,18 @@ def _frapper_monstre_coup(combat_doc: dict, attaquant: dict, monstre: dict, prof
 	# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même en
 	# priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
 	anim_arme = profil.get("animation")
+	# Critique dû à la furtivité : « une ATTAQUE SOURNOISE [CRITIQUE] » (libelle_sournois).
+	sournois = libelle_sournois(jet)
+	critique = f"une {sournois}" if sournois else "un COUP CRITIQUE"
 	if monstre["currentPV"] <= 0:
 		monstre["vivant"] = False
-		texte = (f"{attaquant['nom']} porte un COUP CRITIQUE et élimine {monstre['nom']} !"
+		texte = (f"{attaquant['nom']} porte {critique} et élimine {monstre['nom']} !"
 				 if jet["critique"] else
 				 f"{attaquant['nom']} élimine {monstre['nom']} !")
 		kind = "kill"
 	else:
 		texte = (
-			f"{attaquant['nom']} porte un COUP CRITIQUE à {monstre['nom']}{ou} : {dmg} dégâts ! "
+			f"{attaquant['nom']} porte {critique} à {monstre['nom']}{ou} : {dmg} dégâts ! "
 			f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
 			if jet["critique"] else
 			f"{attaquant['nom']} touche {monstre['nom']}{ou} pour {dmg} dégâts ! "

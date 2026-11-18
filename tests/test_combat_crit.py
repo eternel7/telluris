@@ -174,6 +174,8 @@ def test_attaque_furtive_critique_x4_avant_les_pa(db, monkeypatch):
 	doc = combat_doc([j], [m])
 	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
 	assert res["critique"] and res["dmg"] == 37
+	assert _textes_journal(doc, "ATTAQUE SOURNOISE CRITIQUE")
+	assert not _textes_journal(doc, "COUP CRITIQUE")
 
 
 def test_attaque_furtive_qui_touche_est_un_critique_x2(db, monkeypatch):
@@ -184,6 +186,9 @@ def test_attaque_furtive_qui_touche_est_un_critique_x2(db, monkeypatch):
 	doc = combat_doc([j], [m])
 	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
 	assert res["critique"] and res["dmg"] == 17
+	lignes = _textes_journal(doc, "ATTAQUE SOURNOISE")
+	assert lignes and not any("SOURNOISE CRITIQUE" in t for t in lignes)
+	assert not _textes_journal(doc, "COUP CRITIQUE")
 
 
 def test_cible_qui_a_repere_le_joueur_ne_subit_pas_lattaque_furtive(db, monkeypatch):
@@ -194,6 +199,21 @@ def test_cible_qui_a_repere_le_joueur_ne_subit_pas_lattaque_furtive(db, monkeypa
 	doc = combat_doc([j], [m])
 	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
 	assert not res["critique"] and res["dmg"] == 7
+	assert not _textes_journal(doc, "SOURNOISE")
+
+
+def _textes_journal(doc, fragment):
+	"""Lignes du journal de combat contenant `fragment`."""
+	return [l["texte"] for l in doc["log"] if fragment in (l.get("texte") or "")]
+
+
+def test_libelle_sournois_seulement_pour_un_critique_furtif():
+	assert combat_util.libelle_sournois(
+		{"furtif": True, "critique": True, "mult_degats": 2}) == "ATTAQUE SOURNOISE"
+	assert combat_util.libelle_sournois(
+		{"furtif": True, "critique": True, "mult_degats": 4}) == "ATTAQUE SOURNOISE CRITIQUE"
+	assert combat_util.libelle_sournois({"furtif": False, "critique": True, "mult_degats": 2}) == ""
+	assert combat_util.libelle_sournois({"furtif": True, "critique": False, "mult_degats": 1}) == ""
 
 
 # ── Tag d'espèce `insensible_furtivite` : la furtivité ne le trompe jamais ──────
@@ -229,6 +249,8 @@ def test_sort_furtif_critique_x4_sans_pa(db, monkeypatch):
 			"effets": {"degats": "1D10"}, "composants_engages": [], "poids_consommes": 0}
 	res = combat_util.resolve_action(doc, "sort", cible_id="monstre_0", sort=sort)
 	assert res["critique"] and res["dmg"] == 40
+	assert _textes_journal(doc, "Trait de feu — ATTAQUE SOURNOISE CRITIQUE")
+	assert not _textes_journal(doc, "puissance CRITIQUE")
 
 
 # ── Échec critique : perte d'action ──────────────────────────────────────────────

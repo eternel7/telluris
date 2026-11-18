@@ -982,7 +982,8 @@ def _coup_simule(actor: dict, cible: dict, option: dict, pseudo: dict, furtif: b
 									 jet["mult_degats"], option["jet"], zone=zone)
 		cible["currentPV"] = max(0, int(cible.get("currentPV", 0)) - dmg)
 		cible["vivant"] = cible["currentPV"] > 0
-		suffixe = f" — CRITIQUE ×{jet['mult_degats']}" if jet["critique"] else ""
+		libelle = combat.libelle_sournois(jet) or "CRITIQUE"
+		suffixe = f" — {libelle} ×{jet['mult_degats']}" if jet["critique"] else ""
 		_log(pseudo, actor, "crit" if jet["critique"] else "hit",
 			 f"{actor.get('nom', '?')} touche {cible.get('nom', '?')}{ou} avec "
 			 f"{option['label']} : {dmg} dégâts{suffixe} "
