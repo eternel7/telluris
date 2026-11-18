@@ -11,6 +11,7 @@ import os
 from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
 from utils import pouvoirs_objets
 from utils import exigence_arme
+from utils import exigence_caract
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -1349,6 +1350,8 @@ def spend_xp(
 	character["attribute_points"] = attribute_points - cost
 	if use_bonus:
 		character["max_bonus_used"] = stat_key
+	# Une carac qui monte peut remplir l'EXIGENCE d'une passive connue : agrégat recalé ici.
+	competences_util.synchroniser_competences_bonus(character, get_doc)
 
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
@@ -1380,6 +1383,12 @@ def spend_xp(
 		"max_bonus_used": character.get("max_bonus_used"),
 		"derived_stats": fiche_util.derivees_affichees(character, derived.model_dump()),
 		"caracts_detail": consommables.caracts_detail(character),
+		# Exigences de caractéristique : une compétence connue se réactive, une apprenable
+		# s'ouvre (`exigence_ok`) — sans ces listes, l'onglet ⚡ resterait figé.
+		"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
+		"competences_apprenables": competences_util.competences_apprenables(
+			character, find_docs, get_doc("rules:vocations")),
+		"vitals": _vitals_payload(character),
 	}
 
 
@@ -2026,6 +2035,9 @@ def utiliser_competence(
 	manque = exigence_arme.manquante(comp, exigence_arme.armes_portees(character, get_doc))
 	if manque:
 		raise HTTPException(status_code=422, detail=f"Cette compétence exige {manque}.")
+	if not competences_util.exigence_remplie(character, comp, apprise=False):
+		raise HTTPException(status_code=422, detail="Caractéristiques insuffisantes : exige "
+							+ exigence_caract.libelle(comp["exigences"]))
 	# Même tarif de charge que les sorts : sorts et compétences partagent le contrat.
 	cout_pm = charge_magie.cout_pm_porteur(character, comp, resolve_item_ref)
 	if int(character.get("currentPM", 0) or 0) < cout_pm:
@@ -2091,6 +2103,9 @@ def apprendre_competence(
 	vocations = get_doc("rules:vocations")
 	if sorts_util.apprentissage_exclu(comp, character.get("voc"), vocations):
 		raise HTTPException(status_code=422, detail="Votre vocation ne pratique pas ce type de compétence")
+	if not competences_util.exigence_remplie(character, comp):
+		raise HTTPException(status_code=422, detail="Caractéristiques insuffisantes : exige "
+							+ exigence_caract.libelle(comp["exigences"]))
 
 	cout = competences_util.cout_apprentissage(comp)
 	attribute_points = character.get("attribute_points", 0)

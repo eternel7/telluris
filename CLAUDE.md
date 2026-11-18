@@ -99,6 +99,8 @@ utils/
                          #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
+  exigence_caract.py     # exigence de CARACTÉRISTIQUE d'une compétence HORS NORME (pur) : champ `exigences` {stat: seuil},
+                         #   caract BRUTE, refus d'apprendre, compétence connue INACTIVE tant que non remplie (objets exempts)
   exigence_arme.py       # exigence d'ARME d'une compétence (pur) : champ `arme` {mode cac/jet/tir/bouclier/mains_nues/
                          #   deux_armes (OU), tags (OU, sous_categorie comprise)} ; armes portées FIGÉES au snapshot,
                          #   active refusée / passive inactive sans l'arme, profil emprunté aligné

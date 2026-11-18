@@ -38,6 +38,7 @@ from utils.sorts import (
 from utils.zones_effet import normaliser_zone
 from utils import pieges
 from utils import exigence_arme
+from utils import exigence_caract
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -111,6 +112,9 @@ def normaliser_competence(doc) -> dict | None:
 		# EXIGENCE D'ARME (cf. utils/exigence_arme) : {modes, tags} ou None. Active ⇒ refusée
 		# sans l'arme ; passive ⇒ sans effet sans l'arme (`bonus_passifs`).
 		"arme": exigence_arme.normaliser_arme(doc.get("arme")),
+		# EXIGENCES DE CARACTÉRISTIQUE (cf. utils/exigence_caract) : {stat: seuil} sur la caract
+		# BRUTE, posées sur les seules compétences hors norme. Vide ⇒ aucune condition.
+		"exigences": exigence_caract.normaliser(doc.get("exigences")),
 		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
 		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
 		"animation": str(doc.get("animation") or ""),
@@ -252,6 +256,24 @@ class _ArmesPortees:
 		return self._liste
 
 
+def exigence_remplie(character: dict, comp: dict, apprise: bool = True) -> bool:
+	"""Exigences de caractéristique de `comp` remplies par le porteur (caract BRUTE). Un
+	pouvoir d'OBJET (`accorde_par`, ou toute compétence hors `competences_connues`) en est
+	exempt : l'objet a sa propre `restriction`. Une compétence pas encore apprise (liste des
+	apprenables) passe `apprise=False`."""
+	if (comp or {}).get("accorde_par") or (
+			apprise and (comp or {}).get("id") not in ((character or {}).get("competences_connues") or [])):
+		return True
+	return exigence_caract.satisfaite(comp, exigence_caract.brutes(character))
+
+
+def competences_bloquees(character: dict, get_doc) -> list:
+	"""Ids des compétences connues dont l'exigence n'est PAS remplie — figés au snapshot de
+	combat (les caracts brutes ne bougent pas en combat), comme les armes portées."""
+	return [c["id"] for c in competences_connues_docs(character, get_doc)
+			if c.get("exigences") and not exigence_remplie(character, c)]
+
+
 def bonus_passifs(character: dict, get_doc) -> dict:
 	"""Somme des buffs/régén/esquive des compétences PASSIVES connues :
 	{buffs, regen_pv, regen_pm, esquive, buffs_sources}. Les actives n'y contribuent jamais
@@ -282,6 +304,10 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 		# Passive à EXIGENCE D'ARME : elle ne compte que l'arme en main. Recalculée à chaque
 		# équipement / retrait (`synchroniser_competences_bonus`, appelé par equip/unequip).
 		if comp.get("arme") and not exigence_arme.satisfaite(comp["arme"], armes.liste()):
+			continue
+		# Passive à EXIGENCE DE CARACTÉRISTIQUE non remplie : inactive (recalée à chaque
+		# chargement de /play et à chaque montée de carac, `synchroniser_competences_bonus`).
+		if not exigence_remplie(character, comp):
 			continue
 		if est_aura(comp):
 			auras.append(entree_aura(comp))
@@ -370,6 +396,8 @@ def furtivite_passive(character: dict, get_doc, map_tags) -> int:
 		if not est_passive(comp) or not condition_remplie(comp, map_tags):
 			continue
 		if comp.get("arme") and not exigence_arme.satisfaite(comp["arme"], armes.liste()):
+			continue
+		if not exigence_remplie(character, comp):
 			continue
 		best = max(best, _as_int(comp["effets"].get("furtivite")))
 	return best
@@ -479,6 +507,10 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 		comp["effets"] = apercu_effets(comp["effets"], caracts if not est_passive(comp)
 									   else (character.get("caracteristiques_current") or {}))
 		comp["cout_points"] = cout_apprentissage(comp)
+		# Exigence de caractéristique : listée quand même (l'objectif reste visible), mais
+		# `exigence_ok` faux ⇒ bouton grisé ; `apprendre_competence` refait le test.
+		comp["exigence_requise"] = exigence_caract.libelle(comp["exigences"])
+		comp["exigence_ok"] = exigence_remplie(character, comp, apprise=False)
 		out.append(comp)
 	out.sort(key=lambda c: (c["niveau"], c["nom"]))
 	return out
@@ -588,9 +620,14 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 		# EXIGENCE D'ARME : décidée ICI (le client ne connaît pas les tags des armes portées).
 		# En combat, les slots du doc sont ceux du snapshot : on ne s'équipe pas en combat.
 		arme_ok = not comp.get("arme") or exigence_arme.satisfaite(comp["arme"], armes.liste())
+		# EXIGENCE DE CARACTÉRISTIQUE (caract BRUTE) : non remplie ⇒ inactive, partout.
+		exigence_ok = exigence_remplie(character, comp)
 		out.append({
-			"utilisable": True if contexte == "combat"
-						  else (competence_utilisable_exploration(comp) and arme_ok),
+			"utilisable": exigence_ok and (True if contexte == "combat"
+						  else (competence_utilisable_exploration(comp) and arme_ok)),
+			# « Ag 38 · F 29 » — vide sans exigence ; `exigence_ok` faux ⇒ ⛔ / « inactive ».
+			"exigence_requise": exigence_caract.libelle(comp.get("exigences")),
+			"exigence_ok": exigence_ok,
 			# « une arme de tir (arc) » — vide sans exigence ; `arme_ok` faux ⇒ case grisée
 			# (active) ou « inactive » (passive). `arme_profil` : mode d'attaque emprunté
 			# (cac/jet/tir) quand l'exigence le désigne, miroir de `combat._profil_emprunte`.

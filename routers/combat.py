@@ -16,8 +16,9 @@ from utils.sorts import (
 )
 from utils.competences import (
     normaliser_competence, competence_utilisable_combat, liste_competences_payload,
-    furtivite_passive,
+    furtivite_passive, exigence_remplie,
 )
+from utils import exigence_caract
 from routers.user import _take_ref
 from utils.zones import (
     load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
@@ -718,6 +719,10 @@ def combat_action(
         competence_arg = normaliser_competence(get_doc(body.competence_id))
         if competence_arg is None or not competence_utilisable_combat(competence_arg):
             raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
+        # EXIGENCE DE CARACTÉRISTIQUE (caract BRUTE, immobile en combat) : inactive sinon.
+        if not exigence_remplie(character, competence_arg):
+            raise HTTPException(status_code=422, detail="Caractéristiques insuffisantes : exige "
+                                + exigence_caract.libelle(competence_arg["exigences"]))
 
     # Action « poser_piege » : la compétence est re-vérifiée (connue + bloc `pose_piege`) et
     # SON item retiré du sac ICI, en mémoire — même séquence que les composants d'un sort :
@@ -735,6 +740,9 @@ def combat_action(
         pose = (comp_pose or {}).get("pose_piege")
         if not pose:
             raise HTTPException(status_code=422, detail="Cette compétence ne pose pas de piège")
+        if not exigence_remplie(character, comp_pose):
+            raise HTTPException(status_code=422, detail="Caractéristiques insuffisantes : exige "
+                                + exigence_caract.libelle(comp_pose["exigences"]))
         inventaire = character.get("inventaire", [])
         ref = _take_ref(inventaire, None, pose["item"])
         if ref is None:

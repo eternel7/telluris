@@ -76,4 +76,17 @@ test('exigence d\'arme : neutre, ⛔ si manquante, « inactive » pour une passi
 		.includes('🗡 exige un bouclier'));
 });
 
+test('exigence de caractéristique : neutre, ⛔ « inactive » si connue, ⛔ « exige » à apprendre (utils/exigence_caract)', () => {
+	assert.strictEqual(_exigenceLabel({}), '');
+	assert.strictEqual(_exigenceLabel({ exigence_requise: '' }), '');
+	// Catalogue d'admin : pas d'`exigence_ok` ⇒ neutre.
+	assert.ok(_exigenceLabel({ exigence_requise: 'Ag 38 · F 29' }).includes('📐 exige Ag 38 · F 29'));
+	const ko = _exigenceLabel({ exigence_requise: 'Ag 50', exigence_ok: false });
+	assert.ok(ko.includes('⛔ inactive : exige Ag 50') && ko.includes('capa-arme-manque'));
+	assert.ok(_exigenceLabel({ exigence_requise: 'Ag 50', exigence_ok: false }, false).includes('⛔ exige Ag 50'));
+	assert.ok(_exigenceLabel({ exigence_requise: 'x <b>' }).includes('x &lt;b&gt;'));
+	assert.ok(_compLigneDesc({ mode: 'passive', effets: {}, exigence_requise: 'Int 60', exigence_ok: false })
+		.includes('⛔ inactive : exige Int 60'));
+});
+
 console.log(`✓ ${ok} tests capacites_texte`);
