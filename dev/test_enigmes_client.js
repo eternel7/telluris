@@ -105,6 +105,11 @@ t('énigme résolue : seulement la réussite', () => {
 	assert.ok(h.includes('Ouvert.') && !h.includes('data-eni-essayer'));
 });
 
+t('déduction résolue : la réussite et les indices à réexaminer, plus de conclusion', () => {
+	const h = enigmeCorps(Object.assign({}, VUES.deduction, { resolue: true, reussite: 'Compris.' }), {});
+	assert.ok(h.includes('Compris.') && h.includes('data-eni-cle=') && !h.includes('data-eni-conclure'));
+});
+
 t('scène illustrée : rien sans image, zones en % avec image', () => {
 	assert.strictEqual(enigmeScene({ famille: 'crans' }), '');
 	const h = enigmeScene({ image: 'meuble.jpg', zones: [{ cle: 'a', x: 10, y: 20, w: 30, h: 15 }] });

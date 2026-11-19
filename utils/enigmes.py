@@ -25,7 +25,8 @@
 # chacun avec sa voix, jamais la solution.
 #
 # État sur le personnage (aucune migration : champ absent ⇒ rien de commencé) :
-#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "journal": [...], "etat": {...}}
+#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "journal": [...], "note_at", "etat": {...}}
+#   Les notes (`journal`) remontent à l'onglet 📖 du principal : `notes_du_carnet`.
 # Une énigme résolue le reste POUR TOUJOURS (quête abandonnée comprise). Un essai faux ne coûte
 # rien : découvertes et étapes validées sont gardées. Le journal se tient tout seul.
 #
@@ -114,6 +115,27 @@ def _noter(e: dict, fait: str) -> None:
 	if fait and fait not in e["journal"]:
 		e["journal"].append(fait)
 		del e["journal"][:-JOURNAL_MAX]
+
+
+def notes_du_carnet(character: dict, get_doc_fn) -> list:
+	"""Notes de TOUTES les énigmes commencées, pour l'onglet 📖 du PRINCIPAL (section 🧩).
+	Lues sur `character["enigmes"]` (jamais purgé : résolue pour toujours, quête abandonnée
+	comprise) — aucune copie dans le carnet libre, borné à `JOURNAL_ENTREES_MAX` : un indice
+	ne doit jamais céder la place à une entrée écrite. Énigme sans note écartée.
+	→ [{"id", "nom", "resolue", "faits", "note_at"}], la plus récemment notée d'abord."""
+	tout = (character or {}).get("enigmes") or {}
+	if not isinstance(tout, dict):
+		return []
+	out = []
+	for eid, e in tout.items():
+		faits = [f for f in ((e or {}).get("journal") or []) if isinstance(f, str) and f] if isinstance(e, dict) else []
+		if not faits:
+			continue
+		doc = get_doc_fn(eid) if get_doc_fn else None
+		out.append({"id": eid, "nom": str((doc or {}).get("nom") or eid), "resolue": bool(e.get("resolue")),
+					"faits": faits, "note_at": int(e.get("note_at") or e.get("resolue_at") or 0)})
+	out.sort(key=lambda n: (-n["note_at"], n["nom"]))
+	return out
 
 
 # ---------------------------------------------------------------------------
@@ -357,25 +379,45 @@ _RESOLVEURS = {
 def agir(doc: dict, character: dict, action: str, body: dict, now: int) -> dict:
 	"""Applique une action au personnage (MUTE, ne sauve pas). → résultat :
 	{"reussi": bool, "resolue": bool, "texte": str|None, "evenements": [...]}.
-	Lève `EssaiInvalide` sur une requête mal formée. Une énigme déjà résolue ne bouge plus."""
+	Lève `EssaiInvalide` sur une requête mal formée. Une énigme déjà résolue ne bouge plus, SAUF
+	l'examen d'une déduction : on peut toujours y revenir noter un indice laissé de côté (le carnet
+	de Villard sert au meuble, le socle à la porte de sortie). `note_ajoutee` : le journal a grandi
+	(le router sauve alors même une énigme déjà résolue)."""
 	e = etat_de(character, doc.get("_id"))
+	notes_avant = list(e["journal"])
 	if e.get("resolue"):
-		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": []}
+		evenements = []
+		if doc.get("famille") == "deduction" and action == "examiner":
+			evenements = [_deduction(doc, e, action, body or {})["evenement"]]
+		note = _dater_note(e, notes_avant, now)
+		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements,
+				"note_ajoutee": note}
 	r = _RESOLVEURS[doc.get("famille")](doc, e, action, body or {})
+	note = _dater_note(e, notes_avant, now)
 	evenements = [r["evenement"]] if r.get("evenement") else []
 	if r.get("essai"):
 		e["essais"] = int(e.get("essais", 0)) + 1
 	if r.get("reussi"):
 		e["resolue"], e["resolue_at"] = True, int(now)
 		evenements.append("reussite")
-		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements}
+		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements,
+				"note_ajoutee": note}
 	# Essai FAUX : une remarque, aucune pénalité. Une étape juste mais incomplète (paire trouvée,
 	# `partiel`) n'est pas un échec : elle s'inscrit au journal en silence.
 	texte = None
 	if r.get("essai") and not r.get("partiel"):
 		texte = r.get("texte") or doc.get("echec") or "Rien ne se passe."
 		evenements.append("echec")
-	return {"reussi": False, "resolue": False, "texte": texte, "evenements": evenements}
+	return {"reussi": False, "resolue": False, "texte": texte, "evenements": evenements, "note_ajoutee": note}
+
+
+def _dater_note(e: dict, notes_avant: list, now: int) -> bool:
+	"""Horodate la dernière note (ordre de la section 🧩 du carnet, utils/journal) si le journal
+	a bougé. → True si une note a été ajoutée."""
+	if e["journal"] == notes_avant:
+		return False
+	e["note_at"] = int(now)
+	return True
 
 
 # ---------------------------------------------------------------------------

@@ -20,6 +20,7 @@ from utils.lieux import get_lieu_links
 from utils import acces
 from utils import enigmes
 from utils import escorte
+from utils import journal
 from utils import recrutement
 
 enigmes_router = APIRouter()
@@ -74,12 +75,15 @@ def enigme_action(current_user: Annotated[dict, Depends(get_current_user)], body
 		resultat = enigmes.agir(doc, character, str(body.get("action") or ""), body, int(time.time()))
 	except enigmes.EssaiInvalide as exc:
 		raise HTTPException(status_code=422, detail=str(exc))
-	if not deja and save_doc(character) is None:
+	# Déjà résolue : rien ne bouge, sauf une note prise en réexaminant une déduction.
+	if (not deja or resultat.get("note_ajoutee")) and save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	reponse = {
 		"enigme": enigmes.vue_client(doc, character),
 		"resultat": resultat,
 		"commentaires": enigmes.commentaires(doc, resultat["evenements"], _voix(character)),
+		# Onglet 📖 resynchronisé : ses notes 🧩 viennent de bouger (convention 10).
+		"journal": journal.journal_payload(character, get_doc),
 	}
 	if resultat["resolue"] and not deja:
 		# Une porte peut dépendre de `enigme_resolue` : resync des sous-lieux (convention 10).
