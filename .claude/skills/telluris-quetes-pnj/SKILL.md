@@ -205,6 +205,13 @@ Contenu : `dev/gen_route_saint_denis.py` → **un seul** `jsons/route_saint_deni
 
 Verrouillé par `tests/test_route_saint_denis.py`.
 
+#### La pièce derrière le mur — escorte du rang C, première quête d'Aélis après Jumièges
+Contenu : `dev/gen_piece_derriere_le_mur.py` → **un seul** `jsons/piece_derriere_le_mur_a_importer.json` (Villard, Aélis des Archives, Maëlys, Éléonore et `lieu:les_archives_des_seuils` RELUS du dump + docs neufs). Scénario et arbitrages : `docs/lore/personnages/20261119_la_piece_derriere_le_mur.md`.
+- Escorte `quete:piece_derriere_le_mur` offerte par Aélis (Archives) ET Villard (Cour des Arches), Jumièges réussie ; dépose au `lieu:seuil_de_la_boite`, gardé par l'énigme de sortie ; Besace profonde en récompense (`items`).
+- Sept énigmes chaînées (`prerequis`) : réserve → meuble → arches → Púca (dialogue) → maison de l'enfant (dialogue) → plan impossible → sortie (`combat_gagne` de `lieu:chambre_du_sac`). Lieux gardés par `enigme_resolue`.
+- Salle à **composition fixe** : Homme au sac ×1 + Nopperabō ×3 ; Aélis reste dehors (`proteges_restent_dehors`).
+- Le générateur refuse une énigme insoluble, des prérequis circulaires et toute erreur du linter.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.
@@ -325,6 +332,8 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - **Pièges** : tag codifié `pieges_<quantite>_<danger>` dans les `tags` de la SALLE (lieu `battle_map`), loin du point de départ — telluris-combat § Pièges.
 
 Verrouillé par `tests/test_donjon.py`.
+
+- **Composition fixe** d'une salle : `composition: {"espece:a": 1, "espece:b": 3}` sur son entrée de `battle_maps` (espèces listées dans `especes`, total ≤ `NB_MONSTRES_MAX`) → effectif EXACT par espèce, boss garanti (`donjon.composition_de`) ; sans elle, tirage au hasard parmi `especes`. Verrouillé par `tests/test_donjon.py`.
 
 #### Donjon à ÉTAGES (`"mode": "etages"` sur le doc donjon)
 Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_map` + tag `donjon`), même cascade de grade. Champ absent ⇒ donjon classique. « Étage », jamais « niveau » (`niveau_*` = grade) ; aucun identifiant ne nomme un contenu (pas de « catacombes » dans le code).

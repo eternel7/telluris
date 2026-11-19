@@ -839,3 +839,35 @@ def test_musique_du_donjon_bornee_a_un_fichier_jouable():
 		assert donjon.musique_du_donjon({"musique": refuse}) is None, refuse
 	assert donjon.musique_du_donjon(None) is None
 	assert donjon.musique_du_donjon({"nom": "sans musique"}) is None
+
+
+# --- Composition fixe d'une salle (boss garanti accompagné) -------------------------------
+
+def _instancier_factice(pool, dispo, nb, zone_tags):
+	"""Fournée façon `combat.instantiate_monsters` : ids repartant de `monstre_0`, espèce tirée
+	au hasard — ici toujours la première du pool, ce qui suffit à vérifier qui est appelé."""
+	return [{"id": f"monstre_{i}", "espece_id": pool[0]["_id"]} for i in range(nb)]
+
+
+def _salle_composee(composition):
+	return {"_id": "donjon:maison", "battle_maps": [{
+		"lieu": "lieu:chambre", "especes": ["espece:boss", "espece:sbire"],
+		"nb_monstres": 9, "composition": composition}]}
+
+
+def test_composition_fixe_garantit_chaque_espece_et_renumerote():
+	docs = {"espece:boss": {"_id": "espece:boss"}, "espece:sbire": {"_id": "espece:sbire"}}
+	m = donjon.monstres_de_salle(_salle_composee({"espece:boss": 1, "espece:sbire": 3}), "lieu:chambre",
+								 [], 4, docs.get, _instancier_factice)
+	assert [x["espece_id"] for x in m] == ["espece:boss"] + ["espece:sbire"] * 3
+	assert [x["id"] for x in m] == [f"monstre_{i}" for i in range(4)]   # aucun id en double
+
+
+def test_composition_ignore_une_espece_non_listee_et_borne_l_effectif():
+	assert donjon.composition_de(_salle_composee({"espece:autre": 2, "espece:boss": 1}), "lieu:chambre") \
+		== [("espece:boss", 1)]
+	borne = donjon.composition_de(_salle_composee({"espece:boss": 1, "espece:sbire": 99}), "lieu:chambre")
+	assert sum(n for _e, n in borne) == donjon.NB_MONSTRES_MAX
+	assert donjon.composition_de(_salle_composee({"espece:boss": 0}), "lieu:chambre") is None
+	sans = {"_id": "donjon:x", "battle_maps": [{"lieu": "lieu:chambre", "especes": ["espece:boss"]}]}
+	assert donjon.composition_de(sans, "lieu:chambre") is None   # comportement d'avant

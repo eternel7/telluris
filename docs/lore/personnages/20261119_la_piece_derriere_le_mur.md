@@ -84,6 +84,10 @@ Quête lancée par l'un ⇒ les trois autres passent à l'état PENDANT.
 - **Rang B — « Les vestiges du premier passage »** : portail condamné bâti par un héritier des Frères, gardé par les Templiers ; gravures de la boîte ; Aélis prononce **Mu** pour la première fois, comme l'image révérée des Architectes ; l'inscription peut nommer une destination ou son bâtisseur — ouvert.
 - **Rang A — « Partir pour Mu »** : l'Institut offre à Aélis de parfaire sa formation à Mu ; elle demande à l'aventurier de l'accompagner ; passage par Notre-Dame, un cristal jaune.
 
-## 7. À faire
+## 7. Contenu livré (19/11)
+
+`dev/gen_piece_derriere_le_mur.py` → `jsons/piece_derriere_le_mur_a_importer.json` (30 docs). Arbitrages complémentaires du 19/11 : salle à **composition fixe** (Homme au sac ×1, Nopperabō ×3) ; Maëlys oriente par une réplique (§ 1, ligne 9). Images à produire : Ateliers de Convergence, cave aux cinq arches, maison pliée, seuil de la boîte, battle map de la chambre du sac (grille provisoire à recalibrer), portraits du Púca et de la Zashiki-warashi, Homme au sac, Nopperabō.
+
+## 8. À faire
 
 - **Système d'énigmes** (sept énigmes des brouillons : tiroirs, arches, Púca, plan de la Zashiki-warashi, plan impossible, Homme au sac, sortie) : conception arbitrée le 19/11 → `docs/conception_enigmes.md` ; à coder avant toute donnée importable.
