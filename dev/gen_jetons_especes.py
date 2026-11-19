@@ -281,6 +281,17 @@ TABLE = {
 	"mokele_mbembe": ("4x3", "capsule"),
 	"pontianak": None,
 	"kongamato": ("2x1", "triangle"),
+	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+	"lamassu": ("1x2", "ellipse"),
+	"pazuzu": ("2x1", "triangle"),
+	"lamashtu": None,
+	"ugallu": None,
+	"homme_scorpion": ("2x2", "ellipse"),
+	"kitsune": None,
+	"kyubi": ("1x2", "ellipse"),
+	"oni": None,
+	"nue": ("1x2", "ellipse"),
+	"tanuki": None,
 }
 
 
