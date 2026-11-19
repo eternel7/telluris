@@ -328,6 +328,8 @@ def lieux_neufs():
 	ateliers = {
 		"_id": ATELIERS, "type": "lieu", "label": "Les Ateliers de Convergence",
 		"image": "ateliers_de_convergence01.jpg", "categorie": "institut_des_architectes", "lieu_parent": LUTECIA,
+		# Deux variantes tirées au sort à chaque entrée (utils/images_lieu.py, Auteur 19/11).
+		"images": ["ateliers_de_convergence01.jpg", "ateliers_de_convergence02.jpg"],
 		"pnj": [aelis_ici(AELIS_ATELIERS, "Aélis, à genoux devant une armoire fermée, le carnet ouvert sur le sol.")],
 	}
 	cave = {

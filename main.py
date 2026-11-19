@@ -44,6 +44,7 @@ from utils.characters import get_user_characters, get_selected_character, sync_e
 from utils import derniers_joues as derniers_joues_util
 from utils import aide as aide_util
 from utils import enigmes as enigmes_util
+from utils import images_lieu as images_lieu_util
 from utils import filtres_boutique
 from utils.statiques import PortraitsStatic
 from utils import quetes
@@ -921,9 +922,15 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# lieu) : Armand ne hèle le joueur au seuil de la grotte que tant que la quête des
 	# bûcherons court. L'évaluateur est INJECTÉ — `utils/pnj.py` reste un module minimal.
 	conditions_pnj = lambda conds: acces.clauses_remplies(character, conds, get_doc)
-	change |= pnj_util.poser_pnj_present(character, grid_doc,
+	entree_lieu = pnj_util.poser_pnj_present(character, grid_doc,
 								  marchand_fn=transport_util.entree_marchand,
 								  condition_fn=conditions_pnj)
+	change |= entree_lieu
+	# Image tirée au sort parmi les `images` du lieu, au même instant que la présence des PNJ
+	# (utils/images_lieu.py) : un rafraîchissement ne retire pas, une nouvelle entrée si.
+	_image_servable = lambda f: any(os.path.exists(os.path.join(d, f))
+									for d in (TOWNS_IMAGES_PATH, MAPS_IMAGES_PATH, BATTLE_MAPS_IMAGES_PATH))
+	change |= images_lieu_util.poser_image_tiree(character, grid_doc, _image_servable, entree_lieu)
 	# Informateur de taverne (🔎 renseignement) : même sémantique de tirage à l'entrée. Index
 	# vide : la méthode d'informateur s'exerce sur des prédicats sans géographie (taverne).
 	change |= renseignement_util.poser_informateur(
@@ -1042,7 +1049,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
 	dimensions = grid_doc.get("dimensions",None)
-	image = grid_doc.get("image")
+	image = images_lieu_util.image_effective(character, grid_doc, _image_servable)
 	# PNJ présent : l'entrée du lieu peut fournir une variante d'image AVEC le PNJ visible
 	# (repli silencieux sur l'image de base — ex. version « _vide » — si absente du disque).
 	# ⚠️ Une seule image de fond pour le lieu : le PREMIER présent qui en propose une la donne

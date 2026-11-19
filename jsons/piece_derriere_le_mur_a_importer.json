@@ -3106,6 +3106,10 @@
     "image": "ateliers_de_convergence01.jpg",
     "categorie": "institut_des_architectes",
     "lieu_parent": "lieu:lutecia",
+    "images": [
+      "ateliers_de_convergence01.jpg",
+      "ateliers_de_convergence02.jpg"
+    ],
     "pnj": [
       {
         "character": "pnj:aelis_de_montfaucon_ateliers",
