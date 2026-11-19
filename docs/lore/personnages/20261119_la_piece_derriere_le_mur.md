@@ -86,7 +86,7 @@ Quête lancée par l'un ⇒ les trois autres passent à l'état PENDANT.
 
 ## 7. Contenu livré (19/11)
 
-`dev/gen_piece_derriere_le_mur.py` → `jsons/piece_derriere_le_mur_a_importer.json` (30 docs). Arbitrages complémentaires du 19/11 : salle à **composition fixe** (Homme au sac ×1, Nopperabō ×3) ; Maëlys oriente par une réplique (§ 1, ligne 9). Images à produire : Ateliers de Convergence, cave aux cinq arches, maison pliée, seuil de la boîte, battle map de la chambre du sac (grille provisoire à recalibrer), portraits du Púca et de la Zashiki-warashi, Homme au sac, Nopperabō.
+`dev/gen_piece_derriere_le_mur.py` → `jsons/piece_derriere_le_mur_a_importer.json` (30 docs). Arbitrages complémentaires du 19/11 : salle à **composition fixe** (Homme au sac ×1, Nopperabō ×3) ; Maëlys oriente par une réplique (§ 1, ligne 9). Images livrées par l'Auteur (19/11), toutes posées : les quatre lieux, la battle map (grille 20 × 14 relue sur l'image), les portraits du Púca et de la Zashiki-warashi, l'Homme au sac et le Nopperabō détourés (`--dur 30 --doux 55` : le magenta avait déteint sur les sujets). Le Nopperabō a DEUX images, tirées au sort en combat (`utils/images_monstres.py`) : `nopperabo_transparent.webp` (fixe) et `nopperabo_transparent.gif` (animé, 30 images détourées une à une sur un cadre commun).
 
 ## 7 bis. Prompts d'image (19/11)
 

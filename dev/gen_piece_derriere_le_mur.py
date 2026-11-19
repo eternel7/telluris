@@ -356,10 +356,16 @@ def lieux_neufs():
 		"acces": {"refus": "La porte de la maison ne s'ouvre que de l'intérieur, et pas encore.", "cycle": 1,
 				  "conditions": [{"enigme_resolue": {"id": E_SORTIE}}]},
 	}
-	# Battle map : grille provisoire (bordure de pierre, plancher praticable) à recalibrer sur
-	# l'image (outils de /admin/lieux) une fois celle-ci produite.
+	# Battle map : grille LUE sur `battle_maps/chambre_du_sac.jpg` (1232×864, 20 × 14 cases) :
+	# nattes praticables colonnes 3-16 / lignes 2-11 ; murs, cloisons et véranda tout autour ;
+	# obstacles = la table basse (haut gauche), la table à thé (droite) et le corps du sac
+	# (centre). Lanternes, coussins et jouets restent franchissables.
 	dims = (20, 14)
-	cells = [[0 if x in (0, dims[0] - 1) or y in (0, dims[1] - 1) else 1 for x in range(dims[0])]
+	obstacles = {(4, 3), (5, 3), (6, 3), (4, 4), (5, 4), (6, 4),                 # table basse
+				 (15, 6), (16, 6), (15, 7), (16, 7),                             # table à thé
+				 (9, 5), (10, 5), (8, 6), (9, 6), (10, 6), (11, 6),              # le sac
+				 (8, 7), (9, 7), (10, 7), (11, 7)}
+	cells = [[1 if 3 <= x <= 16 and 2 <= y <= 11 and (x, y) not in obstacles else 0 for x in range(dims[0])]
 			 for y in range(dims[1])]
 	chambre = {
 		"_id": CHAMBRE, "type": "lieu", "label": "La chambre du sac",
