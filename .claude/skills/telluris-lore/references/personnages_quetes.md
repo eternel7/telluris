@@ -31,6 +31,7 @@ Les noms de marchands suivent le gabarit **Maître / Dame / Frère / Docte / Le 
 **Auteur**
 - **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission** — écrite (11/10/2026) : Maëlys, pour le **rang C**, envoie l'aventurier escorter Aélis jusqu'au portail des ruines de **Jumièges** ; elle revient aux **Archives des Seuils** avec trois théories et aucune réponse.
 - **Plus tard** : on lui offre d'approfondir sa formation à **Mu**, et elle veut que l'aventurier l'accompagne.
+- **Arc après Jumièges** (Auteur, 19/11) : rang C « La pièce derrière le mur » (boîte de **Maître Villard**, rapportée de Mu — **jamais dit** ; départs : Aélis, Villard, réception de la Guilde, Maëlys ; Aélis **escortée** ; **nouveau système d'énigmes**) → rang B « Les vestiges du premier passage » → rang A, partir pour Mu : [personnages/20261119_la_piece_derriere_le_mur.md]
 - La relation n'est **pas ambiguë**. L'aventurier peut être une femme. Ce qui compte, c'est la **confiance** et le **regard extérieur** que l'aventurier apporte à l'architecte.
 - Elle est l'une des personnes qui portent des **théories contradictoires** sur le mystère.
 
