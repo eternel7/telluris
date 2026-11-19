@@ -701,7 +701,7 @@ def _attrs(V, F, R, Ag, Vol, Int, Cha, Ch):
 
 def bestiaire():
 	homme = {"_id": HOMME_AU_SAC, "type": "espece", "nom": "Homme au sac", "genre": "m",
-			 "image": "homme_au_sac_transparent.png",
+			 "image": "homme_au_sac_transparent.webp",
 			 "description": "Un homme en manteau sombre, un grand sac de toile sur l'épaule, qui fredonne d'une voix "
 							"très douce. On le nomme sur les deux versants des montagnes, dans les vallées du sud et "
 							"jusqu'aux ports : l'homme qui emporte les enfants qui ne rentrent pas avant la nuit. "
@@ -710,7 +710,7 @@ def bestiaire():
 			 "base_attributes": _attrs((6, 8), (50, 70), (50, 70), (30, 45), (45, 65), (30, 45), (0, 0), (30, 45)),
 			 "tags": ["humanoide", "legendaire", "boss"], "items": [], "proprietes": {}}
 	nopperabo = {"_id": NOPPERABO, "type": "espece", "nom": "Nopperabō", "genre": "m",
-				 "image": "nopperabo_transparent.png",
+				 "image": "nopperabo_transparent.webp",
 				 "description": "Une silhouette de passant, de dos, au bord d'un chemin. Elle se retourne : à la place "
 								"du visage, une peau lisse comme un œuf. Les récits de l'Extrême-Orient en parlent ; "
 								"ils ne disent pas d'où viennent les nopperabō, seulement qu'ils aiment qu'on les "

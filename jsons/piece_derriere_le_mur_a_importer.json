@@ -4878,7 +4878,7 @@
     "type": "espece",
     "nom": "Homme au sac",
     "genre": "m",
-    "image": "homme_au_sac_transparent.png",
+    "image": "homme_au_sac_transparent.webp",
     "description": "Un homme en manteau sombre, un grand sac de toile sur l'épaule, qui fredonne d'une voix très douce. On le nomme sur les deux versants des montagnes, dans les vallées du sud et jusqu'aux ports : l'homme qui emporte les enfants qui ne rentrent pas avant la nuit. Les uns disent qu'il n'est qu'une histoire pour faire rentrer les enfants ; d'autres, qu'il cherche toujours le même.",
     "base_attributes": {
       "V": {
@@ -4927,7 +4927,7 @@
     "type": "espece",
     "nom": "Nopperabō",
     "genre": "m",
-    "image": "nopperabo_transparent.png",
+    "image": "nopperabo_transparent.webp",
     "description": "Une silhouette de passant, de dos, au bord d'un chemin. Elle se retourne : à la place du visage, une peau lisse comme un œuf. Les récits de l'Extrême-Orient en parlent ; ils ne disent pas d'où viennent les nopperabō, seulement qu'ils aiment qu'on les regarde se retourner.",
     "base_attributes": {
       "V": {
