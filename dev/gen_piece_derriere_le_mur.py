@@ -408,8 +408,8 @@ def pnj_neufs():
 	a_ateliers = pnj_doc(AELIS_ATELIERS, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS_ATELIERS, vocation="lettre", noeuds={
 		"accueil": noeud(
 			"Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en "
-			"réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis est à "
-			"genoux devant elle.",
+			"réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis se "
+			"tient devant elle, un carnet serré contre elle.",
 			choix("quoi", "« Par où commencer ? »", "commencer",
 				  condition={"enigme_resolue": {"id": E_RESERVE, "attendu": False}}),
 			choix("tissu", "« Le tissu du meuble… »", "tissu", condition={"enigme_resolue": {"id": E_MEUBLE}}),

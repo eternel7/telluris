@@ -3758,7 +3758,7 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis est à genoux devant elle.",
+          "texte": "Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis se tient devant elle, un carnet serré contre elle.",
           "choix": [
             {
               "id": "quoi",
