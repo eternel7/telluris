@@ -144,6 +144,8 @@ utils/
   pouvoirs_objets.py     # pouvoirs d'un objet PORTÉ (pur) : champ item `competences` (sorts/compétences existants),
                          #   actif équipé + `restriction` BRUTE, hors vocation ; `connait` = contrôle unique d'appartenance
   chasse_signee.py       # trophée signé (pur) : `chasse` sur la RÉFÉRENCE d'une dépouille rare+, suit découpe et commande
+  images_lieu.py         # image d'un lieu tirée au sort (pur) : liste EXPLICITE `images` du lieu (jamais le dossier), tirage
+                         #   à l'ENTRÉE (`image_tiree`, comme `pnj_present`), fichier absent écarté ; sinon `image`
   enigmes.py             # énigmes (pur, docs/conception_enigmes.md) : doc `enigme:*`, six familles (déduction, crans, graphe,
                          #   association, placement, réseau), état sur `character.enigmes` (résolue pour toujours), échec sans
                          #   perte, condition `enigme_resolue` (dialogue + accès), aucun indice système : commentaires des escortés
