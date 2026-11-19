@@ -44,6 +44,8 @@ FEMININS = {
 	"antilopes", "autruches", "hyenes", "tortues_marines",
 	# Bestiaire des légendes du monde (dev/gen_monstres_legendes.py, 17/11).
 	"mere_gelee", "teryel", "jorogumo", "pontianak",
+	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+	"lamashtu",
 }
 
 MASCULINS = {
@@ -79,6 +81,8 @@ MASCULINS = {
 	"impundulu", "tokoloshe", "inkanyamba", "kappa", "tengu", "gashadokuro", "qilin", "baku",
 	"wendigo", "oiseau_tonnerre", "mapinguari", "ahuizotl", "camazotz", "mngwa", "adze",
 	"mokele_mbembe", "kongamato",
+	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+	"lamassu", "pazuzu", "ugallu", "homme_scorpion", "kitsune", "kyubi", "oni", "nue", "tanuki",
 }
 
 PLURIELS = {

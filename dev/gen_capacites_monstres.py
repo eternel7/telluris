@@ -225,6 +225,17 @@ for _c, _especes in {
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
+# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+for _c, _especes in {
+	"dard_caudal": ["pazuzu", "homme_scorpion"],
+	"venin": ["homme_scorpion", "lamashtu"],
+	"venin_faible": ["nue"],
+	"hurlement_terrifiant": ["pazuzu", "lamashtu", "ugallu", "oni", "nue"],
+	"charme": ["kitsune", "kyubi"],
+	"embrasement": ["kyubi"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
 
 # Tags de magie (sorts tirés) — repères : apprenti 2 · mage 5 · héros mage 8 · seigneur mage 10.
 MAGIE = {
@@ -281,6 +292,13 @@ MAGIE = {
 	"baku": ["magie_illusoire_4"],
 	"jorogumo": ["magie_illusoire_3"],
 	"oiseau_tonnerre": ["magie_elementaire_6"],
+	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+	"lamassu": ["magie_sainte_4"],
+	"pazuzu": ["magie_elementaire_5"],
+	"lamashtu": ["magie_necromancie_4"],
+	"kitsune": ["magie_illusoire_3"],
+	"kyubi": ["magie_illusoire_8", "magie_elementaire_5"],
+	"tanuki": ["magie_illusoire_2"],
 }
 
 # Tags d'IA.
@@ -330,6 +348,19 @@ for _tag, _especes in {
 	"ia_fuyard_50": ["qilin", "baku"],
 	"ia_fuyard_40": ["tokoloshe"],
 	"ia_berserker": ["mapinguari", "mokele_mbembe"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11). Les gardiens (lamassu,
+# ugallu, homme-scorpion) tiennent leur seuil ; kitsune et tanuki, rusés, frappent puis fuient.
+for _tag, _especes in {
+	"ia_embuscade": ["lamassu", "ugallu", "homme_scorpion", "nue"],
+	"ia_hit_and_run": ["pazuzu", "kitsune", "tanuki"],
+	"ia_predateur": ["lamashtu"],
+	"ia_artilleur": ["kyubi"],
+	"ia_fuyard_40": ["kitsune"],
+	"ia_fuyard_50": ["tanuki"],
+	"ia_berserker": ["oni"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)
