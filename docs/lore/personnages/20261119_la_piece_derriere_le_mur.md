@@ -74,4 +74,4 @@ Quête lancée par l'un ⇒ les trois autres passent à l'état PENDANT.
 
 ## 7. À faire
 
-- Concevoir le **système d'énigmes** (sept énigmes des brouillons : tiroirs, arches, Púca, plan de la Zashiki-warashi, plan impossible, Homme au sac, sortie) avant toute donnée importable.
+- **Système d'énigmes** (sept énigmes des brouillons : tiroirs, arches, Púca, plan de la Zashiki-warashi, plan impossible, Homme au sac, sortie) : conception arbitrée le 19/11 → `docs/conception_enigmes.md` ; à coder avant toute donnée importable.
