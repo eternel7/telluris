@@ -40,15 +40,20 @@ function enigmeBrouillonInitial(vue) {
 
 // ── Rendu par famille (chaînes HTML ; tout texte de donnée est échappé) ──────────────
 
-function _eniDeduction(vue) {
+function _eniIndices(vue) {
 	const el = vue.elements || {};
 	const vus = (vue.etat && vue.etat.examines) || [];
 	const indices = (el.indices || []).map(i =>
 		`<button type="button" class="eni-btn${vus.includes(i.id) ? ' eni-vu' : ''}" data-eni-cle="${_eniEsc(i.id)}">`
 		+ `${vus.includes(i.id) ? '✓ ' : ''}${_eniEsc(i.label)}</button>`).join('');
+	return `<h4>Examiner</h4><div class="eni-grille">${indices}</div>`;
+}
+
+function _eniDeduction(vue) {
+	const el = vue.elements || {};
 	const conclusions = (el.conclusions || []).map(c =>
 		`<button type="button" class="eni-btn eni-conclure" data-eni-conclure="${_eniEsc(c.id)}">${_eniEsc(c.label)}</button>`).join('');
-	return `<h4>Examiner</h4><div class="eni-grille">${indices}</div>`
+	return _eniIndices(vue)
 		+ `<h4>Conclure</h4><div class="eni-grille">${conclusions}</div>`;
 }
 
@@ -135,7 +140,11 @@ function _eniReseau(vue, b, outil) {
 
 function enigmeCorps(vue, brouillon, outil, selection) {
 	if (!vue) return '';
-	if (vue.resolue) return `<p class="eni-reussite">${_eniEsc(vue.reussite || '')}</p>`;
+	if (vue.resolue) {
+		const fait = `<p class="eni-reussite">${_eniEsc(vue.reussite || '')}</p>`;
+		// Une déduction résolue s'examine encore : un indice laissé de côté reste à noter.
+		return vue.famille === 'deduction' ? fait + _eniIndices(vue) : fait;
+	}
 	const b = brouillon || {};
 	switch (vue.famille) {
 		case 'deduction': return _eniDeduction(vue);

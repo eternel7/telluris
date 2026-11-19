@@ -354,3 +354,33 @@ def test_le_carnet_ignore_les_enigmes_sans_note_et_les_etats_illisibles():
 	# Doc disparu : l'id sert de nom, les notes restent.
 	perso = _perso(enigmes={"enigme:disparue": {"journal": ["Un fait."]}})
 	assert enigmes.notes_du_carnet(perso, {}.get)[0]["nom"] == "enigme:disparue"
+
+
+def test_une_deduction_resolue_s_examine_encore_pour_noter():
+	"""Un indice laissé de côté (le carnet de Villard, le socle) se note encore après coup —
+	mais rien d'autre ne bouge : ni conclusion, ni essais, ni date de résolution."""
+	perso = _perso()
+	_agir(DEDUCTION, perso, "examiner", cle="porte")
+	_agir(DEDUCTION, perso, "examiner", cle="sol")
+	assert _agir(DEDUCTION, perso, "conclure", cle="ailleurs")["resolue"]
+	e = enigmes.lire_etat(perso, DEDUCTION["_id"])
+	essais = e["essais"]
+	r = enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "tissu"}, NOW + 60)
+	assert r["resolue"] and r["note_ajoutee"] and r["evenements"] == ["examen:tissu"]
+	assert e["journal"][-1] == "Une matière inconnue." and e["note_at"] == NOW + 60
+	assert e["essais"] == essais and e["resolue_at"] == NOW
+	# Réexaminer un indice déjà noté : rien de neuf, rien à sauver.
+	assert not enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "tissu"}, NOW + 99)["note_ajoutee"]
+	# Conclure de nouveau ne fait rien.
+	assert enigmes.agir(DEDUCTION, perso, "conclure", {"cle": "vol"}, NOW)["evenements"] == []
+	with pytest.raises(enigmes.EssaiInvalide):
+		enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "rien"}, NOW)
+
+
+def test_les_autres_familles_resolues_ne_notent_rien():
+	perso = _perso()
+	_agir(GRAPHE, perso, "passer", cle="spirale")
+	_agir(GRAPHE, perso, "passer", cle="ligne")
+	avant = copy.deepcopy(perso["enigmes"])
+	r = _agir(GRAPHE, perso, "passer", cle="spirale")
+	assert r["resolue"] and not r["note_ajoutee"] and perso["enigmes"] == avant

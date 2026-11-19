@@ -379,29 +379,45 @@ _RESOLVEURS = {
 def agir(doc: dict, character: dict, action: str, body: dict, now: int) -> dict:
 	"""Applique une action au personnage (MUTE, ne sauve pas). → résultat :
 	{"reussi": bool, "resolue": bool, "texte": str|None, "evenements": [...]}.
-	Lève `EssaiInvalide` sur une requête mal formée. Une énigme déjà résolue ne bouge plus."""
+	Lève `EssaiInvalide` sur une requête mal formée. Une énigme déjà résolue ne bouge plus, SAUF
+	l'examen d'une déduction : on peut toujours y revenir noter un indice laissé de côté (le carnet
+	de Villard sert au meuble, le socle à la porte de sortie). `note_ajoutee` : le journal a grandi
+	(le router sauve alors même une énigme déjà résolue)."""
 	e = etat_de(character, doc.get("_id"))
-	if e.get("resolue"):
-		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": []}
 	notes_avant = list(e["journal"])
+	if e.get("resolue"):
+		evenements = []
+		if doc.get("famille") == "deduction" and action == "examiner":
+			evenements = [_deduction(doc, e, action, body or {})["evenement"]]
+		note = _dater_note(e, notes_avant, now)
+		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements,
+				"note_ajoutee": note}
 	r = _RESOLVEURS[doc.get("famille")](doc, e, action, body or {})
-	if e["journal"] != notes_avant:
-		# Horodatage de la dernière note : ordre de la section 🧩 du carnet (utils/journal).
-		e["note_at"] = int(now)
+	note = _dater_note(e, notes_avant, now)
 	evenements = [r["evenement"]] if r.get("evenement") else []
 	if r.get("essai"):
 		e["essais"] = int(e.get("essais", 0)) + 1
 	if r.get("reussi"):
 		e["resolue"], e["resolue_at"] = True, int(now)
 		evenements.append("reussite")
-		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements}
+		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements,
+				"note_ajoutee": note}
 	# Essai FAUX : une remarque, aucune pénalité. Une étape juste mais incomplète (paire trouvée,
 	# `partiel`) n'est pas un échec : elle s'inscrit au journal en silence.
 	texte = None
 	if r.get("essai") and not r.get("partiel"):
 		texte = r.get("texte") or doc.get("echec") or "Rien ne se passe."
 		evenements.append("echec")
-	return {"reussi": False, "resolue": False, "texte": texte, "evenements": evenements}
+	return {"reussi": False, "resolue": False, "texte": texte, "evenements": evenements, "note_ajoutee": note}
+
+
+def _dater_note(e: dict, notes_avant: list, now: int) -> bool:
+	"""Horodate la dernière note (ordre de la section 🧩 du carnet, utils/journal) si le journal
+	a bougé. → True si une note a été ajoutée."""
+	if e["journal"] == notes_avant:
+		return False
+	e["note_at"] = int(now)
+	return True
 
 
 # ---------------------------------------------------------------------------
