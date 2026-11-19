@@ -253,6 +253,12 @@ TABLE = {
 	],
 	# Esprit-guerrier des montagnes du Japon (dev/gen_monstres_legendes.py, 17/11) : maître du sabre.
 	"tengu": ["Katana"],
+	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
+	# Ugallu : la dague et la masse des sceaux assyriens. Homme-scorpion : l'archer des portes du
+	# Soleil, l'arc en concurrence avec la lance. Oni : le kanabo et la peau de bête.
+	"ugallu": ["Dague", "Masse_de_cavalier", "Jupe_lanieres_cuir", "Bracelets_os"],
+	"homme_scorpion": ["Lance", "Arc_court", "Bracelets_os"],
+	"oni": ["Kanabo", "Tetsubo", "Braies_fourrure", "Etole_de_fourrure", "Bracelets_os"],
 	# Chasseur du Nord en peau de loup (Auteur, 14/10) : hache, écu, fourrures — pas d'armure lourde.
 	"ulfhedinn": [
 		"Hache_de_guerre", "Hache_a_deux_mains", "Ecu",
