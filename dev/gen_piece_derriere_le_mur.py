@@ -72,7 +72,7 @@ E_PLAN_MAISON = "enigme:maison_de_la_zashiki_warashi"
 E_PLAN_IMPOSSIBLE = "enigme:plan_impossible"
 E_SORTIE = "enigme:porte_de_sortie"
 
-PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_humain_f03.jpg"
+PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # sans blessure (Auteur, 19/11)
 
 # Présences et conditions — les trois états (AVANT · PENDANT · APRÈS, telluris-quetes-pnj).
 ESCORTE_ACTIVE = {"quete_active": {"types": ["escorte"], "cible": SEUIL}}
@@ -232,6 +232,7 @@ def villard(doc):
 
 def aelis_archives(doc):
 	doc = sans_rev(doc)
+	doc["portrait"] = PORTRAIT_AELIS   # le portrait blessé (`humain_f03`) écarté (Auteur, 19/11)
 	n = doc["dialogue"]["noeuds"]
 	doc.setdefault("services", {})["escorte"] = {"offre": offre_escorte(), "noeuds": {"accepte": "piece_accepte"}}
 	ajouter_choix(doc, "accueil", [
