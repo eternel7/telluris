@@ -2309,6 +2309,16 @@
 					{% endfor %}
 				</ul>
 				{% endif %}
+				{# Énigmes à bouton ouvrables ici (utils/enigmes.enigmes_du_lieu) ; l'id passe par
+				   `data-enigme`, jamais dans l'onclick (Conventions §9). #}
+				{% if enigmes_ici %}
+				<h3>Énigmes</h3>
+				<ul class="sub-locations-list" id="enigmes-ici">
+					{% for e in enigmes_ici %}
+					<li><button class="sub-loc-btn" data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)">{% if e.resolue %}✓{% else %}🔍{% endif %} {{ e.nom }}</button></li>
+					{% endfor %}
+				</ul>
+				{% endif %}
 				{# Récolte et Cap 🧭 : premier état rendu ICI (rien ne surgit au chargement), puis tenu
 				   par `_refreshRecolte` / `_refreshGuidage`, qui DÉPLIENT/REPLIENT le bloc
 				   (`_basculerDepliable`) au lieu de le faire apparaître d'un coup. Textes = miroirs
@@ -4366,6 +4376,8 @@
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
 <script src="{{ script_url('capacites_texte.js') }}"></script>
 <script src="{{ script_url('colonisation.js') }}"></script>
+{# Panneau d'énigme (`ouvrirEnigme`), ouvert par un choix de dialogue `enigme` ; le serveur tranche. #}
+<script src="{{ script_url('enigmes.js') }}"></script>
 {# Sons d'action (chokepoint `installerSonsApi`), coupe-son partagé avec le combat. #}
 <script src="{{ script_url('sons.js') }}"></script>
 <script>
@@ -14685,6 +14697,9 @@ async function choisirPnj(choixId, extra) {
 		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
+		// Hook d'énigme (`enigme` sur un choix) : le panneau s'ouvre PAR-DESSUS le dialogue ; le
+		// serveur revérifie lieu, prérequis et conditions à l'ouverture (routers/enigmes.py).
+		if (data.enigme) ouvrirEnigme(data.enigme);
 	} catch(err) { console.error('Erreur choix de dialogue', err); }
 }
 </script>

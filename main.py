@@ -29,6 +29,7 @@ from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.traversee import traversee_router, payload_play as traversee_payload_play
 from routers.contenants import contenants_router
+from routers.enigmes import enigmes_router
 from routers.renseignement import renseignement_router
 from routers import renseignement as renseignement_routes
 from routers.animations import animations_router
@@ -42,6 +43,7 @@ from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
 from utils import derniers_joues as derniers_joues_util
 from utils import aide as aide_util
+from utils import enigmes as enigmes_util
 from utils import filtres_boutique
 from utils.statiques import PortraitsStatic
 from utils import quetes
@@ -221,6 +223,10 @@ app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 MONSTERS_IMAGES_PATH = "templates/resources/monsters"
 app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
 app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
+# Scènes illustrées des énigmes (utils/enigmes.py, champ `image`) : sans image, le panneau
+# retombe sur ses commandes parchemin + SVG.
+ENIGMES_IMAGES_PATH = "templates/resources/enigmes"
+app.mount("/enigmes", StaticFiles(directory=ENIGMES_IMAGES_PATH), name="enigmes")
 # Sons des animations de combat — servis au COMBAT comme à l'éditeur (/admin/animations).
 # ⚠️ Des noms de fichiers contiennent des espaces (« melee sound.wav ») : côté client, tout
 # passe par encodeURIComponent, comme les feuilles d'effets.
@@ -244,6 +250,7 @@ app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
 app.include_router(traversee_router, prefix="/api")
 app.include_router(contenants_router, prefix="/api")
+app.include_router(enigmes_router, prefix="/api")
 app.include_router(renseignement_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
@@ -1029,6 +1036,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 		for e, d in pnj_paires
 	]
 	lieux_marques = indicateurs_util.marques_lieux(character)
+	# Énigmes à bouton OUVRABLES ici (utils/enigmes.py) ; le serveur revérifie à l'ouverture.
+	enigmes_ici = enigmes_util.enigmes_du_lieu(find_docs({"type": "enigme"}), character, conditions_pnj)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
@@ -1375,6 +1384,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			# Les PNJ présents, cumulés : une ligne d'action par PNJ, dans l'ordre du lieu.
 			# Chacun porte sa marque « ! »/« ? » (badge de SON bouton 🗣).
 			"pnjs_presents": pnjs_presents,
+			"enigmes_ici": enigmes_ici,
 			# Map {lieu_id: "?"} des lieux où une quête active attend une remise. Elle porte
 			# TOUS les lieux concernés (courant compris) — c'est le client qui l'intersecte
 			# avec les portes qu'il affiche.

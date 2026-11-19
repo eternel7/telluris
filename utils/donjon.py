@@ -11,7 +11,8 @@
 #     "niveau_min": 2,                          # plancher de GRADE (optionnel, même cascade)
 #     "battle_maps": [                          # les salles, et QUI y vit
 #       {"lieu": "lieu:zzz", "especes": ["espece:a", "espece:b"],
-#        "niveau_max": 4, "niveau_min": 2, "nb_monstres": 3}
+#        "niveau_max": 4, "niveau_min": 2, "nb_monstres": 3,
+#        "composition": {"espece:a": 1, "espece:b": 2}}   # optionnel : effectif EXACT par espèce
 #     ]
 #   }
 #
@@ -295,6 +296,28 @@ def especes_de_salle(donjon_doc: dict, lieu_id: str, get_doc_fn) -> list:
 	return docs
 
 
+def composition_de(donjon_doc: dict, lieu_id: str) -> list | None:
+	"""Composition EXACTE de la salle, `composition: {"espece:a": 1, "espece:b": 3}` sur son
+	entrée de `battle_maps` → [(espece_id, n)] dans l'ordre écrit, ou None (tirage au hasard
+	parmi `especes`, comportement d'avant). Garantit un boss ACCOMPAGNÉ, ce qu'un tirage ne peut
+	pas : chaque monstre y est tiré au hasard parmi les espèces. Ne vaut que pour des espèces
+	listées dans `especes` ; total borné par `NB_MONSTRES_MAX` (premiers servis)."""
+	brut = (battle_map_entry(donjon_doc, lieu_id) or {}).get("composition")
+	if not isinstance(brut, dict):
+		return None
+	listees = set((battle_map_entry(donjon_doc, lieu_id) or {}).get("especes") or [])
+	out, total = [], 0
+	for eid, n in brut.items():
+		if eid not in listees or isinstance(n, bool) or not isinstance(n, int) or n < 1:
+			continue
+		n = min(n, NB_MONSTRES_MAX - total)
+		if n < 1:
+			break
+		out.append((eid, n))
+		total += n
+	return out or None
+
+
 def monstres_de_salle(donjon_doc: dict, lieu_id: str, profils: list, nb_compagnons: int,
 					  get_doc_fn, instantiate_fn, nb: int | None = None,
 					  especes: list | None = None) -> list:
@@ -313,6 +336,18 @@ def monstres_de_salle(donjon_doc: dict, lieu_id: str, profils: list, nb_compagno
 		return []
 	dispo = _profils_dans_fourchette(
 		profils, niveau_max_de(donjon_doc, lieu_id), niveau_min_de(donjon_doc, lieu_id))
+	compo = composition_de(donjon_doc, lieu_id) if especes is None and nb is None else None
+	if compo:
+		# Composition ÉCRITE : chaque espèce en nombre exact (le boss est garanti présent).
+		par_id = {e.get("_id"): e for e in pool_especes}
+		monstres = []
+		for eid, n in compo:
+			if eid in par_id:
+				monstres += instantiate_fn([par_id[eid]], dispo, n, []) or []
+		# Ids renumérotés : chaque fournée repart de `monstre_0` (`combat.build_monster_snapshot`).
+		for i, m in enumerate(monstres):
+			m["id"] = f"monstre_{i}"
+		return monstres
 	if nb is None:
 		nb = nb_monstres_de(donjon_doc, lieu_id)
 	if nb is None:

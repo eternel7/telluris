@@ -205,6 +205,13 @@ Contenu : `dev/gen_route_saint_denis.py` → **un seul** `jsons/route_saint_deni
 
 Verrouillé par `tests/test_route_saint_denis.py`.
 
+#### La pièce derrière le mur — escorte du rang C, première quête d'Aélis après Jumièges
+Contenu : `dev/gen_piece_derriere_le_mur.py` → **un seul** `jsons/piece_derriere_le_mur_a_importer.json` (Villard, Aélis des Archives, Maëlys, Éléonore et `lieu:les_archives_des_seuils` RELUS du dump + docs neufs). Scénario et arbitrages : `docs/lore/personnages/20261119_la_piece_derriere_le_mur.md`.
+- Escorte `quete:piece_derriere_le_mur` offerte par Aélis (Archives) ET Villard (Cour des Arches), Jumièges réussie ; dépose au `lieu:seuil_de_la_boite`, gardé par l'énigme de sortie ; Besace profonde en récompense (`items`).
+- Sept énigmes chaînées (`prerequis`) : réserve → meuble → arches → Púca (dialogue) → maison de l'enfant (dialogue) → plan impossible → sortie (`combat_gagne` de `lieu:chambre_du_sac`). Lieux gardés par `enigme_resolue`.
+- Salle à **composition fixe** : Homme au sac ×1 + Nopperabō ×3 ; Aélis reste dehors (`proteges_restent_dehors`).
+- Le générateur refuse une énigme insoluble, des prérequis circulaires et toute erreur du linter.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.
@@ -286,6 +293,17 @@ Notre-Dame n'a **aucun lien** vers ses destinations (Auteur, 25/10) : les portai
 ### Vente à prix fixe — service `vente`
 `services.vente = {articles: [{item, cout_cuivre, trophee?}], noeuds: {fait, sans_fonds, trop_charge, sans_trophee?}}` : plusieurs objets, un choix par article (`action {service:"vente", op:"acheter", item}`), placeholders `{objet}` `{prix}` `{trophee}`. **Trophée** : un exemplaire laissé au vendeur, pris dans les sacs de l'expédition (`_sacs_remise`, principal en tête, porteurs sauvés APRÈS le principal) ; absent ⇒ `sans_trophee` (exigé par le linter dès qu'un article en porte un) ; la charge compte ce qu'il libère du sac du principal. Ni stock, ni relation, ni rang ; principal seul ; charge puis débit puis remise, un refus ne touche à rien (`pnj.article_en_vente`, `routers/pnj._resoudre_vente`). Prix illisible ⇒ article invendable, jamais gratuit. Linter : `item` du choix ∈ articles, op `acheter` seule. `/admin/dialogues` propose `vente/acheter` et garde l'`item` du choix tant que service et op ne changent pas. Contenu : Maître Villard de Honnecourt, copies de contenants à la Cour des Arches (`dev/gen_architecte_contenants.py`). Verrouillé par `tests/test_vente_architecte.py`, `dev/test_dialogues_client.js`.
 
+### Énigmes — doc `enigme:*`, panneau de /play (`utils/enigmes.py`, `routers/enigmes.py`)
+Conception arbitrée (Auteur, 19/11, façon Myst) : `docs/conception_enigmes.md`.
+- **Ouverture** : choix de dialogue `"enigme": "enigme:xxx"` (hook comme `deplacer`, contrôlé par le linter) → `data.enigme` → `ouvrirEnigme` (`scripts/enigmes.js`), par-dessus le dialogue. Rien n'est accordé par le choix : `GET /api/enigme?id=` revérifie `lieux` (OBLIGATOIRE, fail-closed), `prerequis` (énigmes résolues) et `conditions` (clauses `acces`).
+- **Six familles** : `deduction` (examiner → journal, conclure avec `seuil` d'indices essentiels) · `crans` · `graphe` (transitions privées, défaut = retour au départ) · `association` (paires gardées, `seuil`) · `placement` · `reseau` (miroir révèle les `liaisons_cachees`, clé ouvre, pierre ancre). `POST /api/enigme/action {id, action, …}`.
+- ⚠️ **`vue_client` seul filtre** : ni `solution`, ni `conditions`, ni `commentaires`, ni le `fait` d'un indice non examiné.
+- **Échec sans perte**, résolue pour toujours (`character.enigmes[id]`), journal automatique. **Aucun indice système** : `commentaires` `{quand, qui: {protege: prénom} | {vocation}, texte}` dits par les escortés et compagnons présents.
+- **Condition `enigme_resolue: {id, attendu?}`** : dialogue (`pnj.CONDITIONS_STRUCTUREES`) ET accès/présence (`acces.CONDITIONS_CONNUES`), un prédicat partagé (`enigmes.enigme_resolue_ok`).
+- **Contenu** : générateur `dev/gen_*.py` qui appelle `valider_enigme` (insoluble = refus) et `cycles_prerequis` (croisement sans blocage). Images de scène : `templates/resources/enigmes/` (mount `/enigmes`), zones en % de l'image.
+- **Bouton de lieu** : `bouton: true` ⇒ bouton 🔍 dans /play (`enigmes.enigmes_du_lieu`, mêmes contrôles que l'ouverture ; type `enigme` au cache de contenu). Pas encore : ouverture depuis un passage de donjon.
+Verrouillé par `tests/test_enigmes.py`, `dev/test_enigmes_client.js`.
+
 ### Enseignement d'un maître — service `enseignement`
 `services.enseignement: {sort, noeuds: {appris, refus}}` : SEULE voie d'apprentissage d'un sort `enseignement` (aucun grimoire ; `/api/apprendre_sort` → 403). Mêmes règles que l'endpoint (`sorts.verifier_apprentissage`, grimoire excepté) ; un sort `ameliore` REMPLACE l'ancien (connus, épinglés, barre). Op `apprendre`, conditionnée par `enseignement_possible` (linter). Flags `sorts.etat_enseignement` : `enseignement_connu` / `_prerequis_manquant` / `_niveau_insuffisant` / `_points_insuffisants` / `_possible` ; placeholders `{sort}` `{cout}`. **Sélectivité = donnée** : l'épreuve est une condition écrite (`quete_reussie` d'une offre `apport`), jamais un verrou du moteur. Principal seul (dialogue). Contenu : les quatre maîtres de la Lance de lumière (`dev/gen_lumiere_paladine.py`), les 22 maîtres des formes enseignées des sept écoles (`dev/gen_maitres_ecoles.py`, arbre de dialogue de la Lance paramétré). Verrouillé par `tests/test_sorts_enseignement.py`.
 
@@ -314,6 +332,8 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - **Pièges** : tag codifié `pieges_<quantite>_<danger>` dans les `tags` de la SALLE (lieu `battle_map`), loin du point de départ — telluris-combat § Pièges.
 
 Verrouillé par `tests/test_donjon.py`.
+
+- **Composition fixe** d'une salle : `composition: {"espece:a": 1, "espece:b": 3}` sur son entrée de `battle_maps` (espèces listées dans `especes`, total ≤ `NB_MONSTRES_MAX`) → effectif EXACT par espèce, boss garanti (`donjon.composition_de`) ; sans elle, tirage au hasard parmi `especes`. Verrouillé par `tests/test_donjon.py`.
 
 #### Donjon à ÉTAGES (`"mode": "etages"` sur le doc donjon)
 Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_map` + tag `donjon`), même cascade de grade. Champ absent ⇒ donjon classique. « Étage », jamais « niveau » (`niveau_*` = grade) ; aucun identifiant ne nomme un contenu (pas de « catacombes » dans le code).

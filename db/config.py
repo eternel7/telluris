@@ -84,7 +84,10 @@ _CACHEABLE_PREFIXES = ("item:", "espece:", "profil:", "recette:", "sort:",
 					   "zone:",
 					   # `traversee:calais_douvres`… : routes maritimes (utils/traversee.py),
 					   # lues à chaque case d'une traversée, jamais mutées (`lieu_en_mer` copie).
-					   "traversee:")
+					   "traversee:",
+					   # `enigme:meuble_de_villard`… : énigmes (utils/enigmes.py), contenu jamais muté
+					   # en jeu (l'état vit sur le personnage) ; listées à chaque /play par lieu.
+					   "enigme:")
 # ⚠️ Les docs d'ÉTAT (lieu:, character:, user:, relation:…) n'en sont PAS : le cache de contenu
 # rend une copie de SURFACE, or leurs mutations sont IMBRIQUÉES (`stock_vente[i]["qty"]`,
 # `stock_matieres[cle]`) — `buy_item` ou `tick_atelier` empoisonneraient le mémo.
