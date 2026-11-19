@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -68,6 +68,7 @@ routers/
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
   renseignement.py       # /api/renseignement/* : offre, catalogue, chercher, lire (🔎 Se renseigner)
   contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
+  enigmes.py             # /api/enigme (+ /action) : panneau d'énigme — le SERVEUR tranche, ouverture revérifiée à chaque requête
   colonisation.py        # /api/colonisation/* : charte (bureau d'un maître de guilde), site, fonder (carte d'un pays),
                          #   colons (auberge d'une cité), puis DANS l'implantation : ici, donner, feu, construire, poser,
                          #   reparer, chantier/ouvrir|financer, palier, embauche/engager/renvoyer, caisse, negociant,
@@ -143,6 +144,10 @@ utils/
   pouvoirs_objets.py     # pouvoirs d'un objet PORTÉ (pur) : champ item `competences` (sorts/compétences existants),
                          #   actif équipé + `restriction` BRUTE, hors vocation ; `connait` = contrôle unique d'appartenance
   chasse_signee.py       # trophée signé (pur) : `chasse` sur la RÉFÉRENCE d'une dépouille rare+, suit découpe et commande
+  enigmes.py             # énigmes (pur, docs/conception_enigmes.md) : doc `enigme:*`, six familles (déduction, crans, graphe,
+                         #   association, placement, réseau), état sur `character.enigmes` (résolue pour toujours), échec sans
+                         #   perte, condition `enigme_resolue` (dialogue + accès), aucun indice système : commentaires des escortés
+                         #   et compagnons ; ⚠️ `vue_client` SEUL filtre de la solution ; `valider_enigme` / `cycles_prerequis`
   contenants.py          # contenants (pur) : capacité sur le doc item (`contenant`), CONTENU sur la RÉFÉRENCE
                          #   (`ref.contenu`) → suit l'objet partout, ne pèse rien (physique ET magique), INERTE
                          #   pour tout autre système ; aucun contenant dans un autre ; marée en temps réel
@@ -283,6 +288,7 @@ templates/
                          #   partage.js (bouton `data-partager`, icône SVG sans libellé, couleur `--muted` de la page : partage natif, sinon copie de l'URL ; pages du lore)
                          #   conflit.js (409 « Conflit de sauvegarde » dit en douceur : bulle unique via `showToast`, /play ↔ /combat)
                          #   colonisation.js (panneau de l'implantation : fonder, onglets Site / Population / Bâtiments / Défense)
+                         #   enigmes.js (panneau d'énigme de /play : scène illustrée `/enigmes` + commandes parchemin/SVG ; hook `enigme` d'un choix)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)

@@ -29,6 +29,7 @@ from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.traversee import traversee_router, payload_play as traversee_payload_play
 from routers.contenants import contenants_router
+from routers.enigmes import enigmes_router
 from routers.renseignement import renseignement_router
 from routers import renseignement as renseignement_routes
 from routers.animations import animations_router
@@ -221,6 +222,10 @@ app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 MONSTERS_IMAGES_PATH = "templates/resources/monsters"
 app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
 app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
+# Scènes illustrées des énigmes (utils/enigmes.py, champ `image`) : sans image, le panneau
+# retombe sur ses commandes parchemin + SVG.
+ENIGMES_IMAGES_PATH = "templates/resources/enigmes"
+app.mount("/enigmes", StaticFiles(directory=ENIGMES_IMAGES_PATH), name="enigmes")
 # Sons des animations de combat — servis au COMBAT comme à l'éditeur (/admin/animations).
 # ⚠️ Des noms de fichiers contiennent des espaces (« melee sound.wav ») : côté client, tout
 # passe par encodeURIComponent, comme les feuilles d'effets.
@@ -244,6 +249,7 @@ app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
 app.include_router(traversee_router, prefix="/api")
 app.include_router(contenants_router, prefix="/api")
+app.include_router(enigmes_router, prefix="/api")
 app.include_router(renseignement_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).

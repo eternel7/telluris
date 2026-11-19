@@ -1,7 +1,7 @@
 # Système d'énigmes — conception
 
 - **Origine :** quête « La pièce derrière le mur » (`docs/lore/personnages/20261119_la_piece_derriere_le_mur.md`), arbitrage de l'Auteur du 19/11 : nouveau système d'énigmes plutôt que du dialogue.
-- **Statut :** les choix ci-dessous **font foi** (Auteur, 19/11/2026, trois questionnaires). Rien n'est codé.
+- **Statut :** les choix ci-dessous **font foi** (Auteur, 19/11/2026, trois questionnaires). **Moteur et six familles codés** (19/11) : `utils/enigmes.py`, `routers/enigmes.py`, `templates/scripts/enigmes.js` — format des docs dans l'en-tête de `utils/enigmes.py`, résumé dans la compétence `telluris-quetes-pnj` § Énigmes. Reste : ouverture depuis un lieu sans PNJ et depuis un passage de donjon ; le contenu de « La pièce derrière le mur ».
 
 ## Arbitrage (Auteur, 19/11)
 

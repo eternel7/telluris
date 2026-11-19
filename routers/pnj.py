@@ -1294,6 +1294,10 @@ async def pnj_dialogue_choix(
 		link_id = _lien_vers(current_user, character.get("lieu"), choix["deplacer"])
 		if link_id:
 			reponse["deplacer"] = link_id
+	# Hook d'ÉNIGME : `"enigme": "enigme:xxx"` → le client ouvre le panneau d'énigme. Rien n'est
+	# accordé ici : `routers/enigmes` revérifie lieu, prérequis et conditions à l'ouverture.
+	if isinstance(choix.get("enigme"), str) and choix["enigme"].startswith("enigme:"):
+		reponse["enigme"] = choix["enigme"]
 	# Effets de bord du nœud qu'on s'apprête à rendre : sa récompense de relation, la levée
 	# qu'il déclare, et son délai de réouverture. Le moteur ne connaît aucune « fin » (cf.
 	# utils/pnj) : tout cela s'arme au RENDU du nœud qui le porte.

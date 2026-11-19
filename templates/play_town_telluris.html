@@ -4366,6 +4366,8 @@
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
 <script src="{{ script_url('capacites_texte.js') }}"></script>
 <script src="{{ script_url('colonisation.js') }}"></script>
+{# Panneau d'énigme (`ouvrirEnigme`), ouvert par un choix de dialogue `enigme` ; le serveur tranche. #}
+<script src="{{ script_url('enigmes.js') }}"></script>
 {# Sons d'action (chokepoint `installerSonsApi`), coupe-son partagé avec le combat. #}
 <script src="{{ script_url('sons.js') }}"></script>
 <script>
@@ -14685,6 +14687,9 @@ async function choisirPnj(choixId, extra) {
 		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
+		// Hook d'énigme (`enigme` sur un choix) : le panneau s'ouvre PAR-DESSUS le dialogue ; le
+		// serveur revérifie lieu, prérequis et conditions à l'ouverture (routers/enigmes.py).
+		if (data.enigme) ouvrirEnigme(data.enigme);
 	} catch(err) { console.error('Erreur choix de dialogue', err); }
 }
 </script>

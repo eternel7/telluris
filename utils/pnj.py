@@ -78,6 +78,8 @@
 import random
 
 from models import character_stats
+# Condition `enigme_resolue` : module PUR sans import, il ne tire rien dans ce module minimal.
+from utils import enigmes
 
 
 # ---------------------------------------------------------------------------
@@ -427,6 +429,9 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		# d'éradication EN COURS (ids générés, donc innommables par `quete_active`). Injecté
 		# par le router (`donjon.donjon_de_lieu`), même seam que les quêtes.
 		"donjons_commission": set(donjons_commission or ()),
+		# Lu par la condition `enigme_resolue` : énigmes résolues, sur le doc personnage (aucune
+		# lecture DB), cf. utils/enigmes.py.
+		"enigmes_resolues": enigmes.resolues(character),
 	}
 
 
@@ -436,7 +441,7 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
 CONDITIONS_STRUCTUREES = frozenset({
 	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
-	"offre", "commission_donjon"})
+	"offre", "commission_donjon", "enigme_resolue"})
 
 # Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
 # fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
@@ -525,6 +530,11 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 		# Fail-closed : id non textuel ⇒ faux.
 		did = condition["commission_donjon"]
 		if not isinstance(did, str) or did not in (contexte.get("donjons_commission") or ()):
+			return False
+	if "enigme_resolue" in condition:
+		# Une énigme NOMMÉE est-elle résolue ? Même forme `{id, attendu}` et même prédicat
+		# fail-closed que les quêtes nommées : un seul vocabulaire de négation.
+		if not _quete_nommee_ok(condition["enigme_resolue"], contexte.get("enigmes_resolues")):
 			return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():

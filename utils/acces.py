@@ -36,6 +36,8 @@
 #     `cite` — ou dont la `cite` est archivée telle quelle, cas de l'épreuve d'apport). Pour
 #     les quêtes générées, qu'aucun id nommé ne couvre. ⚠️ Les archives d'AVANT ce champ n'ont
 #     ni `giver` ni `cite` : elles ne comptent pas (aucune migration).
+#   - enigme_resolue: {id, attendu?} — l'énigme nommée (`enigme:*`) est résolue par le
+#     personnage (utils/enigmes.py) ; même prédicat que la condition de dialogue homonyme.
 #   - ou: [clause, clause, …] — la SEULE clause composite : vraie dès qu'UNE des sous-clauses
 #     l'est. `conditions` restant un ET, c'est ce qui rend enfin exprimable un « A OU B ».
 #     ⚠️ Elle est née d'un besoin qu'aucune négation ne couvrait : deux docs de lieu qui se
@@ -69,6 +71,8 @@ from utils.recrutement import RANGS
 # Condition `passages` : le prédicat vit dans `utils/pnj` (module minimal : random +
 # character_stats), qui le partage avec les choix de dialogue — aucun cycle.
 from utils.pnj import PASSAGES_CLES, passages_ok
+# Condition `enigme_resolue` : prédicat partagé avec les choix de dialogue (module pur).
+from utils.enigmes import enigme_resolue_ok
 
 
 def now_epoch() -> int:
@@ -77,7 +81,7 @@ def now_epoch() -> int:
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
 CONDITIONS_CONNUES = {"quete_active", "quete_reussie", "quete_reussie_cite", "item",
-					  "rang_min", "combat_gagne", "lieu_visite", "passages", "ou"}
+					  "rang_min", "combat_gagne", "lieu_visite", "passages", "enigme_resolue", "ou"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
@@ -97,6 +101,8 @@ SOUS_FILTRES_CONNUS = {
 	"rang_min": {"cite", "rang"},
 	"combat_gagne": {"lieu", "attendu"},
 	"lieu_visite": {"lieu", "attendu"},
+	# Une énigme NOMMÉE résolue (utils/enigmes.py) — même `attendu` que partout ailleurs.
+	"enigme_resolue": {"id", "attendu"},
 	# Nombre d'ENTRÉES dans un lieu, bornes incluses — prédicat partagé avec les dialogues
 	# (`utils/pnj.passages_ok`), qui en tient la liste des sous-clés.
 	"passages": set(PASSAGES_CLES),
@@ -448,6 +454,8 @@ def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 		return _condition_lieu_visite(character, filtre or {})
 	if cle == "passages":
 		return passages_ok((character or {}).get("passages"), filtre)
+	if cle == "enigme_resolue":
+		return enigme_resolue_ok(character, filtre)
 	if cle == "ou":
 		if not isinstance(filtre, list) or not filtre:
 			return False

@@ -445,6 +445,8 @@ function _dlgFusionChoix(ancien, champs) {
 	if (champs.condition && Object.keys(champs.condition).length) choix.condition = champs.condition;
 	else delete choix.condition;
 	if (champs.deplacer) choix.deplacer = champs.deplacer; else delete choix.deplacer;
+	// Hook d'énigme (utils/enigmes.py) : ouvre le panneau d'énigme après le choix.
+	if (champs.enigme) choix.enigme = champs.enigme; else if ('enigme' in champs) delete choix.enigme;
 	return choix;
 }
 
@@ -995,6 +997,7 @@ function rendreChoix(choix) {
 			+ `<div class="grid" style="margin-top:8px">`
 			+ `<div class="field"><label>action (service/op — ignore le next)</label><select data-c="action">${optsAction}</select></div>`
 			+ `<div class="field"><label>deplacer (lieu:…)</label><input type="text" data-c="deplacer" value="${escapeHtml(c.deplacer || '')}"></div>`
+			+ `<div class="field"><label>énigme (enigme:…)</label><input type="text" data-c="enigme" value="${escapeHtml(c.enigme || '')}"></div>`
 			+ `</div>`
 			+ `<div class="grid" style="margin-top:8px">`
 			+ `<div class="field"><label>condition (flag)</label><select data-c="condflag"${structuree ? ' disabled' : ''}>${optsFlag}</select></div>`
@@ -1065,7 +1068,8 @@ function appliquerNoeud() {
 		}
 		champsChoix.push({
 			id: lire('id').trim(), label: lire('label'), next: lire('next'),
-			action: action, condition: condition, deplacer: lire('deplacer').trim()
+			action: action, condition: condition, deplacer: lire('deplacer').trim(),
+			enigme: lire('enigme').trim()
 		});
 	});
 

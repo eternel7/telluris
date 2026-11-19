@@ -74,7 +74,7 @@ PLACEHOLDERS_CONNUS = {
 # clé de trop laisserait passer une vraie faute.
 CONDITIONS_STRUCTUREES = {
 	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
-	"offre", "commission_donjon"}
+	"offre", "commission_donjon", "enigme_resolue"}
 
 # Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
 # partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
@@ -540,6 +540,25 @@ def analyser_doc(doc: dict) -> list:
 				if "attendu" in filtre and not isinstance(filtre["attendu"], bool):
 					erreur(f"choix `{cid}` : `{cq}.attendu` doit être un "
 						   f"booléen (`true`/`false`).", nid)
+
+			# `enigme_resolue` : même forme `{id, attendu}` que les quêtes nommées, id `enigme:…`.
+			if "enigme_resolue" in conditions:
+				filtre = (choix.get("condition") or {}).get("enigme_resolue")
+				if not isinstance(filtre, dict) or not isinstance(filtre.get("id"), str) \
+						or not filtre["id"].startswith("enigme:"):
+					erreur(f"choix `{cid}` : `enigme_resolue` doit être "
+						   f"`{{\"id\": \"enigme:...\", \"attendu\": true|false}}` — "
+						   f"fail-closed, le choix ne s'affichera JAMAIS.", nid)
+				else:
+					for sous in set(filtre) - QUETE_REUSSIE_CLES:
+						erreur(f"choix `{cid}` : `enigme_resolue.{sous}` inconnue — ignorée "
+							   f"en silence, la condition redevient positive.", nid)
+
+			# Hook d'énigme : `"enigme": "enigme:xxx"` ouvre le panneau d'énigme après le choix.
+			eni = choix.get("enigme")
+			if eni is not None and not (isinstance(eni, str) and eni.startswith("enigme:")):
+				erreur(f"choix `{cid}` : `enigme` doit être un id d'énigme (`enigme:...`), "
+					   f"reçu {eni!r} — le panneau ne s'ouvrirait jamais.", nid)
 
 			# `passages` : fail-closed côté moteur (`pnj.passages_ok`) — un filtre fautif
 			# cache le choix pour toujours, sans symptôme en jeu.
