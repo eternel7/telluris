@@ -52,7 +52,7 @@
               "nom": "de Montfaucon",
               "race": "humain",
               "sex": "F",
-              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "image": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
               "description": "Architecte de l'Institut, rentrée de Jumièges avec un carnet que rien n'explique tout à fait. Un compas, un carnet, un crayon. Elle ne sait pas se battre."
             }
           ],
@@ -421,7 +421,7 @@
     "nom": "Aélis de Montfaucon",
     "race": "humain",
     "vocation": "lettre",
-    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
     "description": "Jeune architecte de l'Institut, rentrée de Jumièges avec un carnet plein de mesures qu'aucune théorie n'explique entièrement.",
     "dialogue": {
       "noeud_depart": "retour_01",
@@ -576,7 +576,7 @@
               "nom": "de Montfaucon",
               "race": "humain",
               "sex": "F",
-              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "image": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
               "description": "Architecte de l'Institut, rentrée de Jumièges avec un carnet que rien n'explique tout à fait. Un compas, un carnet, un crayon. Elle ne sait pas se battre."
             }
           ],
@@ -3114,7 +3114,7 @@
       {
         "character": "pnj:aelis_de_montfaucon_ateliers",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "portrait": "architecte_Aélis_de_Montfaucon_ateliers.jpg",
         "probabilite": 1,
         "conditions": [
           {
@@ -3126,7 +3126,7 @@
             }
           }
         ],
-        "description": "Aélis, à genoux devant une armoire fermée, le carnet ouvert sur le sol."
+        "description": "Aélis, debout près d'une armoire fermée, un carnet serré contre elle."
       }
     ]
   },
@@ -3152,7 +3152,7 @@
       {
         "character": "pnj:aelis_de_montfaucon_cave",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
         "probabilite": 1,
         "conditions": [
           {
@@ -3212,7 +3212,7 @@
       {
         "character": "pnj:aelis_de_montfaucon_maison",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
         "probabilite": 1,
         "conditions": [
           {
@@ -3752,13 +3752,13 @@
     "type": "pnj",
     "nom": "Aélis de Montfaucon",
     "race": "humain",
-    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_ateliers.jpg",
     "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis est à genoux devant elle.",
+          "texte": "Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis se tient devant elle, un carnet serré contre elle.",
           "choix": [
             {
               "id": "quoi",
@@ -3817,7 +3817,7 @@
     "type": "pnj",
     "nom": "Aélis de Montfaucon",
     "race": "humain",
-    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
     "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -3882,7 +3882,7 @@
     "type": "pnj",
     "nom": "Aélis de Montfaucon",
     "race": "humain",
-    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
     "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
     "dialogue": {
       "noeud_depart": "accueil",

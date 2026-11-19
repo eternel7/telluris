@@ -72,7 +72,9 @@ E_PLAN_MAISON = "enigme:maison_de_la_zashiki_warashi"
 E_PLAN_IMPOSSIBLE = "enigme:plan_impossible"
 E_SORTIE = "enigme:porte_de_sortie"
 
-PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_humain_f03.jpg"
+PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # sans blessure (Auteur, 19/11)
+# Aélis dans les Ateliers de Convergence : portrait propre au lieu (Auteur, 19/11).
+PORTRAIT_AELIS_ATELIERS = "architecte_Aélis_de_Montfaucon_ateliers.jpg"
 
 # Présences et conditions — les trois états (AVANT · PENDANT · APRÈS, telluris-quetes-pnj).
 ESCORTE_ACTIVE = {"quete_active": {"types": ["escorte"], "cible": SEUIL}}
@@ -232,6 +234,7 @@ def villard(doc):
 
 def aelis_archives(doc):
 	doc = sans_rev(doc)
+	doc["portrait"] = PORTRAIT_AELIS   # le portrait blessé (`humain_f03`) écarté (Auteur, 19/11)
 	n = doc["dialogue"]["noeuds"]
 	doc.setdefault("services", {})["escorte"] = {"offre": offre_escorte(), "noeuds": {"accepte": "piece_accepte"}}
 	ajouter_choix(doc, "accueil", [
@@ -330,7 +333,8 @@ def lieux_neufs():
 		"image": "ateliers_de_convergence01.jpg", "categorie": "institut_des_architectes", "lieu_parent": LUTECIA,
 		# Deux variantes tirées au sort à chaque entrée (utils/images_lieu.py, Auteur 19/11).
 		"images": ["ateliers_de_convergence01.jpg", "ateliers_de_convergence02.jpg"],
-		"pnj": [aelis_ici(AELIS_ATELIERS, "Aélis, à genoux devant une armoire fermée, le carnet ouvert sur le sol.")],
+		"pnj": [entree_pnj(AELIS_ATELIERS, "Aélis", PORTRAIT_AELIS_ATELIERS,
+						   "Aélis, debout près d'une armoire fermée, un carnet serré contre elle.", [ESCORTE_ACTIVE])],
 	}
 	cave = {
 		"_id": CAVE, "type": "lieu", "label": "La cave aux cinq arches",
@@ -401,11 +405,11 @@ def lieux_neufs():
 
 def pnj_neufs():
 	desc_aelis = "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard."
-	a_ateliers = pnj_doc(AELIS_ATELIERS, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS, vocation="lettre", noeuds={
+	a_ateliers = pnj_doc(AELIS_ATELIERS, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS_ATELIERS, vocation="lettre", noeuds={
 		"accueil": noeud(
 			"Les Ateliers de Convergence sentent le cuivre chaud et la poussière de cristal. Des portails en "
-			"réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis est à "
-			"genoux devant elle.",
+			"réduction dorment sous des cloches de verre. Au fond, une armoire de chêne, fermée. Aélis se "
+			"tient devant elle, un carnet serré contre elle.",
 			choix("quoi", "« Par où commencer ? »", "commencer",
 				  condition={"enigme_resolue": {"id": E_RESERVE, "attendu": False}}),
 			choix("tissu", "« Le tissu du meuble… »", "tissu", condition={"enigme_resolue": {"id": E_MEUBLE}}),
