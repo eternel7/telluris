@@ -20,6 +20,7 @@ from utils.lieux import get_lieu_links
 from utils import acces
 from utils import enigmes
 from utils import escorte
+from utils import journal
 from utils import recrutement
 
 enigmes_router = APIRouter()
@@ -80,6 +81,8 @@ def enigme_action(current_user: Annotated[dict, Depends(get_current_user)], body
 		"enigme": enigmes.vue_client(doc, character),
 		"resultat": resultat,
 		"commentaires": enigmes.commentaires(doc, resultat["evenements"], _voix(character)),
+		# Onglet 📖 resynchronisé : ses notes 🧩 viennent de bouger (convention 10).
+		"journal": journal.journal_payload(character, get_doc),
 	}
 	if resultat["resolue"] and not deja:
 		# Une porte peut dépendre de `enigme_resolue` : resync des sous-lieux (convention 10).

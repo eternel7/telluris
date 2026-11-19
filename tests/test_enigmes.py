@@ -317,3 +317,40 @@ def test_enigmes_du_lieu_seulement_a_bouton_et_ouvrables():
 	ids = [e["id"] for e in enigmes.enigmes_du_lieu([verrouillee, a_bouton], perso)]
 	assert ids == ["enigme:crans", "enigme:reseau"]   # ordre stable des ids, prérequis levé
 	assert enigmes.enigmes_du_lieu([a_bouton], perso)[0]["resolue"]
+
+
+# ── Notes de quête dans le carnet 📖 du principal ────────────────────────────────
+
+def test_les_notes_des_enigmes_remontent_au_carnet_et_y_restent():
+	"""Le carnet garde les indices de TOUTES les énigmes commencées, résolues comprises : le
+	plan d'une énigme vu dans une autre reste lisible pendant qu'on joue la suivante."""
+	from utils import journal
+	perso = _perso()
+	docs = {DEDUCTION["_id"]: DEDUCTION, GRAPHE["_id"]: GRAPHE}
+	enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "porte"}, NOW)
+	enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "sol"}, NOW)
+	enigmes.agir(DEDUCTION, perso, "conclure", {"cle": "ailleurs"}, NOW)       # résolue
+	enigmes.agir(GRAPHE, perso, "passer", {"cle": "spirale"}, NOW + 5)
+	notes = journal.journal_payload(perso, docs.get)["notes"]
+	assert [n["id"] for n in notes] == [GRAPHE["_id"], DEDUCTION["_id"]]     # la plus récente d'abord
+	ded = notes[1]
+	assert ded["resolue"] and ded["nom"] == DEDUCTION["nom"]
+	assert ded["faits"] == ["Aucune effraction.", "Les traces s'interrompent."]
+	assert notes[0]["faits"] == ["Depuis l'entrée, l'arche Spirale mène à la salle humide."]
+	assert notes[0]["note_at"] == NOW + 5
+
+
+def test_un_essai_sans_note_ne_change_pas_l_ordre_du_carnet():
+	perso = _perso()
+	enigmes.agir(DEDUCTION, perso, "examiner", {"cle": "porte"}, NOW)
+	enigmes.agir(DEDUCTION, perso, "conclure", {"cle": "vol"}, NOW + 9)        # essai faux, rien noté
+	assert enigmes.lire_etat(perso, DEDUCTION["_id"])["note_at"] == NOW
+
+
+def test_le_carnet_ignore_les_enigmes_sans_note_et_les_etats_illisibles():
+	perso = _perso(enigmes={CRANS["_id"]: {"resolue": False, "journal": []}, "enigme:x": "bruit"})
+	assert enigmes.notes_du_carnet(perso, {}.get) == []
+	assert enigmes.notes_du_carnet(_perso(), {}.get) == []
+	# Doc disparu : l'id sert de nom, les notes restent.
+	perso = _perso(enigmes={"enigme:disparue": {"journal": ["Un fait."]}})
+	assert enigmes.notes_du_carnet(perso, {}.get)[0]["nom"] == "enigme:disparue"

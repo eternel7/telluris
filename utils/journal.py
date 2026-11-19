@@ -26,6 +26,7 @@ import time
 
 from models import character_stats
 from utils import auberge
+from utils import enigmes
 
 # Le carnet et le bestiaire vivent sur le doc personnage, comme `lieux_visites` et
 # `compagnons_connus`. ⚠️ Champs ABSENTS ⇒ carnet vide et bestiaire vide (Convention §4) :
@@ -244,6 +245,9 @@ def journal_payload(character: dict, get_doc_fn) -> dict:
 	return {
 		"entrees": list(reversed(entrees_de(character))),
 		"bestiaire": bestiaire_payload(character, get_doc_fn),
+		# 🧩 Notes des énigmes de quête (indices examinés, passages essayés) : lues sur l'état
+		# des énigmes, jamais recopiées dans le carnet libre — rien ne les en chasse.
+		"notes": enigmes.notes_du_carnet(character, get_doc_fn),
 		"fournitures": auberge.fournitures_presentes(get_doc_fn, [character]),
 		"longueur_max": longueur_max(),
 		"entrees_max": entrees_max(),

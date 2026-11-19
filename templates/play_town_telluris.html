@@ -1585,6 +1585,13 @@
 			background: rgba(255,255,255,.06); border: 1px solid var(--border-color);
 		}
 		.jnl-best-lieux { font-size: .8rem; color: var(--muted); margin-top: 3px; }
+		/* 🧩 Notes de quête : un bloc par énigme, ses faits en liste. */
+		.jnl-note { padding: 8px 4px; border-bottom: 1px solid var(--border-color); }
+		.jnl-note:last-child { border-bottom: 0; }
+		.jnl-note-nom { font-weight: bold; }
+		.jnl-note-etat { font-size: .82rem; color: var(--muted); font-weight: normal; }
+		.jnl-note-faits { margin: 4px 0 0 1.1rem; padding: 0; font-size: .9rem; }
+		.jnl-note-faits li { margin-bottom: 3px; overflow-wrap: anywhere; }
 		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0px; color: var(--muted); font-size: 1rem; }
 		.sh-empty-icon { font-size: 2.1rem; }
 		.sh-xp-btn {
@@ -2877,6 +2884,19 @@
 								   le wrapper — sinon l'ombre partirait au premier rendu. #}
 								<div class="sh-scroll">
 									<div id="jnl-entrees" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
+						{# 🧩 Notes des énigmes de quête : lues sur l'état des énigmes du PRINCIPAL
+						   (utils/enigmes.notes_du_carnet), jamais dans le carnet libre. #}
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-notes"
+									onclick="toggleOngletSection('journal', 'notes')">
+								<span>🧩 Notes de quête (<span id="jnl-notes-compte">0</span>)</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-notes">
+								<div class="sh-scroll">
+									<div id="jnl-notes" class="sh-rel-scroll"></div>
 								</div>
 							</div>
 						</section>
@@ -9200,7 +9220,7 @@ const SHEET_ACC = {
 	quetes:      { cle: 'telluris.play.quetes_section.' + REL_CHAR_ID, defaut: 'quetes-actives',
 				   ids: ['quetes-actives', 'quetes-terminees'] },
 	journal:     { cle: 'telluris.play.journal_section.' + REL_CHAR_ID, defaut: 'carnet',
-				   ids: ['carnet', 'bestiaire'] },
+				   ids: ['carnet', 'notes', 'bestiaire'] },
 };
 
 // ── Onglet ⚡ Actions en portrait mobile : vue (connues / apprendre) + filtre ──────
@@ -9546,6 +9566,30 @@ function _jnlBestNode(b) {
 	return ligne;
 }
 
+// 🧩 Une énigme commencée et ce qu'on y a noté. ⚠️ textContent partout : les faits viennent
+// de la donnée, le carnet n'en fait jamais du HTML.
+function _jnlNoteNode(n) {
+	const bloc = document.createElement('div');
+	bloc.className = 'jnl-note';
+	const nom = document.createElement('div');
+	nom.className = 'jnl-note-nom';
+	nom.textContent = n.nom || '?';
+	const etat = document.createElement('span');
+	etat.className = 'jnl-note-etat';
+	etat.textContent = n.resolue ? ' · ✔ résolue' : ' · en cours';
+	nom.appendChild(etat);
+	bloc.appendChild(nom);
+	const ul = document.createElement('ul');
+	ul.className = 'jnl-note-faits';
+	for (const f of (n.faits || [])) {
+		const li = document.createElement('li');
+		li.textContent = f;
+		ul.appendChild(li);
+	}
+	bloc.appendChild(ul);
+	return bloc;
+}
+
 function _jnlVide(icone, texte) {
 	const box = document.createElement('div');
 	box.className = 'sh-empty';
@@ -9573,6 +9617,19 @@ function renderFicheJournal(data) {
 			for (const e of liste) entrees.appendChild(_jnlEntreeNode(e));
 		}
 	}
+
+	const notes = document.getElementById('jnl-notes');
+	if (notes) {
+		notes.innerHTML = '';
+		const liste = data.notes || [];
+		if (!liste.length) {
+			notes.appendChild(_jnlVide('🧩', "Aucune note de quête pour l'instant."));
+		} else {
+			// Déjà triées par le serveur : la plus récemment notée d'abord.
+			for (const n of liste) notes.appendChild(_jnlNoteNode(n));
+		}
+	}
+	_ficheCompte('jnl-notes-compte', (data.notes || []).length);
 
 	const best = document.getElementById('jnl-bestiaire');
 	if (best) {

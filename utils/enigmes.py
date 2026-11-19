@@ -25,7 +25,8 @@
 # chacun avec sa voix, jamais la solution.
 #
 # État sur le personnage (aucune migration : champ absent ⇒ rien de commencé) :
-#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "journal": [...], "etat": {...}}
+#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "journal": [...], "note_at", "etat": {...}}
+#   Les notes (`journal`) remontent à l'onglet 📖 du principal : `notes_du_carnet`.
 # Une énigme résolue le reste POUR TOUJOURS (quête abandonnée comprise). Un essai faux ne coûte
 # rien : découvertes et étapes validées sont gardées. Le journal se tient tout seul.
 #
@@ -114,6 +115,27 @@ def _noter(e: dict, fait: str) -> None:
 	if fait and fait not in e["journal"]:
 		e["journal"].append(fait)
 		del e["journal"][:-JOURNAL_MAX]
+
+
+def notes_du_carnet(character: dict, get_doc_fn) -> list:
+	"""Notes de TOUTES les énigmes commencées, pour l'onglet 📖 du PRINCIPAL (section 🧩).
+	Lues sur `character["enigmes"]` (jamais purgé : résolue pour toujours, quête abandonnée
+	comprise) — aucune copie dans le carnet libre, borné à `JOURNAL_ENTREES_MAX` : un indice
+	ne doit jamais céder la place à une entrée écrite. Énigme sans note écartée.
+	→ [{"id", "nom", "resolue", "faits", "note_at"}], la plus récemment notée d'abord."""
+	tout = (character or {}).get("enigmes") or {}
+	if not isinstance(tout, dict):
+		return []
+	out = []
+	for eid, e in tout.items():
+		faits = [f for f in ((e or {}).get("journal") or []) if isinstance(f, str) and f] if isinstance(e, dict) else []
+		if not faits:
+			continue
+		doc = get_doc_fn(eid) if get_doc_fn else None
+		out.append({"id": eid, "nom": str((doc or {}).get("nom") or eid), "resolue": bool(e.get("resolue")),
+					"faits": faits, "note_at": int(e.get("note_at") or e.get("resolue_at") or 0)})
+	out.sort(key=lambda n: (-n["note_at"], n["nom"]))
+	return out
 
 
 # ---------------------------------------------------------------------------
@@ -361,7 +383,11 @@ def agir(doc: dict, character: dict, action: str, body: dict, now: int) -> dict:
 	e = etat_de(character, doc.get("_id"))
 	if e.get("resolue"):
 		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": []}
+	notes_avant = list(e["journal"])
 	r = _RESOLVEURS[doc.get("famille")](doc, e, action, body or {})
+	if e["journal"] != notes_avant:
+		# Horodatage de la dernière note : ordre de la section 🧩 du carnet (utils/journal).
+		e["note_at"] = int(now)
 	evenements = [r["evenement"]] if r.get("evenement") else []
 	if r.get("essai"):
 		e["essais"] = int(e.get("essais", 0)) + 1

@@ -299,6 +299,8 @@ async function _eniEnvoyer(action, extra) {
 			outil: garde.outil, selection: {} };
 		const r = data.resultat || {};
 		_eniRendre(r.resolue ? '' : (r.texte || ''), data.commentaires);
+		// Onglet 📖 : les notes 🧩 de la quête viennent de bouger (convention 10).
+		if (data.journal && typeof renderFicheJournal === 'function') renderFicheJournal(data.journal);
 		if (r.resolue && Array.isArray(data.links) && typeof buildLocationslist === 'function') {
 			LINKS = data.links;
 			buildLocationslist();
