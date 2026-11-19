@@ -140,6 +140,19 @@ def ouvrable(doc: dict, character: dict, clauses_fn=None) -> tuple[bool, str | N
 	return True, None
 
 
+def enigmes_du_lieu(docs, character: dict, clauses_fn=None) -> list:
+	"""Boutons d'énigme du lieu courant dans /play : docs `bouton: true` OUVRABLES ici
+	(même contrôle que l'ouverture). Les autres s'ouvrent par un choix de dialogue.
+	→ [{"id", "nom", "resolue"}], dans l'ordre des ids (stable d'un rendu à l'autre)."""
+	out = []
+	for d in sorted((x for x in docs or [] if isinstance(x, dict) and x.get("bouton")),
+					key=lambda x: str(x.get("_id"))):
+		if ouvrable(d, character, clauses_fn)[0]:
+			out.append({"id": d["_id"], "nom": d.get("nom") or d["_id"],
+						"resolue": est_resolue(character, d["_id"])})
+	return out
+
+
 # ---------------------------------------------------------------------------
 # Vue client (le SEUL filtre de ce qui part au navigateur)
 # ---------------------------------------------------------------------------

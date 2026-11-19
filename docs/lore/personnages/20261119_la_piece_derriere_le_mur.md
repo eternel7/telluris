@@ -34,7 +34,7 @@
 |---|---|---|
 | 7 | Réserve de Villard | **Les Ateliers de Convergence**, lieu neuf rattaché à la Cour des Arches (déjà cité par Aélis en jeu) |
 | 8 | Intérieur de la boîte | **Lieux sans carte** (cave aux arches, maison pliée) pour les énigmes ; **une seule battle map** : le combat contre l'Homme au sac et des Nopperabō |
-| 9 | Départs réception / Maëlys | **Maëlys** confie un **pli** pour Villard (course au journal, petite récompense) ; **Éléonore** se contente d'orienter vers Villard |
+| 9 | Départs réception / Maëlys | ~~pli de Maëlys~~ → **toutes deux orientent vers Villard par une réplique**, sans course (révisé le 19/11 : un pli serait tiré à la place des épreuves de rang B de Maëlys) |
 | 10 | Récompense | XP et cuivre au **barème de l'escorte de Jumièges** + une **Besace profonde offerte** une fois par Villard |
 | 11 | Bestiaire | **Deux espèces neuves** : `espece:homme_au_sac` (être unique, boss du rang C) et `espece:nopperabo` (mineure, en groupe) ; Púca et Zashiki-warashi = **PNJ** |
 | 12 | Croisement | **Chaîne + un retour** : carnet de Villard → plan du meuble ; tissu du meuble → ordre des arches ; Púca → la maison ; Zashiki-warashi → plan impossible ; la sortie demande un symbole vu dans l'atelier au début |

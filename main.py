@@ -43,6 +43,7 @@ from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
 from utils import derniers_joues as derniers_joues_util
 from utils import aide as aide_util
+from utils import enigmes as enigmes_util
 from utils import filtres_boutique
 from utils.statiques import PortraitsStatic
 from utils import quetes
@@ -1035,6 +1036,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 		for e, d in pnj_paires
 	]
 	lieux_marques = indicateurs_util.marques_lieux(character)
+	# Énigmes à bouton OUVRABLES ici (utils/enigmes.py) ; le serveur revérifie à l'ouverture.
+	enigmes_ici = enigmes_util.enigmes_du_lieu(find_docs({"type": "enigme"}), character, conditions_pnj)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
@@ -1381,6 +1384,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			# Les PNJ présents, cumulés : une ligne d'action par PNJ, dans l'ordre du lieu.
 			# Chacun porte sa marque « ! »/« ? » (badge de SON bouton 🗣).
 			"pnjs_presents": pnjs_presents,
+			"enigmes_ici": enigmes_ici,
 			# Map {lieu_id: "?"} des lieux où une quête active attend une remise. Elle porte
 			# TOUS les lieux concernés (courant compris) — c'est le client qui l'intersecte
 			# avec les portes qu'il affiche.

@@ -301,3 +301,19 @@ def test_linter_controle_le_hook_et_la_condition():
 	assert erreurs({"enigme": "crans"})
 	assert erreurs({"condition": {"enigme_resolue": {"id": "quete:x"}}})
 	assert erreurs({"condition": {"enigme_resolue": {"id": "enigme:x", "attendus": False}}})
+
+
+# --- Boutons d'énigme d'un lieu (/play) -----------------------------------------------------
+
+def test_enigmes_du_lieu_seulement_a_bouton_et_ouvrables():
+	a_bouton = dict(CRANS, bouton=True)
+	ailleurs = dict(GRAPHE, bouton=True, lieux=["lieu:ailleurs"])
+	sans_bouton = PLACEMENT
+	verrouillee = dict(RESEAU, bouton=True, prerequis=["enigme:crans"])
+	perso = _perso()
+	assert enigmes.enigmes_du_lieu([verrouillee, sans_bouton, ailleurs, a_bouton], perso) == [
+		{"id": "enigme:crans", "nom": "crans", "resolue": False}]
+	_agir(CRANS, perso, "essayer", positions={"a": 3, "b": 1})
+	ids = [e["id"] for e in enigmes.enigmes_du_lieu([verrouillee, a_bouton], perso)]
+	assert ids == ["enigme:crans", "enigme:reseau"]   # ordre stable des ids, prérequis levé
+	assert enigmes.enigmes_du_lieu([a_bouton], perso)[0]["resolue"]

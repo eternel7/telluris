@@ -294,7 +294,7 @@ Conception arbitrée (Auteur, 19/11, façon Myst) : `docs/conception_enigmes.md`
 - **Échec sans perte**, résolue pour toujours (`character.enigmes[id]`), journal automatique. **Aucun indice système** : `commentaires` `{quand, qui: {protege: prénom} | {vocation}, texte}` dits par les escortés et compagnons présents.
 - **Condition `enigme_resolue: {id, attendu?}`** : dialogue (`pnj.CONDITIONS_STRUCTUREES`) ET accès/présence (`acces.CONDITIONS_CONNUES`), un prédicat partagé (`enigmes.enigme_resolue_ok`).
 - **Contenu** : générateur `dev/gen_*.py` qui appelle `valider_enigme` (insoluble = refus) et `cycles_prerequis` (croisement sans blocage). Images de scène : `templates/resources/enigmes/` (mount `/enigmes`), zones en % de l'image.
-- Pas encore : ouverture depuis un lieu sans PNJ ni depuis un passage de donjon.
+- **Bouton de lieu** : `bouton: true` ⇒ bouton 🔍 dans /play (`enigmes.enigmes_du_lieu`, mêmes contrôles que l'ouverture ; type `enigme` au cache de contenu). Pas encore : ouverture depuis un passage de donjon.
 Verrouillé par `tests/test_enigmes.py`, `dev/test_enigmes_client.js`.
 
 ### Enseignement d'un maître — service `enseignement`

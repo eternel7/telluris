@@ -127,5 +127,11 @@ t('/play charge le script et ouvre le panneau sur le hook `enigme`', () => {
 	assert.ok(/if \(data\.enigme\) ouvrirEnigme\(data\.enigme\)/.test(play));
 });
 
+t('/play rend les boutons d\'énigme du lieu, id lu dans data-enigme (jamais dans l\'onclick)', () => {
+	const play = fs.readFileSync(path.join(RACINE, 'templates', 'play_town_telluris.html'), 'utf8');
+	assert.ok(play.includes('{% for e in enigmes_ici %}'));
+	assert.ok(play.includes('data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)"'));
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);
