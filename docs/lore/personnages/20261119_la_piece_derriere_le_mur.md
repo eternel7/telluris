@@ -28,6 +28,18 @@
 | 5 | Maître Villard | **A parachevé sa formation à Mu**, d'où il a rapporté la boîte — **jamais dit** |
 | 6 | Suite de l'arc | « Les vestiges du premier passage » au **rang B** ; la proposition de partir pour Mu au **rang A** |
 
+### Second arbitrage (Auteur, 19/11, contenu)
+
+| # | Point | Décision |
+|---|---|---|
+| 7 | Réserve de Villard | **Les Ateliers de Convergence**, lieu neuf rattaché à la Cour des Arches (déjà cité par Aélis en jeu) |
+| 8 | Intérieur de la boîte | **Lieux sans carte** (cave aux arches, maison pliée) pour les énigmes ; **une seule battle map** : le combat contre l'Homme au sac et des Nopperabō |
+| 9 | Départs réception / Maëlys | **Maëlys** confie un **pli** pour Villard (course au journal, petite récompense) ; **Éléonore** se contente d'orienter vers Villard |
+| 10 | Récompense | XP et cuivre au **barème de l'escorte de Jumièges** + une **Besace profonde offerte** une fois par Villard |
+| 11 | Bestiaire | **Deux espèces neuves** : `espece:homme_au_sac` (être unique, boss du rang C) et `espece:nopperabo` (mineure, en groupe) ; Púca et Zashiki-warashi = **PNJ** |
+| 12 | Croisement | **Chaîne + un retour** : carnet de Villard → plan du meuble ; tissu du meuble → ordre des arches ; Púca → la maison ; Zashiki-warashi → plan impossible ; la sortie demande un symbole vu dans l'atelier au début |
+| 13 | Fin | La Zashiki-warashi **ne dit rien** : elle referme la porte de sa maison derrière vous |
+
 ## 2. Écarts corrigés dans les brouillons
 
 - Aélis « aventurière compétente » → architecte qui ne se bat pas : compétente par le savoir.
