@@ -1,5 +1,11 @@
 # Prompt pour Élise
 
+Cette séance reprend le scénario et les quatre dialogues d'**Élise**, l'herboriste du Coq de Lutèce, tels que l'Auteur les a écrits, pour en tirer l'image de la guérisseuse dans son auberge des faubourgs de Lutecia. Son histoire est racontée dans [le scénario d'Élise](20261003_scenario_d_elise.md) : quatre visites, une amitié née de la vie de tous les jours, et une mort banale, partie chercher des herbes dans une forêt qu'elle connaissait depuis des années.
+
+Le jeu a fait d'Élise une **naine**, et placé son auberge au **Coq de Lutèce**, dans les faubourgs, et non sur la route d'Auxerre.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ac0bde4-1530-83eb-960a-5480dd6cf117)
 - **Créée :** 03/10/2026 · **mise à jour :** 03/10/2026
 - **Messages :** 2

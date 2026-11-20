@@ -1,5 +1,24 @@
 # Prompt mission PNJ JSON
 
+Cette séance a préparé la mise en jeu de la mission des bûcherons d'Auxerre (le récit de la mission est dans [le scénario](20260831_scenario_mission_auxerre.md)). Elle a fixé la fiche de chacun de ses personnages : nom, fonction, Lignée, description.
+
+Le jeu a depuis tranché certaines Lignées autrement que ces fiches. Ce qui fait foi :
+
+| Personnage | Lignée | Rôle |
+|---|---|---|
+| **Borin Barbe-de-Jais** | nain | réceptionniste du Bastion de l'Yonne, qui prévient que le maître cherche l'aventurier |
+| **Gautier de Valcroix** | humain | maître de la guilde d'Auxerre, qui confie la mission |
+| **Aélis de Montfaucon** | humaine | jeune Architecte, spécialiste des cristaux de mana dans la structure des bâtiments |
+| **Armand Renaud** | humain | bûcheron |
+| **Étienne Morel** | nain | bûcheron |
+| **Matthieu Perrin** | ogre | bûcheron |
+| **Dame Éléonore de Rochefort** | elfe | paladine, commandante des convois de cristaux d'Auxerre |
+| **Frère Martin de Clairvaux** | hobbit | paladin, son second |
+
+?{Les fiches donnaient aux bûcherons, à la paladine et à son second une Lignée humaine ; le jeu en a fait un nain, un ogre, une elfe et un hobbit.}?
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a95b4b4-72e8-83ed-a61c-01ec9e305faf)
 - **Créée :** 31/08/2026 · **mise à jour :** 06/09/2026
 - **Messages :** 2
