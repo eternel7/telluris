@@ -1,0 +1,138 @@
+[
+  {
+    "_id": "item:gelee",
+    "type": "item",
+    "nom": "Gelée de slime",
+    "icon": "🫧",
+    "description": "Gelée translucide et collante, recueillie sur les slimes des donjons.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "gelee",
+    "slots": [],
+    "tags": [],
+    "poids": 1,
+    "valeur": 3
+  },
+  {
+    "_id": "recette:gelee_glu_de_nuit_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Glu_de_nuit",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_reactif_magique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "reactif_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_onguent_apothicairerie",
+    "type": "recette",
+    "lieu_categorie": "apothicairerie",
+    "objet_final": "onguent",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_savon_savonnerie",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "savon",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:ghul_des_sables",
+    "type": "item",
+    "nom": "Restes de Ghûl des Sables",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 7.5,
+    "description": "Dépouille de Ghûl des Sables récupérée à l'issue du combat.",
+    "source_espece": "espece:ghul_des_sables",
+    "loot_defaut": true,
+    "sous_categorie": "ossements"
+  },
+  {
+    "_id": "item:ifrit",
+    "type": "item",
+    "nom": "Restes de Ifrit",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 13.0,
+    "description": "Dépouille de Ifrit récupérée à l'issue du combat.",
+    "source_espece": "espece:ifrit",
+    "loot_defaut": true,
+    "sous_categorie": "debris_anime"
+  },
+  {
+    "_id": "item:jann",
+    "type": "item",
+    "nom": "Restes de Djinn des Ruines",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 4.5,
+    "description": "Dépouille de Djinn des Ruines récupérée à l'issue du combat.",
+    "source_espece": "espece:jann",
+    "loot_defaut": true,
+    "sous_categorie": "residu_spectral"
+  },
+  {
+    "_id": "item:marid",
+    "type": "item",
+    "nom": "Restes de Marid",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 12.0,
+    "description": "Dépouille de Marid récupérée à l'issue du combat.",
+    "source_espece": "espece:marid",
+    "loot_defaut": true,
+    "sous_categorie": "debris_anime"
+  },
+  {
+    "_id": "item:silat",
+    "type": "item",
+    "nom": "Restes de Si'lat",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 6.5,
+    "description": "Dépouille de Si'lat récupérée à l'issue du combat.",
+    "source_espece": "espece:silat",
+    "loot_defaut": true,
+    "sous_categorie": "residu_spectral"
+  }
+]
