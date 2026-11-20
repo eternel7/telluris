@@ -10,9 +10,13 @@
 // envoyé qu'au bouton « Essayer ».
 //
 // Fonctions de rendu PURES (`enigmeCorps`, `enigmeScene`, `enigmeJournal`, `enigmeVoix`,
-// `enigmeBrouillonInitial`) : exécutées par dev/test_enigmes_client.js.
+// `enigmeBrouillonInitial`, `enigmesIciHtml`) : exécutées par dev/test_enigmes_client.js.
+//
+// Une RÉSOLUTION ne recharge pas /play : la réponse porte le resync du lieu (portes, énigmes à
+// bouton, lignes 🗣, journal), appliqué par `_appliquerResyncLieu` de la page ; un dialogue
+// resté ouvert sous le panneau est rouvert à sa fermeture (ses choix ont pu changer).
 
-let _enigme = null;   // { vue, brouillon, outil, selection }
+let _enigme = null;   // { vue, brouillon, outil, selection, resolue_ici }
 
 function _eniEsc(s) {
 	if (typeof escapeHtml === 'function') return escapeHtml(s);
@@ -277,6 +281,21 @@ function _eniRendre(message, commentaires) {
 	o.querySelector('#eni-journal').innerHTML = enigmeJournal(vue);
 }
 
+// Bloc « Énigmes » de la sidebar de /play — MIROIR du markup Jinja de `#enigmes-ici-bloc`.
+// `liste` = `enigmes.enigmes_du_lieu` ([{id, nom, resolue}]) ; vide ⇒ bloc vide.
+function enigmesIciHtml(liste) {
+	if (!Array.isArray(liste) || !liste.length) return '';
+	return '<h3>Énigmes</h3><ul class="sub-locations-list" id="enigmes-ici">'
+		+ liste.map(e => `<li><button class="sub-loc-btn" data-enigme="${_eniEsc(e.id)}" `
+			+ `onclick="ouvrirEnigme(this.dataset.enigme)">${e.resolue ? '✓' : '🔍'} ${_eniEsc(e.nom)}</button></li>`).join('')
+		+ '</ul>';
+}
+
+function _majEnigmesIci(liste) {
+	const bloc = document.getElementById('enigmes-ici-bloc');
+	if (bloc) bloc.innerHTML = enigmesIciHtml(liste);
+}
+
 async function ouvrirEnigme(id) {
 	try {
 		const res = await fetch('api/enigme?id=' + encodeURIComponent(id));
@@ -291,7 +310,16 @@ async function ouvrirEnigme(id) {
 function fermerEnigme() {
 	const o = document.getElementById('enigme-overlay');
 	if (o) o.hidden = true;
+	const resolue = !!(_enigme && _enigme.resolue_ici);
 	_enigme = null;
+	// Dialogue resté ouvert dessous : ses choix (`enigme_resolue`) ont pu changer — on lui
+	// reparle, comme le joueur cliquerait de nouveau sur 🗣.
+	const panneau = document.getElementById('pnj-panel');
+	if (resolue && panneau && !panneau.classList.contains('panel-hidden')
+		&& typeof openPnjDialogue === 'function' && typeof _pnjCourant !== 'undefined') {
+		const btn = Array.from(document.querySelectorAll('.pnj-talk-btn')).find(b => b.dataset.pnj === _pnjCourant);
+		openPnjDialogue(btn || { dataset: { pnj: _pnjCourant } });
+	}
 }
 
 async function _eniEnvoyer(action, extra) {
@@ -304,16 +332,16 @@ async function _eniEnvoyer(action, extra) {
 		const data = await res.json();
 		if (!res.ok) { if (typeof showToast === 'function') showToast(data.detail || 'Erreur.'); return; }
 		const garde = _enigme;
-		_enigme = { vue: data.enigme, brouillon: enigmeBrouillonInitial(data.enigme),
-			outil: garde.outil, selection: {} };
 		const r = data.resultat || {};
+		_enigme = { vue: data.enigme, brouillon: enigmeBrouillonInitial(data.enigme),
+			outil: garde.outil, selection: {},
+			resolue_ici: garde.resolue_ici || (r.resolue && Array.isArray(data.links)) };
 		_eniRendre(r.resolue ? '' : (r.texte || ''), data.commentaires);
 		// Onglet 📖 : les notes 🧩 de la quête viennent de bouger (convention 10).
 		if (data.journal && typeof renderFicheJournal === 'function') renderFicheJournal(data.journal);
-		if (r.resolue && Array.isArray(data.links) && typeof buildLocationslist === 'function') {
-			LINKS = data.links;
-			buildLocationslist();
-		}
+		// Résolution : portes, énigmes à bouton (✓), lignes 🗣 — servis SEULEMENT à la
+		// première résolution (routers/enigmes.py), absents sinon.
+		if (typeof _appliquerResyncLieu === 'function') _appliquerResyncLieu(data);
 	} catch (err) { console.error('Erreur action énigme', err); }
 }
 

@@ -2317,15 +2317,14 @@
 				</ul>
 				{% endif %}
 				{# Énigmes à bouton ouvrables ici (utils/enigmes.enigmes_du_lieu) ; l'id passe par
-				   `data-enigme`, jamais dans l'onclick (Conventions §9). #}
-				{% if enigmes_ici %}
-				<h3>Énigmes</h3>
-				<ul class="sub-locations-list" id="enigmes-ici">
-					{% for e in enigmes_ici %}
-					<li><button class="sub-loc-btn" data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)">{% if e.resolue %}✓{% else %}🔍{% endif %} {{ e.nom }}</button></li>
-					{% endfor %}
-				</ul>
-				{% endif %}
+				   `data-enigme`, jamais dans l'onclick (Conventions §9). Bloc TOUJOURS émis (vide
+				   sans énigme) : une résolution le réécrit sans recharger (`_majEnigmesIci`,
+				   templates/scripts/enigmes.js — miroir de ce markup). #}
+				<div id="enigmes-ici-bloc">
+				{%- if enigmes_ici %}<h3>Énigmes</h3><ul class="sub-locations-list" id="enigmes-ici">
+					{%- for e in enigmes_ici %}<li><button class="sub-loc-btn" data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)">{% if e.resolue %}✓{% else %}🔍{% endif %} {{ e.nom }}</button></li>{% endfor -%}
+				</ul>{% endif -%}
+				</div>
 				{# Récolte et Cap 🧭 : premier état rendu ICI (rien ne surgit au chargement), puis tenu
 				   par `_refreshRecolte` / `_refreshGuidage`, qui DÉPLIENT/REPLIENT le bloc
 				   (`_basculerDepliable`) au lieu de le faire apparaître d'un coup. Textes = miroirs
@@ -4465,6 +4464,30 @@
 	}
 	// PNJ postés sur certaines cases : `ids` = ceux qui se tiennent sur la case du joueur
 	// (`pnjs_ici` de move_character). Absent de la réponse ⇒ rien ne bouge.
+	// Pastille de CHAQUE bouton 🗣 présent (`pnj_marques` {pnj_id: marque}) — après un état qui
+	// change les conditions de tous les PNJ à la fois (énigme résolue). Absent ⇒ rien ne bouge.
+	function _majPnjMarques(marques) {
+		if (!marques || typeof marques !== 'object') return;
+		document.querySelectorAll('.pnj-talk-btn').forEach(btn => {
+			const el = btn.querySelector('.pnj-talk-marque');
+			if (el && btn.dataset.pnj in marques) el.innerHTML = _marquePastille(marques[btn.dataset.pnj]);
+		});
+	}
+	// Resync de tout ce qui dépend du LIEU après une action sans rechargement (énigme résolue,
+	// routers/enigmes.py) : portes et marques, flèches, énigmes à bouton, lignes 🗣.
+	// Chaque bloc absent de la réponse reste en l'état.
+	function _appliquerResyncLieu(data) {
+		if (!data) return;
+		const marques = _majLieuxMarques(data);
+		if (Array.isArray(data.links)) LINKS = data.links;
+		if (marques || Array.isArray(data.links)) {
+			buildLocationslist();
+			updateControls();
+		}
+		if (Array.isArray(data.enigmes_ici) && typeof _majEnigmesIci === 'function') _majEnigmesIci(data.enigmes_ici);
+		_majPnjsIci(data.pnjs_ici);
+		_majPnjMarques(data.pnj_marques);
+	}
 	function _majPnjsIci(ids) {
 		if (!Array.isArray(ids)) return;
 		document.querySelectorAll('li.pnj-talk-li').forEach(li => {

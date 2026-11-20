@@ -134,8 +134,32 @@ t('/play charge le script et ouvre le panneau sur le hook `enigme`', () => {
 
 t('/play rend les boutons d\'énigme du lieu, id lu dans data-enigme (jamais dans l\'onclick)', () => {
 	const play = fs.readFileSync(path.join(RACINE, 'templates', 'play_town_telluris.html'), 'utf8');
-	assert.ok(play.includes('{% for e in enigmes_ici %}'));
+	assert.ok(/{%-? for e in enigmes_ici %}/.test(play));
 	assert.ok(play.includes('data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)"'));
+});
+
+t('bloc « Énigmes » réécrit sans recharger : ✓ / 🔍, échappé, même markup que Jinja', () => {
+	assert.strictEqual(enigmesIciHtml([]), '');
+	assert.strictEqual(enigmesIciHtml(null), '');
+	const h = enigmesIciHtml([{ id: 'enigme:a', nom: 'La porte', resolue: true },
+		{ id: 'enigme:b', nom: PIEGE, resolue: false }]);
+	assert.ok(h.startsWith('<h3>Énigmes</h3><ul class="sub-locations-list" id="enigmes-ici">'));
+	assert.ok(h.includes('data-enigme="enigme:a" onclick="ouvrirEnigme(this.dataset.enigme)">✓ La porte'));
+	assert.ok(h.includes('🔍 &lt;img'));
+	assert.ok(!h.includes(PIEGE));
+	const play = fs.readFileSync(path.join(RACINE, 'templates', 'play_town_telluris.html'), 'utf8');
+	assert.ok(play.includes('<div id="enigmes-ici-bloc">'), 'bloc toujours émis, cible de _majEnigmesIci');
+});
+
+t('une résolution applique le resync du lieu de /play (portes, énigmes, 🗣)', () => {
+	const js = fs.readFileSync(SCRIPT, 'utf8');
+	assert.ok(js.includes('_appliquerResyncLieu(data)'));
+	const play = fs.readFileSync(path.join(RACINE, 'templates', 'play_town_telluris.html'), 'utf8');
+	const corps = play.slice(play.indexOf('function _appliquerResyncLieu'));
+	for (const appel of ['LINKS = data.links', 'buildLocationslist()', '_majEnigmesIci(data.enigmes_ici)',
+		'_majPnjsIci(data.pnjs_ici)', '_majPnjMarques(data.pnj_marques)']) {
+		assert.ok(corps.slice(0, 1200).includes(appel), appel);
+	}
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
