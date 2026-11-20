@@ -113,7 +113,8 @@ utils/
                          #   vue en FLEUVES (`entites` : cités/ordres, paliers de largeur, rattachement par tags
                          #   = `rattacher`), `bandeaux`, cartes d'ères ; vignettes : dev/gen_vignettes_chronologie.py
   lore.py                # /admin/lore (pur) : liste blanche docs/lore + Document maître, rendu Markdown
-                         #   stdlib (texte ÉCHAPPÉ avant balisage), liens .md réécrits vers leur page
+                         #   stdlib (texte ÉCHAPPÉ avant balisage), liens .md réécrits vers leur page ;
+                         #   séance = RÉCIT d'abord (`?{…}?` = proposition), puis `## 🗂 Échanges de travail` repliés
   lore_outils.py         # parcours du lore (pur) : recherche PLEIN TEXTE (sans casse ni accents), durée, entités
                          #   ÉCRITES À LA MAIN (docs/lore/entites.json : liens croisés, thèmes, illustrations,
                          #   encyclopédie, carte par lat/lon), parcours guidé (docs/lore/parcours.json), quoi de neuf
