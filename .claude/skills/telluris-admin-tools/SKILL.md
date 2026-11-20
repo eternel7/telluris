@@ -80,6 +80,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_convoi_lutecia.py` — le voyage à Lutèce.
 - `gen_epaulieres.py` — 21 pièces d'épaules + recettes.
 - `gen_loot_immateriel.py` — sous-catégorie + recettes pour 32 butins immatériels.
+- `gen_debouches_gelee.py` — débouché des gelées de slime (`item:gelee` + 4 recettes : alchimie, apothicairerie, savonnerie) ; refus si feuilles ou prix des produits bougent, liste les butins d'espèce encore sans acheteur hors négociant. DELTA → `jsons/debouches_gelee_a_importer.json`.
 - `gen_boulangeries.py`, `gen_jardinerie.py`, `gen_recettes_empenneur_archerie.py` — boutiques et recettes de métier.
 - `gen_encre_scriptorium.py` — recette pigment ×1 → encre ×2 : sans elle aucun livre de contenu ne sort (cf. `telluris-social-ui` § Scriptorium). ⚠️ Encre 12-36 → 30-90 cu.
 - `gen_grimoires.py [--dump]` — outil 📖 de `/admin/dev-tools` (dump frais) : un grimoire **UNIQUE** (`sorts: [id]`) + `recette:grimoire_<slug>` de scriptorium par sort qui n'en a pas. ⚠️ Un grimoire **multiple ne couvre pas** : le sort reçoit quand même le sien. Règle, prix/rareté par niveau et docs dans `utils/grimoires.py` (`tests/test_grimoires.py`) ; refuse tout le lot sur un `_id` pris par autre chose, n'écrit aucun fichier sans rien à créer ; signale les grimoires sans recette (`Grimoire_necromancie`, `Grimoire_pactes` : `sorts` vide au 14/09). L'alerte de `/admin` (`GET /admin/grimoires/manquants`, lecture seule, relue après un import contenant un sort ou un grimoire) y renvoie.

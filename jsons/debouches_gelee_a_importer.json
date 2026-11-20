@@ -1,0 +1,68 @@
+[
+  {
+    "_id": "item:gelee",
+    "type": "item",
+    "nom": "Gelée de slime",
+    "icon": "🫧",
+    "description": "Gelée translucide et collante, recueillie sur les slimes des donjons.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "gelee",
+    "slots": [],
+    "tags": [],
+    "poids": 1,
+    "valeur": 3
+  },
+  {
+    "_id": "recette:gelee_glu_de_nuit_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Glu_de_nuit",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_reactif_magique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "reactif_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_onguent_apothicairerie",
+    "type": "recette",
+    "lieu_categorie": "apothicairerie",
+    "objet_final": "onguent",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:gelee_savon_savonnerie",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "savon",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gelee",
+        "quantite": 2
+      }
+    ]
+  }
+]
