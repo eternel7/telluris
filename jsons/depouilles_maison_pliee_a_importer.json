@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "item:nopperabo",
+    "type": "item",
+    "nom": "Résidu spectral de Nopperabō",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Ce qui reste d'un Nopperabō une fois dissipé : une pâleur lisse, sans trait, qui ne garde l'empreinte d'aucun doigt.",
+    "source_espece": "espece:nopperabo",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:homme_au_sac",
+    "type": "item",
+    "nom": "Carcasse d'Homme au sac",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [60, 90],
+    "description": "Dépouille de l'Homme au sac récupérée à l'issue du combat. Son sac, vide, n'a plus de fond.",
+    "source_espece": "espece:homme_au_sac",
+    "loot_defaut": true
+  }
+]
