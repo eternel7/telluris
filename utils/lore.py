@@ -3,7 +3,8 @@
 Périmètre : `docs/lore/**/*.md` + `docs/Telluris_Document_Maitre.md` (la synthèse canonique).
 Le rendu est un convertisseur Markdown stdlib (aucune dépendance pip : en ajouter une
 exige de recréer le conteneur) qui couvre ce que le corpus utilise réellement : titres,
-`---`, blocs ``` ```, tableaux GFM, citations, listes imbriquées, gras/italique/code/liens.
+`---`, blocs ``` ```, tableaux GFM, citations, listes imbriquées, gras/italique/code/liens,
+et `?{…}?` = une proposition non tranchée dans un récit (`span.proposition`).
 
 ⚠️ XSS (CLAUDE.md §9) : tout le texte est ÉCHAPPÉ avant que les motifs ne posent leurs
 balises — le HTML brut cité dans une séance s'affiche en texte. Seuls `http(s):`, `#` et
@@ -186,6 +187,7 @@ _RE_ECHAP = re.compile(r"\\([\\`*_{}\[\]()#+\-.!|~>])")
 _RE_LIEN = re.compile(r"(!?)\[([^\]]*)\]\(<?((?:[^()\s<>]|\([^()\s]*\))+)>?(?:\s+\"[^\"]*\")?\)")
 _RE_URL_NUE = re.compile(r"https?://[^\s<>\"]+")
 _RE_PLACE = re.compile(r"\x00(\d+)\x00")
+_RE_PROPOSITION = re.compile(r"\?\{(?=\S)(.+?)(?<=\S)\}\?")
 
 
 def _inline(texte: str, lien_fn) -> str:
@@ -230,6 +232,8 @@ def _inline(texte: str, lien_fn) -> str:
 	texte = re.sub(r"(?<![\w*])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![\w*])", r"<em>\1</em>", texte)
 	texte = re.sub(r"(?<![\w_])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w_])", r"<em>\1</em>", texte)
 	texte = re.sub(r"~~(?=\S)(.+?)(?<=\S)~~", r"<del>\1</del>", texte)
+	# `?{…}?` : une PROPOSITION dans un récit (non tranchée) — teinte et pointillés à l'écran.
+	texte = _RE_PROPOSITION.sub(r'<span class="proposition" title="Proposé, non tranché">\1</span>', texte)
 	while _RE_PLACE.search(texte):  # un libellé de lien peut contenir ses propres gardes
 		texte = _RE_PLACE.sub(lambda m: gardes[int(m.group(1))], texte)
 	return texte
@@ -430,6 +434,17 @@ def rendre(md: str, lien_fn=_lien_externe_seul):
 	etat = _Etat(lien_fn)
 	html_out = "\n".join(_blocs(md.replace("\r\n", "\n").replace("\r", "\n").split("\n"), etat))
 	return html_out, etat.toc
+
+
+# Une séance : le RÉCIT d'abord, puis `## 🗂 Échanges de travail` (repliés à l'écran, hors du livre).
+TITRE_ECHANGES = "🗂"
+_RE_H2_ECHANGES = re.compile(r'<h2 id="[^"]*">' + TITRE_ECHANGES)
+
+
+def sans_echanges(corps: str) -> str:
+	"""HTML de `rendre` sans la partie « 🗂 Échanges de travail » (le livre ne garde que le récit)."""
+	m = _RE_H2_ECHANGES.search(corps)
+	return corps[:m.start()].rstrip() if m else corps
 
 
 def rendre_fichier(chemin: str, racine: Path = RACINE):

@@ -31,11 +31,13 @@
 		.chapitre table { border-collapse: collapse; font-size: 0.86rem; } .chapitre th, .chapitre td { border: 1px solid var(--border); padding: 4px 7px; vertical-align: top; }
 		.chapitre pre { white-space: pre-wrap; font-size: 0.8rem; background: var(--panel); padding: 8px; border-radius: 6px; }
 		.chapitre hr { border: none; border-top: 1px solid var(--border); }
+		.chapitre .proposition { color: var(--violet); text-decoration: underline dotted; text-underline-offset: 3px; }
 		@media print {
 			@page { margin: 18mm 16mm; }
 			.outils { display: none; }
 			.main { max-width: none; padding: 0; }
 			.livre, .livre * { color: #000 !important; background: none !important; }
+			.chapitre .proposition { text-decoration: underline dotted !important; }
 			.chapitre { break-before: page; border-top: none; margin-top: 0; }
 			.chapitre h1, .chapitre h2, .chapitre h3 { break-after: avoid; }
 			.chapitre table, .chapitre pre, .chapitre blockquote { break-inside: avoid; }

@@ -85,6 +85,7 @@ h1, h2, h3, h4 { font-family: Georgia, serif; color: #6b2a14; line-height: 1.25;
 h1 { font-size: 1.6em; } h2 { font-size: 1.3em; border-bottom: 1px solid #b49a6a; }
 blockquote { border-left: 3px solid #b49a6a; margin-left: 0; padding-left: 0.8em; color: #4a3a28; }
 table { border-collapse: collapse; font-size: 0.9em; } th, td { border: 1px solid #b49a6a; padding: 3px 6px; vertical-align: top; }
+.proposition { color: #5b3f8c; text-decoration: underline dotted; }
 pre { white-space: pre-wrap; font-size: 0.8em; } code { font-family: monospace; }
 """
 

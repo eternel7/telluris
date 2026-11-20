@@ -192,6 +192,7 @@
 			border-radius: 4px; line-height: 1.35;
 		}
 		.sommaire li a:hover { color: var(--text); background: var(--panel2); }
+		.sommaire li[hidden] { display: none; }
 		.sommaire li.n1 a { color: var(--text); }
 		.sommaire li.n3 a { padding-left: 18px; }
 		.meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; overflow-wrap: anywhere; }
@@ -243,6 +244,15 @@
 		.md .repli-chatgpt[hidden] { display: none; }
 		.md .repli-chatgpt > * + * { margin-top: 0.8em; }
 		.md .repli-chatgpt { margin-top: 0.8em; }
+		/* Proposition non tranchée dans un récit (`?{…}?`) : teinte voisine, soulignée en pointillés. */
+		.md .proposition { color: var(--violet); text-decoration: underline dotted var(--violet); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+		.md .proposition strong, .md .proposition em { color: inherit; }
+		/* Une séance : le récit d'abord, les échanges de travail repliés dessous. */
+		.md details.echanges { margin-top: 2em; border: 1px solid var(--border); border-radius: 8px; padding: 0 14px; background: var(--panel); }
+		.md details.echanges > summary { min-height: var(--tap); display: flex; align-items: center; cursor: pointer; font-family: var(--police-ui); color: var(--muted); font-size: 0.9rem; }
+		.md details.echanges[open] { padding-bottom: 14px; }
+		.md details.echanges > * + * { margin-top: 0.8em; }
+		.md .legende-proposition { font-family: var(--police-ui); font-size: 0.78rem; color: var(--muted); }
 		.md strong { color: var(--fort); }
 		.md em { color: var(--em); }
 		.md a.entite { color: inherit; text-decoration: underline dotted var(--accent2); text-underline-offset: 3px; }
@@ -586,6 +596,13 @@
 
 	/** Plages à replier (« canon d'abord ») : `blocs` = [{h2: bool, chatgpt: bool}] des enfants
 	 *  du corps. Renvoie [[début, fin)] : ce qui suit un h2 de ChatGPT, jusqu'au h2 suivant. */
+	/** Échanges de travail d'une séance : `blocs` = [{h2: bool, echanges: bool}] des enfants du
+	 *  corps. Renvoie l'indice du PREMIER h2 « 🗂 Échanges de travail » (tout ce qui suit est replié),
+	 *  ou -1 : sans ce titre, la page n'a pas de récit séparé et rien n'est replié. */
+	function lorePlageEchanges(blocs) {
+		return blocs.findIndex(b => b.h2 && b.echanges);
+	}
+
 	function loreSectionsChatgpt(blocs) {
 		const out = [];
 		let debut = -1;
@@ -907,6 +924,7 @@
 				else if (t.startsWith('🤖')) h.classList.add('chatgpt');
 			}
 			canonDabord(corps, aAuteur);
+			replierEchanges(corps);
 
 			// Lu : la page est marquée lue dès son ouverture.
 			const l = loreLu(); l.lu = l.lu || {}; l.lu[corps.dataset.cle] = maintenant(); loreLuEcrire(l);
@@ -934,7 +952,42 @@
 			deplierVers(decodeURIComponent(location.hash.slice(1)));
 		}
 
+		/** Le récit d'abord : la partie « 🗂 Échanges de travail » repliée dans un <details> fermé ;
+		 *  une légende explique le pointillé dès que le récit porte une proposition. */
+		function replierEchanges(corps) {
+			const enfants = Array.from(corps.children);
+			const d = lorePlageEchanges(enfants.map(e => ({ h2: e.tagName === 'H2', echanges: e.tagName === 'H2' && e.textContent.trim().startsWith('🗂') })));
+			const recit = d >= 0 ? enfants.slice(0, d) : [];
+			if (recit.some(e => e.querySelector && e.querySelector('.proposition'))) {
+				const leg = document.createElement('p');
+				leg.className = 'legende-proposition';
+				leg.innerHTML = 'Les passages <span class="proposition">soulignés en pointillés</span> sont des propositions, pas encore tranchées.';
+				const h1 = recit.find(e => e.tagName === 'H1');
+				(h1 || corps.firstElementChild).after(leg);
+			}
+			if (d < 0) return;
+			const det = document.createElement('details');
+			det.className = 'echanges';
+			const sum = document.createElement('summary');
+			const mots = enfants.slice(d).reduce((n, e) => n + (e.textContent.match(/\S+/g) || []).length, 0);
+			sum.textContent = `${enfants[d].textContent.trim()} (≈ ${mots} mots) — à consulter au besoin`;
+			sum.id = enfants[d].id;  // le lien du sommaire vise le résumé, qui ouvre les échanges
+			det.appendChild(sum);
+			enfants[d].before(det);
+			for (let i = d + 1; i < enfants.length; i++) det.appendChild(enfants[i]);
+			enfants[d].remove();
+			// Sommaire : les titres des échanges n'y figurent que lorsque les échanges sont ouverts.
+			const lis = Array.from(document.querySelectorAll('#sommaire li'));
+			const k = lis.findIndex(li => li.querySelector(`a[href="#${CSS.escape(sum.id)}"]`));
+			const suite = k >= 0 ? lis.slice(k + 1) : [];
+			const montrer = () => { for (const li of suite) li.hidden = !det.open; };
+			det.addEventListener('toggle', montrer);
+			montrer();
+		}
+
 		function deplierAutour(el) {
+			const det = el.closest('details.echanges');
+			if (det && !det.open) det.open = true;
 			const r = el.closest('.repli-chatgpt');
 			if (r && r.hidden) { r.hidden = false; const b = r.previousElementSibling; if (b && b.classList.contains('deplier')) b.remove(); }
 		}
@@ -1090,7 +1143,7 @@
 				arreter();
 				const blocs = elements.map(e => ({ h2: e.tagName === 'H2', auteur: e.classList.contains('auteur') }));
 				file = lectureSelection(blocs, $('auteur-seul').checked)
-					.filter(i => i >= indexElement && !elements[i].closest('.repli-chatgpt[hidden]'));
+					.filter(i => i >= indexElement && !elements[i].closest('.repli-chatgpt[hidden]') && !elements[i].closest('details.echanges:not([open])'));
 				pos = 0; morceaux = []; k = 0; actif = true;
 				boutons();
 				dire(jeton);
