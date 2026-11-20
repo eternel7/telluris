@@ -212,6 +212,30 @@ def test_association_paires_gardees_et_seuil():
 	assert _agir(ASSOCIATION, perso, "associer", gauche="chemin", droite="proj")["resolue"]   # seuil 2
 
 
+def test_pex_resolution_premier_coup_puis_deuxieme_puis_rien():
+	assert [enigmes.pex_resolution(n) for n in range(len(enigmes.PEX_RESOLUTION) + 2)] \
+		== list(enigmes.PEX_RESOLUTION) + [0, 0]
+	assert enigmes.PEX_RESOLUTION == (10, 5)   # règle voulue : 10 du premier coup, 5 du deuxième
+	assert enigmes.pex_resolution(None) == 10   # champ absent (aucune migration) ⇒ aucun échec
+
+
+@pytest.mark.parametrize("faux, pex", [(0, 10), (1, 5), (2, 0), (3, 0)])
+def test_agir_accorde_le_pex_selon_les_essais_faux(faux, pex):
+	perso = _perso()
+	for _ in range(faux):
+		assert not _agir(CRANS, perso, "essayer", positions={"a": 0, "b": 0})["reussi"]
+	r = _agir(CRANS, perso, "essayer", positions={"a": 3, "b": 1})
+	assert r["resolue"] and r["pex"] == pex
+	# Rejouer une énigme résolue ne rapporte plus rien.
+	assert "pex" not in _agir(CRANS, perso, "essayer", positions={"a": 3, "b": 1})
+
+
+def test_une_etape_partielle_juste_nest_pas_un_coup():
+	perso = _perso()
+	_agir(ASSOCIATION, perso, "associer", gauche="porte", droite="dest")   # paire juste
+	assert _agir(ASSOCIATION, perso, "associer", gauche="chemin", droite="proj")["pex"] == 10
+
+
 def test_placement():
 	perso = _perso()
 	assert not _agir(PLACEMENT, perso, "essayer", placement={"p1": "lune"})["reussi"]

@@ -25,7 +25,8 @@
 # chacun avec sa voix, jamais la solution.
 #
 # État sur le personnage (aucune migration : champ absent ⇒ rien de commencé) :
-#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "journal": [...], "note_at", "etat": {...}}
+#   character["enigmes"][id] = {"resolue", "resolue_at", "essais", "echecs", "journal": [...], "note_at", "etat": {...}}
+#   `echecs` = essais FAUX (pas les étapes partielles justes) → XP de résolution, cf. PEX_RESOLUTION.
 #   Les notes (`journal`) remontent à l'onglet 📖 du principal : `notes_du_carnet`.
 # Une énigme résolue le reste POUR TOUJOURS (quête abandonnée comprise). Un essai faux ne coûte
 # rien : découvertes et étapes validées sont gardées. Le journal se tient tout seul.
@@ -40,6 +41,16 @@ QUAND_SIMPLES = ("ouverture", "echec", "reussite")
 QUAND_PREFIXES = ("examen:", "salle:", "revele:")
 
 JOURNAL_MAX = 200
+
+# XP de résolution selon le nombre d'essais faux avant la bonne réponse : du premier coup 10,
+# du deuxième 5, rien au-delà. Une étape juste mais incomplète (`partiel`) n'est pas un coup.
+PEX_RESOLUTION = (10, 5)
+
+
+def pex_resolution(echecs) -> int:
+	"""XP accordée à la résolution après `echecs` essais faux."""
+	n = max(0, int(echecs or 0))
+	return PEX_RESOLUTION[n] if n < len(PEX_RESOLUTION) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -378,7 +389,8 @@ _RESOLVEURS = {
 
 def agir(doc: dict, character: dict, action: str, body: dict, now: int) -> dict:
 	"""Applique une action au personnage (MUTE, ne sauve pas). → résultat :
-	{"reussi": bool, "resolue": bool, "texte": str|None, "evenements": [...]}.
+	{"reussi": bool, "resolue": bool, "texte": str|None, "evenements": [...]}, + `pex` (XP due,
+	à accorder par l'appelant) à la PREMIÈRE résolution seulement.
 	Lève `EssaiInvalide` sur une requête mal formée. Une énigme déjà résolue ne bouge plus, SAUF
 	l'examen d'une déduction : on peut toujours y revenir noter un indice laissé de côté (le carnet
 	de Villard sert au meuble, le socle à la porte de sortie). `note_ajoutee` : le journal a grandi
@@ -401,13 +413,14 @@ def agir(doc: dict, character: dict, action: str, body: dict, now: int) -> dict:
 		e["resolue"], e["resolue_at"] = True, int(now)
 		evenements.append("reussite")
 		return {"reussi": True, "resolue": True, "texte": doc.get("reussite", ""), "evenements": evenements,
-				"note_ajoutee": note}
+				"note_ajoutee": note, "pex": pex_resolution(e.get("echecs"))}
 	# Essai FAUX : une remarque, aucune pénalité. Une étape juste mais incomplète (paire trouvée,
 	# `partiel`) n'est pas un échec : elle s'inscrit au journal en silence.
 	texte = None
 	if r.get("essai") and not r.get("partiel"):
 		texte = r.get("texte") or doc.get("echec") or "Rien ne se passe."
 		evenements.append("echec")
+		e["echecs"] = int(e.get("echecs", 0)) + 1
 	return {"reussi": False, "resolue": False, "texte": texte, "evenements": evenements, "note_ajoutee": note}
 
 

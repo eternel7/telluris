@@ -77,3 +77,19 @@ def test_rejouer_une_enigme_deja_resolue_ne_resynchronise_rien(monde):
 	re, _ = monde
 	_essayer(re, 3)
 	assert "enigmes_ici" not in _essayer(re, 3)
+
+
+def test_la_resolution_accorde_l_xp_et_resynchronise_la_fiche(monde):
+	re, docs = monde
+	_essayer(re, 1)   # un essai faux : le deuxième coup rapporte 5
+	rep = _essayer(re, 3)
+	assert rep["xp"]["xp_gain"] == 5 and docs["character:u_1"]["xp_total"] == 5
+	assert rep["fiche"]["xp_total"] == 5
+	rep = _essayer(re, 3)   # déjà résolue : plus rien
+	assert "xp" not in rep and docs["character:u_1"]["xp_total"] == 5
+
+
+def test_un_essai_faux_n_accorde_rien(monde):
+	re, docs = monde
+	rep = _essayer(re, 1)
+	assert "xp" not in rep and "fiche" not in rep and not docs["character:u_1"].get("xp_total")
