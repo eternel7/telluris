@@ -1,4 +1,42 @@
-# Mu — Histoire de la Cité du Continent englouti (ChatGPT)
+# Mu — histoire de la Cité du Continent englouti
+
+Mu était un continent du Grand Océan, et une cité de routes qui ne conquit jamais rien. Elle était **en avance sur son temps** : ses refuges fortifiés, ses chaussées et ses gardiens des routes existaient avant même que Gilgamesh ouvre l'Âge des Remparts pour le reste du monde. Mais son histoire est si mal connue qu'aucune autre cité ne la cite en exemple.
+
+## Le temps des Tables de Pierre
+
+Mu ne parle pas d'« âges » : elle a ses propres époques. La plus ancienne est le **temps des Tables de Pierre**, celui des **Sept Sages de Mu**. Ce sont les sept *apkallu* que la Mésopotamie se rappelle comme des sages venus des eaux avant le Déluge pour enseigner les arts aux hommes. Le Déluge, lui, n'a pas englouti Mu.
+
+Mu n'a jamais eu d'empereur. Elle se gouvernait par des assemblées (lignées, temples, guildes, maîtres Architectes), et celui qui tenait l'équilibre entre elles portait un titre : **Ra-Mu**. La surface, qui ne concevait pas une puissance sans empire, en a fait l'« Empereur du Soleil levant ». Le mythe a eu lieu ; il est seulement arrivé déformé. Que ce nom ressemble à celui du Ra d'Égypte, emprunt, coïncidence ou trace d'un ancien contact, personne ne le sait.
+
+## Les portails et le lent dérèglement
+
+Mu a appris l'art des portails de **l'un des trois frères**. Ses propres portails, œuvres d'héritiers, demandaient des cristaux, comme tous ceux qui ne sont pas de la main des frères. La **Couronne de Mu** servait à les stabiliser. Puis vint un lent dérèglement : les structures de Mu, on le comprit trop tard, « retenaient quelque chose ».
+
+## La Vague et la cité sous la mer
+
+Mu a sombré **au moment de la Vague**. Le continent a disparu, mais la cité, **Mu-la-Centrale**, est descendue au fond de la mer sous une enveloppe de stabilisation : un dôme de lumière irisée, bleutée au sommet, dorée à sa base. Sous ce dôme se dressent de grands temples pyramidaux à degrés, couronnés de soleils d'or, au milieu de canaux en damier, de quais et de jardins ; au-dehors, les anciens quartiers noyés se couvrent de coraux, parmi les méduses et les raies.
+
+Les dirigeants d'alors ont caché à leur peuple les vraies raisons de l'engloutissement : ils ont parlé de tectonique et de volcans. Mu a oublié, et nul au-dehors ne sait ce qu'elle est devenue.
+
+## La vérité que personne ne connaît
+
+Mu a sauvé Telluris. Elle a **sacrifié un continent pour fermer un portail naturel** dont la voracité menaçait le monde : une **porte des Enfers d'Hadès**. Presque personne ne le sait, et à Mu même, ce n'est qu'une hypothèse parmi beaucoup d'autres. La grande question des habitants reste : le continent a-t-il été englouti pour sauver la cité, ou la cité pour sauver le monde ?
+
+Quand la porte fut scellée, **Échidna**, la mère des monstres des Grecs, mi-femme mi-serpent, soignait de l'autre côté du seuil son préféré, **Cerbère**. Lui est resté dans les Enfers ; elle est restée prisonnière sous le continent, séparée de lui. Elle vit sous Mu-la-Centrale, près de la porte fermée. À Mu, on l'appelle la **mère des serpents**, et jamais Lilith. Les **Naga**, fils de **Kadru**, ont parcouru les océans ; certains se sont établis à Mu et ont rencontré Échidna. Elle n'est pas leur mère, mais elle en est l'image. L'aventurier la rencontre au rang A : « Vous appelez monstres mes enfants. »
+
+Cette porte d'Hadès n'est pas celle de l'Hekla, qui mène à l'Enfer de Lucifer : ce sont deux mondes distincts. Mais un monde peut avoir plusieurs portes.
+
+## Les donjons de l'ancien continent
+
+Plusieurs structures de Mu sont devenues des donjons. ?{Certains ouvrent sur des forêts semblables à celles du continent d'avant, peuplées de créatures disparues ; d'autres sur des cités impossibles, bâties selon les principes de Mu par des êtres qui ne la reconnaissent pas.}? Les plus inquiétants s'appellent **les Retours** : ils semblent rejouer des fragments du passé sans être le passé, et des aventuriers jurent y avoir croisé d'anciens sages ou les premiers Architectes. Nul ne sait s'il s'agit d'êtres réels, de créations du donjon ou de mémoires accumulées dans la pierre.
+
+## Mu aujourd'hui
+
+Mu-la-Centrale est habitée. ?{Elle vit des cristaux tirés de ses propres territoires dangereux et de quelques échanges secrets avec la surface.}? Ses Templiers surveillent des passages qui ouvrent « au-delà de toute carte » ; ses Paladins tiennent des routes qui ne sont plus terrestres (tunnels, galeries, cavernes) entre les anciens quartiers. Ses maîtres en savent plus que quiconque dans le monde, mais bien moins que leurs prédécesseurs.
+
+On ne va à Mu que par **Notre-Dame**, en un seul seuil, avec un cristal jaune. Les archives de Mu forment les meilleurs Architectes de Lutecia : il y a **ceux qui reviennent** et **ceux qui restent**, par vocation. « On n'en sort pas » n'est qu'une façon de parler. Moins on parle de Mu, plus les guildes s'y intéressent ; le prix du voyage n'est connu qu'à partir du rang A.
+
+## 🗂 Échanges de travail
 
 - **Source :** deux réponses de ChatGPT, transmises par l'Auteur (séance Claude Code du 11/10/2026). Les messages de l'Auteur qui les ont suscitées n'ont pas été transmis.
 - **Créée :** 11/10/2026

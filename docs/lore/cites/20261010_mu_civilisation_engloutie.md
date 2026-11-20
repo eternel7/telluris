@@ -1,5 +1,21 @@
 # Mu — La civilisation engloutie
 
+On parle de Mu comme d'une terre légendaire dont les archives doutent. Elle a prospéré bien avant les Cités-États, et sa magie est antérieure au savoir que les trois frères ont répandu. Une catastrophe l'a engloutie ; ses ruines dorment sous les océans ou derrière des portails que la Vague a altérés. Ce qu'elle savait dépassait ce que savent aujourd'hui les Architectes.
+
+Mu dit aussi quelque chose d'inquiétant : les Anthropes ne sont peut-être pas les premiers à avoir voulu maîtriser les frontières du monde, et la Vague n'est peut-être pas le premier bouleversement qu'il ait connu. Cette question reste ouverte.
+
+## Le perfectionnement des Architectes
+
+Lutecia et Mu sont liées par le **portail programmable de Notre-Dame**, œuvre de l'un des frères. Lutecia y envoie ses Architectes les plus prometteurs : c'est là que s'achève leur formation. Ils y apprennent des méthodes de stabilisation oubliées et des manières de manier le mana que les instituts de Lutecia ignorent. Ceux qui reviennent sont recherchés partout, pour les portails anciens, les anomalies, les passages qu'il faut rendre très stables.
+
+Mais Mu ne livre pas tout. Ses enseignements les plus avancés sont réservés à ceux qu'elle juge dignes ; certains reviennent transformés, d'autres ne reviennent jamais. La suprématie de Lutecia dans l'art des portails dépend ainsi d'un savoir qu'elle ne possède pas elle-même : Lutecia n'a pas de grandes écoles de magie, seulement des instituts d'Architectes, et c'est Mu qui parachève ce qu'ils commencent.
+
+Aujourd'hui, le continent englouti n'est connu à Lutecia que des grands Architectes et des Templiers de Notre-Dame. Ailleurs, il est une image révérée, presque un culte, chez tous les Architectes. Ceux qui y ont étudié occupent de très hauts postes et en parlent peu. Ce n'est pas un interdit : « ça ne s'explique pas ». Ils ne savent pas où se trouve Mu ; on y entre par un seuil, et l'on en revient par le même.
+
+L'histoire de Mu est racontée dans la séance suivante, [Mu — histoire de la Cité du Continent englouti](20261011_histoire_de_mu_chatgpt.md).
+
+## 🗂 Échanges de travail
+
 - **Source :** texte fourni par l'Auteur (session Claude Code du 10/10/2026) ; ajouté au lore à sa demande.
 - **Créée :** 10/10/2026
 - **Statut :** décision de l'Auteur, complète et précise la ligne « Mu » du tableau du 26/08 (portails surveillés, échanges secrets avec la surface). Pas de `lieu:*` correspondant au dump.

@@ -1,5 +1,25 @@
 # Les cinq portes d'Aix-la-Chapelle — temples de sortie et Templiers gardiens
 
+Sous la coupole de la Chapelle Palatine d'Aix-la-Chapelle s'ouvrent **cinq portes**, disposées en pentagramme. Elles sont l'œuvre de l'un des trois frères venu en Europe. Leurs destinations sont fixes, la Vague ne les a pas touchées, et comme presque tous les portails originaux des frères, elles ne consomment aucun cristal. Les fenêtres de la chapelle laissent voir l'autre côté : des falaises ocre sous un ciel immense, des toits de bois courbes sous des cerisiers, une pyramide à degrés au bout d'une allée, des terrasses accrochées à une montagne verte dans les nuages, des colosses assis au bord d'un fleuve.
+
+Les cinq portes mènent à **Sydney**, **Tokyo**, **Teotihuacan**, **Pichao** et **Abou Simbel**. Elles restent toujours ouvertes, sans gemme ni cristal. Une gardienne tient leur tableau dans la chapelle et parle à tous ; seuls les aventuriers de rang A peuvent franchir les portes.
+
+## Les cinq temples de sortie
+
+?{À chaque sortie, un temple a été bâti autour de la porte, comme on le fait toujours autour d'un portail, et un Templier y veille :}?
+
+?{- à **Sydney**, le **Sanctuaire de Baiame**, sur les promontoires de grès gravés de l'entrée de la baie, gardé par **Barangaroo**, une humaine, ancienne pêcheuse ;}?
+?{- à **Tokyo**, le **temple de Sensō-ji**, que fit bâtir un chef de village après que deux frères pêcheurs eurent tiré une statuette de la rivière Sumida ; le nain **Haji no Nakatomo** porte le nom de ce chef ;}?
+?{- à **Teotihuacan**, le **temple du Serpent à plumes**, avec son tunnel et ses flaques de mercure, gardé par **Ocelotl**, un ogre vêtu d'une peau de jaguar, allié des guerriers-jaguars ;}?
+?{- à **Pichao**, le **temple du Soleil**, autour de la grotte et de la pierre « où l'on attache le soleil », gardé par la hobbit **Cusi Coyllur** ; la cité elle-même reste à décrire ;}?
+?{- à **Abou Simbel**, le **Petit Temple**, aux colosses de Néfertiti et d'Akhénaton, gardé par **Nakhtmin**, un elfe mort-vivant bien conservé de la cour.}?
+
+?{Chaque Templier porte sa théorie sur sa porte, et toutes se contredisent : le frère est-il parti de Sydney, ou a-t-il bâti la porte depuis Aix ? La statuette a-t-elle appelé la porte, ou la porte a-t-elle mis la statuette dans le filet ? Le Serpent à plumes a-t-il enseigné le frère ? La pierre tient-elle la porte, ou la porte tient-elle la pierre ? Néfertiti a-t-elle obtenu sa porte contre un secret de longue vie, ou la lui a-t-on donnée pour qu'elle ne vienne jamais la chercher ?}?
+
+Tokyo et Teotihuacan n'ont aucun autre lien avec le reste du monde : la porte d'Aix est leur seul accès.
+
+## 🗂 Échanges de travail
+
 - **Source :** séance Claude Code du 25/10/2026. L'Auteur choisit les cinq portes de la Chapelle Palatine pour créer des portails en jeu, demande un temple et un Templier gardien à chaque sortie, leurs prompts d'image, puis la liste des lieux propices à de nouveaux portails.
 - **Créée :** 25/10/2026
 - **Statut :** destinations = **canon** (Auteur, 24/08 et 26/08). Temples, Templiers, noms et théories = **proposition de Claude Code, à arbitrer**. En jeu : `dev/gen_portails_aix.py` → `jsons/portails_aix_a_importer.json`.
