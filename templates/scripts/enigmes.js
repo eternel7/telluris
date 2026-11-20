@@ -342,6 +342,11 @@ async function _eniEnvoyer(action, extra) {
 		// Résolution : portes, énigmes à bouton (✓), lignes 🗣 — servis SEULEMENT à la
 		// première résolution (routers/enigmes.py), absents sinon.
 		if (typeof _appliquerResyncLieu === 'function') _appliquerResyncLieu(data);
+		// XP de résolution (10 du premier coup, 5 du deuxième) : fiche resynchronisée.
+		if (data.fiche && typeof _appliquerFiche === 'function') _appliquerFiche(data.fiche);
+		if (data.xp && data.xp.xp_gain && typeof showToast === 'function') {
+			showToast(`+${data.xp.xp_gain} XP` + (data.xp.niveau_up ? ` — niveau ${data.xp.niveau_apres} !` : ''));
+		}
 	} catch (err) { console.error('Erreur action énigme', err); }
 }
 

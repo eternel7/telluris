@@ -15,7 +15,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character
+from utils.characters import get_selected_character, grant_xp
+from utils import fiche as fiche_util
 from utils.lieux import get_lieu_links
 from utils import acces
 from utils import enigmes
@@ -77,6 +78,8 @@ def enigme_action(current_user: Annotated[dict, Depends(get_current_user)], body
 		resultat = enigmes.agir(doc, character, str(body.get("action") or ""), body, int(time.time()))
 	except enigmes.EssaiInvalide as exc:
 		raise HTTPException(status_code=422, detail=str(exc))
+	# XP de résolution (10 du premier coup, 5 du deuxième, rien ensuite — enigmes.pex_resolution).
+	gain_xp = grant_xp(character, resultat["pex"]) if resultat.get("pex") else None
 	# Déjà résolue : rien ne bouge, sauf une note prise en réexaminant une déduction.
 	if (not deja or resultat.get("note_ajoutee")) and save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
@@ -97,4 +100,7 @@ def enigme_action(current_user: Annotated[dict, Depends(get_current_user)], body
 			find_docs({"type": "enigme"}), character,
 			lambda conds: acces.clauses_remplies(character, conds, get_doc))
 		reponse.update(pnjs_presents_resync(character))
+	if gain_xp:
+		reponse["xp"] = gain_xp
+		reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
 	return reponse
