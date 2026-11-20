@@ -1,5 +1,21 @@
 # Portail des profondeurs
 
+Dans les profondeurs des grottes de l'**Hekla**, en Islande, s'ouvre un gouffre qui est le **pendant du portail de Saint-Pierre**. Saint-Pierre mène à la porte d'un Paradis, celle que garde saint Pierre ; l'Hekla est une porte ouverte sur les entrailles de l'**Enfer de Lucifer**, l'ancien ange de lumière, et de sa cohorte de démons. Personne ne l'a bâti, et nul ne sait s'il est plus ancien ou plus jeune que les portails des trois frères.
+
+Ce n'est pas le seul enfer de Telluris. Sous Mu, une autre porte, aujourd'hui scellée, menait aux **Enfers d'Hadès** : ce sont deux mondes distincts. Mais un monde peut avoir plusieurs portes. L'un ou l'autre de ces enfers peut être le donjon où le personnage s'éveille.
+
+## Un secret à demi gardé
+
+?{L'existence du gouffre est connue des cercles supérieurs de Reykjavik et d'Akureyri, des Templiers islandais et des Architectes les plus avancés. La population, elle, ne connaît pas sa vraie nature : pour elle, les profondeurs de l'Hekla sont une région interdite, peuplée de monstres redoutables et traversée de flux instables. Ce n'est pas faux, seulement incomplet. On craint qu'en disant la vérité, on attire des fanatiques, des cultes, ou des aventuriers convaincus d'y trouver la fortune.}?
+
+## La garde du gouffre
+
+?{Le gouffre relève des **Templiers**, qui tiennent dans la montagne une forteresse parmi les plus secrètes d'Islande, assez loin de l'ouverture pour ne pas subir ses phénomènes. Ils surveillent le portail, les créatures qui voudraient en sortir et les flux qui l'entourent. Aucun portail ne doit être bâti à proximité, et surtout, **personne ne doit tenter de stabiliser ou d'élargir le gouffre**. Les Paladins n'interviennent que si une créature atteint les routes.}?
+
+?{La Hallgrímskirkja est une porte faite pour relier Reykjavik au reste du monde ; l'Hekla est une porte qu'il faut empêcher de relier quoi que ce soit. Les dirigeants de Reykjavik financent discrètement sa surveillance ; dans les tavernes, on raconte que les Templiers gardent sous la montagne un dragon ancien, une armée de démons ou un trésor sans fin, et aucune de ces histoires n'est tout à fait fausse. Pour Akureyri, l'Hekla est surtout une frontière : quand les Templiers ferment les routes du volcan, les caravanes attendent dans les auberges fortifiées, et la cité fournit guides, éclaireurs et chasseurs aux rares expéditions autorisées.}?
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a885747-d194-83eb-9fcb-9393d4a17de8)
 - **Créée :** 21/08/2026 · **mise à jour :** 21/08/2026
 - **Messages :** 2

@@ -1,5 +1,21 @@
 # Créer un système de portails
 
+Faut-il des portails à destination fixe ou variable ? Comment explique-t-on la création d'un portail fixe, et que fait-il au lieu où il débouche ? Cette séance a posé les questions ; le monde y a répondu peu à peu.
+
+## Ce qui est établi
+
+Un portail transversal relie **deux lieux de Telluris** ; aucun sort ne sait en faire autant. Les portails des trois frères, et la plupart de ceux de leurs héritiers, ont une **destination fixe** : les cinq portes de la Chapelle Palatine d'Aix ne mènent jamais qu'à Sydney, Tokyo, Teotihuacan, Pichao et Abou Simbel. **Notre-Dame** est l'exception : elle n'a pas de liens, elle court-circuite un portail du monde le temps que son seuil reste chaud. Un lien a **une porte à chaque bout**, et chaque cité entretient la sienne. Les portails originaux des frères se passent presque toujours de cristaux ; ceux de leurs héritiers en demandent.
+
+## Ce qui est proposé
+
+?{Une destination devient fixe par **ancrage** : l'Architecte identifie deux lieux réels et les accorde l'un à l'autre, et le lieu d'arrivée doit lui-même devenir un point d'ancrage, avec sa propre structure. Plus un portail est ancien, plus il **déforme son environnement**.}?
+
+?{On distinguerait quatre classes de portails : les **stables ordinaires**, quatre-vingts à quatre-vingt-dix sur cent ; les **portails à destinations multiples**, rares ; les **portails modifiés ou défectueux**, dangereux ; et les **donjons**, dont les destinations sont hors du réseau.}?
+
+La séance fondatrice du 12/08 distinguait déjà trois natures de destination : les lieux de Telluris entre eux, les donjons, et les autres mondes, souvent ceux des mythes religieux de la Terre.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a8eaae7-3854-83eb-8496-95791bd4b80a)
 - **Créée :** 26/08/2026 · **mise à jour :** 26/08/2026
 - **Messages :** 2

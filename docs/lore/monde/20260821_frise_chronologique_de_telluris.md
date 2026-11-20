@@ -1,5 +1,13 @@
 # Frise chronologique de Telluris
 
+Cette seconde frise a précisé la place des **Paladins** dans l'histoire. Elle a depuis été fusionnée avec celle du 19/08, et c'est la [frise fusionnée](20261011_frise_chronologique_fusionnee.md) qui fait foi.
+
+L'ordre des Paladins est **plus ancien que les portails**. Depuis que les Anthropes se sont réfugiés derrière des remparts, les Paladins protègent les routes terrestres qui relient les cités. Quand les portails sont apparus, certaines routes ont perdu de leur utilité ; mais toutes les cités n'avaient pas de portail, et les Paladins ont gardé leur fonction sur les tronçons qui reliaient encore les Lignées entre elles. Cette décision remplace celle du 19/08, qui faisait naître les Paladins après la Vague.
+
+?{La frise dessinait trois grandes ruptures (avant les portails, après les portails, après la Vague) et un monde sans guerre où l'on se dispute par le commerce, les routes et l'influence.}? Ces trois ruptures sont devenues quatre ères.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a886d29-c0e0-83eb-aaf7-9e21c98564cf)
 - **Créée :** 21/08/2026 · **mise à jour :** 21/08/2026
 - **Messages :** 2
