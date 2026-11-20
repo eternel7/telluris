@@ -1,0 +1,127 @@
+[
+  {
+    "_id": "lieu:cave_aux_cinq_arches",
+    "type": "lieu",
+    "label": "La cave aux cinq arches",
+    "image": "cave_aux_cinq_arches01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "refus": "Le mur est un mur. Rien ne s'y ouvre pour l'instant.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "enigme_resolue": {
+            "id": "enigme:meuble_aux_trois_tiroirs"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_cave",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_cave.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:seuil_de_la_boite"
+            }
+          }
+        ],
+        "description": "Aélis, une main sur la pierre humide, qui compte les arches à voix basse."
+      },
+      {
+        "character": "pnj:puca",
+        "nom": "Le Púca",
+        "portrait": "puca.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:seuil_de_la_boite"
+            }
+          },
+          {
+            "enigme_resolue": {
+              "id": "enigme:cave_aux_cinq_arches"
+            }
+          }
+        ],
+        "description": "Une forme sombre dans l'alcôve : un bouc, un chien, un vieil homme — selon où l'on pose les yeux."
+      }
+    ]
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_cave",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "portrait": "architecte_Aélis_de_Montfaucon_cave.jpg",
+    "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une cave voûtée, plus grande que les Ateliers qui la contiennent. Cinq arches, chacune gravée d'un signe : une ligne, un cercle, une spirale, une croix, un triangle. Aélis les compte encore.",
+          "choix": [
+            {
+              "id": "arches",
+              "label": "« Ce sont les mêmes signes que sur le tissu. »",
+              "next": "arches",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:cave_aux_cinq_arches",
+                  "attendu": false
+                }
+              }
+            },
+            {
+              "id": "puca",
+              "label": "« Cette chose, dans l'alcôve… »",
+              "next": "puca",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:cave_aux_cinq_arches"
+                }
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(Se taire.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "arches": {
+          "texte": "« Les mêmes. » Elle pose la main sur la voûte. « Une cave qui ne mène nulle part par le plus court. Je parierais qu'elle mène quelque part par le plus juste. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "puca": {
+          "texte": "Elle baisse la voix. « Un púca. Les gens de l'ouest des îles en parlent : il prend toutes les formes, il ne ment jamais tout à fait, et il ne dit jamais rien pour rien. » Elle n'a pas l'air d'avoir peur. Elle a l'air d'avoir envie de prendre des notes.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    },
+    "vocation": "lettre"
+  }
+]

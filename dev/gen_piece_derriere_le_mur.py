@@ -75,6 +75,8 @@ E_SORTIE = "enigme:porte_de_sortie"
 PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # sans blessure (Auteur, 19/11)
 # Aélis dans les Ateliers de Convergence : portrait propre au lieu (Auteur, 19/11).
 PORTRAIT_AELIS_ATELIERS = "architecte_Aélis_de_Montfaucon_ateliers.jpg"
+# Aélis dans la cave aux cinq arches : portrait propre au lieu (Auteur, 20/11).
+PORTRAIT_AELIS_CAVE = "architecte_Aélis_de_Montfaucon_cave.jpg"
 
 # Présences et conditions — les trois états (AVANT · PENDANT · APRÈS, telluris-quetes-pnj).
 ESCORTE_ACTIVE = {"quete_active": {"types": ["escorte"], "cible": SEUIL}}
@@ -341,7 +343,8 @@ def lieux_neufs():
 		"image": "cave_aux_cinq_arches01.jpg", "categorie": "institut_des_architectes", "lieu_parent": LUTECIA,
 		"acces": {"refus": "Le mur est un mur. Rien ne s'y ouvre pour l'instant.", "cycle": 1,
 				  "conditions": [{"enigme_resolue": {"id": E_MEUBLE}}]},
-		"pnj": [aelis_ici(AELIS_CAVE, "Aélis, une main sur la pierre humide, qui compte les arches à voix basse."),
+		"pnj": [entree_pnj(AELIS_CAVE, "Aélis", PORTRAIT_AELIS_CAVE,
+						   "Aélis, une main sur la pierre humide, qui compte les arches à voix basse.", [ESCORTE_ACTIVE]),
 				entree_pnj(PUCA, "Le Púca", "puca.jpg",
 						   "Une forme sombre dans l'alcôve : un bouc, un chien, un vieil homme — selon où l'on pose les yeux.",
 						   [ESCORTE_ACTIVE, {"enigme_resolue": {"id": E_ARCHES}}])],
@@ -425,7 +428,7 @@ def pnj_neufs():
 			"on la fait pour ne pas se tromper d'ordre. »",
 			choix("ok", "Revenir.", "accueil")),
 	})
-	a_cave = pnj_doc(AELIS_CAVE, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS, vocation="lettre", noeuds={
+	a_cave = pnj_doc(AELIS_CAVE, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS_CAVE, vocation="lettre", noeuds={
 		"accueil": noeud(
 			"Une cave voûtée, plus grande que les Ateliers qui la contiennent. Cinq arches, chacune gravée "
 			"d'un signe : une ligne, un cercle, une spirale, une croix, un triangle. Aélis les compte encore.",
