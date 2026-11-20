@@ -90,6 +90,7 @@ from utils import serveur as serveur_util
 from utils import grimoires as grimoires_util
 from utils import catalogue_capacites
 from utils import lore as lore_util
+from utils import lore_outils, lore_livre
 from utils import chronologie as chronologie_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
@@ -2055,15 +2056,91 @@ def admin_competences(request: Request, current_user: Annotated[User, Depends(ge
 
 @app.get("/admin/lore", response_class=HTMLResponse)
 def admin_lore(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-	"""Index du lore (docs/lore + Document maître), lu RENDU dans la page — utils/lore.py."""
+	"""Index du lore (docs/lore + Document maître), lu RENDU dans la page — utils/lore.py ;
+	durée, thèmes, parcours, « quoi de neuf » : utils/lore_outils.py."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	entrees = lore_outils.enrichir(lore_util.lister())
+	donnees = lore_outils.charger_entites()
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_lore.html",
+		context={"title": "Lore de Telluris", "groupes": lore_util.grouper(entrees),
+				 "types": donnees["types"], "parcours": lore_outils.parcours(entrees),
+				 "nouveautes": lore_outils.quoi_de_neuf(entrees),
+				 "selections": lore_livre.selections_disponibles(entrees)}
+	)
+
+
+def _exiger_admin_api(current_user):
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+
+@app.get("/admin/lore/recherche")
+def admin_lore_recherche(current_user: Annotated[User, Depends(get_current_user)], q: str = Query("", max_length=200)):
+	"""Recherche PLEIN TEXTE du lore (titre, résumé, corps ; sans casse ni accents)."""
+	_exiger_admin_api(current_user)
+	return {"resultats": lore_outils.rechercher(q, lore_util.lister())}
+
+
+@app.get("/admin/lore/encyclopedie", response_class=HTMLResponse)
+def admin_lore_encyclopedie(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Une fiche par entité de docs/lore/entites.json, avec les pages qui la citent."""
 	redirect = _require_admin_page(request, current_user)
 	if redirect:
 		return redirect
 	return templates.TemplateResponse(
-		request=request,
-		name="admin_lore.html",
-		context={"title": "Lore de Telluris", "groupes": lore_util.grouper(lore_util.lister())}
+		request=request, name="admin_lore_encyclopedie.html",
+		context={"title": "Encyclopédie du lore", "familles": lore_outils.encyclopedie(lore_util.lister())}
 	)
+
+
+@app.get("/admin/lore/carte", response_class=HTMLResponse)
+def admin_lore_carte(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Les cités de entites.json sur la carte du monde en jeu, réseau des portails tracé."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request, name="admin_lore_carte.html",
+		context={"title": "Carte du lore", "carte": lore_outils.carte()}
+	)
+
+
+def _lore_livre(selection: str):
+	entrees = lore_outils.enrichir(lore_util.lister())
+	pages = lore_livre.selection(selection, entrees, lore_outils.parcours(entrees))
+	if not pages:
+		raise HTTPException(status_code=404, detail="Sélection vide ou inconnue")
+	chaps = lore_livre.chapitres(pages, lambda e: lore_outils.rendu_et_texte(e["chemin"])[0])
+	return lore_livre.libelle_selection(selection), chaps
+
+
+@app.get("/admin/lore/livre", response_class=HTMLResponse)
+def admin_lore_livre(request: Request, current_user: Annotated[User, Depends(get_current_user)],
+					 selection: str = Query("redige", max_length=60)):
+	"""Une sélection du lore sur une seule page, mise en page pour l'impression (→ PDF)."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	titre, chaps = _lore_livre(selection)
+	return templates.TemplateResponse(
+		request=request, name="admin_lore_livre.html",
+		context={"title": titre, "chapitres": chaps, "selection": selection}
+	)
+
+
+@app.get("/admin/lore/livre.epub")
+def admin_lore_livre_epub(current_user: Annotated[User, Depends(get_current_user)],
+						  selection: str = Query("redige", max_length=60)):
+	"""La même sélection en EPUB 3 (utils/lore_livre.py), pour liseuse."""
+	_exiger_admin_api(current_user)
+	titre, chaps = _lore_livre(selection)
+	donnees = lore_livre.epub(f"Telluris — {titre}", chaps, f"urn:telluris:lore:{selection}")
+	return Response(content=donnees, media_type="application/epub+zip",
+					headers={"Content-Disposition": f'attachment; filename="{lore_livre.nom_fichier(selection)}"'})
 
 
 @app.get("/admin/lore/chronologie", response_class=HTMLResponse)
@@ -2095,11 +2172,19 @@ def admin_lore_fichier(cle: str, request: Request, current_user: Annotated[User,
 	entree = next(e for e in entrees if e["chemin"] == chemin)
 	voisins = [e for e in entrees if e["section"] == entree["section"]]
 	k = voisins.index(entree)
-	corps, sommaire = lore_util.rendre_fichier(chemin)
+	corps, sommaire, texte = lore_outils.rendu_et_texte(chemin)
+	donnees = lore_outils.charger_entites()
+	compte = lore_outils.entites_citees(texte, donnees)
+	entree = dict(entree, minutes=lore_outils.duree_minutes(lore_outils.nb_mots(texte)),
+				  mtime=int((lore_util.RACINE / chemin).stat().st_mtime))
+	parcours = lore_outils.parcours(lore_outils.enrichir(entrees))
 	return templates.TemplateResponse(
 		request=request,
 		name="admin_lore.html",
-		context={"title": entree["titre"], "entree": entree, "corps": corps, "sommaire": sommaire,
+		context={"title": entree["titre"], "entree": entree, "sommaire": sommaire,
+				 "corps": lore_outils.lier_entites(corps, donnees, entree["cle"]),
+				 "illustrations": lore_outils.illustrations(compte, donnees, cle_courante=entree["cle"]),
+				 "etape": lore_outils.position_parcours(parcours, entree["cle"]),
 				 "precedent": voisins[k - 1] if k > 0 else None,
 				 "suivant": voisins[k + 1] if k + 1 < len(voisins) else None}
 	)

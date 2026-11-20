@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme-fixe="1">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +14,7 @@
 	  le rendu transpose). Tout texte du JSON passe par textContent (CLAUDE.md §9).
 	#}
 	{% include "part-polices.html" %}
+	{% include "part-lore-reglages.html" %}
 	<style>
 		/* Parchemin enluminé (affiches « Time Chart ») : encre sépia, rubriques vermillon, filets d'or.
 		   Les couleurs du SVG sont dans ENCRE (script) — même palette. */
@@ -35,6 +36,8 @@
 		}
 		@media (pointer: coarse) { :root { --tap: 44px; } }
 		* { box-sizing: border-box; margin: 0; padding: 0; }
+		html[data-police="lisible"] { --plume: 'Atkinson Hyperlegible', Verdana, sans-serif; --titre: 'Atkinson Hyperlegible', Verdana, sans-serif; }
+		html[data-police="dyslexie"] { --plume: 'OpenDyslexic', Verdana, sans-serif; --titre: 'OpenDyslexic', Verdana, sans-serif; }
 		body {
 			color: var(--text); font-family: var(--plume); min-height: 100vh;
 			background-color: var(--bg);
@@ -199,7 +202,7 @@
 </head>
 <body>
 	<header>
-		<nav><a href="/admin/lore">← Lore</a><a href="/admin">← Administration</a><button type="button" class="partager" data-partager title="Partager le lien de cette page" aria-label="Partager le lien de cette page"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></button></nav>
+		<nav id="lore-nav"><a href="/admin/lore">← Lore</a><a href="/admin">← Administration</a><button type="button" class="partager" data-partager title="Partager le lien de cette page" aria-label="Partager le lien de cette page"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></button></nav>
 		<div class="cartouche">
 			<h1><span class="rubrique">F</span>rise des <span class="rubrique">Â</span>ges de Telluris</h1>
 			<div class="filet">✦</div>
@@ -278,6 +281,7 @@
 		</div>
 	</div>
 
+	<script>LoreReglages.monter(document.getElementById('lore-nav'), { theme: false, aide: false });</script>
 	<script>
 	const CHRONO = {{ payload_json }};
 

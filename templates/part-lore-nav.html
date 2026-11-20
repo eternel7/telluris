@@ -1,0 +1,11 @@
+{#
+	Liens de navigation partagés des pages du lore ; `actif` = 'index' | 'encyclopedie' | 'carte' | 'livre' | ''.
+	Le bouton « Aa » des réglages s'ajoute en fin de <nav id="lore-nav"> (scripts/lore_reglages.js).
+#}
+<nav id="lore-nav" aria-label="Navigation du lore">
+	<a href="/admin/lore"{{ ' aria-current="page"' if actif == 'index' }}>📚 Lore</a>
+	<a href="/admin/lore/encyclopedie"{{ ' aria-current="page"' if actif == 'encyclopedie' }}>📖 Encyclopédie</a>
+	<a href="/admin/lore/carte"{{ ' aria-current="page"' if actif == 'carte' }}>🗺 Carte</a>
+	<a href="/admin/lore/chronologie">🕰 Chronologie</a>
+	<a href="/admin">← Administration</a>
+</nav>

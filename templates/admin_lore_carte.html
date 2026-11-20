@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{# Carte du lore : la carte du monde en jeu (maps/world.png), cités de entites.json projetées par
+	   lat/lon (utils/lore_outils.carte, constantes CARTE_*), réseau des portails en SVG par-dessus. #}
+	{% include 'part-lore-base-css.html' %}
+	<style>
+		.main { max-width: 1440px; margin: 0 auto; padding: 14px 16px 40px; }
+		.barre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 0.8rem; color: var(--muted); margin-bottom: 10px; }
+		.barre label { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); }
+		.defile { overflow: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+		.carte { position: relative; width: calc(100% * var(--zoom, 1)); min-width: calc(900px * var(--zoom, 1)); aspect-ratio: 1408 / 768; }
+		.carte > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+		.carte svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+		.carte svg line { stroke: #f4d27a; stroke-width: 2; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; opacity: 0.9; filter: drop-shadow(0 0 2px #000); }
+		.carte svg line.vif { stroke: #ff6b3d; stroke-width: 3; stroke-dasharray: none; opacity: 1; }
+		.carte.sans-portails svg { display: none; }
+		.cite {
+			position: absolute; transform: translate(-50%, -50%); width: 14px; height: 14px; padding: 0;
+			border-radius: 50%; border: 2px solid #fff; background: #8e2a1c; cursor: pointer; box-shadow: 0 0 0 2px rgba(0,0,0,0.6);
+		}
+		.cite.portail { background: #c8a84b; }
+		.cite:hover, .cite:focus-visible, .cite[aria-expanded="true"] { width: 20px; height: 20px; outline: none; background: #ff6b3d; z-index: 2; }
+		.cite .nom {
+			position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; white-space: nowrap;
+			font-size: 11px; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; font-family: var(--police-ui);
+		}
+		.carte.sans-noms .cite .nom { display: none; }
+		.bulle {
+			position: absolute; z-index: 5; width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--accent);
+			border-radius: 8px; box-shadow: 0 8px 28px var(--ombre); overflow: hidden; font-size: 0.8rem;
+		}
+		.bulle[hidden] { display: none; }
+		.bulle img { display: block; width: 100%; height: 120px; object-fit: cover; }
+		.bulle .corps { padding: 10px 12px; }
+		.bulle h2 { font-size: 0.95rem; font-weight: normal; color: var(--accent); }
+		.bulle p { font-family: var(--police-lecture); color: var(--lecture); line-height: 1.45; margin: 4px 0 8px; }
+		.bulle .liens { color: var(--muted); font-size: 0.74rem; margin-bottom: 6px; }
+		.bulle .fermer { position: absolute; top: 4px; right: 4px; background: var(--panel); }
+		.liste { margin-top: 14px; columns: 4 200px; font-size: 0.8rem; }
+		.liste a { display: block; padding: 3px 0; break-inside: avoid; text-decoration: none; }
+	</style>
+</head>
+<body>
+	<header class="lore-tete">
+		<h1>🗺 {{ title }}</h1>
+		{% set actif = 'carte' %}
+		{% include 'part-lore-nav.html' %}
+	</header>
+	<main class="main">
+		<div class="barre">
+			<span>{{ carte.cites|length }} cités · {{ carte.liens|length }} liens de portails transversaux</span>
+			<label><input type="checkbox" id="voir-portails" checked> Réseau des portails</label>
+			<label><input type="checkbox" id="voir-noms" checked> Noms</label>
+			<span role="group" aria-label="Zoom">
+				<button type="button" class="icone-btn" data-zoom="-1" aria-label="Dézoomer">−</button>
+				<span id="zoom-val">100 %</span>
+				<button type="button" class="icone-btn" data-zoom="1" aria-label="Zoomer">+</button>
+				<button type="button" class="icone-btn" data-europe>🔍 Europe</button>
+			</span>
+			<span>● or : cité à portail · ● rouge : sans portail transversal</span>
+		</div>
+		<div class="defile">
+			<div class="carte" id="carte">
+				<img src="{{ url_for('maps', path=carte.image) }}" alt="Carte du monde de Telluris">
+				<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+					{% for l in carte.liens %}<line x1="{{ l[0] }}" y1="{{ l[1] }}" x2="{{ l[2] }}" y2="{{ l[3] }}" data-a="{{ l[4] }}" data-b="{{ l[5] }}"/>{% endfor %}
+				</svg>
+				{% for c in carte.cites %}
+				<button type="button" class="cite{{ ' portail' if c.portails }}" style="left:{{ c.x }}%;top:{{ c.y }}%" data-id="{{ c.id }}" aria-expanded="false" aria-label="{{ c.nom }}"><span class="nom">{{ c.nom }}</span></button>
+				{% endfor %}
+				<div class="bulle" id="bulle" hidden role="dialog" aria-live="polite"></div>
+			</div>
+		</div>
+		<nav class="liste" aria-label="Toutes les cités">
+			{% for c in carte.cites|sort(attribute='nom') %}<a href="{{ c.url }}">{{ c.nom }}</a>{% endfor %}
+		</nav>
+	</main>
+	<script id="donnees-carte" type="application/json">{{ carte.cites|tojson }}</script>
+	<script>
+	(function () {
+		LoreReglages.monter(document.getElementById('lore-nav'));
+		const cites = {};
+		for (const c of JSON.parse(document.getElementById('donnees-carte').textContent)) cites[c.id] = c;
+		const carte = document.getElementById('carte');
+		const bulle = document.getElementById('bulle');
+		const lignes = Array.from(carte.querySelectorAll('line'));
+		let ouverte = null;
+		const fermer = () => {
+			bulle.hidden = true;
+			if (ouverte) { ouverte.setAttribute('aria-expanded', 'false'); ouverte = null; }
+			for (const l of lignes) l.classList.remove('vif');
+		};
+		const ouvrir = btn => {
+			fermer();
+			const c = cites[btn.dataset.id];
+			ouverte = btn;
+			btn.setAttribute('aria-expanded', 'true');
+			const voisins = [];
+			for (const l of lignes) {
+				const lie = l.dataset.a === c.id || l.dataset.b === c.id;
+				l.classList.toggle('vif', lie);
+				if (lie) voisins.push(cites[l.dataset.a === c.id ? l.dataset.b : l.dataset.a].nom);
+			}
+			// Contenu en DOM (textContent) : rien de la donnée ne passe par innerHTML.
+			bulle.textContent = '';
+			const x = document.createElement('button');
+			x.type = 'button'; x.className = 'icone-btn fermer'; x.textContent = '✕'; x.setAttribute('aria-label', 'Fermer');
+			x.addEventListener('click', fermer);
+			bulle.append(x);
+			if (c.image) { const img = document.createElement('img'); img.src = '/' + c.image.split('/').map(encodeURIComponent).join('/'); img.alt = ''; bulle.append(img); }
+			const corps = document.createElement('div'); corps.className = 'corps';
+			const h = document.createElement('h2'); h.textContent = c.nom; corps.append(h);
+			const p = document.createElement('p'); p.textContent = c.resume; corps.append(p);
+			const v = document.createElement('div'); v.className = 'liens';
+			v.textContent = voisins.length ? '🌀 Portails vers : ' + voisins.join(', ') : 'Aucun portail transversal connu.';
+			corps.append(v);
+			const a = document.createElement('a'); a.href = c.url; a.textContent = 'Lire la page →'; corps.append(a);
+			bulle.append(corps);
+			bulle.hidden = false;
+			// Placée à côté du point, sans sortir de la carte.
+			const W = carte.clientWidth, H = carte.clientHeight;
+			let left = c.x / 100 * W + 16, top = c.y / 100 * H - 40;
+			if (left + 270 > W) left = c.x / 100 * W - 276;
+			top = Math.max(6, Math.min(top, H - bulle.offsetHeight - 6));
+			bulle.style.left = Math.max(6, left) + 'px';
+			bulle.style.top = top + 'px';
+		};
+		carte.addEventListener('click', e => {
+			const btn = e.target.closest('.cite');
+			if (btn) { if (btn === ouverte) fermer(); else ouvrir(btn); }
+			else if (!bulle.contains(e.target)) fermer();
+		});
+		document.addEventListener('keydown', e => { if (e.key === 'Escape') fermer(); });
+		// Zoom (×1 à ×4) : la carte s'élargit dans son cadre défilant ; le centre visé reste en vue.
+		const defile = carte.parentElement;
+		let zoom = 1;
+		const zoomer = (z, cx, cy) => {
+			const ancien = zoom;
+			zoom = Math.max(1, Math.min(4, z));
+			const fx = cx !== undefined ? cx : (defile.scrollLeft + defile.clientWidth / 2) / carte.clientWidth;
+			const fy = cy !== undefined ? cy : (defile.scrollTop + defile.clientHeight / 2) / carte.clientHeight;
+			carte.style.setProperty('--zoom', zoom);
+			document.getElementById('zoom-val').textContent = Math.round(zoom * 100) + ' %';
+			defile.style.maxHeight = zoom > 1 ? '80vh' : '';
+			defile.scrollLeft = fx * carte.clientWidth - defile.clientWidth / 2;
+			defile.scrollTop = fy * carte.clientHeight - defile.clientHeight / 2;
+			if (ancien !== zoom) fermer();
+		};
+		for (const b of document.querySelectorAll('[data-zoom]')) b.addEventListener('click', () => zoomer(zoom + Number(b.dataset.zoom)));
+		document.querySelector('[data-europe]').addEventListener('click', () => zoomer(3.5, 0.52, 0.25));
+		document.getElementById('voir-portails').addEventListener('change', e => carte.classList.toggle('sans-portails', !e.target.checked));
+		document.getElementById('voir-noms').addEventListener('change', e => carte.classList.toggle('sans-noms', !e.target.checked));
+	})();
+	</script>
+</body>
+</html>

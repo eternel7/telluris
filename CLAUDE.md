@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -42,7 +42,8 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 
 ```
 main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe,
-                         #   /admin/sorts, /admin/competences, /admin/zones, /admin/lore (+ /chronologie), /admin/personnages-recents), static mounts
+                         #   /admin/sorts, /admin/competences, /admin/zones, /admin/lore (+ /chronologie, /encyclopedie,
+                         #   /carte, /livre(.epub), /recherche), /admin/personnages-recents), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
                          #   character CRUD (dont renommer_personnage), movement, equip/unequip, drop/pickup, spend_xp
@@ -113,6 +114,10 @@ utils/
                          #   = `rattacher`), `bandeaux`, cartes d'ères ; vignettes : dev/gen_vignettes_chronologie.py
   lore.py                # /admin/lore (pur) : liste blanche docs/lore + Document maître, rendu Markdown
                          #   stdlib (texte ÉCHAPPÉ avant balisage), liens .md réécrits vers leur page
+  lore_outils.py         # parcours du lore (pur) : recherche PLEIN TEXTE (sans casse ni accents), durée, entités
+                         #   ÉCRITES À LA MAIN (docs/lore/entites.json : liens croisés, thèmes, illustrations,
+                         #   encyclopédie, carte par lat/lon), parcours guidé (docs/lore/parcours.json), quoi de neuf
+  lore_livre.py          # le lore en livre (pur) : sélection, EPUB 3 stdlib (zipfile), page imprimable → PDF
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
   competences.py         # compétences de vocation (pur) : passives permanentes, AURAS (passive + zone :
