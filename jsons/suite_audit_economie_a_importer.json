@@ -1,0 +1,2864 @@
+[
+	{
+		"_id": "rules:world_variables",
+		"type": "rules",
+		"value": {
+			"FACTEUR_DEGATS_ARMURE": 20,
+			"MONSTRE_DES_CC_NATURELS": 2,
+			"MONSTRE_EQUIPEMENT_PROBA": 0.65,
+			"LOCALISATION_TOUCHES": {
+				"tete": 7,
+				"epaules": 15,
+				"torse": 50,
+				"bras": 73,
+				"jambes": 89,
+				"pieds": 100
+			},
+			"JET_PORTEE_F_DIV": 20,
+			"DEUX_ARMES_MALUS_SECOND": 20,
+			"DETECTION_DISTANCE_FACTEUR": 5,
+			"XP_DECOUVERTE_LIEU": 10,
+			"XP_NIVEAU_BASE": 50,
+			"XP_NIVEAU_INCREMENT": 100,
+			"TOWN_PROFIL_NIVEAU_MAX": 2,
+			"XP_COEFF": {
+				"V": 10
+			},
+			"XP_VOC_COEFF": 5,
+			"VOC_NIVEAU_MAX": 10,
+			"VOC_CHANGEMENT_BASE": 5,
+			"VOC_CHANGEMENT_FACTEUR": 1.5,
+			"VOC_RETOUR_COUT": 10,
+			"SUB_CAP_REDUCTION": {
+				"V": 1
+			},
+			"PRIX_DERIVE_BASE": 2,
+			"MULT_RARETE": {
+				"commun": 1,
+				"peu_commun": 10,
+				"rare": 30,
+				"tres_rare": 100,
+				"legendaire": 500,
+				"mythique": 1000,
+				"divin": 10000
+			},
+			"CATEGORIES_INTERMEDIAIRES": [
+				"composant",
+				"metal"
+			],
+			"CATEGORIES_NON_PERSONNALISABLES": [
+				"document",
+				"livre",
+				"munition"
+			],
+			"SOUS_CATEGORIES_NON_PERSONNALISABLES": [
+				"boulangerie",
+				"cuisine",
+				"fruit",
+				"legume"
+			],
+			"APPRO_DEBIT": {
+				"fer": 5,
+				"acier": 3,
+				"bronze": 5,
+				"mithril": 1,
+				"herbe": 0,
+				"seve": 0,
+				"item:mithril": 1,
+				"item:orichalque": 1,
+				"item:adamantite": 1,
+				"cuir_brut": 1,
+				"crins": 1,
+				"tendons": 1,
+				"boyaux": 1,
+				"graisse": 1,
+				"poils": 1,
+				"os": 1,
+				"plumes": 1,
+				"sang": 1,
+				"coeur": 1,
+				"crocs": 1,
+				"yeux": 1,
+				"crane": 1,
+				"griffes": 1,
+				"viande": 1,
+				"foie": 1,
+				"item:viande": 1,
+				"item:foie": 1,
+				"item:boyaux": 1,
+				"item:graisse": 1,
+				"item:Herbes_medicinales": 2,
+				"item:Seve_de_chene": 2,
+				"item:Herbes_a_bruler": 2
+			},
+			"APPRO_DEBIT_DEFAUT": 5,
+			"APPRO_EXTRA": {
+				"grand_arsenal": [
+					"item:mithril",
+					"item:orichalque",
+					"item:adamantite"
+				],
+				"tannerie": [
+					"cuir_brut",
+					"tendons",
+					"graisse"
+				],
+				"armurerie": [
+					"crins",
+					"tendons",
+					"plumes",
+					"crocs"
+				],
+				"atelier_de_cirier": [
+					"crins",
+					"graisse",
+					"poils",
+					"sang"
+				],
+				"bourrellerie": [
+					"crins"
+				],
+				"brosserie": [
+					"crins",
+					"poils",
+					"plumes"
+				],
+				"corderie": [
+					"crins"
+				],
+				"lutherie": [
+					"crins",
+					"boyaux",
+					"poils",
+					"os"
+				],
+				"atelier_de_l_empenneur": [
+					"tendons",
+					"boyaux",
+					"plumes"
+				],
+				"cordonnerie": [
+					"tendons"
+				],
+				"fletcher": [
+					"tendons",
+					"boyaux",
+					"plumes"
+				],
+				"taxidermie": [
+					"tendons",
+					"graisse",
+					"poils",
+					"os",
+					"plumes",
+					"crocs",
+					"yeux",
+					"crane",
+					"griffes"
+				],
+				"boyauderie": [
+					"boyaux",
+					"graisse",
+					"viande"
+				],
+				"apothicairerie": [
+					"graisse",
+					"foie"
+				],
+				"cabinet_des_specimens": [
+					"graisse",
+					"sang",
+					"coeur",
+					"yeux"
+				],
+				"fumoir": [
+					"graisse",
+					"coeur",
+					"viande",
+					"foie"
+				],
+				"laboratoire_d_alchimie": [
+					"graisse",
+					"sang",
+					"coeur",
+					"yeux",
+					"griffes"
+				],
+				"salaison": [
+					"graisse",
+					"coeur",
+					"viande"
+				],
+				"savonnerie": [
+					"graisse"
+				],
+				"necromancie": [
+					"poils",
+					"crane"
+				],
+				"tissage": [
+					"poils"
+				],
+				"atelier_d_artisan": [
+					"os"
+				],
+				"bijouterie": [
+					"os",
+					"crocs",
+					"griffes"
+				],
+				"tabletterie": [
+					"os",
+					"sang",
+					"crocs",
+					"crane"
+				],
+				"grande_manufacture_textile": [
+					"plumes"
+				],
+				"plumasserie": [
+					"plumes"
+				],
+				"scriptorium": [
+					"plumes",
+					"sang"
+				],
+				"cuisine": [
+					"coeur",
+					"viande",
+					"foie"
+				],
+				"maison_des_conserves": [
+					"item:viande",
+					"item:boyaux"
+				],
+				"grandes_halles_alimentaires": [
+					"item:foie",
+					"item:graisse"
+				]
+			},
+			"CHA_MARCHAND": 50,
+			"CHA_MARCHAND_PAR_CATEGORIE": {
+				"bijouterie": 70,
+				"grande_apothicairerie": 65,
+				"institut_medico_alchimique": 65,
+				"grand_arsenal": 65,
+				"grande_manufacture_du_cuir": 65,
+				"grande_manufacture_textile": 65,
+				"grandes_halles_alimentaires": 65,
+				"grande_orfevrerie": 65,
+				"manufacture_des_instruments": 65,
+				"grande_maison_des_arts": 65,
+				"manufacture_des_savons_et_parfums": 65,
+				"grand_scriptorium": 65,
+				"grand_laboratoire_alchimique": 65,
+				"institut_de_thanaturgie": 65,
+				"cabinet_des_specimens": 65,
+				"grande_corderie": 65,
+				"grand_atelier_d_empennage": 65,
+				"grande_boulangerie": 65,
+				"maison_des_conserves": 65
+			},
+			"LIEU_CATEGORIES_FUSION": {
+				"grande_apothicairerie": [
+					"apothicairerie",
+					"jardinier"
+				],
+				"institut_medico_alchimique": [
+					"apothicairerie",
+					"laboratoire_d_alchimie"
+				],
+				"grand_arsenal": [
+					"armurerie",
+					"tannerie",
+					"bourrellerie",
+					"corderie",
+					"fletcher",
+					"atelier_de_l_empenneur"
+				],
+				"grande_manufacture_du_cuir": [
+					"tannerie",
+					"maroquinerie",
+					"cordonnerie",
+					"bourrellerie"
+				],
+				"grande_manufacture_textile": [
+					"tissage",
+					"plumasserie",
+					"brosserie"
+				],
+				"grandes_halles_alimentaires": [
+					"boucherie",
+					"salaison",
+					"fumoir",
+					"cuisine"
+				],
+				"grande_orfevrerie": [
+					"bijouterie",
+					"tabletterie"
+				],
+				"manufacture_des_instruments": [
+					"lutherie",
+					"boyauderie",
+					"plumasserie"
+				],
+				"grande_maison_des_arts": [
+					"atelier_d_artisan",
+					"bijouterie",
+					"tabletterie"
+				],
+				"manufacture_des_savons_et_parfums": [
+					"savonnerie",
+					"apothicairerie",
+					"atelier_de_cirier"
+				],
+				"grand_scriptorium": [
+					"scriptorium",
+					"atelier_de_cirier"
+				],
+				"grand_laboratoire_alchimique": [
+					"laboratoire_d_alchimie",
+					"apothicairerie",
+					"bijouterie"
+				],
+				"institut_de_thanaturgie": [
+					"necromancie",
+					"laboratoire_d_alchimie"
+				],
+				"cabinet_des_specimens": [
+					"taxidermie",
+					"plumasserie",
+					"tabletterie"
+				],
+				"grande_corderie": [
+					"corderie",
+					"boyauderie",
+					"tissage"
+				],
+				"grand_atelier_d_empennage": [
+					"atelier_de_l_empenneur",
+					"plumasserie",
+					"fletcher"
+				],
+				"grande_boulangerie": [
+					"boulangerie",
+					"cuisine"
+				],
+				"maison_des_conserves": [
+					"boucherie",
+					"salaison",
+					"fumoir",
+					"boulangerie"
+				]
+			},
+			"PRIX_MAX_FACTEUR": 3,
+			"MARGE_TRANSFO": 5,
+			"RACHAT_FACTEUR": 0.6,
+			"CATEGORIES_NEGOCE": [
+				"negociant"
+			],
+			"NEGOCE_COMMISSION_MIN": 0.1,
+			"NEGOCE_COMMISSION_MAX": 0.3,
+			"NEGOCE_SEUIL_REVENTE_CUIVRE": 2000,
+			"NEGOCE_BONUS_CONVERSION": 0.25,
+			"DEPECAGE_TAGS": {
+				"_charnu_base": [
+					"viande",
+					"viande",
+					"coeur",
+					"os",
+					"sang",
+					"graisse",
+					"tendons",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"animal": [
+					"cuir_brut",
+					"crocs",
+					"coeur",
+					"poils",
+					"tendons",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"monstre": [
+					"cuir_brut",
+					"crocs",
+					"coeur",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"humanoide": [
+					"cuir_brut",
+					"coeur",
+					"foie",
+					"crane"
+				],
+				"monture": [
+					"cuir_brut",
+					"coeur",
+					"crins",
+					"tendons",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"bete_de_somme": [
+					"cuir_brut",
+					"coeur",
+					"crins",
+					"tendons",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"draconique": [
+					"cuir_brut",
+					"crocs",
+					"griffes",
+					"tendons",
+					"coeur",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"reptile": [
+					"cuir_brut",
+					"crocs"
+				],
+				"demon": [
+					"cuir_brut",
+					"crocs",
+					"griffes",
+					"coeur",
+					"item:Sang_demon_seche",
+					"foie",
+					"crane"
+				],
+				"infernal": [
+					"griffes",
+					"coeur"
+				],
+				"celeste": [
+					"griffes",
+					"coeur"
+				],
+				"ange": [
+					"plumes",
+					"coeur",
+					"tendons",
+					"foie",
+					"crane"
+				],
+				"vol": [
+					"plumes",
+					"griffes"
+				],
+				"venin": [
+					"crocs",
+					"item:Poison_de_base"
+				],
+				"foret": [
+					"poils",
+					"tendons"
+				],
+				"froid": [
+					"poils",
+					"tendons"
+				],
+				"geant": [
+					"tendons",
+					"boyaux",
+					"foie",
+					"crane"
+				],
+				"grande_taille": [
+					"boyaux",
+					"tendons",
+					"crane"
+				],
+				"boss": [
+					"coeur",
+					"yeux",
+					"crane"
+				],
+				"legendaire": [
+					"coeur",
+					"foie",
+					"yeux"
+				],
+				"magique": [
+					"yeux"
+				],
+				"petrification": [
+					"yeux"
+				],
+				"undead": [
+					"os",
+					"os",
+					"crane"
+				],
+				"non_mort": [
+					"os",
+					"os",
+					"crane"
+				]
+			},
+			"DEPECAGE_POIDS_REF": 5,
+			"ATELIER_TRANSFO_PROBA": 0.1,
+			"STOCK_CIBLE_DEFAUT": 25,
+			"PRIX_AMPLITUDE_STOCK": 0.3,
+			"VENTE_PNJ_PROBA": 0.1,
+			"VENTE_PNJ_FRACTION": 0.05,
+			"VENTE_PNJ_REDISTRIB": 0.5,
+			"FLUX_SURPLUS_PART": 1,
+			"FLUX_PART_MAX": 0.5,
+			"STOCK_INTERMEDIAIRE_MAX": 50,
+			"REVENTE_MAJORATION": 1.15,
+			"CRIT_REUSSITE_MAX": 5,
+			"CRIT_ECHEC_MIN": 96,
+			"CRIT_CHANCE_DIVISEUR": 10,
+			"COMBAT_SLOTS_MAX": 15,
+			"COMBAT_ANIMATIONS_DEFAUT": {
+				"cac": "",
+				"jet": "",
+				"tir": "",
+				"monstre": "",
+				"sort": "",
+				"competence": "",
+				"consommable": "",
+				"soin": "",
+				"buff": "",
+				"debuff": "",
+				"miss": "",
+				"fumble": "",
+				"dissipation": ""
+			},
+			"RELATION_INITIALE": 50,
+			"RELATION_SEUIL_COEFF": 2,
+			"MARCHANDAGE_BLOCAGE_SECONDES": 3600,
+			"MARCHANDAGE_COMPAGNON_AFFINITE_MIN": 50,
+			"RELATION_FIDELITE_TRANSACTIONS": 10,
+			"RELATION_FIDELITE_SEUIL": 55,
+			"PNJ_REPUTATION_SEUIL": 56,
+			"QUETE_BOARD_TAILLE": 6,
+			"QUETE_QTE_MIN": 2,
+			"QUETE_QTE_MAX": 8,
+			"QUETE_XP_FACTEUR": 1.5,
+			"QUETE_CUIVRE_PAR_XP": 3,
+			"QUETE_COLLECT_POIDS_MAX": 100,
+			"QUETE_PAYS_RAYON": 10,
+			"QUETE_BOARD_DUREE_SECONDES": 3600,
+			"QUETE_BOARD_DUREE_JITTER": 0.5,
+			"QUETE_TRANSPORT_PROBA": 0.3,
+			"QUETE_TRANSPORT_DUREE_SECONDES": 3600,
+			"QUETE_TRANSPORT_POIDS_MAX": 100,
+			"QUETE_TRANSPORT_NB_MAX": 10,
+			"QUETE_TRANSPORT_XP": 10,
+			"QUETE_TRANSPORT_RELATION_DELTA": 1,
+			"QUETE_REUSSITE_RELATION_DELTA": 1,
+			"QUETE_TRANSPORT_RELATION_MIN": 50,
+			"QUETE_TRANSPORT_STOCK_PROBA": 0.5,
+			"QUETE_CHASSE_XP_FACTEUR": 3,
+			"QUETE_CHASSE_PROBA_RANG": 0.5,
+			"RANG_GUILDE_MAX_DEFAUT": "D",
+			"QUETE_RANG_POTENTIEL_MIN": {
+				"E": 25,
+				"D": 50,
+				"C": 105,
+				"B": 175,
+				"A": 250,
+				"S": 400,
+				"S+": 600
+			},
+			"QUETE_RANG_NIVEAU_ENTREE": {
+				"E": 10,
+				"D": 21,
+				"C": 31,
+				"B": 41,
+				"A": 51,
+				"S": 61,
+				"S+": 81
+			},
+			"QUETE_RANG_PART_NIVEAU": 0.3333333333333333,
+			"XP_MONSTRE_PART_NIVEAU": 0.05,
+			"CARCASSE_PRIX_REF_XP": 700,
+			"CARCASSE_PRIX_REF_CUIVRE": 36000,
+			"CARCASSE_PRIX_EXPOSANT": 2.66,
+			"FOCUS_EVENEMENT_MULT": 3,
+			"FOCUS_CIBLE_MULT": 3,
+			"SORT_COUT_COEFF": 2,
+			"CONCENTRATION_VOL_DIV": 2,
+			"SORT_VOCATIONS_DEPART": [
+				"elementaliste",
+				"mage",
+				"illusionniste",
+				"lettre",
+				"druide",
+				"chaman",
+				"pretre",
+				"necromancien",
+				"demoniste"
+			],
+			"MAGIE_POLYVALENTE_VOCATIONS": [
+				"lettre"
+			],
+			"MAGIE_ECOLE_COUT_COEFF": 2,
+			"COMPETENCE_COUT_COEFF": 2,
+			"CHARGE_MAGIE_FRANCHISE": 0.25,
+			"CHARGE_MAGIE_PEN_MAX": 0.6,
+			"CHARGE_MAGIE_PENTE_SURCHARGE": 1.5,
+			"CHARGE_MAGIE_PEN_PLAFOND": 3,
+			"SENSIBILITE_CHARGE_DEFAUT": 0.5,
+			"CHARGE_MAGIQUE_COEF_MAX": 10,
+			"CHARGE_MAGIE_PALIERS": {
+				"legere": 0.25,
+				"moderee": 0.5,
+				"importante": 0.75,
+				"lourde": 1
+			},
+			"CANALISATION_REDUCTION_MAX": 90,
+			"RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE": {
+				"capitale": {
+					"nb": 6,
+					"niveau_max": 5
+				},
+				"ville": {
+					"nb": 4,
+					"niveau_max": 2
+				},
+				"defaut": {
+					"nb": 2,
+					"niveau_max": 1
+				}
+			},
+			"RECRUTEMENT_GROUPE_TAILLE_MAX": 2,
+			"RECRUTEMENT_BOARD_DUREE_SECONDES": 7200,
+			"RECRUTEMENT_BOARD_DUREE_JITTER": 0.5,
+			"RECRUTEMENT_PART_BUTIN_MIN": 10,
+			"RECRUTEMENT_PART_BUTIN_MAX": 30,
+			"RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU": 6,
+			"RECRUTEMENT_CARTE_REQUISE": true,
+			"RECRUTEMENT_CAUTION_CUIVRE": 0,
+			"RECRUTEMENT_MISSION_COUT_CUIVRE": 300,
+			"RECRUTEMENT_MISSION_COUT_PAR_NIVEAU": 200,
+			"RECRUTEMENT_MISSION_PART_FACTEUR": 0.5,
+			"RECRUTEMENT_MISSION_PART_MIN": 0,
+			"AFFINITE_INITIALE": 50,
+			"AFFINITE_DELTA_QUETE": 2,
+			"AFFINITE_DELTA_VICTOIRE": 1,
+			"AFFINITE_DELTA_KO": -5,
+			"AFFINITE_DELTA_CONGEDIE": -1,
+			"AFFINITE_DELTA_CONGEDIE_EN_QUETE": -3,
+			"AFFINITE_DELTA_CONGEDIE_PERMANENT": -15,
+			"AFFINITE_SEUIL_DEPART": 30,
+			"AFFINITE_SEUIL_REMISE": 60,
+			"AFFINITE_SEUIL_ENGAGEMENT": 90,
+			"AFFINITE_REDUC_PART": 10,
+			"MONTURE_GROUPE_MAX": 2,
+			"MONTURE_CHARGE_MULT_DEFAUT": 1.2,
+			"MONTURE_PRIX_DEFAUT": 2000,
+			"MONTURE_MORT_DEFINITIVE": true,
+			"ESCORTE_MORT_DEFINITIVE": true,
+			"ESCORTE_PROGENITURE_PROBA": 0.05,
+			"ESCORTE_PROGENITURE_RELATION_MIN": 60,
+			"ESCORTE_GUILDE_PROBA": 0.25,
+			"ESCORTE_PROGENITURE_XP": 25,
+			"SECOURS_PROBA": 0.25,
+			"SECOURS_XP": 20,
+			"SECOURS_DELAI_H": 48,
+			"SECOURS_PV_DEPART": 0.5,
+			"SECOURS_FENETRE_H": 24,
+			"SECOURS_NB_MIN": 2,
+			"SECOURS_NB_MAX": 3,
+			"AUBERGE_NUIT_COUT_CUIVRE": 50,
+			"TRAVERSEE_PAS_MS": 900,
+			"CLIC_PORTEE_MAX": 0,
+			"PORTAIL_FENETRE_MINUTES": 2,
+			"PORTAIL_SEUILS_OUVERTS": 3,
+			"MAREE_PERIODE_S": 44712,
+			"MAREE_FENETRE_S": 10800,
+			"MAREE_REFERENCE_EPOCH": 1793606400,
+			"AUBERGE_NUIT_PASSES_ATELIER": 2,
+			"AUBERGE_MESSAGE_DUREE_SECONDES": 86400,
+			"AUBERGE_TABLE_MESSAGES_MAX": 10,
+			"AUBERGE_TABLES_MAX": 8,
+			"AUBERGE_ANNONCE_LONGUEUR_MAX": 800,
+			"MERCENAIRE_CLAUSES_MAX": 5,
+			"MERCENAIRE_CLAUSE_LONGUEUR_MAX": 120,
+			"JOURNAL_LONGUEUR_MAX": 800,
+			"JOURNAL_ENTREES_MAX": 50,
+			"JOURNAL_BESTIAIRE_LIEUX_MAX": 5,
+			"RENS_DELAI_MINUTES": 240,
+			"RENS_PORTEE_LIEUX": 12,
+			"RENS_FAUSSE_PCT": 20,
+			"RENS_EXACT_FACTEUR": 0.5,
+			"RENS_RELATION_POIDS": 0.2,
+			"RENS_RELATION_MAX": 15,
+			"RENS_COUT_MULT": {
+				"rumeur": 1,
+				"region": 1.5,
+				"exact": 2
+			},
+			"RENS_BRAS_DE_FER_PV": "1D6",
+			"RENS_INFORMATEUR_MULT": 1.5,
+			"RENS_INFORMATEUR_PROBA": 0.5,
+			"RENS_POURBOIRE_FACTEUR": 2,
+			"RENS_POURBOIRE_DES": "1D10",
+			"RENS_XP_BELLE": 10,
+			"RENS_RECRUE_POURBOIRE": 5,
+			"RENS_RECRUE_ORIGINE_BONUS": 15,
+			"RENS_RECRUE_AFFINITE": 1,
+			"SCRIPTORIUM_LIVRE_LONGUEUR_MAX": 800,
+			"SCRIPTORIUM_LIVRE_PAPIER": 3,
+			"SCRIPTORIUM_LIVRE_ENCRE": 2,
+			"COMMANDE_DELAI_SECONDES": 600,
+			"COMMANDE_PEREMPTION_SECONDES": 259200,
+			"COMMANDE_MATIERES_MAX": 3,
+			"COMMANDE_QUANTITE_MAX": 1,
+			"FABRICATION_PLAFOND_HORS_FAMILLE": 5,
+			"COMMANDE_FACTEUR_VALEUR_MAX": 3,
+			"COMMANDE_FACON_PART": 0.25,
+			"COMMANDE_COMPLEXITE_PART": 0.15,
+			"ACCES_GARDIEN_ACTIF": true,
+			"INDICATEURS_ACTIFS": true,
+			"BOIS_A_COUPER": [
+				"branche",
+				"petit_rondin",
+				"rondin",
+				"gros_rondin",
+				"tronc",
+				"arbre"
+			],
+			"OUTIL_COUPE_BOIS_TAG": "outil_coupe_bois",
+			"COUPE_MAX_PIECES": 40,
+			"CARCASSE_TRANCHANT_TAG": "tranchant",
+			"CARCASSE_DECOUPE_POIDS_MIN": 100
+		}
+	},
+	{
+		"_id": "zone:maquis",
+		"type": "zone_influence",
+		"nom": "Maquis",
+		"intensite_max": 0.45,
+		"terrain_tags": [
+			"broussaille",
+			"colline",
+			"pierre",
+			"aride"
+		],
+		"modificateurs": {
+			"danger": 1,
+			"visibilite": 1,
+			"deplacement": -1
+		},
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 45,
+				"tags": [
+					"herbe_aromatique",
+					"plante",
+					"miel",
+					"pierre"
+				]
+			},
+			{
+				"type": "combat",
+				"poids": 25,
+				"tags": [
+					"sanglier",
+					"serpent",
+					"bandit"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 20,
+				"tags": [
+					"berger",
+					"herboriste",
+					"chasseur"
+				]
+			},
+			{
+				"type": "meteo",
+				"poids": 5,
+				"tags": [
+					"secheresse",
+					"vent_chaud"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 5
+			}
+		],
+		"defauts_rencontres": [
+			{
+				"espece": "espece:sanglier"
+			},
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:renard"
+			},
+			{
+				"espece": "espece:lievre"
+			},
+			{
+				"espece": "espece:rapaces"
+			},
+			{
+				"espece": "espece:araignee"
+			},
+			{
+				"espece": "espece:satyre",
+				"regions": [
+					"europe"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Arbousier"
+			},
+			{
+				"ressource": "item:Baies_d_arbousier"
+			},
+			{
+				"ressource": "item:Herbes_a_bruler"
+			},
+			{
+				"ressource": "item:Herbes_medicinales"
+			},
+			{
+				"ressource": "item:Chene_vert"
+			},
+			{
+				"ressource": "item:Herbes_aromatiques"
+			},
+			{
+				"ressource": "item:Miel"
+			},
+			{
+				"ressource": "item:Cypres"
+			},
+			{
+				"ressource": "item:Caroubier"
+			}
+		]
+	},
+	{
+		"_id": "zone:garrigue",
+		"type": "zone_influence",
+		"nom": "Garrigue",
+		"terrain_tags": [
+			"garrigue",
+			"broussaille",
+			"pierre",
+			"colline",
+			"aride"
+		],
+		"intensite_max": 0.45,
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 45,
+				"tags": [
+					"herbe_aromatique",
+					"plante",
+					"miel",
+					"pierre"
+				]
+			},
+			{
+				"type": "combat",
+				"poids": 25,
+				"tags": [
+					"sanglier",
+					"serpent",
+					"bandit"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 20,
+				"tags": [
+					"berger",
+					"herboriste",
+					"chasseur"
+				]
+			},
+			{
+				"type": "meteo",
+				"poids": 5,
+				"tags": [
+					"secheresse",
+					"vent_chaud"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 5
+			}
+		],
+		"modificateurs": {
+			"danger": 1,
+			"visibilite": 1,
+			"deplacement": -1
+		},
+		"defauts_rencontres": [
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:lievre"
+			},
+			{
+				"espece": "espece:renard"
+			},
+			{
+				"espece": "espece:rapaces"
+			},
+			{
+				"espece": "espece:araignee"
+			},
+			{
+				"espece": "espece:sanglier",
+				"regions": [
+					"europe",
+					"afrique_du_nord"
+				]
+			},
+			{
+				"espece": "espece:satyre",
+				"regions": [
+					"europe"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Herbes_aromatiques"
+			},
+			{
+				"ressource": "item:Chene_vert"
+			},
+			{
+				"ressource": "item:Genevrier"
+			},
+			{
+				"ressource": "item:Miel"
+			},
+			{
+				"ressource": "item:Herbes_a_bruler"
+			},
+			{
+				"ressource": "item:pierre"
+			},
+			{
+				"ressource": "item:Cypres"
+			},
+			{
+				"ressource": "item:Caroubier"
+			}
+		]
+	},
+	{
+		"_id": "zone:pinede_seche",
+		"type": "zone_influence",
+		"nom": "Pinède sèche",
+		"intensite_max": 0.8,
+		"terrain_tags": [
+			"foret",
+			"conifere",
+			"aride",
+			"pierre"
+		],
+		"modificateurs": {
+			"danger": 2,
+			"visibilite": -1
+		},
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 45,
+				"tags": [
+					"conifere_vert",
+					"pin_gris",
+					"resine"
+				]
+			},
+			{
+				"type": "combat",
+				"poids": 35,
+				"tags": [
+					"araignee_geante",
+					"loup"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 10,
+				"tags": [
+					"herboriste"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 10
+			}
+		],
+		"defauts_rencontres": [
+			{
+				"espece": "espece:loup"
+			},
+			{
+				"espece": "espece:sanglier"
+			},
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:araignee"
+			},
+			{
+				"espece": "espece:renard"
+			},
+			{
+				"espece": "espece:rapaces"
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Pin"
+			},
+			{
+				"ressource": "item:Resine_de_pin"
+			},
+			{
+				"ressource": "item:graines"
+			},
+			{
+				"ressource": "item:Pin_parasol"
+			},
+			{
+				"ressource": "item:Herbes_aromatiques"
+			},
+			{
+				"ressource": "item:Cypres"
+			}
+		]
+	},
+	{
+		"_id": "zone:steppe_aride",
+		"type": "zone_influence",
+		"nom": "Steppe aride",
+		"intensite_max": 0.45,
+		"terrain_tags": [
+			"steppe",
+			"plaine",
+			"herbe",
+			"aride"
+		],
+		"modificateurs": {
+			"danger": 1,
+			"visibilite": 3,
+			"deplacement": 0
+		},
+		"table_evenements": [
+			{
+				"type": "combat",
+				"poids": 30,
+				"tags": [
+					"loup",
+					"meute",
+					"predateur"
+				]
+			},
+			{
+				"type": "ressource",
+				"poids": 30,
+				"tags": [
+					"herbe",
+					"plante",
+					"gibier"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 25,
+				"tags": [
+					"nomade",
+					"berger",
+					"cavalier"
+				]
+			},
+			{
+				"type": "meteo",
+				"poids": 10,
+				"tags": [
+					"vent_fort",
+					"orage"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 5
+			}
+		],
+		"defauts_rencontres": [
+			{
+				"espece": "espece:antilopes"
+			},
+			{
+				"espece": "espece:loup"
+			},
+			{
+				"espece": "espece:rapaces"
+			},
+			{
+				"espece": "espece:lievre"
+			},
+			{
+				"espece": "espece:cheval",
+				"regions": [
+					"steppes"
+				]
+			},
+			{
+				"espece": "espece:lamassu",
+				"regions": [
+					"afrique_du_nord"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Alfa"
+			},
+			{
+				"ressource": "item:Feuilles_d_absinthe"
+			},
+			{
+				"ressource": "item:graines"
+			},
+			{
+				"ressource": "item:Arganier"
+			}
+		]
+	},
+	{
+		"_id": "zone:contreforts_arides",
+		"type": "zone_influence",
+		"nom": "Contreforts arides",
+		"intensite_max": 0.6,
+		"terrain_tags": [
+			"montagne",
+			"colline",
+			"roche",
+			"pente",
+			"aride"
+		],
+		"modificateurs": {
+			"danger": 2,
+			"visibilite": 1,
+			"deplacement": -2
+		},
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 40,
+				"tags": [
+					"minerai",
+					"pierre",
+					"bois",
+					"herbe_rare"
+				]
+			},
+			{
+				"type": "combat",
+				"poids": 30,
+				"tags": [
+					"loup",
+					"ours",
+					"brigand_montagnard"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 15,
+				"tags": [
+					"mineur",
+					"bucheron",
+					"berger"
+				]
+			},
+			{
+				"type": "malus",
+				"poids": 10,
+				"tags": [
+					"eboulement",
+					"pente_raide"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 5
+			}
+		],
+		"defauts_rencontres": [
+			{
+				"espece": "espece:scorpion_geant"
+			},
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:fauves"
+			},
+			{
+				"espece": "espece:oiseaux_de_proies"
+			},
+			{
+				"espece": "espece:orc",
+				"regions": [
+					"afrique_du_nord"
+				]
+			},
+			{
+				"espece": "espece:nasnas",
+				"regions": [
+					"afrique_du_nord"
+				]
+			},
+			{
+				"espece": "espece:teryel",
+				"regions": [
+					"afrique_du_nord"
+				]
+			},
+			{
+				"espece": "espece:ugallu",
+				"regions": [
+					"afrique_du_nord"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Genevrier"
+			},
+			{
+				"ressource": "item:pierre"
+			},
+			{
+				"ressource": "item:fer"
+			},
+			{
+				"ressource": "item:Sel_gemme"
+			},
+			{
+				"ressource": "item:alun"
+			},
+			{
+				"ressource": "item:gres"
+			},
+			{
+				"ressource": "item:Arganier"
+			}
+		]
+	},
+	{
+		"_id": "zone:oasis",
+		"type": "zone_influence",
+		"nom": "Oasis",
+		"terrain_tags": [
+			"desert",
+			"oasis",
+			"eau",
+			"vegetation"
+		],
+		"intensite_max": 0.5,
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 40,
+				"tags": [
+					"eau_douce",
+					"datte",
+					"fruit",
+					"plante"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 30,
+				"tags": [
+					"nomade",
+					"marchand",
+					"voyageur"
+				]
+			},
+			{
+				"type": "commerce",
+				"poids": 20,
+				"tags": [
+					"ravitaillement",
+					"caravane",
+					"troc"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 10
+			}
+		],
+		"modificateurs": {
+			"danger": -1,
+			"visibilite": 1,
+			"deplacement": 0
+		},
+		"defauts_rencontres": [
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:scorpion_geant"
+			},
+			{
+				"espece": "espece:rapaces"
+			},
+			{
+				"espece": "espece:antilopes",
+				"regions": [
+					"afrique_du_nord"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Palmier_dattier"
+			},
+			{
+				"ressource": "item:Dattes"
+			},
+			{
+				"ressource": "item:Eau_de_source"
+			},
+			{
+				"ressource": "item:Figues"
+			},
+			{
+				"ressource": "item:Tamaris"
+			},
+			{
+				"ressource": "item:Doum"
+			},
+			{
+				"ressource": "item:Branche_de_Doum"
+			},
+			{
+				"ressource": "item:Branche_de_Palmier_dattier"
+			}
+		]
+	},
+	{
+		"_id": "zone:palmeraie",
+		"type": "zone_influence",
+		"nom": "Palmeraie",
+		"intensite_max": 0.5,
+		"terrain_tags": [
+			"oasis",
+			"eau",
+			"vegetation",
+			"desert"
+		],
+		"modificateurs": {
+			"danger": -1,
+			"visibilite": 1,
+			"deplacement": 0
+		},
+		"table_evenements": [
+			{
+				"type": "ressource",
+				"poids": 40,
+				"tags": [
+					"eau_douce",
+					"datte",
+					"fruit",
+					"plante"
+				]
+			},
+			{
+				"type": "pnj",
+				"poids": 30,
+				"tags": [
+					"nomade",
+					"marchand",
+					"voyageur"
+				]
+			},
+			{
+				"type": "commerce",
+				"poids": 20,
+				"tags": [
+					"ravitaillement",
+					"caravane",
+					"troc"
+				]
+			},
+			{
+				"type": "rien",
+				"poids": 10
+			}
+		],
+		"defauts_rencontres": [
+			{
+				"espece": "espece:serpent"
+			},
+			{
+				"espece": "espece:scorpion_geant"
+			},
+			{
+				"espece": "espece:nuee_de_scarabees"
+			},
+			{
+				"espece": "espece:rapaces"
+			},
+			{
+				"espece": "espece:lamashtu",
+				"regions": [
+					"afrique_du_nord"
+				]
+			}
+		],
+		"defauts_ressources": [
+			{
+				"ressource": "item:Palmier"
+			},
+			{
+				"ressource": "item:Dattes"
+			},
+			{
+				"ressource": "item:Eau_de_source"
+			},
+			{
+				"ressource": "item:Palmier_dattier"
+			},
+			{
+				"ressource": "item:Figues"
+			},
+			{
+				"ressource": "item:Doum"
+			},
+			{
+				"ressource": "item:Branche_de_Doum"
+			},
+			{
+				"ressource": "item:Branche_de_Palmier_dattier"
+			}
+		]
+	},
+	{
+		"_id": "item:Arc_long_composite_4b849907",
+		"type": "item",
+		"nom": "Arc long composite Bestial des Profondeurs en orichalque",
+		"icon": "🏹",
+		"categorie": "arme",
+		"sous_categorie": "arc",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"tir"
+		],
+		"deux_mains": true,
+		"description": "Arc long fait de bois, de corne et de nerf collés : plus puissant qu'un arc d'if. Façonné sur mesure : Fiole de sang de bête, Patte de Bunyip, Lingot d'orichalque.",
+		"bonus_degats": 6,
+		"bonus_degats_dice": "1D6+1D6+1D6",
+		"bonus_cd": 7,
+		"portee": 9,
+		"bonus": {
+			"Ag": 5,
+			"F": 1,
+			"V": 1,
+			"R": 1,
+			"Int": 2,
+			"Vol": 2
+		},
+		"effets": {
+			"canalisation": 1
+		},
+		"restriction": {
+			"Ag": 23,
+			"F": 14
+		},
+		"rarete": "tres_rare",
+		"poids": [
+			1.47,
+			2.31
+		],
+		"valeur": [
+			{
+				"cu": 94712
+			},
+			{
+				"cu": 310920
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Arc_long_composite",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_patte",
+					"quantite": 1
+				},
+				{
+					"item": "item:orichalque",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Arc_long_composite_4b849907",
+			"cree_at": 1794291021,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Arc_long_composite_b725d2d1",
+		"type": "item",
+		"nom": "Arc long composite Bestial en adamantite des Profondeurs",
+		"icon": "🏹",
+		"categorie": "arme",
+		"sous_categorie": "arc",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"tir"
+		],
+		"deux_mains": true,
+		"description": "Arc long fait de bois, de corne et de nerf collés : plus puissant qu'un arc d'if. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Patte de Bunyip.",
+		"bonus_degats": 6,
+		"bonus_degats_dice": "1D6+1D8+1D6",
+		"bonus_cd": 7,
+		"portee": 9,
+		"bonus": {
+			"Ag": 5,
+			"F": 1,
+			"V": 1,
+			"R": 4
+		},
+		"restriction": {
+			"Ag": 23,
+			"F": 14
+		},
+		"rarete": "legendaire",
+		"poids": [
+			1.76,
+			2.77
+		],
+		"valeur": [
+			{
+				"cu": 204712
+			},
+			{
+				"cu": 640920
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Arc_long_composite",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:adamantite",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_patte",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Arc_long_composite_b725d2d1",
+			"cree_at": 1794262633,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Armure_cuir_souple_N_c87052b0",
+		"type": "item",
+		"nom": "Armure de cuir souple noire Bestial des Marais",
+		"icon": "🥷",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"description": "Armure de cuir souple teint en noir, qui ne craque ni ne brille. Façonné sur mesure : Fiole de sang de bête, Tête de Bunyip.",
+		"bonus_pa": 5,
+		"bonus_pv": 6,
+		"bonus": {
+			"F": 1,
+			"V": 1,
+			"R": 2
+		},
+		"rarete": "rare",
+		"poids": [
+			2.0,
+			4.0
+		],
+		"valeur": [
+			{
+				"cu": 535
+			},
+			{
+				"cu": 2449
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Armure_cuir_souple_N",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Armure_cuir_souple_N_c87052b0",
+			"cree_at": 1794144993,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		},
+		"tags": [
+			"armure_cuir"
+		]
+	},
+	{
+		"_id": "item:Bandeau_de_cuir_07282826",
+		"type": "item",
+		"nom": "Bandeau de cuir Hanté de l’Aigle à l'Aile du Dragon",
+		"icon": "🎽",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [
+			"armure_cuir"
+		],
+		"description": "Bandeau de cuir qui tient les cheveux et la sueur loin des yeux. Façonné sur mesure : Fragments d'âme, Aile d'Aigle Geant, Aile de Dragon.",
+		"bonus_pa": 1,
+		"bonus_pm": 15,
+		"bonus": {
+			"Int": 1,
+			"Vol": 4,
+			"F": 3,
+			"V": 2
+		},
+		"effets": {
+			"regen_pm": 1,
+			"esquive": 2
+		},
+		"rarete": "tres_rare",
+		"poids": 0.1,
+		"valeur": [
+			{
+				"cu": 6654
+			},
+			{
+				"cu": 20892
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Bandeau_de_cuir",
+			"matieres": [
+				{
+					"item": "item:Fragments_ame",
+					"quantite": 1
+				},
+				{
+					"item": "item:aigle_geant_aile",
+					"quantite": 1
+				},
+				{
+					"item": "item:dragon_aile",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Bandeau_de_cuir_07282826",
+			"cree_at": 1794685141,
+			"lieu": "lieu:la_grande_megisserie"
+		}
+	},
+	{
+		"_id": "item:Casque_cornu_6c670ed1",
+		"type": "item",
+		"nom": "Casque cornu Hanté de l’Aigle aux Crocs du Dragon",
+		"icon": "🐂",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [
+			"armure_cuir"
+		],
+		"description": "Le crâne d'un Minotaure, cornes comprises, évidé et doublé de cuir, cerclé de fer à la nuque. On baisse la tête pour le porter, et l'on garde l'habitude de foncer. Façonné sur mesure : Fragments d'âme, Aile d'Aigle Geant, Tête de Dragon.",
+		"bonus_pa": 2,
+		"bonus_pv": 4,
+		"bonus_pm": 3,
+		"bonus": {
+			"F": 5,
+			"Int": 1,
+			"Vol": 4,
+			"V": 2
+		},
+		"effets": {
+			"regen_pm": 1,
+			"esquive": 1,
+			"buffs": {
+				"R": -1
+			},
+			"duree": 2
+		},
+		"rarete": "tres_rare",
+		"poids": 3.0,
+		"valeur": [
+			{
+				"cu": 8029
+			},
+			{
+				"cu": 26212
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Casque_cornu",
+			"matieres": [
+				{
+					"item": "item:Fragments_ame",
+					"quantite": 1
+				},
+				{
+					"item": "item:aigle_geant_aile",
+					"quantite": 1
+				},
+				{
+					"item": "item:dragon_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Casque_cornu_6c670ed1",
+			"cree_at": 1794639468,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_3275292a",
+		"type": "item",
+		"nom": "Dague Bestial en adamantite des Profondeurs",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Patte de Bunyip.",
+		"bonus_degats": 4,
+		"bonus_degats_dice": "1D4+1D8+1D6",
+		"bonus_cc": 6,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 5,
+			"F": 1,
+			"V": 1,
+			"R": 4
+		},
+		"rarete": "legendaire",
+		"poids": 0.38,
+		"valeur": [
+			{
+				"cu": 201488
+			},
+			{
+				"cu": 611904
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:adamantite",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_patte",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_3275292a",
+			"cree_at": 1794261672,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_5f96ac46",
+		"type": "item",
+		"nom": "Dague Bestial Empoisonné Ténébreux",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sel noir.",
+		"bonus_degats": 3,
+		"bonus_degats_dice": "1D4+1D4",
+		"bonus_cc": 6,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"F": 1,
+			"V": 1,
+			"Vol": 1
+		},
+		"effets": {
+			"regen_pv": -2,
+			"duree": 4,
+			"buffs": {
+				"Int": -1
+			}
+		},
+		"rarete": "peu_commun",
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 1333
+			},
+			{
+				"cu": 6130
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:Poison_de_base",
+					"quantite": 1
+				},
+				{
+					"item": "item:Sel_noir",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_5f96ac46",
+			"cree_at": 1794082227,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_65c53764",
+		"type": "item",
+		"nom": "Dague Bestial en mithril",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot de mithril.",
+		"bonus_degats": 3,
+		"bonus_degats_dice": "1D4+1D6",
+		"bonus_cc": 8,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 5,
+			"F": 1,
+			"V": 1
+		},
+		"rarete": "tres_rare",
+		"poids": 0.18,
+		"valeur": [
+			{
+				"cu": 41148
+			},
+			{
+				"cu": 129324
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:mithril",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_65c53764",
+			"cree_at": 1794047515,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_69ba1b0d",
+		"type": "item",
+		"nom": "Dague Démoniaque aux Crocs du Dragon aux Crocs des Vers des Sables",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Sang de démon séché, Tête de Dragon, Tête de Vers des Sables.",
+		"bonus_degats": 17,
+		"bonus_degats_dice": 4,
+		"bonus_cc": 6,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"F": 5,
+			"Vol": 2,
+			"R": 3
+		},
+		"effets": {
+			"buffs": {
+				"Vol": -1,
+				"R": -1,
+				"Ag": -1
+			},
+			"duree": 6
+		},
+		"rarete": "tres_rare",
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 6642
+			},
+			{
+				"cu": 27366
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Sang_demon_seche",
+					"quantite": 1
+				},
+				{
+					"item": "item:dragon_tete",
+					"quantite": 1
+				},
+				{
+					"item": "item:vers_des_sables_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_69ba1b0d",
+			"cree_at": 1794733416,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_79b420fd",
+		"type": "item",
+		"nom": "Dague Bestial des Profondeurs en mithril",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Patte de Bunyip, Lingot de mithril.",
+		"bonus_degats": 4,
+		"bonus_degats_dice": "1D4+1D6+1D6",
+		"bonus_cc": 8,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 7,
+			"F": 1,
+			"V": 1,
+			"R": 1
+		},
+		"rarete": "tres_rare",
+		"poids": 0.19,
+		"valeur": [
+			{
+				"cu": 41488
+			},
+			{
+				"cu": 131904
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_patte",
+					"quantite": 1
+				},
+				{
+					"item": "item:mithril",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_79b420fd",
+			"cree_at": 1794145801,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_954797f8",
+		"type": "item",
+		"nom": "Dague Bestial des Eaux Sombres en mithril",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Queue de Bunyip, Lingot de mithril.",
+		"bonus_degats": 4,
+		"bonus_degats_dice": "1D4+1D6+1D6",
+		"bonus_cc": 8,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 5,
+			"F": 1,
+			"V": 1,
+			"R": 2
+		},
+		"effets": {
+			"buffs": {
+				"Ag": -1
+			},
+			"duree": 2
+		},
+		"rarete": "tres_rare",
+		"poids": 0.18,
+		"valeur": [
+			{
+				"cu": 41488
+			},
+			{
+				"cu": 131904
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:bunyip_queue",
+					"quantite": 1
+				},
+				{
+					"item": "item:mithril",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_954797f8",
+			"cree_at": 1794145781,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_aa3f9aa7",
+		"type": "item",
+		"nom": "Dague Bestial en orichalque",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot d'orichalque.",
+		"bonus_degats": 3,
+		"bonus_degats_dice": "1D4+1D6",
+		"bonus_cc": 6,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus_pm": 4,
+		"bonus": {
+			"Ag": 3,
+			"F": 1,
+			"V": 1,
+			"Int": 2,
+			"Vol": 2
+		},
+		"effets": {
+			"canalisation": 1
+		},
+		"rarete": "tres_rare",
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 91148
+			},
+			{
+				"cu": 279324
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:orichalque",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_aa3f9aa7",
+			"cree_at": 1794047576,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_ac8fbfec",
+		"type": "item",
+		"nom": "Dague Bestial Empoisonné Démoniaque",
+		"icon": "🔪",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sang de démon séché.",
+		"bonus_degats": 4,
+		"bonus_degats_dice": "1D4+1D6",
+		"bonus_cc": 6,
+		"bonus_initiative": 3,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"F": 2,
+			"V": 1,
+			"Vol": 1
+		},
+		"effets": {
+			"regen_pv": -2,
+			"duree": 4,
+			"buffs": {
+				"Vol": -1
+			}
+		},
+		"rarete": "rare",
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 1338
+			},
+			{
+				"cu": 8396
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague",
+			"matieres": [
+				{
+					"item": "item:Fiole_sang_bete",
+					"quantite": 1
+				},
+				{
+					"item": "item:Poison_de_base",
+					"quantite": 1
+				},
+				{
+					"item": "item:Sang_demon_seche",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_ac8fbfec",
+			"cree_at": 1794082206,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_15cea185",
+		"type": "item",
+		"nom": "Dague de scène de la Chimère",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Chimere.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus_cd": 2,
+		"bonus": {
+			"Ag": 4
+		},
+		"effets": {
+			"regen_pv": -2,
+			"duree": 2
+		},
+		"rarete": "rare",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 1212
+			},
+			{
+				"cu": 5660
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:chimere_queue",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_15cea185",
+			"cree_at": 1794378714,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_1ad56aa5",
+		"type": "item",
+		"nom": "Dague de scène du Basilic",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Basilic.",
+		"bonus_degats": 1,
+		"bonus_degats_dice": "1D2+1D4",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3
+		},
+		"effets": {
+			"regen_pv": -3,
+			"duree": 2
+		},
+		"rarete": "peu_commun",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 932
+			},
+			{
+				"cu": 3554
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:basilic_queue",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_1ad56aa5",
+			"cree_at": 1794594094,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_2fa8d6e9",
+		"type": "item",
+		"nom": "Dague de scène des Trois Visages",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Chimere.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 4,
+			"F": 1,
+			"Vol": 1
+		},
+		"effets": {
+			"buffs": {
+				"Vol": -1
+			},
+			"duree": 2
+		},
+		"rarete": "rare",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 1212
+			},
+			{
+				"cu": 5660
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:chimere_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_2fa8d6e9",
+			"cree_at": 1794378725,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_3a34cd3d",
+		"type": "item",
+		"nom": "Dague de scène des Profondeurs",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Patte de Bunyip.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 5,
+			"R": 1
+		},
+		"rarete": "rare",
+		"poids": 0.21,
+		"valeur": [
+			{
+				"cu": 1064
+			},
+			{
+				"cu": 5216
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:bunyip_patte",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_3a34cd3d",
+			"cree_at": 1794260836,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_5dbb1bf0",
+		"type": "item",
+		"nom": "Dague de scène de la Fureur",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Patte de Chimere.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 5,
+		"portee": 1,
+		"bonus": {
+			"Ag": 4,
+			"F": 1
+		},
+		"rarete": "rare",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 1212
+			},
+			{
+				"cu": 5660
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:chimere_patte",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_5dbb1bf0",
+			"cree_at": 1794378707,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_63a6e646",
+		"type": "item",
+		"nom": "Dague de scène des Eaux Sombres",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Queue de Bunyip.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"R": 2
+		},
+		"effets": {
+			"buffs": {
+				"Ag": -1
+			},
+			"duree": 2
+		},
+		"rarete": "rare",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 1064
+			},
+			{
+				"cu": 5216
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:bunyip_queue",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_63a6e646",
+			"cree_at": 1794260876,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_7019860f",
+		"type": "item",
+		"nom": "Dague de scène des Marais",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Bunyip.",
+		"bonus_degats": 2,
+		"bonus_degats_dice": "1D2+1D6",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"R": 2
+		},
+		"rarete": "rare",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 1064
+			},
+			{
+				"cu": 5216
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:bunyip_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_7019860f",
+			"cree_at": 1794260862,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Dague_de_scene_b58720dc",
+		"type": "item",
+		"nom": "Dague de scène du Regard Mortel",
+		"icon": "🗡️",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite"
+		],
+		"tags": [
+			"cac",
+			"tranchant",
+			"legere"
+		],
+		"description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup. Façonné sur mesure : Tête de Basilic.",
+		"bonus_degats": 1,
+		"bonus_degats_dice": "1D2+1D4",
+		"bonus_cc": 4,
+		"portee": 1,
+		"bonus": {
+			"Ag": 3,
+			"Vol": 2
+		},
+		"effets": {
+			"buffs": {
+				"R": -1
+			},
+			"duree": 2
+		},
+		"rarete": "peu_commun",
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 932
+			},
+			{
+				"cu": 3554
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Dague_de_scene",
+			"matieres": [
+				{
+					"item": "item:basilic_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Dague_de_scene_b58720dc",
+			"cree_at": 1794594084,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:Fouet_31f6c52c",
+		"type": "item",
+		"nom": "Fouet Empoisonné Démoniaque en adamantite",
+		"icon": "➰",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"legere"
+		],
+		"description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot d'adamantite.",
+		"bonus_degats_dice": "1D2+1D8+1D6",
+		"bonus_cc": 4,
+		"portee": 2,
+		"bonus_degats": 3,
+		"effets": {
+			"regen_pv": -2,
+			"duree": 4,
+			"buffs": {
+				"Vol": -1
+			}
+		},
+		"bonus": {
+			"F": 1,
+			"Vol": 1,
+			"R": 3
+		},
+		"restriction": {
+			"Ag": 17
+		},
+		"rarete": "legendaire",
+		"poids": 1.2,
+		"valeur": [
+			{
+				"cu": 200535
+			},
+			{
+				"cu": 604395
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Fouet",
+			"matieres": [
+				{
+					"item": "item:Poison_de_base",
+					"quantite": 1
+				},
+				{
+					"item": "item:Sang_demon_seche",
+					"quantite": 1
+				},
+				{
+					"item": "item:adamantite",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Fouet_31f6c52c",
+			"cree_at": 1792613232,
+			"lieu": "lieu:la_grande_megisserie"
+		}
+	},
+	{
+		"_id": "item:Glaive_croc_de_basilic_7b8dc027",
+		"type": "item",
+		"nom": "Glaive-croc de Basilic Démoniaque en adamantite aux Crocs du Dragon",
+		"icon": "🐍",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"hast",
+			"tranchant",
+			"lourde"
+		],
+		"deux_mains": true,
+		"description": "Un croc de basilic emmanché au bout d'une hampe, à la place du fer. Le regard de la bête n'y est plus, mais ce qu'il entaille se raidit encore. Façonné sur mesure : Sang de démon séché, Lingot d'adamantite, Tête de Dragon.",
+		"bonus_degats": 9,
+		"bonus_degats_dice": "1D6+1D8+1D8+1D6",
+		"bonus_cc": 1,
+		"portee": 2,
+		"effets": {
+			"buffs": {
+				"Ag": -2,
+				"Vol": -1,
+				"R": -1
+			},
+			"duree": 6
+		},
+		"bonus": {
+			"F": 4,
+			"Vol": 2,
+			"R": 3
+		},
+		"restriction": {
+			"F": 19
+		},
+		"rarete": "legendaire",
+		"poids": 3.6,
+		"valeur": [
+			{
+				"cu": 210559
+			},
+			{
+				"cu": 637047
+			}
+		],
+		"fabrication": {
+			"base_item": "item:Glaive_croc_de_basilic",
+			"matieres": [
+				{
+					"item": "item:Sang_demon_seche",
+					"quantite": 1
+				},
+				{
+					"item": "item:adamantite",
+					"quantite": 1
+				},
+				{
+					"item": "item:dragon_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_Glaive_croc_de_basilic_7b8dc027",
+			"cree_at": 1794681601,
+			"lieu": "lieu:l_arsenal_de_lutecia"
+		}
+	},
+	{
+		"_id": "item:chevaliere_62e7d946",
+		"type": "item",
+		"nom": "Chevalière d’Améthyste aux Crocs du Dragon aux Crocs de la Tarasque",
+		"icon": "💍",
+		"categorie": "armure",
+		"sous_categorie": "bijou",
+		"slots": [
+			"anneau_1",
+			"anneau_2"
+		],
+		"tags": [],
+		"description": "Anneau à plateau gravé, lourd à la main. On le tend à baiser, on le presse dans la cire : c'est une signature qu'on porte au doigt. Façonné sur mesure : Poudre d'améthyste, Tête de Dragon, Tête de Tarasque.",
+		"bonus_pm": 4,
+		"bonus": {
+			"Cha": 2,
+			"Vol": 2,
+			"F": 4,
+			"R": 2
+		},
+		"effets": {
+			"buffs": {
+				"R": -1,
+				"Ag": -1
+			},
+			"duree": 4
+		},
+		"rarete": "tres_rare",
+		"poids": 0.1,
+		"valeur": [
+			{
+				"cu": 6271
+			},
+			{
+				"cu": 25323
+			}
+		],
+		"fabrication": {
+			"base_item": "item:chevaliere",
+			"matieres": [
+				{
+					"item": "item:Poudre_amethyste",
+					"quantite": 1
+				},
+				{
+					"item": "item:dragon_tete",
+					"quantite": 1
+				},
+				{
+					"item": "item:tarasque_tete",
+					"quantite": 1
+				}
+			],
+			"recette": "recette:commande_chevaliere_62e7d946",
+			"cree_at": 1794612595,
+			"lieu": "lieu:l_orfevrerie_royale"
+		}
+	}
+]
