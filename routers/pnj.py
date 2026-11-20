@@ -422,6 +422,26 @@ def marque_pnj(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 	return pnj.marque_noeud(pnj_doc, depart, contexte)
 
 
+def pnjs_presents_resync(character: dict) -> dict:
+	"""Lignes 🗣 de /play recalculées SANS recharger la page, après un changement d'état qui
+	peut jouer sur les `conditions` d'une entrée ou d'un choix (énigme résolue, …) :
+	`pnjs_ici` (ids dont la ligne est visible — client `_majPnjsIci`) et `pnj_marques`
+	({pnj_id: "!"|"?"|None} — client `_majPnjMarques`). Mêmes calculs que le rendu de /play
+	(main.py), en LECTURE SEULE : aucun tirage, ni d'offre ni de présence (convention 6 —
+	un PNJ non tiré à l'entrée n'apparaît qu'à la prochaine)."""
+	lieu_doc = get_doc(character.get("lieu", "")) or {}
+	conds = lambda c: acces.clauses_remplies(character, c, get_doc)
+	ici = [e.get("character") for e in pnj.entrees_pnj_actives(
+		character, lieu_doc, transport.entree_marchand, conds)]
+	marques = {}
+	for e in pnj.entrees_pnj_actives(character, lieu_doc, transport.entree_marchand, conds,
+									 toutes_cases=True):
+		d = offres.vue_pnj(get_doc(e.get("character")), character, lieu_doc)
+		if d:
+			marques[e["character"]] = marque_pnj(character, d, lieu_doc, e)
+	return {"pnjs_ici": ici, "pnj_marques": marques}
+
+
 def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str | None:
 	"""`_id` du doc `connection` reliant le lieu COURANT à `destination`, ou None s'il n'y en a
 	pas — c'est ce que le hook `deplacer` d'un choix de dialogue rend au client.

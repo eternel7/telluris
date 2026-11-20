@@ -13,7 +13,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 
-from db.config import get_doc, save_doc
+from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import get_selected_character
 from utils.lieux import get_lieu_links
@@ -22,6 +22,8 @@ from utils import enigmes
 from utils import escorte
 from utils import journal
 from utils import recrutement
+from utils import indicateurs
+from routers.pnj import pnjs_presents_resync
 
 enigmes_router = APIRouter()
 
@@ -86,6 +88,13 @@ def enigme_action(current_user: Annotated[dict, Depends(get_current_user)], body
 		"journal": journal.journal_payload(character, get_doc),
 	}
 	if resultat["resolue"] and not deja:
-		# Une porte peut dépendre de `enigme_resolue` : resync des sous-lieux (convention 10).
+		# Tout ce que /play a rendu et qui peut dépendre de `enigme_resolue` (prérequis, accès,
+		# conditions d'entrée PNJ ou de choix) est resynchronisé — la page n'est pas rechargée
+		# (convention 10) : portes et marques de lieux, énigmes à bouton, lignes 🗣.
 		reponse["links"] = get_lieu_links(current_user)
+		reponse["lieux_marques"] = indicateurs.marques_lieux(character)
+		reponse["enigmes_ici"] = enigmes.enigmes_du_lieu(
+			find_docs({"type": "enigme"}), character,
+			lambda conds: acces.clauses_remplies(character, conds, get_doc))
+		reponse.update(pnjs_presents_resync(character))
 	return reponse
