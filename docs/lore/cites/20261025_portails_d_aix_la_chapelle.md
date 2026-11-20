@@ -8,11 +8,11 @@ Les cinq portes mènent à **Sydney**, **Tokyo**, **Teotihuacan**, **Pichao** et
 
 ?{À chaque sortie, un temple a été bâti autour de la porte, comme on le fait toujours autour d'un portail, et un Templier y veille :}?
 
-?{- à **Sydney**, le **Sanctuaire de Baiame**, sur les promontoires de grès gravés de l'entrée de la baie, gardé par **Barangaroo**, une humaine, ancienne pêcheuse ;}?
-?{- à **Tokyo**, le **temple de Sensō-ji**, que fit bâtir un chef de village après que deux frères pêcheurs eurent tiré une statuette de la rivière Sumida ; le nain **Haji no Nakatomo** porte le nom de ce chef ;}?
-?{- à **Teotihuacan**, le **temple du Serpent à plumes**, avec son tunnel et ses flaques de mercure, gardé par **Ocelotl**, un ogre vêtu d'une peau de jaguar, allié des guerriers-jaguars ;}?
-?{- à **Pichao**, le **temple du Soleil**, autour de la grotte et de la pierre « où l'on attache le soleil », gardé par la hobbit **Cusi Coyllur** ; la cité elle-même reste à décrire ;}?
-?{- à **Abou Simbel**, le **Petit Temple**, aux colosses de Néfertiti et d'Akhénaton, gardé par **Nakhtmin**, un elfe mort-vivant bien conservé de la cour.}?
+- ?{à **Sydney**, le **Sanctuaire de Baiame**, sur les promontoires de grès gravés de l'entrée de la baie, gardé par **Barangaroo**, une humaine, ancienne pêcheuse ;}?
+- ?{à **Tokyo**, le **temple de Sensō-ji**, que fit bâtir un chef de village après que deux frères pêcheurs eurent tiré une statuette de la rivière Sumida ; le nain **Haji no Nakatomo** porte le nom de ce chef ;}?
+- ?{à **Teotihuacan**, le **temple du Serpent à plumes**, avec son tunnel et ses flaques de mercure, gardé par **Ocelotl**, un ogre vêtu d'une peau de jaguar, allié des guerriers-jaguars ;}?
+- ?{à **Pichao**, le **temple du Soleil**, autour de la grotte et de la pierre « où l'on attache le soleil », gardé par la hobbit **Cusi Coyllur** ; la cité elle-même reste à décrire ;}?
+- ?{à **Abou Simbel**, le **Petit Temple**, aux colosses de Néfertiti et d'Akhénaton, gardé par **Nakhtmin**, un elfe mort-vivant bien conservé de la cour.}?
 
 ?{Chaque Templier porte sa théorie sur sa porte, et toutes se contredisent : le frère est-il parti de Sydney, ou a-t-il bâti la porte depuis Aix ? La statuette a-t-elle appelé la porte, ou la porte a-t-elle mis la statuette dans le filet ? Le Serpent à plumes a-t-il enseigné le frère ? La pierre tient-elle la porte, ou la porte tient-elle la pierre ? Néfertiti a-t-elle obtenu sa porte contre un secret de longue vie, ou la lui a-t-on donnée pour qu'elle ne vienne jamais la chercher ?}?
 
