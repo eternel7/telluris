@@ -77,6 +77,8 @@ PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # san
 PORTRAIT_AELIS_ATELIERS = "architecte_Aélis_de_Montfaucon_ateliers.jpg"
 # Aélis dans la cave aux cinq arches : portrait propre au lieu (Auteur, 20/11).
 PORTRAIT_AELIS_CAVE = "architecte_Aélis_de_Montfaucon_cave.jpg"
+# Aélis dans la maison pliée : portrait propre au lieu (Auteur, 20/11).
+PORTRAIT_AELIS_MAISON = "architecte_Aélis_de_Montfaucon_maison.jpg"
 
 # Présences et conditions — les trois états (AVANT · PENDANT · APRÈS, telluris-quetes-pnj).
 ESCORTE_ACTIVE = {"quete_active": {"types": ["escorte"], "cible": SEUIL}}
@@ -329,7 +331,6 @@ def lieu_archives(doc):
 # ---------------------------------------------------------------------------------------------
 
 def lieux_neufs():
-	aelis_ici = lambda pid, desc: entree_pnj(pid, "Aélis", PORTRAIT_AELIS, desc, [ESCORTE_ACTIVE])
 	ateliers = {
 		"_id": ATELIERS, "type": "lieu", "label": "Les Ateliers de Convergence",
 		"image": "ateliers_de_convergence01.jpg", "categorie": "institut_des_architectes", "lieu_parent": LUTECIA,
@@ -354,7 +355,8 @@ def lieux_neufs():
 		"image": "maison_pliee01.jpg", "categorie": "institut_des_architectes", "lieu_parent": LUTECIA,
 		"acces": {"refus": "La troisième porte reste une peinture sur la pierre.", "cycle": 1,
 				  "conditions": [{"enigme_resolue": {"id": E_PUCA}}]},
-		"pnj": [aelis_ici(AELIS_MAISON, "Aélis, sur le seuil d'une pièce de bois clair, qui ne touche à rien."),
+		"pnj": [entree_pnj(AELIS_MAISON, "Aélis", PORTRAIT_AELIS_MAISON,
+						   "Aélis, sur le seuil d'une pièce de bois clair, qui ne touche à rien.", [ESCORTE_ACTIVE]),
 				entree_pnj(ZASHIKI, "L'enfant de la maison", "zashiki_warashi.jpg",
 						   "Une enfant au visage rouge, en kimono court, assise sur le plancher. Elle vous regarde sans ciller.",
 						   [ESCORTE_ACTIVE])],
@@ -446,7 +448,7 @@ def pnj_neufs():
 			"d'avoir peur. Elle a l'air d'avoir envie de prendre des notes.",
 			choix("ok", "Revenir.", "accueil")),
 	})
-	a_maison = pnj_doc(AELIS_MAISON, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS, vocation="lettre",
+	a_maison = pnj_doc(AELIS_MAISON, "Aélis de Montfaucon", "humain", desc_aelis, PORTRAIT_AELIS_MAISON, vocation="lettre",
 		services={"acces": {"lieu": CHAMBRE, "noeuds": {"ouvre": "chambre_ouverte", "refus": "chambre_close"}}},
 		noeuds={
 		"accueil": noeud(

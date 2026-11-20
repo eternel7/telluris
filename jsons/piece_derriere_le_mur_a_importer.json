@@ -3212,7 +3212,7 @@
       {
         "character": "pnj:aelis_de_montfaucon_maison",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+        "portrait": "architecte_Aélis_de_Montfaucon_maison.jpg",
         "probabilite": 1,
         "conditions": [
           {
@@ -3882,7 +3882,7 @@
     "type": "pnj",
     "nom": "Aélis de Montfaucon",
     "race": "humain",
-    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_maison.jpg",
     "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
     "dialogue": {
       "noeud_depart": "accueil",

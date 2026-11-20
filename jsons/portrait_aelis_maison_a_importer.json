@@ -1,0 +1,154 @@
+[
+  {
+    "_id": "lieu:maison_pliee",
+    "type": "lieu",
+    "label": "La maison pliée",
+    "image": "maison_pliee01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "refus": "La troisième porte reste une peinture sur la pierre.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "enigme_resolue": {
+            "id": "enigme:propositions_du_puca"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_maison",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_maison.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:seuil_de_la_boite"
+            }
+          }
+        ],
+        "description": "Aélis, sur le seuil d'une pièce de bois clair, qui ne touche à rien."
+      },
+      {
+        "character": "pnj:zashiki_warashi",
+        "nom": "L'enfant de la maison",
+        "portrait": "zashiki_warashi.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:seuil_de_la_boite"
+            }
+          }
+        ],
+        "description": "Une enfant au visage rouge, en kimono court, assise sur le plancher. Elle vous regarde sans ciller."
+      }
+    ]
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_maison",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "portrait": "architecte_Aélis_de_Montfaucon_maison.jpg",
+    "description": "Aélis de Montfaucon, architecte de l'Institut, dans l'espace de la boîte de Maître Villard.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une maison de bois clair, aux cloisons de papier. Elle tient dans une boîte, et pourtant on entend le vent dans un jardin qu'on ne voit pas. Aélis reste sur le seuil.",
+          "choix": [
+            {
+              "id": "sac",
+              "label": "Écouter, derrière la cloison du fond.",
+              "next": "seuil",
+              "condition": {
+                "acces_ouvrable": true
+              }
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini ? »",
+              "next": "apres",
+              "condition": {
+                "acces_libere": true
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(Se taire.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Un froissement de toile, lent, régulier, comme quelqu'un qui remplit un sac sans se presser. Puis une voix d'homme, très douce, qui fredonne. Aélis vous attrape la manche. « L'enfant. Il est venu pour l'enfant. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "« Restez ici. »",
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "pas_encore",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "chambre_ouverte": {
+          "texte": "La cloison glisse sans bruit. La chambre est plus profonde que la maison. Au milieu, un homme en manteau sombre, un grand sac de toile sur l'épaule ; autour de lui, des silhouettes sans visage se retournent vers vous.",
+          "choix": [
+            {
+              "id": "arme",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "chambre_close": {
+          "texte": "Aélis secoue la tête. « Pas maintenant. Le plan ne tient pas. »",
+          "choix": [
+            {
+              "id": "reculer",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Aélis est entrée dans la chambre vide. Elle relève, à genoux, des figures tracées au plafond, et recopie dans son carnet des notes trouvées sur une table basse. « Villard m'a permis de prendre ce que je trouverais. Je prends. » Elle lève les yeux vers la porte de la maison. « Il reste à sortir. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    },
+    "vocation": "lettre",
+    "services": {
+      "acces": {
+        "lieu": "lieu:chambre_du_sac",
+        "noeuds": {
+          "ouvre": "chambre_ouverte",
+          "refus": "chambre_close"
+        }
+      }
+    }
+  }
+]
