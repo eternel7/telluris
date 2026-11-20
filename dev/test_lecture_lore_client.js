@@ -1,6 +1,7 @@
 // dev/test_lecture_lore_client.js
 //
-// Tests d'EXÉCUTION de la lecture à voix haute du lore (templates/admin_lore.html).
+// Tests d'EXÉCUTION de la lecture à voix haute du lore (templates/admin_lore.html),
+// et de l'état des groupes en accordéon de l'index (`loreEtatGroupe`).
 //
 //   node dev/test_lecture_lore_client.js     # sort en code 1 au premier échec
 //
@@ -33,7 +34,7 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-const FONCTIONS = ['lectureNettoyer', 'lectureDecouper', 'lectureSelection'];
+const FONCTIONS = ['lectureNettoyer', 'lectureDecouper', 'lectureSelection', 'loreEtatGroupe'];
 vm.runInThisContext(FONCTIONS.map(extraire).join('\n') + '\nglobalThis.F = {' + FONCTIONS.join(',') + '};');
 
 let echecs = 0, n = 0;
@@ -84,6 +85,18 @@ t('sélection : tout, ou seulement ce qui suit un h2 de l\'Auteur', () => {
 	assert.deepStrictEqual(F.lectureSelection(blocs, false), [0, 1, 2, 3, 4, 5, 6, 7]);
 	assert.deepStrictEqual(F.lectureSelection(blocs, true), [1, 2, 3, 6, 7]);
 	assert.deepStrictEqual(F.lectureSelection([{ h2: false }, { h2: true }], true), []);
+});
+
+t('accordéon : hors recherche, groupe visible, ouvert sauf fermeture mémorisée', () => {
+	assert.deepStrictEqual(F.loreEtatGroupe(5, false, false), { cache: false, ouvert: true });
+	assert.deepStrictEqual(F.loreEtatGroupe(5, false, true), { cache: false, ouvert: false });
+	assert.deepStrictEqual(F.loreEtatGroupe(0, false, true), { cache: false, ouvert: false });
+});
+
+t('accordéon : en recherche, groupe non vide OUVERT même fermé, groupe vide caché', () => {
+	assert.deepStrictEqual(F.loreEtatGroupe(2, true, true), { cache: false, ouvert: true });
+	assert.deepStrictEqual(F.loreEtatGroupe(2, true, false), { cache: false, ouvert: true });
+	assert.deepStrictEqual(F.loreEtatGroupe(0, true, false), { cache: true, ouvert: false });
 });
 
 console.log(`\n${n - echecs} / ${n} tests passés`);

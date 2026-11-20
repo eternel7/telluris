@@ -72,11 +72,48 @@
 			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
 			margin-bottom: 12px; padding: 4px 0;
 		}
-		.groupe h2 {
-			font-size: 0.8rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;
-			padding: 10px 14px 6px; font-weight: normal;
+		.groupe { scroll-margin-top: 12px; }
+		.groupe h2 { font-size: 0.8rem; font-weight: normal; }
+		/* Accordéon : chaque groupe s'ouvre / se ferme par son en-tête (état mémorisé hors recherche). */
+		.groupe-tete {
+			display: flex; align-items: center; gap: 6px; width: 100%; min-height: var(--tap);
+			padding: 6px 14px; border: none; background: none; cursor: pointer; text-align: left;
+			font-family: inherit; font-size: inherit; letter-spacing: 0.12em; color: var(--accent);
+			text-transform: uppercase;
 		}
-		.groupe h2 .nb { color: var(--muted); font-size: 0.7rem; margin-left: 6px; }
+		.groupe-tete::after { content: '▾'; margin-left: auto; color: var(--muted); letter-spacing: 0; }
+		.groupe.closed .groupe-tete::after { content: '▸'; }
+		.groupe-tete:hover, .groupe-tete:focus-visible { background: var(--panel2); outline: none; }
+		.groupe h2 .nb { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.05em; }
+		.groupe.closed .groupe-corps { display: none; }
+
+		/* ── Sommaire flottant de l'index (icône ☰) ───────────────── */
+		.sommaire-btn {
+			position: fixed; right: 16px; bottom: 16px; z-index: 20;
+			width: calc(var(--tap) + 8px); height: calc(var(--tap) + 8px); border-radius: 50%;
+			border: 1px solid var(--accent); background: var(--panel); color: var(--accent);
+			font-size: 1.15rem; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+		}
+		.sommaire-btn:hover, .sommaire-btn:focus-visible, .sommaire-btn[aria-expanded="true"] { background: var(--panel2); outline: none; }
+		.sommaire-flottant {
+			position: fixed; right: 16px; bottom: calc(var(--tap) + 32px); z-index: 20;
+			width: min(320px, calc(100vw - 32px)); max-height: min(70vh, 560px); overflow-y: auto;
+			background: var(--panel); border: 1px solid var(--accent); border-radius: 8px;
+			box-shadow: 0 8px 28px rgba(0,0,0,0.6); font-size: 0.78rem;
+		}
+		.sommaire-flottant[hidden], .sommaire-flottant li[hidden] { display: none; }
+		.sommaire-flottant .titre {
+			padding: 10px 12px 6px; color: var(--accent); letter-spacing: 0.1em;
+			text-transform: uppercase; font-size: 0.72rem;
+		}
+		.sommaire-flottant ol { list-style: none; padding: 0 6px 8px; }
+		.sommaire-flottant a {
+			display: flex; align-items: center; gap: 8px; min-height: var(--tap); padding: 4px 8px;
+			color: var(--text); text-decoration: none; border-radius: 4px; line-height: 1.3;
+		}
+		.sommaire-flottant a:hover, .sommaire-flottant a:focus-visible { background: var(--panel2); outline: none; }
+		.sommaire-flottant a .nb { margin-left: auto; color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
+		.sommaire-flottant li.tete a { color: var(--accent); }
 		a.fichier {
 			display: block; padding: 8px 14px; text-decoration: none; color: var(--text);
 			border-top: 1px solid var(--border);
@@ -249,7 +286,7 @@
 				<span class="card-title">🕰 Chronologie du lore</span>
 				<span class="card-desc">Frise filtrable de tout ce qui est daté — ères, figures, cités, portails, trame du joueur — et points à arbitrer.</span>
 			</a>
-			<div class="synthese">
+			<div class="synthese" id="synthese-lore">
 				{% include 'part-lore-synthese.html' %}
 			</div>
 		</div>
@@ -261,8 +298,9 @@
 		<input type="search" id="recherche" placeholder="Filtrer (titre, résumé, date…)" autocomplete="off" aria-label="Filtrer le lore">
 		<div class="compte" id="compte"></div>
 		{% for section, libelle, entrees in groupes %}
-		<section class="groupe" data-groupe>
-			<h2>{{ libelle }} <span class="nb" data-nb="{{ entrees|length }}">{{ entrees|length }}</span></h2>
+		<section class="groupe" data-groupe id="groupe-{{ loop.index }}">
+			<h2><button type="button" class="groupe-tete" aria-expanded="true" aria-controls="groupe-corps-{{ loop.index }}">{{ libelle }} <span class="nb" data-nb="{{ entrees|length }}">{{ entrees|length }}</span></button></h2>
+			<div class="groupe-corps" id="groupe-corps-{{ loop.index }}">
 			{% for e in entrees %}
 			<a class="fichier{{ ' canon' if e.canon }}{{ ' redige' if e.redige }}" href="/admin/lore/{{ e.cle }}"
 			   data-texte="{{ (e.titre ~ ' ' ~ e.resume ~ ' ' ~ e.date ~ ' ' ~ e.cle)|lower }}">
@@ -271,8 +309,21 @@
 				{% if e.resume %}<span class="r">{{ e.resume }}</span>{% endif %}
 			</a>
 			{% endfor %}
+			</div>
 		</section>
 		{% endfor %}
+		<button type="button" class="sommaire-btn" id="sommaire-btn" aria-expanded="false" aria-controls="sommaire-flottant"
+		        title="Sommaire" aria-label="Sommaire du lore">☰</button>
+		<nav class="sommaire-flottant" id="sommaire-flottant" aria-label="Sommaire du lore" hidden>
+			<div class="titre">Sommaire</div>
+			<ol>
+				<li class="tete"><a href="/admin/lore/chronologie">🕰 Chronologie du lore</a></li>
+				<li class="tete"><a href="#synthese-lore" data-cible="synthese-lore">📜 Synthèse du concept</a></li>
+				{% for section, libelle, entrees in groupes %}
+				<li data-sommaire-groupe="groupe-{{ loop.index }}"><a href="#groupe-{{ loop.index }}" data-cible="groupe-{{ loop.index }}">{{ libelle }} <span class="nb">{{ entrees|length }}</span></a></li>
+				{% endfor %}
+			</ol>
+		</nav>
 	{% else %}
 		<div class="meta">
 			{% if entree.canon %}<span class="badge">CANON</span>{% endif %}
@@ -356,30 +407,95 @@
 		return out;
 	}
 
+	/** État d'un groupe de l'index (accordéon). Hors recherche : toujours visible, ouvert sauf
+	 *  s'il a été fermé (mémorisé). En recherche : caché s'il n'a aucun fichier retenu, sinon
+	 *  OUVERT quel que soit l'état mémorisé (dev/test_lecture_lore_client.js). */
+	function loreEtatGroupe(nbVus, enRecherche, fermeMemorise) {
+		if (!enRecherche) return { cache: false, ouvert: !fermeMemorise };
+		return { cache: nbVus === 0, ouvert: nbVus > 0 };
+	}
+
 	(function () {
 		const recherche = document.getElementById('recherche');
 		if (recherche) {
 			const fichiers = Array.from(document.querySelectorAll('a.fichier'));
+			const groupes = Array.from(document.querySelectorAll('[data-groupe]'));
 			const compte = document.getElementById('compte');
 			const total = fichiers.length;
+			// Groupes FERMÉS mémorisés (clé = id du groupe) ; la recherche n'y écrit jamais.
+			const CLE_GROUPES = 'telluris.lore_groupes.v1';
+			let fermes = {};
+			try { fermes = JSON.parse(localStorage.getItem(CLE_GROUPES) || '{}') || {}; } catch (e) { fermes = {}; }
+			const memoriser = () => { try { localStorage.setItem(CLE_GROUPES, JSON.stringify(fermes)); } catch (e) { /* mode privé */ } };
+			const ouvrir = (g, ouvert) => {
+				g.classList.toggle('closed', !ouvert);
+				g.querySelector('.groupe-tete').setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+			};
+			let enRecherche = false;
 			const filtrer = () => {
 				const mots = recherche.value.toLowerCase().split(/\s+/).filter(Boolean);
+				enRecherche = mots.length > 0;
 				let n = 0;
 				for (const a of fichiers) {
 					const ok = mots.every(m => a.dataset.texte.includes(m));
 					a.hidden = !ok;
 					if (ok) n++;
 				}
-				for (const g of document.querySelectorAll('[data-groupe]')) {
+				for (const g of groupes) {
 					const vus = g.querySelectorAll('a.fichier:not([hidden])').length;
-					g.hidden = !vus;
-					const nb = g.querySelector('.nb');
-					if (nb) nb.textContent = mots.length ? `${vus} / ${nb.dataset.nb}` : nb.dataset.nb;
+					const etat = loreEtatGroupe(vus, enRecherche, !!fermes[g.id]);
+					g.hidden = etat.cache;
+					ouvrir(g, etat.ouvert);
+					const ligne = document.querySelector(`[data-sommaire-groupe="${g.id}"]`);
+					if (ligne) ligne.hidden = etat.cache;
+					const txt = enRecherche ? `${vus} / ${g.querySelector('.nb').dataset.nb}` : g.querySelector('.nb').dataset.nb;
+					for (const nb of [g.querySelector('.nb'), ligne && ligne.querySelector('.nb')]) if (nb) nb.textContent = txt;
 				}
-				compte.textContent = mots.length ? `${n} / ${total} fichiers` : `${total} fichiers`;
+				compte.textContent = enRecherche ? `${n} / ${total} fichiers` : `${total} fichiers`;
 			};
+			for (const g of groupes) {
+				g.querySelector('.groupe-tete').addEventListener('click', () => {
+					const ouvert = g.classList.contains('closed');
+					ouvrir(g, ouvert);
+					// Pendant une recherche, le clic replie à l'écran sans toucher la mémoire.
+					if (enRecherche) return;
+					if (ouvert) delete fermes[g.id]; else fermes[g.id] = true;
+					memoriser();
+				});
+			}
 			recherche.addEventListener('input', filtrer);
 			filtrer();
+
+			// Sommaire flottant : ☰ ouvre / ferme ; Échap, clic dehors ou choix d'une entrée le referment.
+			const btn = document.getElementById('sommaire-btn');
+			const panneau = document.getElementById('sommaire-flottant');
+			const afficher = visible => {
+				panneau.hidden = !visible;
+				btn.setAttribute('aria-expanded', visible ? 'true' : 'false');
+				if (visible) { const lien = panneau.querySelector('li:not([hidden]) a'); if (lien) lien.focus(); }
+			};
+			btn.addEventListener('click', () => afficher(panneau.hidden));
+			document.addEventListener('keydown', e => {
+				if (e.key === 'Escape' && !panneau.hidden) { afficher(false); btn.focus(); }
+			});
+			document.addEventListener('click', e => {
+				if (!panneau.hidden && !panneau.contains(e.target) && !btn.contains(e.target)) afficher(false);
+			});
+			panneau.addEventListener('click', e => {
+				const lien = e.target.closest('a[data-cible]');
+				if (!lien) return;
+				e.preventDefault();
+				const cible = document.getElementById(lien.dataset.cible);
+				afficher(false);
+				if (!cible) return;
+				// Aller à un groupe fermé l'ouvre (et le retient hors recherche).
+				if (cible.matches('[data-groupe]') && cible.classList.contains('closed')) {
+					ouvrir(cible, true);
+					if (!enRecherche) { delete fermes[cible.id]; memoriser(); }
+				}
+				cible.scrollIntoView({ block: 'start', behavior: 'smooth' });
+				history.replaceState(null, '', '#' + cible.id);
+			});
 		}
 		// Cards de synthèse repliables (état par navigateur ; clé = texte de l'en-tête).
 		const CLE = 'telluris.lore_cards.v1';
