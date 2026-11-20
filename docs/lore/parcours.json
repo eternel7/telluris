@@ -1,0 +1,32 @@
+{
+	"_doc": "Parcours guidé « Découvrir Telluris » de /admin/lore (Auteur, 20/11/2026 : rédigé puis thématique). Étapes dans l'ordre : `cle` = clé de /admin/lore, `pourquoi` = une ligne affichée dans le parcours. Éditable à la main ; tests/test_lore.py vérifie que chaque clé existe.",
+	"titre": "Découvrir Telluris",
+	"etapes": [
+		{"cle": "redige/01_le_monde_et_ses_eres.md", "pourquoi": "Le cadre : géographie réelle, remparts, quatre ères."},
+		{"cle": "redige/02_anthropes_et_lignees.md", "pourquoi": "Qui vit derrière les murs."},
+		{"cle": "redige/03_portails_vague_donjons.md", "pourquoi": "Le cœur du monde : portails, Vague, donjons, cristaux."},
+		{"cle": "redige/04_institutions.md", "pourquoi": "Paladins, Templiers, Architectes, Guilde."},
+		{"cle": "redige/05_cites_etats.md", "pourquoi": "Le tour des Cités-États."},
+		{"cle": "redige/06_personnages_et_trame.md", "pourquoi": "Le chemin de l'aventurier, d'Auxerre au rang S+."},
+		{"cle": "redige/07_mysteres_et_cosmologie.md", "pourquoi": "Ce qui ne sera jamais tranché."},
+		{"cle": "redige/08_magie_et_vie_quotidienne.md", "pourquoi": "La magie à coût réel et la vie de tous les jours."},
+		{"cle": "redige/09_vampires.md", "pourquoi": "Les cinq lignées du sang."},
+		{"cle": "redige/10_loups_garous.md", "pourquoi": "Les familles de la bête."},
+		{"cle": "Telluris_Document_Maitre.md", "pourquoi": "La synthèse canonique en 26 sections."},
+		{"cle": "monde/20261120_reseau_des_portails.md", "pourquoi": "Toutes les routes de portails entre les cités."},
+		{"cle": "cites/20260820_decrire_l_histoire_de_lutecia.md", "pourquoi": "La capitale et son portail."},
+		{"cle": "cites/20261010_cour_des_arches_lutecia.md", "pourquoi": "L'institut des Architectes."},
+		{"cle": "cites/20261011_rhemi_et_chartres.md", "pourquoi": "Deux cités sans capitale : le Sacre et le labyrinthe."},
+		{"cle": "cites/20261111_histoire_d_orleans.md", "pourquoi": "Le fleuve, Jeanne et les quatre donjons."},
+		{"cle": "cites/20260820_decrire_rome_dans_telluris.md", "pourquoi": "La pieuse et la pécheresse."},
+		{"cle": "cites/20261021_camelot_winchester.md", "pourquoi": "Arthur, la Table ronde et les portails qui surgissent."},
+		{"cle": "cites/20261024_histoire_de_petra.md", "pourquoi": "L'eau, la pierre et quatre donjons."},
+		{"cle": "cites/20261101_histoire_d_aksoum.md", "pourquoi": "La cité de la reine et des pégases."},
+		{"cle": "cites/20261011_histoire_de_mu_chatgpt.md", "pourquoi": "Le continent englouti."},
+		{"cle": "cites/20261012_histoire_d_atlantis.md", "pourquoi": "La cité qui refusa un des frères."},
+		{"cle": "monde/20261012_les_vampires_de_telluris.md", "pourquoi": "Les récits de l'Auteur sur le sang."},
+		{"cle": "monde/20261016_dragons_et_serpents.md", "pourquoi": "Dragons et serpents des mythes."},
+		{"cle": "monde/20261101_licornes_et_pegase.md", "pourquoi": "Les montures des légendes."},
+		{"cle": "monde/20261102_sacs_des_legendes.md", "pourquoi": "Les contenants des légendes."}
+	]
+}

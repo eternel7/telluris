@@ -223,6 +223,8 @@ def _inline(texte: str, lien_fn) -> str:
 
 	texte = _RE_URL_NUE.sub(url_nue, texte)
 	texte = html.escape(texte, quote=False)
+	# `***x***` d'abord : sinon gras puis italique se chevauchent (`<strong><em>x</strong></em>`).
+	texte = re.sub(r"\*\*\*(?=\S)(.+?)(?<=\S)\*\*\*", r"<strong><em>\1</em></strong>", texte)
 	texte = re.sub(r"\*\*(?=\S)(.+?)(?<=\S)\*\*", r"<strong>\1</strong>", texte)
 	texte = re.sub(r"(?<!\w)__(?=\S)(.+?)(?<=\S)__(?!\w)", r"<strong>\1</strong>", texte)
 	texte = re.sub(r"(?<![\w*])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![\w*])", r"<em>\1</em>", texte)

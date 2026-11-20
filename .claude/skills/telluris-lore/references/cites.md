@@ -313,8 +313,13 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 Deux moments (Auteur, 11/10) : **établissement** (le site prend racine et ne bouge plus ; avant, campements temporaires, passages, nomades saisonniers) ; **avènement** (la cité prend son essor, son nom, son rang de Cité-État, et devient connue des autres) ; tableau révisé avec Rome : `monde/20261011_frise_chronologique_fusionnee.md` § 5. (L'ordre de fondation du 26/08 en périodes terrestres est abandonné.)
 
-## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20260826_creer_un_systeme_de_portails.md]
+## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20260826_creer_un_systeme_de_portails.md], [monde/20261120_reseau_des_portails.md]
 **Auteur** : tableau du 26/08 (repris ci-dessus cité par cité). Lutecia relie par Notre-Dame **toutes** les cités munies d'un portail transversal.
+
+**Auteur (20/11, cinq questionnaires)** — réseau complet [monde/20261120_reseau_des_portails.md] :
+- Survie à la Vague = **fait** ; cause = théorie admise + **voix contraire**. Quatre facteurs : **œuvre d'un frère** · **entretien continu** · **mana faible du lieu** · **concepteurs anciens** (proches du savoir originel). Lien = **deux sens, une porte à chaque bout**.
+- Liens neufs : Saint-Marc → **Constantinople** · Frari → **Alexandrie** · San Zanipolo → **Bruges** · San Lorenzo → **Caffa** · porte Fieschi → **Lyon** · Panthéon → **Athènes** · Saint-Ange → **Jérusalem** (avant la Vague, commanderie du Temple, distinct de l'héritage de Salomon) · Notre-Dame de Bruges → **Novgorod** · Hallgrímskirkja → **Nidaros** · Mezquita → **Tolède, Fès, Kairouan, Babylone** (pas Bagdad) · Grand Palais → **Kiev, Trébizonde, Antioche** · Muziris → **Pékin** · **Tokyo ↔ Pékin** · **Sydney ↔ Melbourne** (premier portail des frères) · Hôtel de Ville d'Aix → **Cologne, Mayence, Trèves, Ratisbonne** (post-Vague).
+- Bucarest, Teotihuacan : aucun autre lien. Bâtisseurs, anecdotes, mythes d'ancrage : **proposés**.
 
 **Proposé** : quatre classes de portails :
 1. stables ordinaires (80-90 %) ;

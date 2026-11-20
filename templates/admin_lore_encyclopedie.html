@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{# Encyclopédie du lore : une fiche par entité de docs/lore/entites.json (utils/lore_outils.encyclopedie). #}
+	{% include 'part-lore-base-css.html' %}
+	<style>
+		.main { max-width: 1180px; margin: 0 auto; padding: 14px 16px 60px; }
+		.intro { font-size: 0.8rem; color: var(--muted); line-height: 1.5; border-left: 3px solid var(--accent); padding: 8px 12px; margin-bottom: 12px; background: var(--panel); }
+		input[type=search] { width: 100%; min-height: var(--tap); padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 16px; }
+		input:focus { outline: none; border-color: var(--accent); }
+		.sauts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+		.sauts a { font-size: 0.75rem; text-decoration: none; border: 1px solid var(--border); border-radius: 16px; padding: 4px 10px; color: var(--muted); background: var(--panel); }
+		.compte { font-size: 0.75rem; color: var(--muted); margin: 6px 2px 12px; min-height: 1.2em; }
+		.famille { margin-bottom: 22px; scroll-margin-top: 12px; }
+		.famille[hidden], .fiche[hidden] { display: none; }
+		.famille h2 { font-size: 0.85rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; font-weight: normal; margin-bottom: 10px; }
+		.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; align-items: start; }
+		.fiche { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; scroll-margin-top: 12px; }
+		.fiche:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-doux); }
+		.fiche img { display: block; width: 100%; height: 140px; object-fit: cover; background: var(--panel2); }
+		.fiche .corps { padding: 10px 12px; }
+		.fiche h3 { font-size: 0.95rem; color: var(--text); font-weight: normal; }
+		.fiche h3 a { color: inherit; text-decoration: none; }
+		.fiche h3 a:hover { color: var(--accent); }
+		.fiche p { font-family: var(--police-lecture); color: var(--lecture); font-size: 0.86rem; line-height: 1.5; margin-top: 4px; }
+		.fiche details { margin-top: 8px; font-size: 0.76rem; }
+		.fiche summary { cursor: pointer; color: var(--muted); min-height: var(--tap); display: flex; align-items: center; }
+		.fiche ul { list-style: none; }
+		.fiche li a { display: flex; gap: 8px; padding: 4px 0; color: var(--accent2); text-decoration: none; line-height: 1.35; }
+		.fiche li a:hover { text-decoration: underline; }
+		.fiche li .nb { margin-left: auto; color: var(--muted); white-space: nowrap; }
+		.fiche .aucune { color: var(--muted); font-size: 0.74rem; margin-top: 8px; }
+	</style>
+</head>
+<body>
+	<header class="lore-tete">
+		<h1>📖 {{ title }}</h1>
+		{% set actif = 'encyclopedie' %}
+		{% include 'part-lore-nav.html' %}
+	</header>
+	<main class="main">
+		<div class="intro">Une fiche par cité, figure, créature, institution, autre monde ou notion, tirée de
+			<code>docs/lore/entites.json</code> (écrit à la main, canon seulement). Le nom mène à la page principale ;
+			« Mentionné dans » liste les pages qui en parlent le plus.</div>
+		<label for="filtre" class="visuellement-cache">Filtrer l'encyclopédie</label>
+		<input type="search" id="filtre" placeholder="Filtrer (nom, résumé…) — raccourci : /" autocomplete="off">
+		<nav class="sauts" aria-label="Aller à une famille">
+			{% for t, libelle, liste in familles %}<a href="#f-{{ t }}">{{ libelle }} · {{ liste|length }}</a>{% endfor %}
+		</nav>
+		<div class="compte" id="compte" aria-live="polite"></div>
+		{% for t, libelle, liste in familles %}
+		<section class="famille" id="f-{{ t }}">
+			<h2>{{ libelle }}</h2>
+			<div class="grille">
+			{% for e in liste %}
+				<article class="fiche" id="e-{{ e.id }}" data-texte="{{ (e.nom ~ ' ' ~ (e.variantes or [])|join(' ') ~ ' ' ~ (e.resume or ''))|lower }}">
+					{% if e.image %}<img src="/{{ e.image|urlencode }}" alt="" loading="lazy">{% endif %}
+					<div class="corps">
+						<h3>{% if e.page %}<a href="{{ e.url }}">{{ e.nom }} →</a>{% else %}{{ e.nom }}{% endif %}</h3>
+						{% if e.resume %}<p>{{ e.resume }}</p>{% endif %}
+						{% if e.mentions %}
+						<details>
+							<summary>Mentionné dans {{ e.nb_pages }} page{{ 's' if e.nb_pages > 1 }}</summary>
+							<ul>
+							{% for m in e.mentions %}<li><a href="/admin/lore/{{ m.cle }}?q={{ e.nom|urlencode }}">{{ m.titre }}<span class="nb">× {{ m.nb }}</span></a></li>{% endfor %}
+							</ul>
+						</details>
+						{% else %}<div class="aucune">Aucune page du lore ne le nomme encore.</div>{% endif %}
+					</div>
+				</article>
+			{% endfor %}
+			</div>
+		</section>
+		{% endfor %}
+	</main>
+	<script>
+	(function () {
+		LoreReglages.monter(document.getElementById('lore-nav'));
+		const filtre = document.getElementById('filtre');
+		const fiches = Array.from(document.querySelectorAll('.fiche'));
+		const compte = document.getElementById('compte');
+		const appliquer = () => {
+			const mots = filtre.value.toLowerCase().split(/\s+/).filter(Boolean);
+			let n = 0;
+			for (const f of fiches) { const ok = mots.every(m => f.dataset.texte.includes(m)); f.hidden = !ok; if (ok) n++; }
+			for (const s of document.querySelectorAll('.famille')) s.hidden = !s.querySelector('.fiche:not([hidden])');
+			compte.textContent = mots.length ? `${n} / ${fiches.length} fiches` : `${fiches.length} fiches`;
+		};
+		filtre.addEventListener('input', appliquer);
+		appliquer();
+		document.addEventListener('keydown', e => {
+			if (e.key === '/' && !e.target.closest('input, textarea, select')) { e.preventDefault(); filtre.focus(); }
+		});
+		// Une fiche visée par l'URL (#e-…) : sa liste de mentions s'ouvre.
+		const cible = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+		if (cible && cible.querySelector('details')) cible.querySelector('details').open = true;
+	})();
+	</script>
+</body>
+</html>

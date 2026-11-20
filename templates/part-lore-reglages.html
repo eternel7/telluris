@@ -1,0 +1,37 @@
+{#
+	Réglages de lecture « Aa » (scripts/lore_reglages.js) : script chargé SANS defer (attributs de
+	<html> posés avant le premier rendu) + styles du bouton et du panneau. Inclus par
+	part-lore-base-css.html, et seul par la chronologie (qui garde son thème parchemin :
+	`<html data-theme-fixe="1">`). Échelle du texte : `html { font-size }`, les tailles en rem suivent.
+#}
+<script src="{{ script_url('lore_reglages.js') }}"></script>
+<style>
+	html { font-size: calc(100% * var(--lore-echelle, 1)); }
+	@media (max-width: 768px) { html { font-size: calc(93.75% * var(--lore-echelle, 1)); } }
+	.icone-btn {
+		display: inline-flex; align-items: center; justify-content: center;
+		min-width: var(--tap); height: var(--tap); padding: 0 6px; border: 1px solid transparent; border-radius: 6px;
+		background: none; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 0.9rem;
+	}
+	.icone-btn:hover, .icone-btn[aria-expanded="true"] { color: var(--accent); border-color: var(--border); }
+
+	/* ── Panneau « Aa » des réglages (scripts/lore_reglages.js) ── */
+	.reglages-panneau {
+		position: fixed; top: 56px; right: 16px; z-index: 40; width: min(300px, calc(100vw - 32px));
+		background: var(--panel); border: 1px solid var(--accent); border-radius: 8px; padding: 12px;
+		box-shadow: 0 8px 28px var(--ombre, rgba(0,0,0,0.45)); font-size: 0.8rem; color: var(--text);
+	}
+	.reglages-panneau[hidden] { display: none; }
+	.reglages-panneau fieldset { border: none; margin-bottom: 10px; }
+	.reglages-panneau legend { color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 6px; }
+	.reglages-panneau .ligne { display: flex; gap: 6px; flex-wrap: wrap; }
+	.reglages-panneau button {
+		flex: 1 1 auto; min-height: var(--tap); padding: 0 10px; border: 1px solid var(--border); border-radius: 6px;
+		background: var(--bg); color: var(--text); cursor: pointer; font-size: 0.8rem;
+	}
+	.reglages-panneau button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-doux, rgba(142,42,28,0.10)); }
+	.reglages-panneau button.f-lisible { font-family: 'Atkinson Hyperlegible', sans-serif; }
+	.reglages-panneau button.f-dyslexie { font-family: 'OpenDyslexic', sans-serif; }
+	.reglages-panneau .taille-val { align-self: center; min-width: 3.5em; text-align: center; color: var(--muted); }
+	.reglages-panneau .aide { color: var(--muted); font-size: 0.72rem; line-height: 1.4; }
+</style>

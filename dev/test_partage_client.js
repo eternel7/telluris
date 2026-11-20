@@ -88,11 +88,13 @@ t('les pages du lore chargent partage.js et portent un bouton data-partager', ()
 		// Couleur NON imposée : celle, atténuée, de la page (sombre ou parchemin).
 		assert.ok(/button\.partager\s*\{[^}]*color:\s*var\(--muted\)/.test(html), f + ' : couleur figée au lieu de --muted');
 	}
-	// La lecture d'un fichier et l'index partagent admin_lore.html : bouton HORS de tout {% if %}.
+	// La lecture d'un fichier et l'index partagent admin_lore.html : bouton HORS de tout {% if %}
+	// de l'en-tête (la navigation vit dans part-lore-nav.html, incluse dans le <header>).
 	const html = fs.readFileSync(path.join(RACINE, 'templates', 'admin_lore.html'), 'utf8');
-	const nav = html.slice(html.indexOf('<nav>'), html.indexOf('</nav>'));
-	const bouton = nav.indexOf('data-partager');
-	assert.ok(bouton > nav.lastIndexOf('{% endif %}'), 'bouton conditionné');
+	const tete = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
+	const bouton = tete.indexOf('data-partager');
+	assert.ok(bouton >= 0, 'bouton absent de l\'en-tête');
+	assert.ok(!/\{%-?\s*if\b/.test(tete.slice(0, bouton)), 'bouton conditionné');
 });
 
 t('filtre de l\'index : un fichier `hidden` est vraiment masqué malgré display:block', () => {
