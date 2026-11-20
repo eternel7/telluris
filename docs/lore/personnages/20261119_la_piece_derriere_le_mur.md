@@ -1,5 +1,43 @@
 # La pièce derrière le mur — la première quête d'Aélis après Jumièges
 
+Après Jumièges, Aélis de Montfaucon vit aux Archives des Seuils. Aélis ne se bat pas : c'est une Architecte, compétente par le savoir et non par l'épée. C'est sa première quête depuis Jumièges, au **rang C**.
+
+## La boîte qui ne pouvait pas se perdre
+
+**Maître Villard de Honnecourt**, le nain maître d'œuvre de la Cour des Arches, sait plier l'espace. Ses copies obéissent à deux règles : rien de vivant dedans, et jamais un de ces objets dans un autre. Or Villard a perdu une boîte qui ne peut pas se perdre. Il l'avait rapportée de l'endroit où il a parachevé sa formation, et cet endroit est **Mu** ; mais cela, il ne le dit jamais. Au rang C, Mu n'est jamais nommée.
+
+L'aventurier entre dans l'histoire par l'une de quatre portes, toutes ouvertes une fois Jumièges réussie : Aélis aux Archives des Seuils, Villard lui-même, la réception de la Guilde de Lutecia ou Maëlys. La réception et Maëlys renvoient simplement vers Villard.
+
+?{Aélis l'annonce ainsi : « Maître Villard ne dort plus depuis trois nuits. Il ne dira pas pourquoi à un apprenti. À vous, peut-être. » Villard, lui : « Vous êtes de ceux qui ont ramené Aélis vivante. J'ai perdu quelque chose qui ne peut pas se perdre. » Et Maëlys ajoute : « Si vous voyez une porte rouge là-dedans, vous me le direz. »}?
+
+## Les Ateliers de Convergence
+
+L'enquête commence dans la réserve de Villard, aux **Ateliers de Convergence**. La boîte a quitté une armoire fermée, protections intactes. ?{Le socle, le sol, la porte, le plan du meuble à trois tiroirs (trois axes), le carnet de Villard et un tissu noir mènent à une conclusion : elle est sortie sans passer par la porte.}?
+
+Cette quête inaugure les **énigmes** de Telluris. Elles s'enchaînent, et une dernière renvoie au début : le carnet de Villard éclaire le plan du meuble, le tissu du meuble donne l'ordre des arches, le Púca mène à la maison, la Zashiki-warashi au plan impossible, et la sortie exige un symbole aperçu dans l'atelier au tout début.
+
+## La cave aux cinq arches
+
+?{Cinq arches, la Ligne, le Cercle, la Spirale, la Croix et le Triangle : c'est l'ordre de passage qui compte, non la distance, et les mauvaises arches ramènent à l'entrée.}? Un **Púca**, l'esprit changeant d'Irlande, y attend l'aventurier. ?{Il propose trois choses à associer et révèle qu'un visage vide est entré dans l'atelier, et qu'une enfant a refermé le passage derrière lui.}?
+
+## La maison pliée
+
+À l'intérieur de la boîte se tient une maison, et dans la maison vit une **Zashiki-warashi**, l'esprit-enfant des maisons japonaises : une maison qu'elle quitte tombe en ruine. C'est elle qui a refermé le passage. Des **Nopperabō**, les yōkai sans visage, sont entrés par l'interstice et passent pour les voleurs. La vraie menace est l'**Homme au sac**, venu prendre l'enfant : un vivant dans un sac. L'aventurier l'affronte, avec trois Nopperabō, tout en protégeant Aélis, qu'il doit ramener vivante comme à Jumièges.
+
+À la fin, la Zashiki-warashi **ne dit rien** : elle referme derrière l'aventurier la porte de sa maison.
+
+## Ce que l'on rapporte
+
+L'aventurier reçoit l'XP et le cuivre d'une escorte comme celle de Jumièges, et Villard lui offre une **Besace profonde**, une fois. ?{La boîte revient à Villard, scellée, et la Zashiki-warashi reste chez elle. Aélis recopie quelques pages de l'atelier intérieur, avec la permission de Villard.}?
+
+La boîte n'est pas un contenant : des vivants l'habitent, ce que Villard interdit à ses copies. C'est toute l'anomalie. ?{Trois théories, aucune tranchée : un contenant mal plié qui a appris à garder des vivants (Villard), un portail à une seule ouverture replié sur lui-même (Aélis), ou une maison qui existait avant la boîte, laquelle n'en serait que la porte (le Púca). Villard dit seulement : « Je l'ai rapportée de là où j'ai fini d'apprendre. Ça ne s'explique pas. » Et Aélis, regardant vers les remparts : « Nous croyons qu'un espace, on y entre. Maître Villard sait le plier. Mais quelqu'un, un jour, a su en bâtir un où l'on vit. Imaginez ce que cela voudrait dire, pour un monde qui vit derrière ses murs. »}?
+
+## La suite
+
+Au **rang B** viendra « **Les vestiges du premier passage** », puis au **rang A** l'offre faite à Aélis de partir pour Mu. ?{Au rang B, un portail condamné, bâti par un héritier des frères et gardé par les Templiers, porte les mêmes gravures que la boîte ; Aélis y prononce pour la première fois le nom de Mu. Au rang A, l'Institut lui offre de parfaire sa formation à Mu, et elle demande à l'aventurier de l'accompagner, par Notre-Dame et un cristal jaune.}?
+
+## 🗂 Échanges de travail
+
 - **Source :** séance Claude Code du 19/11/2026, d'après deux brouillons ChatGPT collés par l'Auteur (« La pièce derrière le mur » / « Les vestiges du premier passage » / « Partir pour Mu », et « La quête de la boîte de Mu — les systèmes d'énigmes »).
 - **Créée :** 19/11/2026
 - **Statut :** le § 1 **fait foi** (arbitrage de l'Auteur, 19/11, questionnaire) ; le scénario (§ 3-5) et les répliques restent **proposés**. Rien en jeu.

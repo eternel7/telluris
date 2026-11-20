@@ -34,6 +34,20 @@ def test_mise_en_forme_en_ligne():
 	assert "<del>barré</del>" in html
 
 
+def test_proposition_d_un_recit_marquee():
+	html = _html("Rome a ?{peut-être **deux** portails}? et `?{code}?`.")
+	assert '<span class="proposition" title="Proposé, non tranché">peut-être <strong>deux</strong> portails</span>' in html
+	assert "<code>?{code}?</code>" in html  # rien n'est interprété dans du code
+	assert "proposition" not in _html("un ?{ espace }? ou ?{} vide")
+
+
+def test_livre_sans_les_echanges_de_travail():
+	corps = _html("# Orléans\n\nLe récit.\n\n## 🗂 Échanges de travail\n\n## ✍️ Auteur\n\nUne question.")
+	assert lore.sans_echanges(corps).endswith("<p>Le récit.</p>")
+	sans = _html("# Séance\n\n## ✍️ Auteur\n\nTout.")
+	assert lore.sans_echanges(sans) == sans  # sans récit séparé : rien n'est coupé
+
+
 def test_soulignes_d_un_identifiant_restent_du_texte():
 	assert "<em>" not in _html("le doc lieu_categorie_x et rules_races")
 

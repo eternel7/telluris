@@ -1,5 +1,11 @@
 # Générer documentation maître
 
+L'Auteur a voulu rassembler en un seul document tout ce qui avait été élaboré pour Telluris : non pas un résumé, mais l'intégralité. ChatGPT n'a su produire qu'une synthèse incomplète, puis un modèle de dump sans contenu.
+
+De cette tentative sont nés deux héritages. Le premier est le **[Document maître](../../Telluris_Document_Maitre.md)**, la synthèse canonique en vingt-six sections, corrigée le 08/10/2026 contre les messages de l'Auteur ; il ne couvre ni les cités, ni les personnages, ni les quêtes. Le second est ce dossier même : les cinquante séances de travail récupérées une à une, en entier, et rangées par thème, d'où sont tirés le lore rédigé et les récits en tête de chaque séance.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ac7e821-d518-83eb-9cdd-dba8fdc220ca)
 - **Créée :** 08/10/2026 · **mise à jour :** 08/10/2026
 - **Messages :** 7

@@ -2114,7 +2114,7 @@ def _lore_livre(selection: str):
 	pages = lore_livre.selection(selection, entrees, lore_outils.parcours(entrees))
 	if not pages:
 		raise HTTPException(status_code=404, detail="Sélection vide ou inconnue")
-	chaps = lore_livre.chapitres(pages, lambda e: lore_outils.rendu_et_texte(e["chemin"])[0])
+	chaps = lore_livre.chapitres(pages, lambda e: lore_util.sans_echanges(lore_outils.rendu_et_texte(e["chemin"])[0]))
 	return lore_livre.libelle_selection(selection), chaps
 
 

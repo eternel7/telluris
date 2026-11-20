@@ -1,5 +1,31 @@
 # Décrire Aix-la-Chapelle
 
+Aix-la-Chapelle est la capitale symbolique de l'Occident germanique : la **Nouvelle Rome** de Charlemagne, qui voulait rivaliser avec Rome et Constantinople. Elle est le cœur du réseau des cités carolingiennes germaniques, qui sont toutes reliées entre elles et se portent secours face aux dangers du dehors.
+
+## Les sources et les cinq portes
+
+Bien avant Charlemagne, on venait déjà à Aix pour ses **sources chaudes sulfurées**. Mais son destin tient à ce qui dormait sous la cité : **cinq portails transversaux**, bâtis par l'un des trois frères lors de sa venue en Europe. Disposés en un étrange pentagramme, ils relient l'Europe au reste du monde : **Sydney**, **Tokyo**, **Teotihuacan**, **Pichao** sur le Machu Picchu, et **Abou Simbel**. Contrairement au portail de Notre-Dame, leur destination est fixe ; comme lui, la Vague ne les a ni altérés ni abîmés.
+
+## Charlemagne
+
+Un siècle après la Vague, Charlemagne choisit Aix pour résidence principale et transforme la cité. Il y installe sa cour, son administration et son académie palatine ; il y fait bâtir des **thermes royaux**, pour ses rhumatismes et pour apporter l'hygiène nécessaire dans un monde dur aux Anthropes. ?{Il ne voulait pas d'un empire conquis par la guerre, mais d'une capitale de cités alliées, reliées sans être soumises. Alcuin, venu d'York, organisa la vie savante de sa cour, et l'on y copiait les textes venus des cinq bouts du monde.}?
+
+Sous son impulsion naît aussi un second réseau : un portail par cité sœur du monde carolingien, abrité dans l'**Hôtel de Ville**. Ces portails sont postérieurs à la Vague et mènent à **Cologne**, **Mayence**, **Trèves** et **Ratisbonne**. Aucun ne mène à un donjon : c'est le rôle des autres cités germaniques. Aix est ainsi la porte d'accès de tout le réseau.
+
+## Les monuments
+
+- La **Chapelle Palatine**, consacrée par Léon III, s'inspire des basiliques de Ravenne : un plan octogonal sous un dôme, des colonnes de marbre antique venues de Rome et de Ravenne, des mosaïques à fond d'or. Elle forme aujourd'hui le cœur de la cathédrale, bâtie autour des cinq portes. ?{Les Architectes d'Aix y ont fondé une grande école : l'étude comparée des portails, à partir de ces cinq passages stables et plus anciens que la Vague.}?
+- Le **trône de Charlemagne**, dans la tribune de la chapelle, est d'une grande sobriété : des plaques de marbre blanc venues de Jérusalem. Plus de **trente rois** s'y sont assis après leur sacre, pour affirmer leur légitimité sur le réseau des cités germaniques. ?{Il dit qu'une cité peut reconnaître un souverain sans perdre son existence propre.}?
+- Le **Palais Palatin**, œuvre de l'architecte **Eudes de Metz**, comprend la grande salle d'audience et des tours défensives, dont la **Granusturm**, pièce maîtresse de la défense aérienne.
+- L'**Hôtel de Ville**, bâti sur les fondations de l'ancienne salle d'audience, incarne le pouvoir des bourgeois d'Aix ; il accueille les banquets de couronnement des rois carolingiens, et le réseau des portails des cités sœurs.
+- Un **double rempart** ponctué de tours entoure la ville, avec deux portes monumentales dont elle est fière, le **Ponttor** et le **Marschiertor**.
+
+## Les reliques
+
+Aix est l'un des grands pèlerinages de l'Occident, grâce à ses reliques insignes. Des **nécromants** ont attesté que la plupart sont authentiques, et la cité ne se contente pas de les protéger : elle s'en sert.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a8c69b8-2028-83eb-9909-9d42b096db0a)
 - **Créée :** 24/08/2026 · **mise à jour :** 26/08/2026
 - **Messages :** 2

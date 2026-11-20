@@ -33,7 +33,7 @@ function extraire(nom) {
 }
 
 const FONCTIONS = ['loreFichierRetenu', 'loreStatutLecture', 'lorePlier', 'loreOccurrences',
-	'loreSectionsChatgpt', 'loreReglagesNormaliser'];
+	'loreSectionsChatgpt', 'lorePlageEchanges', 'loreReglagesNormaliser'];
 vm.runInThisContext(FONCTIONS.map(extraire).join('\n') + '\nglobalThis.F = {' + FONCTIONS.join(',') + '};');
 
 let echecs = 0, n = 0;
@@ -89,6 +89,13 @@ t('canon d\'abord : ce qui suit un h2 🤖, jusqu\'au h2 suivant', () => {
 	assert.deepStrictEqual(F.loreSectionsChatgpt(blocs), [[4, 7], [10, 11]]);
 	assert.deepStrictEqual(F.loreSectionsChatgpt([b(true, 1), b(true)]), []);  // h2 🤖 vide
 	assert.deepStrictEqual(F.loreSectionsChatgpt([b(false), b(false)]), []);
+});
+
+t('récit d\'abord : les échanges repliés dès le premier h2 🗂, sinon rien', () => {
+	const b = (h2, echanges) => ({ h2, echanges: !!echanges });
+	assert.strictEqual(F.lorePlageEchanges([b(false), b(false), b(true), b(false), b(true, 1), b(true), b(true, 1)]), 4);
+	assert.strictEqual(F.lorePlageEchanges([b(false), b(true), b(false)]), -1);
+	assert.strictEqual(F.lorePlageEchanges([b(false, 1), b(false)]), -1);  // seul un h2 compte
 });
 
 t('réglages : valeurs bornées, inconnues ramenées au défaut', () => {

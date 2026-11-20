@@ -1,5 +1,13 @@
 # Chronologie des cités Telluris
 
+On a voulu ranger les cités de Telluris dans l'ordre de leur fondation, sans oublier Mu, Atlantis, Reykjavik et Akureyri. Cet ordre, rédigé en périodes terrestres, a été **abandonné** : Telluris ne connaît pas d'antiquité ni de moyen âge, seulement ses quatre ères.
+
+Ce qui en reste tient en quelques principes, fixés depuis par la [frise fusionnée](20261011_frise_chronologique_fusionnee.md). Presque toutes les cités existaient **avant la Vague**. Une cité ne se « fonde » pas d'un coup : elle a son **établissement**, le jour où le site prend racine et ne bouge plus (avant, ce n'étaient que campements, passages, nomades saisonniers), puis son **avènement**, quand elle prend son essor, son nom, son rang de Cité-État, et devient connue des autres. **Lutecia** n'a pas été fondée : elle est née autour du portail d'un frère, dans une cité qui existait déjà, et elle a pris son nom en dernier.
+
+**Mu** est plus ancienne que les trois frères ; elle est aujourd'hui un continent englouti, révéré par les Architectes, et le rang A peut y mener l'aventurier, comme on offrira à Aélis d'y parfaire sa formation. **Atlantis** n'est jamais devenue un nœud du réseau des portails : elle s'est tenue à l'écart, et elle existe toujours. Reykjavik et Akureyri sont reliées par une forteresse-portail des Templiers, active mais altérée.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a8ea4c7-6848-83eb-bce0-90872f0572d9)
 - **Créée :** 26/08/2026 · **mise à jour :** 26/08/2026
 - **Messages :** 2

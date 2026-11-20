@@ -1,5 +1,11 @@
 # Frise chronologique de Telluris
 
+Cette première frise a ouvert le chantier de la chronologie de Telluris. Elle a depuis été fusionnée avec celle du 21/08, et c'est la [frise fusionnée](20261011_frise_chronologique_fusionnee.md) qui fait foi : quatre ères, de l'antédiluvien à l'Âge des Donjons.
+
+Il en reste deux décisions. **Salomon a vécu après les trois frères**, quand l'Âge des Portails avait déjà commencé : l'« héritage de Salomon », à Jérusalem, est un portail ancien, coûteux, mal compris, et non un passage libre vers une capitale. Et l'histoire de **Jérusalem** se lit en parallèle de celle du monde : David y est reconnu roi par la cité, sans conquête ; quand « le royaume se divise », ce sont les cités voisines qui espacent leurs relations avec elle. Jérusalem est une Cité-État, pas un royaume.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a85e263-8b50-83eb-9202-9a90b7dad0ff)
 - **Créée :** 19/08/2026 · **mise à jour :** 06/09/2026
 - **Messages :** 4

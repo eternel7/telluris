@@ -1,5 +1,39 @@
 # Idées de quêtes à Lutecia
 
+Chaque passage de rang, du D au S+, a sa grande quête. Jusqu'au rang B, elles restent à Lutecia et en France ; à partir du rang A, elles quittent Lutecia, pour Mu ou ailleurs, et servent à faire **miroir des mythologies** du monde plutôt qu'à parler des portails et de leurs malfaçons. Et toujours, les réponses restent non définitives.
+
+## La trame
+
+| Rang | Quête | Où |
+|---|---|---|
+| D | **Les rats de la crypte** | les catacombes de Lutecia |
+| C | **La route de Saint-Denis** | la route du nord |
+| B | **La porte qui ne devait pas s'ouvrir** | un temple templier près de Lutecia |
+| A | **Le serpent sous la cité** | Mu |
+| A+ | **Rome, vers le Paradis** | Rome |
+| S | **Yggdrasil** | une cité du Nord |
+| S+ | **Celui qui était avant** | hors de toute mythologie |
+
+**Les rats de la crypte.** Des ouvriers chargés de consolider les souterrains ne reviennent pas. On croit à une infestation de rats géants ; on découvre une crypte dont certaines portes ont été rouvertes récemment, et au fond, un objet portant le symbole d'un portail ancien.
+
+**La route de Saint-Denis.** Une escorte de Bouchard de Clignancourt, où des loups rabattent un convoi vers une bête plus vieille que la route : les monstres précèdent les donjons.
+
+**La porte qui ne devait pas s'ouvrir.** L'extraction des cristaux **modifie** un donjon : au fond de l'ossuaire des catacombes, une paroi s'est ouverte sur une porte de pierre fermée et tiède.
+
+**Le serpent sous la cité.** À Mu, sous Mu-la-Centrale, près de la porte que la cité a fermée, l'aventurier rencontre **Échidna**, la mère des serpents, que l'on accuse d'être la mère de tous les monstres. Il choisit de la combattre ou de lui parler. « Vous appelez monstres mes enfants. » S'il la croit, les dieux seraient la source de tous les maux.
+
+**Rome, vers le Paradis.** Par le portail de Saint-Pierre, un monde divin. ?{Les anges y donnent des réponses ambiguës : « Vos dieux vous ont menti. » Est-ce vrai ? Les habitants de Telluris ne savent même pas si c'est vraiment le Paradis ; ils l'appellent ainsi faute d'un autre mot.}?
+
+**Yggdrasil.** ?{Une cité du Nord, dont les portails mènent à un lieu qu'on appelle Yggdrasil, sans savoir si c'est un arbre, un monde, un portail gigantesque ou l'image de tout autre chose : Asgard, Midgard, Jötunheim, Hel. Les mondes précèdent-ils les récits qu'on en fait ?}?
+
+**Celui qui était avant.** ?{Le joueur a assez voyagé pour voir que toutes les mythologies décrivent des structures semblables : un monde des mortels, des mondes divins, des êtres primordiaux, des passages entre les mondes. Quatre hypothèses restent côte à côte (Échidna disait vrai ; les dieux sont eux-mêmes des victimes ; les mythologies sont des traductions d'une même chose ; Échidna ment), et le jeu n'en tranche aucune.}?
+
+?{Chaque mythologie devrait répondre à une question, et en ouvrir deux nouvelles.}?
+
+Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont les marionnettes des joueurs ; mais le jeu ne le lui apprend pas tôt.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ab5526c-3eb8-83ed-ad2d-d76f7e39c627)
 - **Créée :** 24/09/2026 · **mise à jour :** 24/09/2026
 - **Messages :** 6

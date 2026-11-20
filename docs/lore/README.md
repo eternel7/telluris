@@ -2,6 +2,8 @@
 
 Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026), une par fichier, rangées par thème. Contenu COMPLET, non résumé : c'est la matière d'où sortira la compétence `telluris-lore`.
 
+> Chaque séance des dossiers Monde, Cités et Personnages s'ouvre sur un **récit** : ce qui a été décidé, raconté comme une chronique ; les propositions non tranchées y sont soulignées en pointillés (`?{…}?`). Les échanges d'origine suivent, intacts, sous « 🗂 Échanges de travail ».
+>
 > ⚠️ Ce sont des **échanges de travail**, pas un canon : les messages de l'**Auteur** font foi ; les réponses de ChatGPT sont des propositions, retenues seulement si une décision les a adoptées. La synthèse canonique vit dans `../Telluris_Document_Maitre.md`.
 
 ## ✒️ Le lore rédigé

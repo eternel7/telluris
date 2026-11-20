@@ -1,5 +1,23 @@
 # Créer trois revirements émotionnels
 
+Sur la route de l'aventurier, il y aura des deuils : la mort d'un ami parmi les personnages qu'il croise. Encore faut-il que le lien existe avant qu'on le brise.
+
+## Pourquoi pas la paladine
+
+On a d'abord pensé à **Dame Éléonore de Rochefort**, la paladine qui a escorté l'aventurier d'Auxerre à Notre-Dame. Mais elle se prête mal à un lien émotionnel : elle reste tout entière à sa mission, sécuriser les convois entre Auxerre et Lutecia. Son comparse hobbit, Frère Martin, n'en offrait guère davantage. ?{On aurait pu la faire passer de la mission à la confiance : elle confie à l'aventurier la garde d'un passage pendant son sommeil, lui demande son avis sur la route, lui promet de lui présenter son unité à son retour, puis meurt en défendant une caravane, et Frère Martin raconte ses derniers instants.}?
+
+## Deux arcs retenus
+
+Deux nouveaux personnages porteront ces deuils, chacun par un chemin différent.
+
+**Milo, l'attachement par la complicité.** Un jeune hobbit, aide-cartographe d'une compagnie de voyageurs à Auxerre, qui rêve de dresser la carte complète de la région. À chaque retour de mission, l'aventurier lui raconte ce qu'il a vu, et ensemble ils complètent la carte. Puis une escorte banale tourne mal, et Milo meurt en voulant récupérer sa carte. Une région y reste vierge. ([Les dialogues de Milo](20261003_ecrire_dialogues_de_milo.md).)
+
+**Élise, l'attachement par la vie quotidienne.** Une herboriste naine, au Coq de Lutèce, dans les faubourgs de Lutecia. Elle n'est ni aventurière ni paladine : elle soigne. Elle finit par reconnaître l'aventurier, par connaître ses habitudes, par s'intéresser à la personne plus qu'au héros en devenir. Puis elle part chercher des herbes dans une forêt qu'elle connaît depuis des années, et ne revient pas. ([Le scénario d'Élise](20261003_scenario_d_elise.md).)
+
+Dans les deux cas, la mort est **banale**. Ni héroïsme, ni monstre exceptionnel : c'est ce qui la rend vraie.
+
+## 🗂 Échanges de travail
+
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ab61416-f4a8-83ed-a0ef-14768b843604)
 - **Créée :** 25/09/2026 · **mise à jour :** 03/10/2026
 - **Messages :** 4
