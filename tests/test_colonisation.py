@@ -822,6 +822,20 @@ def test_le_bilan_par_jour_est_celui_qu_une_journee_de_passes_produit():
 	assert "stocks" not in col.vue(imp, reg, col.VISITEUR, site, [bucheron])
 
 
+def test_sans_place_sur_la_grille_retouchee_le_batiment_redevient_a_poser():
+	reg = _reg()
+	imp = _imp(reg, batiments=[{"id": "b1", "type": "habitation", "pos": [2, 2]}])
+	imp["cells"] = [[0] * len(imp["cells"][0]) for _ in imp["cells"]]   # plus une case marchable
+	imp_change, lien_change, portes = col.suivre_entrees(imp, reg, None, {})
+	assert imp_change and not lien_change and portes == []
+	assert col.batiment(imp, "b1")["pos"] is None
+	assert imp["journal"][-1]["genre"] == "batiment" and "à reposer" in imp["journal"][-1]["texte"]
+	# un lieu sans grille lue (modèle introuvable) ne déplace rien
+	sans = _imp(reg, batiments=[{"id": "b1", "type": "habitation", "pos": [2, 2]}])
+	sans.pop("cells")
+	assert col.suivre_entrees(sans, reg, None, {})[0] is False
+
+
 def test_chaque_ligne_du_carnet_porte_un_genre_connu():
 	reg = _reg()
 	imp = _imp(reg)

@@ -853,6 +853,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	if est_implantation:
 		_reg_col = colonisation_util.regles(get_doc)
 		role_implantation = colonisation_util.role_de(character, grid_doc)
+		# Le lieu modèle a pu être retouché (entrées 🚪, grille) : sortie, bâtiments et portes le suivent.
+		colonisation_routes.suivre_modele_ici(grid_doc, _reg_col)
 		_pos = character.get("position") or {}
 		_entrees = colonisation_util.entrees_de(grid_doc)
 		if _entrees and not colonisation_util.case_marchable(grid_doc, _pos.get("x", -1), _pos.get("y", -1)):

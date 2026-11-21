@@ -1555,6 +1555,63 @@ def replacer_batiments(imp: dict, anciennes_dims: dict, nouveau_lieu: dict) -> N
 			prises.add(tuple(pos))
 
 
+def suivre_entrees(imp: dict, reg: dict, lien: dict | None, portes: dict, now: int | None = None) -> tuple[bool, bool, list]:
+	"""Tout ce qui garde une POSITION tirée du lieu modèle suit sa grille ACTUELLE (le modèle se
+	retouche dans l'éditeur après la fondation : entrées 🚪, grille) — lu à chaque passage :
+	1. la sortie vers le pays (nœud de `lien` côté implantation) = la PREMIÈRE entrée ;
+	2. un bâtiment dont la case n'est plus marchable, tombe sur une entrée ou est déjà prise va
+	   à la case libre la plus proche (`case_libre_proche`) — sans place, il redevient « à poser » ;
+	3. la porte de chaque sous-lieu (`portes` : {id du bâtiment: doc du lien}) = la case de son
+	   bâtiment.
+	Mute sans sauver. → (implantation changée, lien changé, portes changées)."""
+	entrees = entrees_de(imp)
+	lien_change = False
+	if entrees and lien:
+		for n in lien.get("nodes") or []:
+			if n.get("lieu") == imp.get("_id") and _xy(n.get("pos") or [-1, -1]) != entrees[0]:
+				n["pos"] = list(entrees[0])
+				lien_change = True
+	imp_change = False
+	if (imp.get("cells") or []):
+		prises = set()
+		hors = {tuple(e) for e in entrees}
+		for b in imp.get("batiments") or []:
+			if not b.get("pos"):
+				continue
+			pos = _xy(b["pos"])
+			if case_marchable(imp, pos[0], pos[1]) and tuple(pos) not in hors and tuple(pos) not in prises:
+				prises.add(tuple(pos))
+				continue
+			nouvelle = case_libre_proche(imp, pos, prises)
+			b["pos"] = nouvelle
+			imp_change = True
+			label = (batiment_def(reg, b.get("type")) or {}).get("label") or b.get("type") or ""
+			if nouvelle:
+				prises.add(tuple(nouvelle))
+			else:
+				noter(imp, f"Plus de place pour {label} sur la carte : il est à reposer.", now, genre="batiment")
+	portes_changees = []
+	for b in imp.get("batiments") or []:
+		porte = (portes or {}).get(b.get("id"))
+		if porte and b.get("pos"):
+			for n in porte.get("nodes") or []:
+				if n.get("lieu") == imp.get("_id") and _xy(n.get("pos") or [-1, -1]) != _xy(b["pos"]):
+					n["pos"] = list(b["pos"])
+					portes_changees.append(porte)
+					break
+	return imp_change, lien_change, portes_changees
+
+
+def arrivee_implantation(imp: dict, link_id, pos):
+	"""Case d'arrivée par une connexion : par la sortie vers le pays (`imp.lien`), la PREMIÈRE
+	entrée ACTUELLE du modèle, même si le nœud enregistré n'a pas encore suivi ; autrement
+	(porte d'un sous-lieu), `pos` inchangée."""
+	entrees = entrees_de(imp)
+	if entrees and link_id and link_id == (imp or {}).get("lien"):
+		return {"x": entrees[0][0], "y": entrees[0][1]}
+	return pos
+
+
 def reperes_carte(imp: dict, reg: dict) -> list:
 	"""Marqueurs des bâtiments POSÉS, au format des passages de `/play` (`lieux.passages_carte`) :
 	pictogramme et halo des repères (§ 12.4). `link_id` absent : on n'y entre pas."""

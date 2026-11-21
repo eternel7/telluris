@@ -415,6 +415,51 @@ def test_construire_poser_engager_puis_changer_de_palier(monde):
 	assert monde["get"](imp_id)["dimensions"] == nouveau["dimensions"]          # nouvelle image, nouvelle grille
 
 
+def test_sortie_batiments_et_portes_suivent_le_modele_retouche(monde):
+	"""Le modèle est retouché APRÈS la fondation (entrées 🚪, grille) : au passage suivant, la
+	sortie va sur la nouvelle première entrée, un bâtiment sur une entrée ou une case murée
+	est déplacé, la porte de son sous-lieu le suit (cas de Sens, hameau du 21/11)."""
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	reg = _reg(monde)
+	modele_id = monde["docs"][imp_id]["modele"]
+	modele = monde["docs"][modele_id]
+	w, h = modele["dimensions"]["x"], modele["dimensions"]["y"]
+	nouvelles = [[w // 2, 0], [w // 2, h - 1]]
+	stocke = monde["docs"][imp_id]
+	stocke["batiments"] = [
+		{"id": "b_e", "type": "entrepot", "pos": list(nouvelles[1])},                       # sur une future entrée
+		{"id": "b_h", "type": "habitation", "pos": [3, 3], "lien": "link:colonie_t"},         # sur une future case murée
+		{"id": "b_g", "type": "poste_de_garde", "pos": [5, 5]}]                               # intacte
+	monde["docs"]["link:colonie_t"] = {"_id": "link:colonie_t", "type": "connection",
+									   "nodes": [{"lieu": imp_id, "pos": [3, 3]}, {"lieu": "lieu:colonie_t", "pos": [0, 0]}]}
+	ancienne = monde["docs"][stocke["lien"]]["nodes"][1]["pos"]
+	assert ancienne != nouvelles[0]
+	# retouche du modèle dans l'éditeur
+	modele["entrees"] = nouvelles
+	modele["cells"] = [list(r) for r in modele["cells"]]
+	modele["cells"][3][3] = 0
+	rc.suivre_modele_ici(monde["get"](imp_id), reg)
+	assert monde["docs"][stocke["lien"]]["nodes"][1]["pos"] == nouvelles[0]
+	apres = {b["id"]: b["pos"] for b in monde["docs"][imp_id]["batiments"]}
+	assert apres["b_g"] == [5, 5]
+	assert apres["b_e"] not in nouvelles and apres["b_h"] != [3, 3]
+	imp = monde["get"](imp_id)
+	assert all(col.case_marchable(imp, *p) for p in apres.values())
+	assert len({tuple(p) for p in apres.values()}) == 3
+	assert monde["docs"]["link:colonie_t"]["nodes"][0]["pos"] == apres["b_h"], "la porte suit son bâtiment"
+	assert not set(db_config.CHAMPS_MODELE) & set(monde["docs"][imp_id]), "lien pur : rien du modèle en base"
+	# idempotent : un second passage ne change plus rien
+	avant = copy.deepcopy(monde["docs"])
+	rc.suivre_modele_ici(monde["get"](imp_id), reg)
+	assert monde["docs"] == avant
+	# arrivée par la sortie : la première entrée actuelle, même si le nœud n'avait pas suivi
+	monde["docs"][stocke["lien"]]["nodes"][1]["pos"] = ancienne
+	assert col.arrivee_implantation(monde["get"](imp_id), stocke["lien"], {"x": 1, "y": 1}) == {"x": nouvelles[0][0], "y": 0}
+	assert col.arrivee_implantation(monde["get"](imp_id), "link:colonie_t", {"x": 3, "y": 4}) == {"x": 3, "y": 4}
+
+
 def test_hors_d_une_implantation_les_routes_du_lieu_refusent(monde):
 	rc = monde["rc"]
 	assert _refus(monde, _perso(), rc.ici, None) == 403
