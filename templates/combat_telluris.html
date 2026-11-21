@@ -709,10 +709,7 @@ html.vue-portrait #move-controls { transform: rotate(90deg); }
 	display: flex; gap: 8px; flex-wrap: nowrap; align-items: center;
 	min-width: 0; overflow-x: auto; overflow-y: hidden;
 	padding: 8px 4px;
-	scrollbar-width: thin; scrollbar-color: var(--border-color) transparent;
 }
-#initiative-strip::-webkit-scrollbar { height: 6px; }
-#initiative-strip::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 .init-badge {
 	position: relative; flex-shrink: 0;
 	width: 42px; height: 42px; border-radius: 50%;
@@ -1318,8 +1315,6 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 	contain: size;
 	min-height: 250px;
 	width: 100%;
-	scrollbar-width: thin; /* Rend la barre plus fine */
-	scrollbar-color: #4d4d4d transparent;
 }
 .log-entry {
 	font-size: 12px; color: #bbb; padding: 2px 0;
@@ -1526,6 +1521,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 .end-btn-sol:disabled { opacity: 0.4; cursor: not-allowed; }
 
 </style>
+	{% include "part-defilement.html" %}
 </head>
 <body>
 

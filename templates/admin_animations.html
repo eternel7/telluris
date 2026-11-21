@@ -65,8 +65,6 @@
 			border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
 			max-height: 520px; overflow-y: auto;
 		}
-		.anim-list::-webkit-scrollbar { width: 8px; }
-		.anim-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 		.anim-row {
 			padding: 8px 10px; border-bottom: 1px solid rgba(42,48,64,0.6);
 			cursor: pointer; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;
@@ -202,6 +200,7 @@
 		.liaison-scroll { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
 		.type-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 	</style>
+	{% include "part-defilement.html" %}
 </head>
 <body>
 	<header>

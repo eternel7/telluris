@@ -284,7 +284,8 @@ templates/
                          #   (part-character-card, part-slot-bar-css, part-move-panel,
                          #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux,
                          #    part-auth-css : carte de parchemin partagée /auth ↔ /reinitialisation,
-                         #    part-polices : polices HÉBERGÉES (mount /polices), jamais Google Fonts)
+                         #    part-polices : polices HÉBERGÉES (mount /polices), jamais Google Fonts,
+                         #    part-defilement : barre de défilement UNIQUE, dans le <head> de CHAQUE page — n'en redéfinir aucune)
   scripts/               # JS partagé, servi par le mount /scripts — ⚠️ toujours `{{ script_url('x.js') }}`
                          #   (URL versionnée par mtime : sinon Chrome garde l'ancien fichier en cache)
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)

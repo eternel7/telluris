@@ -737,9 +737,6 @@
 			padding-right: 4px;
 			margin-bottom: 4px;
 		}
-		.voc-grid::-webkit-scrollbar { width: 4px; }
-		.voc-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-		.voc-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
 
 		.voc-btn {
 			border: 1px solid rgba(141,99,52,0.25);
@@ -802,9 +799,6 @@
 			margin-bottom: 4px;
 			align-items: start;
 		}
-		.portrait-grid::-webkit-scrollbar { width: 4px; }
-		.portrait-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-		.portrait-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
 
 		.portrait-btn {
 			border: 2px solid transparent;
@@ -868,9 +862,6 @@
 			padding-right: 4px;
 			margin-bottom: 4px;
 		}
-		.cite-grid::-webkit-scrollbar { width: 4px; }
-		.cite-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-		.cite-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
 
 		.cite-btn {
 			border: 1px solid rgba(141,99,52,0.25);
@@ -1095,6 +1086,7 @@
 			}
 		}
 	</style>
+	{% include "part-defilement.html" %}
 </head>
 <body>
 	<svg style="display:none">
