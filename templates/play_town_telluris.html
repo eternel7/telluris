@@ -1308,6 +1308,7 @@
 		   s'affiche pas au doigt). */
 		.bruit-indic { display: inline-block; margin-top: 8px; font: inherit; font-size: 0.8rem; padding: 3px 10px; background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
 		.bruit-indic[hidden] { display: none; }
+		.bruit-indic.bruit-silencieux { border-color: #3f9a8a; }
 		.bruit-indic.bruit-discret { border-color: #5d8a5d; }
 		.bruit-indic.bruit-audible { border-color: #b08d3c; }
 		.bruit-indic.bruit-bruyant { border-color: #b0503c; }
@@ -2366,7 +2367,7 @@
 			<!-- Effets actifs (consommables) : miroir du panneau latéral, resynchronisé
 			     à chaque déplacement via _renderEffetsActifs (rep.effets_actifs). -->
 			<div id="sh-effets-actifs-panel" class="sh-effets-chips"></div>
-			<!-- Bruit du groupe (utils/bruit.py) : 🤫 / 👣 / 📣, masqué hors zone de nature
+			<!-- Bruit du groupe (utils/bruit.py) : 🌿 / 🤫 / 👣 / 📣, masqué hors zone de nature
 			     (ville, mer). Bloc `bruit` de /play puis de chaque pas (`_majBruit`). -->
 			<button type="button" id="bruit-indic" class="bruit-indic" hidden
 				onclick="_detaillerBruit()"></button>
@@ -5133,7 +5134,8 @@
 		const detail = (b.sources || []).map(s => s.cle === 'charge'
 			? `${s.libelle} ${Math.round((s.taux || 0) * 100)} % (+${s.points})`
 			: `${s.libelle}${s.nb > 1 ? ' ×' + s.nb : ''} (+${s.points})`).join(' · ');
-		const effet = { discret: 'les rencontres sont plus rares et moins nombreuses',
+		const effet = { silencieux: 'les bêtes viennent rarement, souvent seules, jamais en bande mêlée',
+			discret: 'les rencontres sont plus rares et moins nombreuses',
 			audible: 'les rencontres suivent leur cours ordinaire',
 			bruyant: 'les rencontres sont plus fréquentes et plus nombreuses' }[b.niveau] || '';
 		return `${b.libelle} — ${effet}. Bruit ${b.points} : ${detail}`;

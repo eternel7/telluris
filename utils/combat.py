@@ -4011,7 +4011,9 @@ def instantiate_groupes(
 	l'effectif est tiré à la POSITION que donne le bruit (seul ⇒ bas, convoi ⇒ haut, jamais
 	au-delà) au lieu du milieu décalé par les compagnons, et la part de budget par spécimen se
 	calcule sur le milieu de la fourchette (grades inchangés) ; la chance du second groupe est
-	multipliée par `bruit.facteur_second`. None (ou mécanique inactive) ⇒ comportement d'avant."""
+	multipliée par `bruit.facteur_second`. None (ou mécanique inactive) ⇒ comportement d'avant.
+	Auteur 21/11 : une NUÉE plafonne à `bruit.plafond_nuee` ; SILENCIEUX ⇒ plancher de fourchette
+	abaissé à 1, meute à 1, aucun second groupe (`bruit.silencieux`)."""
 	rand = rand or random
 	plafond = max(1, int(plafond if plafond is not None else character_stats.RENCONTRE_PLAFOND))
 	if proba_second is None:
@@ -4162,6 +4164,8 @@ def _instantiate_groupes_composes(
 		if max_n is not None:
 			limite = max_n if limite is None else min(limite, max_n)
 		mini = composition.effectif_min(espece, r)
+		if bruit is not None:
+			mini = bruit_util.meute_min(mini, bruit)   # silencieux ⇒ l'éclaireur isolé
 		roles = composition.joue_des_roles(espece, r)
 
 		chef = tirer_profil(cands)
@@ -4181,6 +4185,9 @@ def _instantiate_groupes_composes(
 			# NUÉE : grades libres, un spécimen de plus tant que le budget le paie, jusqu'au
 			# plafond des nuées (ou de l'association : les charognards restent peu nombreux).
 			plaf = max(plafond, character_stats.RENCONTRE_PLAFOND_NUEE)
+			if bruit is not None:
+				# BRUIT (Auteur 21/11) : la nuée elle-même vient moins nombreuse au groupe discret.
+				plaf = min(plaf, len(monstres) + bruit_util.plafond_nuee(bruit, plaf))
 			if max_n is not None:
 				plaf = min(plaf, len(monstres) + max_n)
 			premier = True
@@ -4293,7 +4300,8 @@ def _instantiate_groupes_composes(
 		if bruit is not None:
 			f = fourche(espece)
 			n0 = bruit_util.milieu(f)
-			n = bruit_util.tirer_effectif(f, bruit_util.position_fourchette(bruit), rand)
+			n = bruit_util.tirer_effectif(bruit_util.fourchette_tirage(f, bruit),
+										  bruit_util.position_fourchette(bruit), rand)
 		else:
 			n0 = composition.tirer_effectif(fourche(espece), rand)
 			n = n0 + decalage

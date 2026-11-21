@@ -38,7 +38,8 @@ def test_mesurer_cumule_tous_les_porteurs():
 
 
 def test_niveaux_affiches():
-	assert bruit.niveau(_pts())[0] == "discret"
+	assert bruit.niveau(_pts())[0] == "silencieux"            # seul, sac vide
+	assert bruit.niveau(_pts(compagnons=1))[0] == "discret"
 	assert bruit.niveau(cs.RENCONTRE_BRUIT_REFERENCE)[0] == "audible"
 	assert bruit.niveau(2 * cs.RENCONTRE_BRUIT_REFERENCE)[0] == "bruyant"
 
@@ -145,6 +146,73 @@ def test_second_groupe_suit_le_bruit():
 									  bruit=_pts(), **kw)
 	assert len({m["espece_id"] for m in ref}) == 2
 	assert len({m["espece_id"] for m in seul}) == 1
+
+
+# ── Silencieux et nuées (Auteur 21/11) ────────────────────────────────────────
+
+def test_silencieux_seul_et_leger():
+	seuil = cs.RENCONTRE_BRUIT_SILENCIEUX * cs.RENCONTRE_BRUIT_REFERENCE   # en points
+	taux_limite = (seuil - 1) / cs.RENCONTRE_BRUIT_CHARGE                 # charge au seuil
+	assert bruit.silencieux(_pts(taux=taux_limite * 0.9))
+	assert not bruit.silencieux(_pts(taux=taux_limite * 1.1))
+	assert not bruit.silencieux(_pts(compagnons=1))   # un compagnon suffit à en sortir
+
+
+def test_silencieux_inactif_si_mecanique_coupee(monkeypatch):
+	monkeypatch.setattr(cs, "RENCONTRE_BRUIT_REFERENCE", 0.0)
+	assert not bruit.silencieux(0)
+	assert bruit.fourchette_tirage((3, 6), 0) == (3, 6)
+
+
+def test_effets_drastiques_silencieux():
+	seul, ref = _pts(), cs.RENCONTRE_BRUIT_REFERENCE
+	assert bruit.fourchette_tirage((3, 6), seul) == (1, 6)
+	assert bruit.fourchette_tirage((3, 6), ref) == (3, 6)
+	assert bruit.meute_min(2, seul) == 1 and bruit.meute_min(2, ref) == 2
+	assert bruit.facteur_second(seul) == 0
+
+
+def test_plafond_nuee_suit_le_bruit():
+	p = cs.RENCONTRE_PLAFOND_NUEE
+	assert bruit.plafond_nuee(cs.RENCONTRE_BRUIT_REFERENCE, p) == round(p / 2)
+	assert bruit.plafond_nuee(100 * cs.RENCONTRE_BRUIT_REFERENCE, p) == p
+	assert 1 <= bruit.plafond_nuee(_pts(), p) < round(p / 2)
+	assert bruit.plafond_nuee(0, p) == 1
+
+
+def test_nuee_instanciee_moins_nombreuse_en_silence():
+	ecureuil = {"_id": "espece:ecureuil", "tags": ["nuee"]}
+	kw = dict(plafond=8, proba_second=0, affinites=_aff())
+	gros_budget = 10_000   # le budget ne limite plus : seul le plafond joue
+	seul = combat.instantiate_groupes([ecureuil], [], gros_budget, lambda e, p: 1,
+									  rand=_R([0.5]), bruit=_pts(), **kw)
+	convoi = combat.instantiate_groupes([ecureuil], [], gros_budget, lambda e, p: 1,
+										rand=_R([0.5]), bruit=4 * cs.RENCONTRE_BRUIT_REFERENCE, **kw)
+	assert len(seul) == bruit.plafond_nuee(_pts(), max(8, cs.RENCONTRE_PLAFOND_NUEE))
+	assert len(convoi) == max(8, cs.RENCONTRE_PLAFOND_NUEE)
+
+
+def test_fourchette_sous_le_minimum_en_silence():
+	loup = {"_id": "espece:loup", "tags": [], "effectif": [3, 6]}
+	kw = dict(plafond=8, proba_second=0, affinites=_aff())
+	# random 0 puis 0,99 : tirage au plus bas de la fourchette de tirage.
+	seul = combat.instantiate_groupes([loup], [], 100, lambda e, p: 1,
+									  rand=_R([0.0, 0.99]), bruit=_pts(), **kw)
+	discret = combat.instantiate_groupes([loup], [], 100, lambda e, p: 1,
+										 rand=_R([0.0, 0.99]), bruit=_pts(compagnons=1), **kw)
+	assert len(seul) == 1 and len(discret) == 3
+
+
+def test_meute_reduite_a_un_en_silence():
+	loup = {"_id": "espece:loup", "tags": ["ia_meute"]}   # meute sans fourchette
+	budget = 1.5     # paie un loup, pas deux : seul le minimum de meute force le second
+	kw = dict(plafond=8, proba_second=0, affinites=_aff())
+	seul = combat.instantiate_groupes([loup], [], budget, lambda e, p: 1,
+									  rand=_R([0.5]), bruit=_pts(), **kw)
+	ref = combat.instantiate_groupes([loup], [], budget, lambda e, p: 1,
+									 rand=_R([0.5]), bruit=cs.RENCONTRE_BRUIT_REFERENCE, **kw)
+	assert len(seul) == 1
+	assert len(ref) == compo.regles(_aff())["formes"]["meute_min"]
 
 
 # ── Fréquence des combats ─────────────────────────────────────────────────────
