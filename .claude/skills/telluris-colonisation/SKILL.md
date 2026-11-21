@@ -13,6 +13,7 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 #### Lien PUR au lieu modèle (§ 12.3) — ⚠️ point unique dans `db/config.py`
 - L'implantation ne porte que `modele`. `get_doc` pose `CHAMPS_MODELE` (`image`, `dimensions`, `cells`, `nav`, `entrees`) sur l'exemplaire lu (`suivre_modele`) ; `save_doc` / `save_docs` les retirent de ce qui part en base (`sans_modele`). Tout le moteur lit donc la grille comme celle d'un lieu ordinaire.
 - Limité au préfixe `implantation:`. ⚠️ `find_docs` ne suit PAS le modèle (un balayage n'a pas de grille).
+- Ce qui GARDE une position tirée du modèle la suit à chaque `/play` (`suivre_entrees`, via `routers/colonisation.suivre_modele_ici`, aussi appelé par la route `palier`) : sortie vers le pays = 1re entrée ; bâtiment sur case non marchable / entrée / doublon → case libre la plus proche, sinon « à poser » (noté au carnet) ; porte d'un sous-lieu = case de son bâtiment. Arrivée par la sortie (`move_character`) : 1re entrée ACTUELLE (`arrivee_implantation`). Retoucher les entrées 🚪 ou la grille d'un modèle s'applique donc aux implantations fondées (Sens, 21/11 : sortie restée sur l'ancienne entrée).
 - Un modèle n'est jamais écrit en jeu. Verrouillé par `tests/test_colonisation.py` § Lien pur et `test_fonder_cree_…sans_recopier_la_grille`.
 
 #### Lieux modèles (§ 12.1, § 12.2)

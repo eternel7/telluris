@@ -928,6 +928,9 @@ def move_character(
 								save_doc(guide_parti)
 							return {"moved": 0, "combat_id": combat_id}
 						destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
+						# Implantation par sa sortie vers le pays : la première entrée ACTUELLE du modèle.
+						if colonisation.est_implantation(lieu_doc):
+							destination_pos = colonisation.arrivee_implantation(lieu_doc, link.get("_id"), destination_pos)
 						print("move to ", destination, destination_pos)
 						arrivee = _effets_arrivee(character_to_update, destination, destination_pos, lieu_doc)
 						# Doc ANNEXE, sauvé après le personnage (déjà sorti de son groupe).

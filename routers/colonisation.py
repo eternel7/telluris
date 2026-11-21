@@ -16,7 +16,7 @@ import unicodedata
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from db.config import get_doc, save_doc, find_docs
+from db.config import get_doc, save_doc, find_docs, suivre_modele
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref, item_ref_id, credit_character,
@@ -105,6 +105,22 @@ def _vignettes(propositions: list) -> list:
 
 def _implantations_du_pays(pays_id) -> list:
 	return find_docs({"type": colonisation.TYPE_DOC, "lieu_parent": pays_id}) or []
+
+
+def _lien_et_portes(imp: dict) -> tuple[dict | None, dict]:
+	"""La connexion vers le pays et les portes des sous-lieux ({id du bâtiment: lien})."""
+	portes = {b["id"]: p for b in imp.get("batiments") or []
+			  if b.get("lien") and (p := get_doc(b["lien"]))}
+	return get_doc(imp.get("lien") or ""), portes
+
+
+def suivre_modele_ici(imp: dict, reg: dict) -> None:
+	"""`/play` dans une implantation : sortie, bâtiments et portes suivent la grille ACTUELLE du
+	lieu modèle (`colonisation.suivre_entrees`) ; best-effort, rejoué au passage suivant."""
+	lien, portes = _lien_et_portes(imp)
+	imp_change, lien_change, changees = colonisation.suivre_entrees(imp, reg, lien, portes)
+	for d in changees + ([lien] if lien_change and lien else []) + ([imp] if imp_change else []):
+		save_doc(d)
 
 
 def _ici(current_user: dict) -> tuple[dict, dict, dict, str]:
@@ -642,19 +658,12 @@ async def palier(current_user: Annotated[dict, Depends(get_current_user)], body:
 		raise HTTPException(status_code=409, detail="Ce modèle n'est pas proposé pour ce palier.")
 	modele = get_doc(body["modele"])
 	colonisation.changer_palier(imp, reg, modele, imp.get("dimensions") or actuel.get("dimensions") or {})
+	# La grille du NOUVEAU modèle sur l'exemplaire (lien pur) : sortie, bâtiments et portes la suivent.
+	suivre_modele(imp, {modele["_id"]: modele}.get)
 	entree = colonisation.entrees_de(modele)[0]
-	lien = get_doc(imp.get("lien") or "")
-	if lien:
-		for n in lien.get("nodes") or []:
-			if n.get("lieu") == imp["_id"]:
-				n["pos"] = list(entree)
+	lien, portes = _lien_et_portes(imp)
+	_imp_change, _lien_change, portes = colonisation.suivre_entrees(imp, reg, lien, portes)
 	character["position"] = {"x": entree[0], "y": entree[1]}
-	# Les portes des sous-lieux suivent leurs bâtiments replacés.
-	portes = []
-	for b in imp.get("batiments") or []:
-		porte = get_doc(b.get("lien") or "") if b.get("lien") else None
-		if porte and colonisation.deplacer_sous_lieu(porte, imp["_id"], b.get("pos")):
-			portes.append(porte)
 	_sauver(*portes, imp, *([lien] if lien else []), character)
 	# La carte a changé sous les pieds du joueur : le client recharge la page.
 	return {"palier": (colonisation.palier_def(reg, imp["palier"]) or {}).get("label", ""), "recharger": True}
