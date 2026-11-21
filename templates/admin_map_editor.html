@@ -454,12 +454,7 @@
 	.chips-filtre-wrap { position: relative; margin-bottom: 4px; }
 	.chips-filtre {
 		display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px;
-		scrollbar-width: thin; scrollbar-color: rgba(42,48,64,0.7) transparent;
 	}
-	.chips-filtre::-webkit-scrollbar { height: 3px; }
-	.chips-filtre::-webkit-scrollbar-track { background: transparent; }
-	.chips-filtre::-webkit-scrollbar-thumb { background: rgba(42,48,64,0.7); border-radius: 2px; }
-	.chips-filtre::-webkit-scrollbar-thumb:hover { background: rgba(200,168,75,0.45); }
 	.chips-filtre .zchip { flex-shrink: 0; white-space: nowrap; }
 	/* Ombre à droite tant que des chips restent cachées hors de la zone (classe `.plus`, posée en JS). */
 	.chips-filtre-wrap::after {
@@ -561,9 +556,6 @@
 	#dep-open-btn[hidden] { display: none; }
 
 	/* Scrollbar */
-	::-webkit-scrollbar { width: 5px; }
-	::-webkit-scrollbar-track { background: #0d0f14; }
-	::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 	{% include "part-lieux-css.html" %}
 
@@ -806,6 +798,7 @@ header .aide-btn:hover, header .aide-btn:focus-visible { background: #e6c98e; ou
 .aide-ed-pied .aide-ed-suivant:hover, .aide-ed-pied .aide-ed-suivant:focus-visible { background: #e6c98e; color: #1a1408; }
 @media (prefers-reduced-motion: reduce) { #aide-ed-spot { transition: none; } }
 </style>
+	{% include "part-defilement.html" %}
 </head>
 <body>
 

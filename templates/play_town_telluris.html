@@ -182,8 +182,6 @@
 			overflow-y: auto;
 			contain: size;
 			min-height: 20vh;
-			scrollbar-width: thin;
-			scrollbar-color: var(--border-color) transparent;
 		}
 		.sub-locations-panel h3 {
 			font-size: 1rem;
@@ -209,8 +207,6 @@
 			flex-shrink: 0;
 			margin-bottom: 10px;
 			border-bottom: 1px dashed var(--border-color);
-			scrollbar-width: thin;
-			scrollbar-color: var(--border-color) transparent;
 		}
 		.sub-locations-list {
 			list-style: none;
@@ -703,11 +699,7 @@
 			overflow-x: auto;
 			flex: 1;
 			min-width: 0;
-			scrollbar-width: thin;
-			scrollbar-color: var(--border-color) transparent;
 		}
-		.sheet-tabs-scroll::-webkit-scrollbar { height: 3px; }
-		.sheet-tabs-scroll::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 		.sheet-tab-btn {
 			padding: 6px 10px;
 			background: var(--btn-bg);
@@ -1128,8 +1120,6 @@
 		/* Réglages communs à TOUT enfant qui défile (sacs + listes de la fiche). */
 		.sh-inv-box, .sh-rel-scroll {
 			overflow-y: auto;
-			scrollbar-width: thin;
-			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
@@ -1491,7 +1481,6 @@
 			#sh-competences { row-gap: 0; scrollbar-gutter: stable; }
 			/* Barre de défilement de l'ONGLET (c'est lui qui défile, d'un bloc) : celle des
 			   listes de la fiche (`.sh-inv-box, .sh-rel-scroll`) — fine, sombre, translucide. */
-			#sh-competences { scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, 0.2) transparent; }
 			#sh-competences .capa-tete { margin-bottom: .35rem; }
 			/* L'en-tête d'accordéon devient une étiquette de groupe, inerte. */
 			#sh-competences .acc-head {
@@ -2179,6 +2168,7 @@
 			}
 		}
 	</style>
+	{% include "part-defilement.html" %}
 </head>
 <body>
 	<div id="game-container" class="panel-frame">
@@ -3441,7 +3431,7 @@
 		}
 		.aub-table-titre { font-weight: 600; }
 		.aub-table-occ { opacity: .7; font-size: .85em; }
-		.aub-msgs { max-height: 30vh; overflow-y: auto; scrollbar-width: thin; }
+		.aub-msgs { max-height: 30vh; overflow-y: auto; }
 		.aub-msg {
 			padding: .25rem 0; border-top: 1px solid rgba(220, 200, 160, .12);
 			display: flex; gap: .5rem; align-items: flex-start;
