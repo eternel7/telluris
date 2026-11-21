@@ -3359,6 +3359,17 @@
 			border: 1px solid var(--border-color); background: transparent; color: var(--muted); font: inherit; font-size: 12px; }
 		.col-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
 		.col-filtre.bas { border-color: #e17055; }
+		/* Interrupteur (« Vend son surplus aux boutiques ») : la piste dit l'état, le libellé reste fixe. */
+		.col-vente { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; font-size: .9em; }
+		.col-interrupteur { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; vertical-align: middle; }
+		.col-interrupteur input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+		.col-interrupteur-piste { position: relative; flex: 0 0 auto; width: 2.1rem; height: 1.1rem; border-radius: 999px;
+			background: rgba(120, 90, 50, .35); border: 1px solid var(--border-color); transition: background-color .15s; }
+		.col-interrupteur-piste::after { content: ''; position: absolute; top: 1px; left: 1px; width: calc(1.1rem - 4px); height: calc(1.1rem - 4px);
+			border-radius: 50%; background: var(--muted); transition: transform .15s, background-color .15s; }
+		.col-interrupteur input:checked + .col-interrupteur-piste { background: rgba(106, 176, 76, .45); border-color: #6ab04c; }
+		.col-interrupteur input:checked + .col-interrupteur-piste::after { transform: translateX(1rem); background: var(--accent-color); }
+		.col-interrupteur input:focus-visible + .col-interrupteur-piste { outline: 2px solid var(--accent-color); outline-offset: 2px; }
 		/* Mini-plan de l'onglet Bâtiments : image du lieu, bâtiments posés, vous. */
 		.col-plan { position: relative; width: 100%; max-width: 32rem; border-radius: 6px; overflow: hidden;
 			border: 1px solid rgba(120, 90, 50, .45); background-size: 100% 100%; }

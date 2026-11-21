@@ -364,4 +364,17 @@ test('en-tête : 📦 Rangements aux gérants seulement', () => {
 	assert.ok(!colOngletSiteHtml(gerant('fondateur')).includes('openColonieRangements'), 'plus en bas du Site');
 });
 
+test('vente du surplus : un interrupteur au libellé fixe, au fondateur seul', () => {
+	const poste = vend => ({ metier: 'bucheron', label: 'Bûcheron', places: 1, tenus: [{ id: 'employe:x', nom: MECHANT, vend }] });
+	const d = vend => gerant('fondateur', { batiments: [{ id: 'b', label: 'Entrepôt', icone: '📦', pos: [1, 1], postes: [poste(vend)] }] });
+	const oui = colOngletBatimentsHtml(d(true)), non = colOngletBatimentsHtml(d(false));
+	for (const h of [oui, non]) {
+		assert.ok(h.includes('role="switch"') && h.includes('Vend son surplus aux boutiques') && h.includes('onchange="colVente(this)"'));
+		assert.ok(!h.includes('💰 vend') && !h.includes('🔒 garde') && !h.includes('<script>'));
+	}
+	assert.ok(/type="checkbox" role="switch" data-id="employe:x" checked/.test(oui) && !/data-id="employe:x" checked/.test(non));
+	assert.ok(!colOngletBatimentsHtml(Object.assign({}, d(true), { role: 'associe' })).includes('role="switch"'), 'associé : lecture');
+	assert.ok(!colOngletBatimentsHtml(gerant('fondateur')).includes('role="switch"'), 'PNJ non producteur (vend absent) : rien');
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);

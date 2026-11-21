@@ -2,6 +2,8 @@
 	Barre de défilement — design UNIQUE de toute l'application (joueur ET admin) : fine, pouce à la
 	couleur des bordures du jeu (`--border-color` de /play et /combat ; à défaut le même gris),
 	rail transparent. Celle qu'avait le panneau des lieux de /play.
+	Seule la COULEUR du pouce peut changer, par `--defilement-pouce` sur `:root` : l'accueil du
+	joueur (fond de parchemin) la met au bronze. Forme, épaisseur et rail restent les mêmes partout.
 	⚠️ Ne pas redéfinir une barre ailleurs : seul `scrollbar-width: none` (barre volontairement
 	masquée, rangée de pastilles qui défile au doigt) a sa place dans une page.
 	Standard (`scrollbar-width` / `scrollbar-color`) : Firefox, Chrome ≥ 121 — qui ignore alors
@@ -9,8 +11,8 @@
 	Usage : `{% include "part-defilement.html" %}` dans le <head>.
 #}
 <style>
-	* { scrollbar-width: thin; scrollbar-color: var(--border-color, #4a4a5a) transparent; }
+	* { scrollbar-width: thin; scrollbar-color: var(--defilement-pouce, var(--border-color, #4a4a5a)) transparent; }
 	::-webkit-scrollbar { width: 8px; height: 8px; }
 	::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
-	::-webkit-scrollbar-thumb { background: var(--border-color, #4a4a5a); border-radius: 4px; }
+	::-webkit-scrollbar-thumb { background: var(--defilement-pouce, var(--border-color, #4a4a5a)); border-radius: 4px; }
 </style>
