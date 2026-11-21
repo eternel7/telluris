@@ -354,14 +354,17 @@ function colOngletPopulationHtml(d) {
 	return html + colChantierHtml(d);
 }
 
-// Autonomie des approvisionnements : glanage et simples (lecture), consignes d'achat de
+// Autonomie des approvisionnements : production des métiers au poste et glanage / simples
+// (lecture, mêmes formules que le solde des Réserves), consignes d'achat de
 // l'intendant (fondateur), convois du charretier en route.
 function colApproHtml(d) {
 	const a = d.approvisionnement;
 	if (!a) return '';
 	const libelles = {};
 	(d.stocks || []).forEach(s => { libelles[s.stock] = s.label; });
-	const auto = Object.entries(a.autonome || {}).map(([s, v]) => `<span>${_colE(libelles[s] || s)} +${_colE(v)} / jour</span>`).join('');
+	const parJour = bloc => Object.entries(bloc || {}).map(([s, v]) => `<span>${_colE(libelles[s] || s)} +${_colE(v)} / jour</span>`).join('');
+	const metiers = parJour(a.metiers);
+	const auto = parJour(a.autonome);
 	const fondateur = d.role === 'fondateur';
 	const consignes = (a.consignes || []).map(c => `<div class="prop-ligne"><div class="prop-txt">
 		<strong>${_colE(c.label)}</strong>
@@ -375,6 +378,7 @@ function colApproHtml(d) {
 		? `L'intendant comble les réserves en consigne jusqu'au seuil bas : boutiques du lieu d'abord${a.charretier ? ', puis convoi du charretier vers la cité' : ''}, enfin troc d'un surplus. Payé sur la caisse du lieu.`
 		: 'Sans intendant au poste (entrepôt), personne n\'achète ni ne troque pour le lieu.';
 	return `<section class="prop-section"><h3>🧺 Approvisionnement</h3>
+		${metiers ? `<span class="q-desc">Métiers au poste (selon le site) :</span><div class="prop-caps">${metiers}</div>` : ''}
 		${auto ? `<span class="q-desc">Sans métier : glanage des habitants, simples des soignants.</span><div class="prop-caps">${auto}</div>` : ''}
 		<span class="q-desc">${qui}</span>
 		<div class="prop-liste">${consignes}</div>

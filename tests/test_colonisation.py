@@ -820,6 +820,10 @@ def test_le_bilan_par_jour_est_celui_qu_une_journee_de_passes_produit():
 	assert nourr["par_jour"] == round(solde["nourriture"], 1)
 	assert nourr["jours"] == col.autonomie_jours(imp["stocks"]["nourriture"], solde["nourriture"])
 	assert "stocks" not in col.vue(imp, reg, col.VISITEUR, site, [bucheron])
+	# l'approvisionnement montre la production des métiers (même formule que le solde)
+	metiers = col.production_metiers_jour(imp, reg, site, [bucheron])
+	assert metiers.get("bois", 0) > 0
+	assert v["approvisionnement"]["metiers"] == {s: round(x, 1) for s, x in metiers.items()}
 
 
 def test_sans_place_sur_la_grille_retouchee_le_batiment_redevient_a_poser():
