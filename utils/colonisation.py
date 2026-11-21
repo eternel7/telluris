@@ -3072,6 +3072,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 			"intendant": bool(_du_role(imp, reg, employes, "intendants")),
 			"charretier": any(e.get("metier") in ((reg.get("approvisionnement") or {}).get("metiers_charretier") or [])
 							  for e in au_poste(imp, reg, employes)),
+			"metiers": {s: round(v, 1) for s, v in production_metiers_jour(imp, reg, site, employes).items()},
 			"autonome": {s: round(v, 1) for s, v in production_autonome(imp, reg, site, employes).items()},
 			"consignes": [{"stock": s, "label": labels.get(s, s), **consigne(imp, reg, s)} for s in reg.get("stocks") or []],
 			"livraisons": [{"stock": l.get("stock"), "label": labels.get(l.get("stock"), l.get("stock")),

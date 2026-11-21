@@ -243,13 +243,14 @@ test('don depuis le sac d’un compagnon : son sac est resynchronisé, après ce
 
 test('approvisionnement : consignes au fondateur seul, lecture pour l\'associé, rien au visiteur', () => {
 	const appro = {
-		intendant: true, charretier: true, autonome: { bois: 0.6 },
+		intendant: true, charretier: true, metiers: { materiaux: 3.75 }, autonome: { bois: 0.6 },
 		consignes: [{ stock: 'bois', label: MECHANT, acheter: true, plafond_jour: 300 }],
 		livraisons: [{ stock: 'bois', label: 'Bois', unites: 12, cite: MECHANT, arrivee: Date.now() / 1000 + 3600 }],
 	};
 	const f = colOngletSiteHtml(gerant('fondateur', { approvisionnement: appro }));
 	assert.ok(f.includes('colConsigne(this)') && f.includes('class="col-consigne-plafond" data-stock="bois"'));
 	assert.ok(!f.includes(MECHANT) && f.includes('Bois +0.6 / jour') && f.includes('de &lt;script&gt;'));
+	assert.ok(f.includes('Métiers au poste') && f.includes('materiaux +3.75 / jour') && f.indexOf('materiaux +3.75 / jour') < f.indexOf('Sans métier'), 'production des métiers, avant le glanage');
 	const a = colOngletSiteHtml(gerant('associe', { approvisionnement: appro }));
 	assert.ok(a.includes('🧺 Approvisionnement') && !a.includes('colConsigne') && !a.includes(MECHANT));
 	assert.ok(!colOngletSiteHtml(gerant('fondateur')).includes('🧺'), 'sans bloc, aucune section');
