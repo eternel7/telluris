@@ -606,6 +606,73 @@ def test_proteges_effectifs_ignore_un_lien_rompu(db):
 	assert escorte_util.proteges_effectifs(c, db["get"]) == []
 
 
+# ── Voix d'un protégé (`voix_protege`) : parler à la personne escortée ───────────
+
+def _escortee(db, c, quete="quete:porte", prenom="Aélis", pid="protege:aelis"):
+	db["docs"][pid] = {"_id": pid, "type": "protege", "statut": "escorte", "escorte_par": c["_id"],
+					   "quete": quete, "prenom": prenom, "image": "aelis.jpg", "description": "Architecte."}
+	c.setdefault("proteges", []).append(pid)
+
+
+def _voix(db, quete="quete:porte", prenom="Aélis", sauf=None):
+	v = {"quete": quete, "prenom": prenom}
+	if sauf:
+		v["sauf_lieux"] = sauf
+	db["docs"]["pnj:voix"] = {"_id": "pnj:voix", "type": "pnj", "nom": "Aélis de Montfaucon",
+							  "voix_protege": v, "dialogue": {"noeud_depart": "accueil", "noeuds": {}}}
+
+
+def test_voix_de_la_personne_escortee_partout(db):
+	c = character(lieu="lieu:enclos")
+	_escortee(db, c)
+	_voix(db)
+	voix = escorte_util.voix_des_proteges(c, db["get"], db["find"])
+	assert [(v["character"], v["nom"], v["portrait"], v["protege"]) for v in voix] == [
+		("pnj:voix", "Aélis", "aelis.jpg", "protege:aelis")]
+	assert escorte_util.voix_payload(voix) == [{"character": "pnj:voix", "nom": "Aélis"}]
+	# Le portrait du doc de voix prime sur l'image de l'escortée.
+	db["docs"]["pnj:voix"]["portrait"] = "aelis_transparent.webp"
+	assert escorte_util.voix_des_proteges(c, db["get"], db["find"])[0]["portrait"] == "aelis_transparent.webp"
+
+
+def test_voix_muette_dans_ses_sauf_lieux(db):
+	c = character(lieu="lieu:galerie")
+	_escortee(db, c)
+	_voix(db, sauf=["lieu:galerie"])
+	assert escorte_util.voix_des_proteges(c, db["get"], db["find"]) == []
+
+
+def test_pas_de_voix_sans_escorte_ou_pour_une_autre_quete(db):
+	c = character(lieu="lieu:enclos")
+	_voix(db)
+	assert escorte_util.voix_des_proteges(c, db["get"], db["find"]) == []   # personne d'escorté
+	_escortee(db, c, quete="quete:autre")
+	assert escorte_util.voix_des_proteges(c, db["get"], db["find"]) == []   # autre quête
+	db["docs"]["protege:aelis"]["statut"] = "libere"
+	_escortee(db, c, pid="protege:deposee")
+	db["docs"]["protege:deposee"]["statut"] = "libere"
+	assert escorte_util.voix_des_proteges(c, db["get"], db["find"]) == []   # déposée
+
+
+def test_le_dialogue_trouve_la_voix_hors_du_lieu(db, monkeypatch):
+	"""`routers.pnj._pnj_du_lieu` : désignée par le client, la voix répond où que l'on soit ;
+	aucun PNJ du lieu, pas de voix désignée ⇒ 404 comme avant."""
+	import routers.pnj as rp
+	from fastapi import HTTPException
+	c = character(lieu="lieu:enclos")
+	_escortee(db, c)
+	_voix(db)
+	db["docs"]["lieu:enclos"] = {"_id": "lieu:enclos", "type": "lieu", "pnj": []}
+	monkeypatch.setattr(rp, "get_doc", db["get"])
+	monkeypatch.setattr(rp, "find_docs", lambda sel, *a, **k: db["find"](sel))
+	entree, doc, lieu = rp._pnj_du_lieu(c, "pnj:voix")
+	assert (entree["character"], entree["nom"], doc["_id"], lieu["_id"]) == (
+		"pnj:voix", "Aélis", "pnj:voix", "lieu:enclos")
+	with pytest.raises(HTTPException):
+		rp._pnj_du_lieu(c, None)
+	assert rp.pnjs_presents_resync(c)["voix_proteges"] == [{"character": "pnj:voix", "nom": "Aélis"}]
+
+
 # ── PROGÉNITURE : les enfants des tenanciers ────────────────────────────────────
 #
 # La seule source d'escorte GÉNÉRÉE. Deux canaux, un seul moteur : le parent se saisit

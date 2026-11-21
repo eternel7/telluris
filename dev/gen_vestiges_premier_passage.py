@@ -59,6 +59,7 @@ COMMANDEUR = "pnj:commandeur_de_l_enclos_du_temple"
 AELIS_ARCHIVES = "pnj:aelis_de_montfaucon_archives"
 AELIS_GALERIE = "pnj:aelis_de_montfaucon_galerie"
 AELIS_ANTICHAMBRE = "pnj:aelis_de_montfaucon_antichambre"
+AELIS_ESCORTE = "pnj:aelis_de_montfaucon_escorte"   # sa voix tant qu'elle est escortée (`voix_protege`)
 
 PENANGGALAN = "espece:penanggalan"
 
@@ -68,6 +69,9 @@ E_ARCHE = "enigme:arche_eteinte"
 E_RETOUR = "enigme:serrure_du_retour"
 
 PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # sans blessure (Auteur, 19/11)
+# Portrait DÉTOURÉ (fond transparent, tiré de celui de la maison pliée) : celui de TOUS les dialogues
+# de la quête (Auteur, 21/11). L'escortée garde PORTRAIT_AELIS (jeton de combat, panneau 👥).
+PORTRAIT_AELIS_DIALOGUE = "architecte_Aélis_de_Montfaucon_transparent.webp"
 PORTRAIT_COMMANDEUR = "templier_humain_m_commandeur_enclos01.png"
 # Images à livrer par l'Auteur (prompts dans la séance, § Prompts d'image des vestiges).
 IMAGE_GALERIE = "galerie_du_commandeur01.jpg"
@@ -221,7 +225,8 @@ def aelis_archives(doc):
 		choix("vestiges_plus_tard", "« Pas tout de suite. »", "fin"))
 	n["vestiges_accepte"] = noeud(
 		"Elle glisse son compas à sa ceinture et prend une lanterne sourde sur l'étagère. « À l'Enclos du "
-		"Temple, d'abord. Ensuite, nous verrons bien ce qu'une porte a à dire à une architecte. »",
+		"Temple, d'abord, voir le commandeur : c'est lui qui garde le chemin. Pas par les catacombes, il "
+		"a sa propre galerie. Ensuite, nous verrons bien ce qu'une porte a à dire à une architecte. »",
 		choix("vestiges_route", "« À l'Enclos. »", "fin"))
 	n["vestiges_souvenir"] = noeud(
 		"Aélis lève les yeux vers la coupole peinte des Archives, vers le signe tracé au-dessus de la porte "
@@ -304,7 +309,7 @@ def lieux_neufs():
 		"acces": {"gardien": COMMANDEUR, "cycle": 1,
 				  "refus": "Une porte de fer, au pied de la tour carrée. Fermée à clé.",
 				  "conditions": [ESCORTE_ACTIVE]},
-		"pnj": [entree_pnj(AELIS_GALERIE, "Aélis", PORTRAIT_AELIS,
+		"pnj": [entree_pnj(AELIS_GALERIE, "Aélis", PORTRAIT_AELIS_DIALOGUE,
 						   "Aélis, la lanterne levée devant une porte de pierre, qui ne la touche pas encore.",
 						   [ESCORTE_ACTIVE])],
 	}
@@ -316,7 +321,7 @@ def lieux_neufs():
 		"acces": {"cycle": 1,
 				  "refus": "La porte de pierre est refermée. Tiède sous la main, comme avant.",
 				  "conditions": [ESCORTE_ACTIVE, {"enigme_resolue": {"id": E_ANNEAUX}}]},
-		"pnj": [entree_pnj(AELIS_ANTICHAMBRE, "Aélis", PORTRAIT_AELIS,
+		"pnj": [entree_pnj(AELIS_ANTICHAMBRE, "Aélis", PORTRAIT_AELIS_DIALOGUE,
 						   "Aélis, immobile sous une arche de pierre noire, le carnet ouvert et le crayon arrêté.",
 						   [ESCORTE_ACTIVE])],
 	}
@@ -370,7 +375,7 @@ def lieux_neufs():
 
 def pnj_neufs():
 	desc = "Aélis de Montfaucon, architecte de l'Institut, sous l'ossuaire de Lutecia."
-	a_galerie = pnj_doc(AELIS_GALERIE, "Aélis de Montfaucon", "humain", desc, PORTRAIT_AELIS, vocation="lettre", noeuds={
+	a_galerie = pnj_doc(AELIS_GALERIE, "Aélis de Montfaucon", "humain", desc, PORTRAIT_AELIS_DIALOGUE, vocation="lettre", noeuds={
 		"accueil": noeud(
 			"La galerie descend en pente douce, étayée de poutres neuves, jusqu'à une paroi éventrée. "
 			"Derrière, une porte de pierre grise, sans gonds ni poignée, couverte de gravures. L'air est "
@@ -391,7 +396,7 @@ def pnj_neufs():
 			"Leurs héritiers ont peut-être gardé le geste, à défaut de la main. »",
 			choix("ok", "Revenir.", "accueil")),
 	})
-	a_antichambre = pnj_doc(AELIS_ANTICHAMBRE, "Aélis de Montfaucon", "humain", desc, PORTRAIT_AELIS, vocation="lettre",
+	a_antichambre = pnj_doc(AELIS_ANTICHAMBRE, "Aélis de Montfaucon", "humain", desc, PORTRAIT_AELIS_DIALOGUE, vocation="lettre",
 		services={"acces": {"lieu": SALLE, "noeuds": {"ouvre": "salle_ouverte", "refus": "salle_close"}}},
 		noeuds={
 		"accueil": noeud(
@@ -443,7 +448,67 @@ def pnj_neufs():
 			"d'ici, maintenant. Et elle demande un sceau. »",
 			choix("ok", "Revenir.", "accueil")),
 	})
-	return [a_galerie, a_antichambre]
+	return [a_galerie, a_antichambre, aelis_escorte()]
+
+
+def aelis_escorte():
+	"""La VOIX d'Aélis tant qu'elle est sous votre protection (`voix_protege`, utils/escorte) :
+	« 🗣 Parler à Aélis » où que vous soyez, sauf dans la galerie et l'antichambre, où ses voix
+	de lieu parlent déjà. Elle dit où aller d'après l'avancement : galerie jamais visitée, puis
+	énigme par énigme."""
+	# Cinq étapes EXCLUSIVES, une clé d'énigme et une clé de passages chacune (un dict de condition
+	# ne porte qu'une `enigme_resolue`) : l'antichambre ne s'ouvre qu'anneaux réglés, l'arche ne
+	# se résout que dedans.
+	etapes = {
+		"enclos": {"passages": {"lieu": GALERIE, "max": 0}},
+		"galerie": {"passages": {"lieu": GALERIE, "min": 1},
+					"enigme_resolue": {"id": E_GRAVURES, "attendu": False}},
+		"anneaux": {"enigme_resolue": {"id": E_GRAVURES}, "passages": {"lieu": ANTICHAMBRE, "max": 0}},
+		"arche": {"passages": {"lieu": ANTICHAMBRE, "min": 1},
+				  "enigme_resolue": {"id": E_ARCHE, "attendu": False}},
+		"serrure": {"enigme_resolue": {"id": E_ARCHE}, "passages": {"lieu": RETOUR, "max": 0}},
+	}
+	doc = pnj_doc(AELIS_ESCORTE, "Aélis de Montfaucon", "humain",
+		"Aélis de Montfaucon, architecte de l'Institut, qui vous accompagne jusqu'à la porte tiède.",
+		PORTRAIT_AELIS_DIALOGUE, vocation="lettre", noeuds={
+		"accueil": noeud(
+			"Aélis marche à votre hauteur, la lanterne sourde à la ceinture et le carnet sous le bras. Elle "
+			"lève les yeux quand vous ralentissez.",
+			choix("enclos", "« Où allons-nous ? »", "enclos", condition=etapes["enclos"]),
+			*[choix(cle, "« Où en sommes-nous ? »", cle, condition=etapes[cle])
+			  for cle in ("galerie", "anneaux", "arche", "serrure")],
+			choix("fin", "(Reprendre la route.)", "fin")),
+		"enclos": noeud(
+			"« À l'Enclos du Temple, voir le commandeur. » Elle désigne la tour carrée qui dépasse des toits "
+			"de Lutecia. « Ses hommes extraient les cristaux jaunes au fond de l'ossuaire, et il a creusé sa "
+			"propre galerie jusqu'à la porte. On n'y descend pas par les catacombes : trois étages de morts, "
+			"et la porte n'est pas au bout de leur chemin. Il faut qu'il nous ouvre. S'il vous a déjà donné "
+			"sa clé, la galerie part de la cour de l'Enclos. »",
+			choix("ok", "Revenir.", "accueil")),
+		"galerie": noeud(
+			"« Au bout de la galerie du commandeur, depuis la cour de l'Enclos. La porte nous attend. » Elle "
+			"tapote son carnet. « Les quatre gravures, d'abord. Je les ai toutes vues dans la boîte de "
+			"Villard, et vous aussi : il suffit de se souvenir où. »",
+			choix("ok", "Revenir.", "accueil")),
+		"anneaux": noeud(
+			"« Les gravures sont lues. Il reste les trois anneaux, au fond de la galerie : une spirale, un "
+			"triangle, un cercle, l'ordre du tissu de Villard. On règle cette porte, on ne la force pas. "
+			"Quand elle s'entrouvre, on passe. »",
+			choix("ok", "Revenir.", "accueil")),
+		"arche": noeud(
+			"« Derrière la porte entrouverte, il y a l'arche. Sa règle est gravée sur le seuil : on monte par "
+			"la gauche, on ne touche pas au logement du cristal, et ce qui tremble se tient à la pierre. Je "
+			"n'avancerai pas sans vous. »",
+			choix("ok", "Revenir.", "accueil")),
+		"serrure": noeud(
+			"« Si quelque chose sort de l'arche, je reste derrière vous. » Elle serre son compas. « Ensuite, "
+			"la porte ne s'ouvre plus que de l'intérieur. Elle demande un sceau, celui de la boîte : les "
+			"trois cercles. »",
+			choix("ok", "Revenir.", "accueil")),
+	})
+	# Voix de l'Aélis escortée pour CETTE quête ; muette là où une Aélis du lieu parle déjà.
+	doc["voix_protege"] = {"quete": QUETE, "prenom": "Aélis", "sauf_lieux": [GALERIE, ANTICHAMBRE]}
+	return doc
 
 
 # ---------------------------------------------------------------------------------------------
@@ -613,6 +678,11 @@ def main(argv):
 	fautes = controler(docs, par_id)
 	if fautes:
 		sys.exit("ERREUR :\n  " + "\n  ".join(fautes))
+	# DELTA seul (CLAUDE.md §18) : un doc identique à celui du dump n'a rien à réimporter.
+	docs = [d for d in docs if d["_id"] not in par_id or sans_rev(par_id[d["_id"]]) != d]
+	if not docs:
+		print("Rien à importer : le dump est à jour.")
+		return
 	with open(SORTIE, "w", encoding="utf-8", newline="\n") as f:
 		f.write(json.dumps(docs, ensure_ascii=False, indent=2) + "\n")
 	print(f"{len(docs)} docs → {os.path.relpath(SORTIE, RACINE)}")

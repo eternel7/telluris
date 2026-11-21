@@ -70,6 +70,11 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 	entree = pnj.entree_pnj_active(
 		character, lieu_doc or {}, transport.entree_marchand,
 		lambda conds: acces.clauses_remplies(character, conds, get_doc), pnj_id)
+	# Voix d'une personne ESCORTÉE (`voix_protege`, utils/escorte) : elle vous suit, on lui parle
+	# où que l'on soit — seulement quand le client la désigne, jamais par défaut.
+	if not entree and pnj_id:
+		entree = next((v for v in escorte.voix_des_proteges(character, get_doc, find_docs)
+					   if v["character"] == pnj_id), None)
 	# VUE du doc (utils/offres.py) : un PNJ à plusieurs `offres` n'en tient qu'une par service,
 	# celle en cours ou celle tirée à l'entrée — tout le reste du router n'en voit qu'une.
 	pnj_doc = offres.vue_pnj(get_doc(entree["character"]) if entree else None, character, lieu_doc)
@@ -439,7 +444,10 @@ def pnjs_presents_resync(character: dict) -> dict:
 		d = offres.vue_pnj(get_doc(e.get("character")), character, lieu_doc)
 		if d:
 			marques[e["character"]] = marque_pnj(character, d, lieu_doc, e)
-	return {"pnjs_ici": ici, "pnj_marques": marques}
+	# Voix des personnes escortées : une escorte acceptée dans ce dialogue fait paraître la
+	# sienne, une dépose la retire (client `_majVoixProteges`).
+	voix = escorte.voix_payload(escorte.voix_des_proteges(character, get_doc, find_docs))
+	return {"pnjs_ici": ici, "pnj_marques": marques, "voix_proteges": voix}
 
 
 def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str | None:

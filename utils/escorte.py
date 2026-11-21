@@ -971,6 +971,55 @@ def proteges_de_quete(character: dict, quete_id: str, get_doc_fn) -> list:
 	return [p for p in proteges_effectifs(character, get_doc_fn) if p.get("quete") == quete_id]
 
 
+# ── Voix d'un protégé : parler à la personne escortée ────────────────────────────
+# Un doc `pnj:*` qui déclare `voix_protege: {quete, prenom, sauf_lieux?}` est la VOIX de la
+# personne de ce prénom escortée pour cette quête : tant qu'elle est sous votre protection, une
+# ligne 🗣 permet de lui parler, où que vous soyez (sauf dans `sauf_lieux`, où un PNJ du lieu
+# parle déjà pour elle). Lu à la LECTURE, rien n'est copié sur le doc `protege:*` : une escorte
+# déjà en cours reçoit sa voix sans migration (Convention 4).
+
+def _voix_declaree(doc: dict) -> dict | None:
+	v = (doc or {}).get("voix_protege")
+	if isinstance(v, dict) and isinstance(v.get("quete"), str) and isinstance(v.get("prenom"), str):
+		return v
+	return None
+
+
+def voix_des_proteges(character: dict, get_doc_fn, find_docs_fn) -> list:
+	"""Entrées de PNJ (forme d'une entrée `pnj` de lieu, + `protege`) des personnes escortées
+	qui ont une voix et qui parlent ICI — `character["lieu"]` hors des `sauf_lieux`. Ordre :
+	celui des protégés du personnage."""
+	proteges = proteges_effectifs(character, get_doc_fn)
+	if not proteges:
+		return []
+	voix = {}
+	for d in find_docs_fn({"type": "pnj"}) or []:
+		v = _voix_declaree(d)
+		if v:
+			voix.setdefault((v["quete"], v["prenom"]), (d, v))
+	lieu = (character or {}).get("lieu")
+	out = []
+	for p in proteges:
+		trouve = voix.get((p.get("quete"), p.get("prenom")))
+		if not trouve:
+			continue
+		d, v = trouve
+		if lieu in (v.get("sauf_lieux") or []):
+			continue
+		# Portrait du doc de VOIX d'abord (écrit pour le dialogue — un détouré, par exemple),
+		# l'image de la personne escortée en repli.
+		out.append({"character": d["_id"], "nom": p.get("prenom") or d.get("nom", ""),
+					"portrait": d.get("portrait") or p.get("image", ""), "probabilite": 1,
+					"description": p.get("description") or d.get("description", ""),
+					"protege": p.get("_id")})
+	return out
+
+
+def voix_payload(voix: list) -> list:
+	"""Ce que /play affiche d'une voix : l'id du doc de dialogue et le prénom."""
+	return [{"character": v["character"], "nom": v["nom"]} for v in voix or []]
+
+
 def incarner(character: dict, q: dict, get_doc_fn, now: int | None = None) -> list:
 	"""Fait naître et attache les docs `protege:*` de la quête, puis pose `rencontre_at`
 	(miroir de `livree_at` du transport). Mute le character sans save ; renvoie les docs

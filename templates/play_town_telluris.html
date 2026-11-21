@@ -2320,6 +2320,15 @@
 				   `data-enigme`, jamais dans l'onclick (Conventions §9). Bloc TOUJOURS émis (vide
 				   sans énigme) : une résolution le réécrit sans recharger (`_majEnigmesIci`,
 				   templates/scripts/enigmes.js — miroir de ce markup). #}
+				{# Personnes ESCORTÉES qui ont une voix (`voix_protege`, utils/escorte) : on leur parle
+				   où que l'on soit. Bloc TOUJOURS émis : une escorte acceptée ou une dépose le réécrit
+				   sans recharger (`_majVoixProteges`, miroir de ce markup). Id par `data-pnj`, jamais
+				   dans l'onclick (Conventions §9). #}
+				<div id="voix-proteges-bloc">
+				{%- if voix_proteges %}<h3>Avec vous</h3><ul class="sub-locations-list">
+					{%- for v in voix_proteges %}<li><button class="sub-loc-btn" data-pnj="{{ v.character }}" onclick="openPnjDialogue(this)">🗣 Parler à {{ v.nom }}</button></li>{% endfor -%}
+				</ul>{% endif -%}
+				</div>
 				<div id="enigmes-ici-bloc">
 				{%- if enigmes_ici %}<h3>Énigmes</h3><ul class="sub-locations-list" id="enigmes-ici">
 					{%- for e in enigmes_ici %}<li><button class="sub-loc-btn" data-enigme="{{ e.id }}" onclick="ouvrirEnigme(this.dataset.enigme)">{% if e.resolue %}✓{% else %}🔍{% endif %} {{ e.nom }}</button></li>{% endfor -%}
@@ -3571,6 +3580,8 @@
 			display: block; border-radius: 10px;
 			border: 2px solid var(--accent, #b98c4a);			
 		}
+		/* Portrait DÉTOURÉ (fond transparent, `*_transparent.webp`) : pas de cadre autour d'une silhouette. */
+		.pnj-portrait[src$="_transparent.webp"] { border: none; border-radius: 0; }
 		.pnj-dialogue { min-width: 0; }
 		/* Choix à saisie libre (`saisie: true`) : champ + bouton, miroir de `.aub-dire`. */
 		.pnj-saisie { display: flex; gap: .4rem; }
@@ -4546,6 +4557,20 @@
 		if (Array.isArray(data.enigmes_ici) && typeof _majEnigmesIci === 'function') _majEnigmesIci(data.enigmes_ici);
 		_majPnjsIci(data.pnjs_ici);
 		_majPnjMarques(data.pnj_marques);
+		_majVoixProteges(data.voix_proteges);
+	}
+	// Voix des personnes escortées (`voix_proteges` : [{character, nom}]) — miroir du bloc
+	// Jinja `#voix-proteges-bloc`. Absent de la réponse ⇒ rien ne bouge. Nom ÉCHAPPÉ (innerHTML).
+	function voixProtegesHtml(voix) {
+		if (!voix.length) return '';
+		return '<h3>Avec vous</h3><ul class="sub-locations-list">' + voix.map(v =>
+			`<li><button class="sub-loc-btn" data-pnj="${escapeHtml(v.character)}" onclick="openPnjDialogue(this)">🗣 Parler à ${escapeHtml(v.nom)}</button></li>`
+		).join('') + '</ul>';
+	}
+	function _majVoixProteges(voix) {
+		const bloc = document.getElementById('voix-proteges-bloc');
+		if (!bloc || !Array.isArray(voix)) return;
+		bloc.innerHTML = voixProtegesHtml(voix);
 	}
 	function _majPnjsIci(ids) {
 		if (!Array.isArray(ids)) return;
@@ -14745,9 +14770,10 @@ async function choisirPnj(choixId, extra) {
 		// le « ? » sur la porte du destinataire, sans attendre un rechargement de page.
 		if ('pnj_marque' in data) _majPnjMarque(data.pnj_marque);
 		// Lignes 🗣 du lieu après une ACTION (escorte acceptée : le PNJ part avec vous) — absents
-		// de la réponse ⇒ rien ne bouge.
+		// de la réponse ⇒ rien ne bouge. Voix des escortés : une escorte acceptée fait paraître la sienne.
 		_majPnjsIci(data.pnjs_ici);
 		_majPnjMarques(data.pnj_marques);
+		_majVoixProteges(data.voix_proteges);
 		if (_majLieuxMarques(data)) buildLocationslist();
 		// Contrats d'une mission arrivés à terme (rang, commission, course rendue à la guilde).
 		// ⚠️ AVANT les sorties anticipées ci-dessous : un `combat_id` ou un `deplacer` quitte

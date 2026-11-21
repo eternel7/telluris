@@ -1396,6 +1396,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			# Les PNJ présents, cumulés : une ligne d'action par PNJ, dans l'ordre du lieu.
 			# Chacun porte sa marque « ! »/« ? » (badge de SON bouton 🗣).
 			"pnjs_presents": pnjs_presents,
+			# Personnes escortées qui ont une voix (`voix_protege`) : on leur parle où que l'on soit.
+			"voix_proteges": escorte_util.voix_payload(escorte_util.voix_des_proteges(character, get_doc, find_docs)),
 			"enigmes_ici": enigmes_ici,
 			# Map {lieu_id: "?"} des lieux où une quête active attend une remise. Elle porte
 			# TOUS les lieux concernés (courant compris) — c'est le client qui l'intersecte

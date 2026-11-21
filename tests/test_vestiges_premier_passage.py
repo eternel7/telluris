@@ -161,6 +161,39 @@ def test_les_quetes_citees_existent():
 	assert DOCS[G.COMMANDEUR]["services"]["apport"]["offre"]["id"] == G.CRISTAL
 
 
+# ── La voix d'Aélis escortée : où aller, étape par étape ────────────────────────
+
+def _etape(passages=None, resolues=()):
+	contexte = {"quetes_actives": {G.QUETE}, "quetes_reussies": set(), "flags": {},
+				"passages": passages or {}, "enigmes_resolues": set(resolues)}
+	vus = {c["id"] for c in pnj._choix_visibles(DOCS[G.AELIS_ESCORTE], "accueil", contexte)}
+	return vus - {"fin"}
+
+
+def test_la_voix_d_aelis_est_celle_de_l_escortee_des_vestiges():
+	v = DOCS[G.AELIS_ESCORTE]["voix_protege"]
+	offre = DOCS[G.AELIS_ARCHIVES]["services"]["escorte"]["offres"][-1]["offre"]
+	assert v["quete"] == offre["id"] == G.QUETE
+	assert v["prenom"] == offre["proteges"][0]["prenom"]
+	assert set(v["sauf_lieux"]) == {G.GALERIE, G.ANTICHAMBRE}
+
+
+def test_aelis_indique_une_seule_etape_a_la_fois():
+	g, a, r = G.GALERIE, G.ANTICHAMBRE, G.RETOUR
+	assert _etape() == {"enclos"}                                       # jamais descendu
+	assert _etape({g: 1}) == {"galerie"}
+	assert _etape({g: 1}, [G.E_GRAVURES]) == {"anneaux"}
+	assert _etape({g: 1}, [G.E_GRAVURES, G.E_ANNEAUX]) == {"anneaux"}   # pas encore entré
+	assert _etape({g: 1, a: 1}, [G.E_GRAVURES, G.E_ANNEAUX]) == {"arche"}
+	assert _etape({g: 1, a: 1}, [G.E_GRAVURES, G.E_ANNEAUX, G.E_ARCHE]) == {"serrure"}
+	assert _etape({g: 1, a: 1, r: 1}, [G.E_GRAVURES, G.E_ANNEAUX, G.E_ARCHE, G.E_RETOUR]) == set()
+
+
+def test_aelis_dit_le_point_de_contact_a_l_acceptation():
+	texte = DOCS[G.AELIS_ARCHIVES]["dialogue"]["noeuds"]["vestiges_accepte"]["texte"]
+	assert "Enclos du Temple" in texte and "commandeur" in texte and "catacombes" in texte
+
+
 # ── Énigmes et dialogues ────────────────────────────────────────────────────────
 
 def test_les_enigmes_sont_solubles_et_chainees_sans_cycle():
