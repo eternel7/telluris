@@ -150,3 +150,104 @@ def test_changer_d_etage_rend_ses_ailes_a_un_volant(db):
 	assert doc["couvert"] is False
 	assert allie["volant"] is True and allie["actions_max"] == 4
 	assert doc["monstres"][0]["volant"] is True
+
+
+# ── Se faufiler entre les piliers (ailes déployées) ─────────────────────────────
+# Un volant à découvert n'est arrêté que par une LIGNE de 0 : un pilier isolé passe sous
+# ses ailes. Sous couvert, abattu, ailes brisées ou vol magique seul : rien ne change.
+
+def test_un_pilier_isole_se_survole_une_ligne_non():
+	cells = [[1, 1, 1, 1, 1],
+			 [1, 0, 1, 0, 1],
+			 [1, 1, 1, 0, 1],
+			 [1, 1, 1, 1, 1]]
+	assert combat_util._pilier_isole(cells, 1, 1)
+	assert not combat_util._pilier_isole(cells, 3, 1)   # (3,1)-(3,2) : une ligne
+	assert combat_util._walkable(cells, 1, 1, flying=True, ailes=True)
+	assert not combat_util._walkable(cells, 1, 1, flying=True)
+	assert not combat_util._walkable(cells, 3, 1, flying=True, ailes=True)
+	# Deux 0 en DIAGONALE font aussi une ligne.
+	diag = [[0, 1], [1, 0]]
+	assert not combat_util._pilier_isole(diag, 0, 0)
+
+
+def test_seules_des_ailes_deployees_se_faufilent():
+	g = griffon()
+	combat_util._appliquer_couvert(g, couvert=False)
+	assert combat_util._ailes_deployees(g)
+	combat_util._appliquer_couvert(g, couvert=True)
+	assert not combat_util._ailes_deployees(g)
+	g = griffon()
+	combat_util._appliquer_couvert(g, couvert=False)
+	g["ailes_brisees"] = True
+	assert not combat_util._ailes_deployees(g)
+	# Le vol MAGIQUE seul ne se faufile pas (la marche du joueur reste deplacement.js).
+	assert not combat_util._ailes_deployees({"vol_magique": True})
+
+
+def test_les_coins_du_nav_cedent_aux_ailes_pas_les_murs_fins_ni_les_lignes():
+	cells = [[1, 1], [1, 1]]
+	nav = {"0,0": 8 | 4}     # coin bas-droite ET mur fin à droite interdits depuis (0,0)
+	assert not combat_util._pas_nav_ok(nav, cells, 0, 0, 1, 1)
+	assert combat_util._pas_nav_ok(nav, cells, 0, 0, 1, 1, ailes=True)
+	assert not combat_util._pas_nav_ok(nav, cells, 0, 0, 1, 0, ailes=True)
+	# Coin interdit ENTRE deux 0 : franchir une ligne, même en vol.
+	ligne = [[1, 0], [0, 1]]
+	assert not combat_util._pas_nav_ok(nav, ligne, 0, 0, 1, 1, ailes=True)
+	# Jamais plus strict que la marche : sans nav, la diagonale reste permise.
+	assert combat_util._pas_nav_ok({}, ligne, 0, 0, 1, 1, ailes=True)
+
+
+def _foret_a_piliers(w=12, h=9):
+	"""Clairière plantée d'un arbre isolé toutes les deux cases (colonnes et lignes paires) :
+	aucun rectangle 3x2 libre n'y bouge d'une case sans heurter un tronc."""
+	return [[0 if (x % 2 == 0 and y % 2 == 0) else 1 for x in range(w)] for y in range(h)]
+
+
+def test_un_grand_volant_se_faufile_entre_les_arbres():
+	cells = _foret_a_piliers()
+	grid = {"cells": cells, "dims": {"x": len(cells[0]), "y": len(cells)}, "nav": {}}
+	dragon = {"pos": {"x": 1, "y": 1}, "cap": "bas", "jeton": {"largeur": 3, "profondeur": 2,
+			  "forme": "triangle"}}
+	a_pied = dict(dragon)
+	vole = dict(dragon, volant=True)
+	for acteur, attendu in ((a_pied, False), (vole, True)):
+		praticable, nav_ok = combat_util._predicats_jeton(grid, acteur)
+		bouge = any(combat_util.jetons.pas_jeton(acteur, dx, dy, set(), praticable, nav_ok)
+					for dx, dy in combat_util.MOVE_OFFSETS)
+		assert bouge is attendu
+
+
+def test_l_invocation_evite_la_poche_d_ou_elle_ne_sort_pas():
+	"""Le lanceur se tient dans une poche 4x2 murée en LIGNE continue (aucune aile n'y passe),
+	ouverte d'une seule case : le 3x2 y tient, à une case de lui — c'était la place retenue —,
+	mais n'en sortirait jamais. L'invocation surgit dehors, de l'autre côté de l'ouverture."""
+	w, h = 12, 8
+	cells = [[1] * w for _ in range(h)]
+	for x in range(0, 6):
+		cells[0][x] = 0
+		cells[3][x] = 0
+	for y in range(0, 4):
+		cells[y][0] = 0
+		cells[y][5] = 0
+	cells[3][1] = 1          # l'ouverture, une case, sous le lanceur
+	grid = {"cells": cells, "dims": {"x": w, "y": h}, "nav": {}}
+	jeton = {"largeur": 3, "profondeur": 2, "forme": "triangle"}
+	poche = {(x, y) for x in range(1, 5) for y in range(1, 3)}
+	doc = {"joueurs": [{"id": "joueur_0", "pos": {"x": 1, "y": 1}, "currentPV": 10}], "monstres": []}
+
+	# Sans la condition de sortie, la pose la plus proche est bien dans la poche…
+	sonde = {"jeton": jeton}
+	region = combat_util._reachable_region(cells, grid["dims"], {}, (1, 1), True, True)
+	libres = sorted((c for c in region if c != (1, 1)),
+					key=lambda c: (max(abs(c[0] - 1), abs(c[1] - 1)), c[1], c[0]))
+	assert combat_util._poser_emprise(sonde, libres, region, {(1, 1)}, doc["joueurs"][0])
+	assert set(combat_util.jetons.cases_emprise(sonde)) <= poche
+	assert not combat_util._emprise_se_degage(sonde, grid, ailes=True)
+
+	# … l'invocation, elle, choisit une place d'où elle peut sortir.
+	place = combat_util._cases_invocation(doc, grid, doc["joueurs"][0], 1, jeton, ailes=True)[0]
+	posee = {"pos": place["pos"], "cap": place["cap"], "jeton": jeton}
+	assert not place["reduit"]
+	assert set(combat_util.jetons.cases_emprise(posee)).isdisjoint(poche)
+	assert combat_util._emprise_se_degage(posee, grid, ailes=True)
