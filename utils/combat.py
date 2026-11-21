@@ -1342,15 +1342,59 @@ def _passable(cells: list, x: int, y: int) -> bool:
 	return row[x] >= 1
 
 
-def _walkable(cells: list, x: int, y: int, flying: bool = False) -> bool:
-	"""Case franchissable au DÉPLACEMENT : praticable (`>= 1`) et, sauf vol, pas une falaise."""
+def _walkable(cells: list, x: int, y: int, flying: bool = False, ailes: bool = False) -> bool:
+	"""Case franchissable au DÉPLACEMENT : praticable (`>= 1`) et, sauf vol, pas une falaise.
+	`ailes` (`_ailes_deployees`) : un PILIER ISOLÉ se survole aussi (`_pilier_isole`)."""
 	if not cells or y < 0 or y >= len(cells):
 		return False
 	row = cells[y]
 	if x < 0 or x >= len(row):
 		return False
 	val = row[x]
-	return val >= 1 and (flying or val != TERRAIN_FALAISE)
+	if val < 1:
+		return ailes and _pilier_isole(cells, x, y)
+	return flying or ailes or val != TERRAIN_FALAISE
+
+
+# ── Ailes déployées : se faufiler entre les piliers ──────────────────────────────
+# Un volant À DÉCOUVERT n'est arrêté que par une LIGNE de cases à 0 : un pilier isolé (un
+# arbre, une colonne — aucun autre 0 parmi ses 8 voisines) passe sous ses ailes, emprise
+# comprise. Deux 0 qui se touchent, même en diagonale, font une ligne et bloquent.
+#   • Ailes d'ESPÈCE seules (`volant`, posé par `_appliquer_couvert`) : sous couvert,
+#     abattu ou ailes brisées, rien ne change ; le vol MAGIQUE non plus (la marche du joueur
+#     est `scripts/deplacement.js`, intact).
+#   • `nav` : seuls ses COINS (pas diagonal) cèdent ; un mur fin cardinal arrête toujours.
+#     Un coin interdit entre deux 0 orthogonaux reste interdit (ce serait franchir une ligne).
+#     Jamais plus strict que la marche : un pas que `nav` permet reste permis.
+#   • Ligne de vue inchangée : le pilier arrête toujours les tirs.
+#   • Serveur seul : seuls des acteurs joués par le serveur portent des ailes d'espèce
+#     (monstres, invocations) ; un volant abattu au-dessus d'un pilier en chute (`_atterrir`).
+
+def _ailes_deployees(actor: dict) -> bool:
+	"""L'acteur vole-t-il de ses AILES, à découvert ? (`volant` est faux sous couvert.)"""
+	return (bool(actor.get("volant")) and not actor.get("ailes_brisees")
+			and not vol_util.abattu(actor))
+
+
+def _mur(cells: list, x: int, y: int) -> bool:
+	"""Case DANS la grille et à 0 (le hors-grille n'est pas un mur : c'est la borne)."""
+	return 0 <= y < len(cells) and 0 <= x < len(cells[y]) and cells[y][x] < 1
+
+
+def _pilier_isole(cells: list, x: int, y: int) -> bool:
+	"""(x, y) est-il un 0 sans aucun autre 0 parmi ses 8 voisines ?"""
+	return _mur(cells, x, y) and not any(
+		_mur(cells, x + dx, y + dy) for dx, dy in MOVE_OFFSETS)
+
+
+def _pas_nav_ok(nav: dict, cells: list, x: int, y: int, dx: int, dy: int,
+				ailes: bool = False) -> bool:
+	"""Pas (dx, dy) depuis (x, y) permis par la carte. Sans `ailes` : `nav_allows`, à la
+	lettre. Avec : un pas diagonal ignore aussi les coins du `nav`, sauf entre deux 0 (une
+	ligne). Jamais plus strict que la marche : ce que `nav` permet reste permis."""
+	if nav_allows(nav, x, y, dx, dy):
+		return True
+	return bool(ailes and dx and dy) and not (_mur(cells, x + dx, y) and _mur(cells, x, y + dy))
 
 
 def _cheby(a: dict, b: dict) -> int:
@@ -2934,8 +2978,9 @@ def _avancer_incantation(combat_doc: dict, joueur: dict) -> None:
 
 
 def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
-			   nav: dict | None = None, flying: bool = False) -> list | None:
+			   nav: dict | None = None, flying: bool = False, ailes: bool = False) -> list | None:
 	"""A* 8-directions (heuristique Chebyshev). Porté du prototype client.
+	`ailes` : volant à découvert, qui se faufile entre les piliers (`_ailes_deployees`).
 
 	Mêmes règles que le déplacement du joueur : un pas est valide s'il vise une case
 	dans la grille, praticable (`cells >= 1`), non `blocked` (sauf la case d'arrivée,
@@ -2968,9 +3013,9 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 			nx, ny = cur["x"] + dx, cur["y"] + dy
 			if nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
-			if not _walkable(cells, nx, ny, flying):
+			if not _walkable(cells, nx, ny, flying, ailes):
 				continue
-			if not nav_allows(nav, cur["x"], cur["y"], dx, dy):
+			if not _pas_nav_ok(nav, cells, cur["x"], cur["y"], dx, dy, ailes):
 				continue
 			if (nx, ny) in closed:
 				continue
@@ -3030,14 +3075,14 @@ def _is_type1(cells: list, x: int, y: int) -> bool:
 
 
 def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple,
-					  flying: bool = False) -> set:
+					  flying: bool = False, ailes: bool = False) -> set:
 	"""Toutes les cases franchissables atteignables depuis `start`.
 
 	Flood fill 8-directions respectant `nav` — mêmes règles que l'A* de
 	déplacement (`_walkable`), donc cette région == l'ensemble des cases que l'A* sait joindre.
 	"""
 	sx, sy = start
-	if not _walkable(cells, sx, sy, flying):
+	if not _walkable(cells, sx, sy, flying, ailes):
 		return set()
 	w, h = dims["x"], dims["y"]
 	seen = {(sx, sy)}
@@ -3048,7 +3093,8 @@ def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple,
 			nx, ny = x + dx, y + dy
 			if (nx, ny) in seen or nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
-			if not _walkable(cells, nx, ny, flying) or not nav_allows(nav, x, y, dx, dy):
+			if (not _walkable(cells, nx, ny, flying, ailes)
+					or not _pas_nav_ok(nav, cells, x, y, dx, dy, ailes)):
 				continue
 			seen.add((nx, ny))
 			stack.append((nx, ny))
@@ -3221,16 +3267,19 @@ def _caps_face_a(sonde: dict, repere: dict) -> list:
 	return [premier, second]
 
 
-def _poser_emprise(acteur: dict, ancres, region: set, occupied: set, repere: dict) -> bool:
+def _poser_emprise(acteur: dict, ancres, region: set, occupied: set, repere: dict,
+				   accepte=None) -> bool:
 	"""Pose `acteur` (grand jeton) sur la première ancre de `ancres` où TOUTE son emprise tient
 	dans `region` sans chevaucher `occupied`, en essayant les deux caps de `_caps_face_a`.
+	`accepte(sonde)` (optionnel) : condition de plus sur la pose (cf. `_cases_invocation`).
 	Mute `pos`, `cap` et `occupied` ; rend False si rien ne tient (l'appelant décide du repli)."""
 	for (x, y) in ancres:
 		sonde = {"pos": {"x": x, "y": y}, "jeton": acteur.get("jeton")}
 		for cap in _caps_face_a(sonde, repere):
 			sonde["cap"] = cap
 			cases = jetons.cases_emprise(sonde)
-			if all(c in region and c not in occupied for c in cases):
+			if (all(c in region and c not in occupied for c in cases)
+					and (accepte is None or accepte(sonde))):
 				acteur["pos"] = {"x": x, "y": y}
 				acteur["cap"] = cap
 				occupied.update(cases)
@@ -4762,8 +4811,40 @@ def _prochain_index_joueur(combat_doc: dict) -> int:
 	return suivant
 
 
+def _emprise_se_degage(sonde: dict, grid: dict, ailes: bool = False) -> bool:
+	"""Un grand jeton posé là peut-il quitter ENTIÈREMENT son emprise de départ (une
+	position sans aucune case commune avec elle) ? Terrain et `nav` seuls : les autres
+	acteurs bougent, la carte non. Exploration bornée par `jetons.EXPANSIONS_MAX` ; une poche
+	se vide vite, un terrain dégagé répond en quelques pas."""
+	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
+
+	def praticable(x, y):
+		return 0 <= x < dims["x"] and 0 <= y < dims["y"] and _walkable(cells, x, y, ailes, ailes)
+
+	def nav_ok(x, y, dx, dy):
+		return _pas_nav_ok(nav, cells, x, y, dx, dy, ailes)
+
+	depart = set(jetons.cases_emprise(sonde))
+	etat0 = (sonde["pos"]["x"], sonde["pos"]["y"], jetons.cap_de(sonde))
+	vus, file = {etat0}, [etat0]
+	while file and len(vus) < jetons.EXPANSIONS_MAX:
+		vue = jetons.vue_etat(sonde, file.pop(0))
+		for dx, dy in MOVE_OFFSETS:
+			pas = jetons.pas_jeton(vue, dx, dy, set(), praticable, nav_ok)
+			if pas is None:
+				continue
+			etat = (pas[0]["x"], pas[0]["y"], pas[1])
+			if etat in vus:
+				continue
+			if depart.isdisjoint(jetons.cases_emprise(jetons.vue_etat(sonde, etat))):
+				return True
+			vus.add(etat)
+			file.append(etat)
+	return False
+
+
 def _cases_invocation(combat_doc: dict, grid: dict, origine: dict, nombre: int,
-					  jeton: dict | None = None) -> list:
+					  jeton: dict | None = None, ailes: bool = False) -> list:
 	"""Jusqu'à `nombre` places libres où faire apparaître des créatures autour d'`origine`,
 	les plus proches d'abord. Chaque place : `{"pos", "cap", "reduit"}`.
 
@@ -4774,17 +4855,27 @@ def _cases_invocation(combat_doc: dict, grid: dict, origine: dict, nombre: int,
 	est totalement encerclé, ce que l'appelant traite comme un échec du sort.
 
 	Grand `jeton` : toute l'emprise doit tenir ; sinon la créature est posée en 1x1
-	(`reduit: True`), comme au placement initial.
+	(`reduit: True`), comme au placement initial. Parmi les places où elle tient, la plus
+	proche D'OÙ ELLE PEUT SORTIR (`_emprise_se_degage`) : sinon une poche entre quatre arbres
+	où le rectangle tient tout juste la clouerait là pour tout le combat. La plus proche tout
+	court n'est qu'un dernier recours.
+
+	`ailes` : créature volante appelée à découvert — région, emprise et sortie suivent ses
+	règles (falaises, piliers isolés : `_ailes_deployees`).
 	"""
 	ox, oy = origine["pos"]["x"], origine["pos"]["y"]
 	occupees = _occupied_set(combat_doc)
-	region = _reachable_region(grid["cells"], grid["dims"], grid.get("nav", {}), (ox, oy))
+	region = _reachable_region(grid["cells"], grid["dims"], grid.get("nav", {}), (ox, oy),
+							   flying=ailes, ailes=ailes)
 	libres = [c for c in region if c not in occupees]
 	libres.sort(key=lambda c: (max(abs(c[0] - ox), abs(c[1] - oy)), c[1], c[0]))
 	places = []
 	for _ in range(max(0, int(nombre))):
 		sonde = {"jeton": jeton}
-		if jetons.est_grand(sonde) and _poser_emprise(sonde, libres, region, occupees, origine):
+		if jetons.est_grand(sonde) and (
+				_poser_emprise(sonde, libres, region, occupees, origine,
+							   accepte=lambda s: _emprise_se_degage(s, grid, ailes))
+				or _poser_emprise(sonde, libres, region, occupees, origine)):
 			places.append({"pos": sonde["pos"], "cap": sonde["cap"], "reduit": False})
 			continue
 		case = next((c for c in libres if c not in occupees), None)
@@ -4816,7 +4907,8 @@ def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
 		profil = None
 
 	places = _cases_invocation(combat_doc, grid, lanceur, invocation.get("nombre", 1),
-							   jetons.jeton_espece(espece))
+							   jetons.jeton_espece(espece),
+							   ailes=espece_vole(espece) and not combat_doc.get("couvert"))
 	crees = []
 	for place in places:
 		snap = build_invocation_snapshot(
@@ -6605,7 +6697,8 @@ def invoquer_monstre(combat_doc: dict, monstre: dict, sort: dict, grid: dict) ->
 	if profil is not None and profil.get("type") != "profil":
 		profil = None
 	places = _cases_invocation(combat_doc, grid, monstre, invocation.get("nombre", 1),
-							   jetons.jeton_espece(espece))
+							   jetons.jeton_espece(espece),
+							   ailes=espece_vole(espece) and not combat_doc.get("couvert"))
 	crees = []
 	for place in places:
 		snap = build_monster_snapshot(espece, profil, _prochain_index_monstre(combat_doc),
@@ -6649,9 +6742,10 @@ def _tenter_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict, rand_f
 def _predicats_jeton(grid: dict, acteur: dict) -> tuple:
 	"""(praticable, nav_ok) injectés dans `utils/jetons.py` — mêmes règles que `_find_path`."""
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
-	flying = _can_fly(acteur)
-	return ((lambda x, y: 0 <= x < dims["x"] and 0 <= y < dims["y"] and _walkable(cells, x, y, flying)),
-			(lambda x, y, dx, dy: nav_allows(nav, x, y, dx, dy)))
+	flying, ailes = _can_fly(acteur), _ailes_deployees(acteur)
+	return ((lambda x, y: 0 <= x < dims["x"] and 0 <= y < dims["y"]
+			 and _walkable(cells, x, y, flying, ailes)),
+			(lambda x, y, dx, dy: _pas_nav_ok(nav, cells, x, y, dx, dy, ailes)))
 
 
 def _pas_budget_ok(acteur: dict) -> bool:
@@ -6762,6 +6856,7 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 		blocked,
 		grid.get("nav", {}),
 		flying=_can_fly(monstre),
+		ailes=_ailes_deployees(monstre),
 	)
 	if not path or len(path) < 2:
 		return False
@@ -6817,7 +6912,7 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 		return True
 	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
-	flying = _can_fly(monstre)
+	flying, ailes = _can_fly(monstre), _ailes_deployees(monstre)
 	dist_actuelle = jetons.distance(monstre, cible)
 	best = None
 	best_dist = dist_actuelle
@@ -6825,9 +6920,9 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 		nx, ny = x + dx, y + dy
 		if not (0 <= nx < dims["x"] and 0 <= ny < dims["y"]):
 			continue
-		if (nx, ny) in blocked or not nav_allows(nav, x, y, dx, dy):
+		if (nx, ny) in blocked or not _pas_nav_ok(nav, cells, x, y, dx, dy, ailes):
 			continue
-		if not _walkable(cells, nx, ny, flying):
+		if not _walkable(cells, nx, ny, flying, ailes):
 			continue
 		d = jetons.distance({"pos": {"x": nx, "y": ny}}, cible)
 		if d > best_dist:
@@ -7025,15 +7120,15 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 		return True
 	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
-	flying = _can_fly(monstre)
+	flying, ailes = _can_fly(monstre), _ailes_deployees(monstre)
 	options = []
 	for dx, dy in MOVE_OFFSETS:
 		nx, ny = x + dx, y + dy
 		if not (0 <= nx < dims["x"] and 0 <= ny < dims["y"]):
 			continue
-		if (nx, ny) in blocked or not nav_allows(nav, x, y, dx, dy):
+		if (nx, ny) in blocked or not _pas_nav_ok(nav, cells, x, y, dx, dy, ailes):
 			continue
-		if not _walkable(cells, nx, ny, flying):
+		if not _walkable(cells, nx, ny, flying, ailes):
 			continue
 		options.append((nx, ny))
 	if not options:
@@ -7327,13 +7422,13 @@ def _approche_meute(combat_doc: dict, monstre: dict, cible: dict, grid: dict, pr
 			  if m is not monstre and m.get("vivant") and m.get("case_visee")}
 	fx, fy = _axe_acteur(cible)
 	tx, ty = cible["pos"]["x"], cible["pos"]["y"]
-	flying = _can_fly(monstre)
+	flying, ailes = _can_fly(monstre), _ailes_deployees(monstre)
 	candidates = []
 	for dx, dy in MOVE_OFFSETS:
 		x, y = tx + dx, ty + dy
 		if not (0 <= x < dims["x"] and 0 <= y < dims["y"]) or (x, y) in bloque:
 			continue
-		if not _walkable(cells, x, y, flying):
+		if not _walkable(cells, x, y, flying, ailes):
 			continue
 		score = ia_monstre.score_case_meute(dx * fx + dy * fy, (x, y) in visees)
 		candidates.append((-score, _cheby(monstre, {"pos": {"x": x, "y": y}}), (x, y)))
