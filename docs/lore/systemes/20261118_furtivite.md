@@ -187,7 +187,8 @@ Dump du 17/11/2026. « Terrain souterrain » = `sous-terrain, catacombe, donjon,
 ## 8. Ce que le joueur voit
 
 - **Badge 🥷** dans l'en-tête de tour, tant que le membre **actif** est furtif.
-- **Œil barré** sur le badge de chaque ennemi qui ne vous a pas encore repéré (affiché dès qu'un membre vivant du groupe est furtif).
+- **Œil barré** sur le badge de chaque ennemi qui ne vous a pas encore repéré (affiché dès qu'un COMBATTANT vivant du groupe est furtif — montures et escortés, furtifs tout le combat, n'en comptent pas, 21/11).
+- **Membre furtif** (combattant, monture ou escorté, vivant) : jeton voilé (translucide, halo violet) sur la carte, membre actif compris, et pastille 🥷 sur son badge du bandeau d'initiative (21/11). La marque suit l'état du joueur : elle ne tombe qu'à la sortie de l'ombre, jamais parce qu'un ennemi l'a repéré — c'est l'œil barré de L'ENNEMI qui le dit.
 - **Journal** : « X se fond dans les ombres… », « X vous repère ! (jet / seuil) », « X cherche d'où vient le coup sans repérer Y ! (jet / seuil) », « X sort de l'ombre : tous les ennemis l'ont repéré ! », et les lignes d'errance des monstres aveugles.
 - **Onglet ⚡ de `/play`**, `/admin/sorts`, `/admin/competences` : « 🥷 furtivité +N », la formule puis sa valeur résolue (« +{Ag/10} → 6 »), et la condition de terrain (« 🗺️ seulement en terrain : … »).
 - **Animation** : `animation:capa_furtif` (fondu dans la fumée).

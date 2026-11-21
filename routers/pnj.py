@@ -1351,6 +1351,11 @@ async def pnj_dialogue_choix(
 	# une réplique simple ne paie pas ce recalcul.
 	if "fiche_actives" in reponse or "inventaire_payload" in reponse:
 		reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
+	# Une ACTION peut changer les conditions de présence des PNJ du lieu (une escorte acceptée
+	# emmène Aélis hors des Archives) : lignes 🗣 recalculées, sinon la sienne resterait
+	# cliquable et répondrait « Personne à qui parler ici ». Une réplique simple n'y touche pas.
+	if action:
+		reponse.update(pnjs_presents_resync(character))
 	return reponse
 
 

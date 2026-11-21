@@ -310,7 +310,8 @@ templates/
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)
-  lint_dialogues.py · export_bestiaire.py · purge_quetes_acceptees.py · gen_grille_image.py
+  lint_dialogues.py · export_bestiaire.py · gen_grille_image.py
+  retires/               # scripts à ne plus lancer (historique), hors de /admin/dev-tools : retires/README.md
   calibrer_grille_image.py
   check_js.js · test_*_client.js   # contrôle syntaxique + harnais d'exécution du JS client
 tests/                   # tests purs, un fichier par système

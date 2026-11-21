@@ -896,3 +896,26 @@ def test_resume_presences_ignore_les_entrees_inexploitables():
     assert [r["character"] for r in pnj.resume_presences(lieu)] == ["pnj:ok"]
     assert pnj.resume_presences({}) == []
     assert pnj.resume_presences(None) == []
+
+
+# ---------------------------------------------------------------------------
+# Choix qui ne fait que clore (`ferme`) : le client ferme sans requête
+# ---------------------------------------------------------------------------
+
+def test_choix_ferme_seulement_sans_action_ni_hook_vers_fin():
+    assert pnj.choix_ferme({"id": "a", "label": "x", "next": "fin"})
+    assert pnj.choix_ferme({"id": "a", "label": "x"})
+    assert not pnj.choix_ferme({"id": "a", "label": "x", "next": "suite"})
+    for hook in ({"action": {"service": "escorte", "op": "accepter"}}, {"deplacer": "lieu:x"},
+                 {"enigme": "enigme:x"}, {"saisie": True}):
+        assert not pnj.choix_ferme(dict({"id": "a", "label": "x", "next": "fin"}, **hook)), hook
+
+
+def test_noeud_client_marque_les_choix_qui_ferment():
+    doc = {"dialogue": {"noeud_depart": "accueil", "noeuds": {"accueil": {"texte": "t", "choix": [
+        {"id": "route", "label": "« À l'Enclos. »", "next": "fin"},
+        {"id": "suite", "label": "Suite", "next": "accueil"},
+        {"id": "ok", "label": "Accepter", "action": {"service": "escorte", "op": "accepter"}},
+    ]}}}}
+    rendu = pnj.noeud_client(doc, "accueil", {"placeholders": {}})
+    assert {c["id"]: c["ferme"] for c in rendu["choix"]} == {"route": True, "suite": False, "ok": False}

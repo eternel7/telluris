@@ -277,5 +277,38 @@ t('syncViewSize en portrait : idempotente, écrit la profondeur dans --view-widt
 	assert.strictEqual(ROOT.vars['--view-width'], r1.viewWidth + 'px');
 });
 
+// ── Œil barré des ennemis (`_groupeFurtif`) ─────────────────────────────────────
+// Seul un COMBATTANT vivant et furtif l'allume : montures et escortés (`jouable === false`)
+// entrent furtifs et ne frappent jamais, l'œil restait affiché tout le combat.
+vm.runInThisContext(extraire('_groupeFurtif'));
+
+t('œil barré : un combattant furtif vivant l’allume', () => {
+	assert.strictEqual(_groupeFurtif([{ currentPV: 10, furtif: true }]), true);
+});
+t('œil barré : une escortée ou une monture furtive ne l’allume pas', () => {
+	assert.strictEqual(_groupeFurtif([
+		{ currentPV: 10, furtif: false },
+		{ currentPV: 10, furtif: true, jouable: false },
+	]), false);
+});
+t('œil barré : un combattant furtif à terre ne l’allume pas', () => {
+	assert.strictEqual(_groupeFurtif([{ currentPV: 0, furtif: true }]), false);
+	assert.strictEqual(_groupeFurtif(undefined), false);
+});
+
+// ── Marque de furtivité d'un membre (`_membreFurtif`) : jeton voilé, pastille 🥷 ──
+// Monture et escorté compris (l'état du moteur) ; jamais un membre à terre.
+vm.runInThisContext(extraire('_membreFurtif'));
+
+t('marque furtive : membre vivant et furtif, monture ou escorté compris', () => {
+	assert.strictEqual(_membreFurtif({ currentPV: 5, furtif: true }), true);
+	assert.strictEqual(_membreFurtif({ currentPV: 5, furtif: true, jouable: false, est_protege: true }), true);
+});
+t('marque furtive : ni repéré, ni à terre, ni absent', () => {
+	assert.strictEqual(_membreFurtif({ currentPV: 5, furtif: false }), false);
+	assert.strictEqual(_membreFurtif({ currentPV: 0, furtif: true }), false);
+	assert.strictEqual(_membreFurtif(null), false);
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).\n`);
 process.exit(echecs ? 1 : 0);

@@ -31,7 +31,7 @@ Les noms de marchands suivent le gabarit **Maître / Dame / Frère / Docte / Le 
 **Auteur**
 - **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission** — écrite (11/10/2026) : Maëlys, pour le **rang C**, envoie l'aventurier escorter Aélis jusqu'au portail des ruines de **Jumièges** ; elle revient aux **Archives des Seuils** avec trois théories et aucune réponse.
 - **Plus tard** : on lui offre d'approfondir sa formation à **Mu**, et elle veut que l'aventurier l'accompagne.
-- **Arc après Jumièges** (Auteur, 19/11) : rang C « La pièce derrière le mur » (boîte de **Maître Villard**, rapportée de Mu — **jamais dit** ; départs : Aélis, Villard, réception de la Guilde, Maëlys ; Aélis **escortée** ; **nouveau système d'énigmes**) → rang B « Les vestiges du premier passage » → rang A, partir pour Mu : [personnages/20261119_la_piece_derriere_le_mur.md]
+- **Arc après Jumièges** (Auteur, 19/11) : rang C « La pièce derrière le mur » (boîte de **Maître Villard**, rapportée de Mu — **jamais dit** ; départs : Aélis, Villard, réception de la Guilde, Maëlys ; Aélis **escortée** ; **nouveau système d'énigmes**) → rang B « Les vestiges du premier passage » → rang A, partir pour Mu : [personnages/20261119_la_piece_derriere_le_mur.md]. **21/11** : arc suivi **dans l'ordre**, on n'arrive à Mu que par lui ; Mu-la-Centrale **à demi fermée** (invité de l'Institut, auberge + marché restreint, le reste par réputation/quêtes, **aucune maison de Guilde**) ; 1ʳᵉ livraison = accès Notre-Dame ↔ Mu + cité explorable, Échidna en seconde passe.
 - La relation n'est **pas ambiguë**. L'aventurier peut être une femme. Ce qui compte, c'est la **confiance** et le **regard extérieur** que l'aventurier apporte à l'architecte.
 - Elle est l'une des personnes qui portent des **théories contradictoires** sur le mystère.
 
@@ -66,7 +66,7 @@ Trame **retenue** (D–B de la première version, A–S+ de la version gardée) 
 | D | « Les rats de la crypte » | catacombes de Lutecia | ouvriers disparus, crypte rouverte, objet au symbole de portail ancien |
 | C | « La route de Saint-Denis » | route nord ; **4ᵉ escorte de Bouchard** (Montmartre), pas une épreuve de rang (Jumièges l'est) — arbitrée le 08/11 : [personnages/20261108_la_route_de_saint_denis.md] | les monstres **précèdent** les donjons : loups et corneilles rabattent vers le **Chemin du Saint**, serpent de Marcel (être unique) ; légendes de Denis et de Marcel, sans christianisme |
 | B | « La porte qui ne devait pas s'ouvrir » | temple templier près de Lutecia | l'extraction de cristaux **modifie** un donjon |
-| A | Mu : « Le serpent sous la cité » | Mu | rencontre avec **Échidna**, « mère des serpents » des traditions de Mu, sous Mu-la-Centrale près de la porte fermée (11/10) : la combattre ou parler. « Vous appelez monstres mes enfants. » |
+| A | Mu : « Le serpent sous la cité » | Mu | rencontre avec **Échidna**, « mère des serpents » des traditions de Mu, sous Mu-la-Centrale près de la porte fermée (11/10) : la combattre ou parler — **deux voies, choix définitif** inscrit sur le personnage, la parole pouvant aboutir sans combat ou y basculer, aucune voie « bonne » (Auteur, 21/11). « Vous appelez monstres mes enfants. » |
 | A+ | Rome → **Paradis** | Rome | des anges aux réponses ambiguës (« Vos dieux vous ont menti. » — est-ce vrai ?) |
 | S | **Yggdrasil** | cité nordique | Asgard, Midgard, Jötunheim, Hel ; les mondes précèdent-ils les récits ? |
 | S+ | « Celui qui était avant » | hors de toute mythologie | quatre hypothèses, **le jeu ne tranche pas** |

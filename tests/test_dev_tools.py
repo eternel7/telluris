@@ -53,6 +53,48 @@ def test_forme_des_entrees():
 			assert isinstance(o.get("argv"), list), o["id"]
 
 
+def _scripts_du_catalogue():
+	"""(id, chemin relatif) de chaque script lancé par le catalogue — `argv_fn` appelée sur des
+	valeurs factices (elle ne fait que bâtir une liste)."""
+	from collections import defaultdict
+	factice = defaultdict(lambda: "x")
+	for o in dt.CATALOGUE:
+		argv = o.get("argv") or o["argv_fn"](factice, factice)
+		for a in argv:
+			if os.path.normpath(str(a)).split(os.sep)[0] == "dev":
+				yield o["id"], a
+
+
+def test_chaque_script_du_catalogue_existe_hors_des_retires():
+	racine = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+	vus = list(_scripts_du_catalogue())
+	assert vus
+	for outil, chemin in vus:
+		assert os.path.isfile(os.path.join(racine, chemin)), (outil, chemin)
+		assert dt.DOSSIER_RETIRES not in os.path.normpath(chemin).split(os.sep), (outil, chemin)
+
+
+@pytest.mark.parametrize("script", [
+	"retires/gen_lutecia.py", os.path.join("retires", "purge_quetes_acceptees.py"), "../main.py",
+])
+def test_un_script_retire_ou_hors_de_dev_ne_se_lance_pas(script):
+	with pytest.raises(ValueError):
+		dt._py(script)
+	with pytest.raises(ValueError):
+		dt._node(script)
+
+
+def test_le_dossier_des_retires_existe_et_documente_chaque_script():
+	racine = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+	dossier = os.path.join(racine, "dev", dt.DOSSIER_RETIRES)
+	with open(os.path.join(dossier, "README.md"), encoding="utf-8") as f:
+		lisez_moi = f.read()
+	scripts = [n for n in os.listdir(dossier) if n.endswith((".py", ".js"))]
+	assert scripts
+	for nom in scripts:
+		assert f"`{nom}`" in lisez_moi, nom
+
+
 # ── Validation des paramètres ────────────────────────────────────────────────
 
 @pytest.mark.parametrize("ville", [

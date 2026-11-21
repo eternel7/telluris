@@ -1,0 +1,1961 @@
+[
+  {
+    "_id": "pnj:aelis_de_montfaucon_archives",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+    "description": "Jeune architecte de l'Institut, rentrée de Jumièges avec un carnet plein de mesures qu'aucune théorie n'explique entièrement.",
+    "dialogue": {
+      "noeud_depart": "retour_01",
+      "noeud_attente": "accueil",
+      "noeuds": {
+        "retour_01": {
+          "texte": "Les Archives des Seuils montent sur trois étages de galeries, sous une coupole peinte. Aélis a fait vider une table entière : ses relevés de Jumièges y sont étalés, tenus aux coins par des presse-papiers de cristal. Autour, des architectes de toutes les Lignées se penchent, discutent, se contredisent. Elle vous aperçoit et, sans un mot, vous fait signe d'approcher.",
+          "choix": [
+            {
+              "id": "disent",
+              "label": "« Qu'en disent-ils ? »",
+              "next": "retour_02"
+            }
+          ]
+        },
+        "retour_02": {
+          "texte": "« Ce que disent toujours les gens savants : trois choses incompatibles, chacune avec certitude. » Elle compte sur ses doigts. « Le vieux maître des Seuils jure qu'un portail des Frères dormait sous l'abbaye, et que la Vague l'a réveillé. Ses élèves répondent que les Frères n'ont rien bâti si loin de leurs routes, et qu'un portail peut naître seul, comme celui de Rome. Et l'archiviste en chef rappelle que personne n'a jamais vu un portail naître seul — il en conclut que quelqu'un l'a ouvert, et qu'il l'a ouvert exprès. »",
+          "choix": [
+            {
+              "id": "vous",
+              "label": "« Et vous ? »",
+              "next": "retour_03"
+            }
+          ]
+        },
+        "retour_03": {
+          "texte": "Elle regarde longtemps son carnet ouvert. « Moi, j'ai mesuré. Les trois hypothèses tiennent dans mes chiffres, et aucune ne les explique tous. » Elle le referme. « La Cour a écrit aux Templiers ; quelqu'un gardera la nef. J'y retournerai un jour, avec de meilleurs instruments — et, si vous le voulez bien, avec vous. » Puis, d'un ton plus léger : « Allez voir la Guilde, {prenom}. La maîtresse attend votre récit, et je crois savoir ce que vous y gagnerez. »",
+          "delai_min": 315360000,
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« À bientôt, Aélis. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Aélis lève les yeux d'une pile de relevés de Jumièges, une plume entre les dents qu'elle retire pour parler. « Vous. Asseyez-vous, si vous trouvez une chaise qui ne porte pas de vélin. »",
+          "choix": [
+            {
+              "id": "vestiges_offre",
+              "label": "« Vous ne lisez plus vos notes de la boîte. Vous les comparez. »",
+              "next": "vestiges_01",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:vestiges_du_premier_passage",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:piece_derriere_le_mur"
+                },
+                "escorte_offerte": true,
+                "offre": "quete:vestiges_du_premier_passage",
+                "rang_min": {
+                  "cite": "lieu:lutecia",
+                  "rang": "B"
+                }
+              }
+            },
+            {
+              "id": "vestiges_apres",
+              "label": "« Ce nom, sous la coupole… »",
+              "next": "vestiges_souvenir",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:vestiges_du_premier_passage"
+                }
+              }
+            },
+            {
+              "id": "piece_offre",
+              "label": "« Vous ne relevez pas Jumièges, aujourd'hui. »",
+              "next": "piece_01",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:piece_derriere_le_mur",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges"
+                },
+                "escorte_offerte": true,
+                "offre": "quete:piece_derriere_le_mur"
+              }
+            },
+            {
+              "id": "piece_apres",
+              "label": "« Vos notes de la boîte ? »",
+              "next": "piece_souvenir",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:piece_derriere_le_mur"
+                }
+              }
+            },
+            {
+              "id": "nouveau",
+              "label": "« Du nouveau sur le portail ? »",
+              "next": "nouveau"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "nouveau": {
+          "texte": "« Du nouveau, non. Du différent, toujours. » Elle tourne une feuille vers vous : deux tracés presque identiques. « Le même portail, relevé à dix jours d'écart. Il a changé d'une ligne. Un vivant aurait grandi ; une pierre aurait bougé. Je ne sais pas encore lequel des deux il est. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "piece_01": {
+          "texte": "Aélis repousse les relevés de Jumièges. Dessous, une autre feuille : une boîte vue de six côtés, couverte de figures. « Maître Villard ne dort plus depuis trois nuits. Il ne dira pas pourquoi à un apprenti. À moi, il l'a dit : la boîte est partie. Sans ouvrir l'armoire. » Elle tapote le dessin. « Je l'ai mesurée une fois. Ses angles ne font pas le compte. »",
+          "choix": [
+            {
+              "id": "piece_compte",
+              "label": "« Pas le compte ? »",
+              "next": "piece_02"
+            }
+          ]
+        },
+        "piece_02": {
+          "texte": "« Six faces, et pourtant la somme de ce que j'ai relevé dépasse ce qu'une boîte peut contenir. » Elle hausse une épaule. « Les uns diraient que je me suis trompée. J'ai refait le calcul. Je voudrais aller voir l'armoire, aux Ateliers de Convergence. Et je préférerais ne pas y aller seule, si quelque chose y attend. »",
+          "choix": [
+            {
+              "id": "piece_ok",
+              "label": "« Allons-y ensemble. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "piece_plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "piece_accepte": {
+          "texte": "Elle range le dessin dans un carnet neuf, glisse son compas à sa ceinture. « Je ne me bats toujours pas, {prenom}. Vous le savez. Mais je sais regarder. Ça nous fait un partage. »",
+          "choix": [
+            {
+              "id": "piece_route",
+              "label": "« Aux Ateliers. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "piece_souvenir": {
+          "texte": "Elle ouvre son carnet sur une page couverte d'une écriture qui n'est pas la sienne : les notes recopiées dans l'atelier intérieur, avec la permission de Villard. « Je les lis tous les soirs. Je n'en comprends pas le quart. » Elle referme. « Nous croyons qu'un espace, on y entre. Maître Villard sait le plier. Mais quelqu'un, un jour, a su en bâtir un où l'on vit. » Elle regarde vers la fenêtre, vers les remparts. « Imaginez ce que cela voudrait dire, pour un monde qui vit derrière ses murs. »",
+          "choix": [
+            {
+              "id": "piece_souvenir_fin",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "vestiges_01": {
+          "texte": "Aélis a posé côte à côte deux feuilles. Sur l'une, son écriture : les pages recopiées dans la boîte de Villard. Sur l'autre, un relevé maladroit, au fusain, d'une main qui n'a pas l'habitude. « Les Templiers de l'Enclos ont fait porter ceci à l'Institut. Une porte, au fond de l'ossuaire, derrière une paroi qui s'est ouverte toute seule. Personne chez eux ne sait la lire. » Elle pose le doigt sur trois cercles entrelacés. « Moi non plus. Mais je l'ai déjà vue. »",
+          "choix": [
+            {
+              "id": "vestiges_ou",
+              "label": "« Dans la boîte. »",
+              "next": "vestiges_02"
+            }
+          ]
+        },
+        "vestiges_02": {
+          "texte": "« Sous le socle de la réserve, sur le tissu du meuble, dans le dessin de l'enfant. Les mêmes signes, {prenom}, à cent pieds sous Lutecia, sur une porte que personne n'a bâtie depuis qu'on y creuse. » Elle range les deux feuilles dans son carnet. « Le commandeur de l'Enclos garde le chemin. Il m'ouvrira peut-être, si quelqu'un qu'il connaît m'accompagne. Et je préférerais ne pas descendre seule. »",
+          "choix": [
+            {
+              "id": "vestiges_ok",
+              "label": "« Je descends avec vous. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "vestiges_plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_accepte": {
+          "texte": "Elle glisse son compas à sa ceinture et prend une lanterne sourde sur l'étagère. « À l'Enclos du Temple, d'abord. Ensuite, nous verrons bien ce qu'une porte a à dire à une architecte. »",
+          "choix": [
+            {
+              "id": "vestiges_route",
+              "label": "« À l'Enclos. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_souvenir": {
+          "texte": "Aélis lève les yeux vers la coupole peinte des Archives, vers le signe tracé au-dessus de la porte des vieux maîtres. « Je passais dessous tous les jours. On nous apprend à dire Mu en levant les yeux, comme on dit un nom qu'on respecte et qu'on n'explique pas. » Elle baisse les yeux sur son carnet. « Sur l'arche, il disait peut-être où elle menait. Ou qui l'avait bâtie. Les vieux maîtres ne répondent pas quand je demande. Ils sourient, et ils parlent d'autre chose. »",
+          "choix": [
+            {
+              "id": "vestiges_souvenir_fin",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "escorte": {
+        "offres": [
+          {
+            "offre": {
+              "id": "quete:piece_derriere_le_mur",
+              "titre": "La pièce derrière le mur",
+              "description": "Une petite boîte de métal, gravée de figures, a quitté une armoire fermée des Ateliers de Convergence sans en passer la porte. Maître Villard la veut de retour, et Aélis de Montfaucon veut comprendre. Accompagnez-la jusqu'à la boîte et ramenez-la vivante, de l'autre côté de ce qu'elle a ouvert. Elle ne sait pas se battre.",
+              "destination": "lieu:seuil_de_la_boite",
+              "proteges": [
+                {
+                  "prenom": "Aélis",
+                  "nom": "de Montfaucon",
+                  "race": "humain",
+                  "sex": "F",
+                  "image": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+                  "description": "Architecte de l'Institut, rentrée de Jumièges avec un carnet que rien n'explique tout à fait. Un compas, un carnet, un crayon. Elle ne sait pas se battre."
+                }
+              ],
+              "unique": true,
+              "proba": 1,
+              "rang_min": {
+                "cite": "lieu:lutecia",
+                "rang": "D"
+              },
+              "recompenses": {
+                "xp": 120,
+                "cuivre": 1500,
+                "items": [
+                  {
+                    "item": "item:besace_profonde",
+                    "poids": 0.5
+                  }
+                ]
+              }
+            },
+            "noeuds": {
+              "accepte": "piece_accepte"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:vestiges_du_premier_passage",
+              "titre": "Les vestiges du premier passage",
+              "description": "Au fond de l'ossuaire des catacombes, une paroi s'est ouverte sur une porte de pierre tiède, gravée de signes que les Templiers ne savent pas lire. Aélis de Montfaucon les a reconnus : ce sont ceux de la boîte de Maître Villard. Le commandeur de l'Enclos du Temple garde le chemin. Accompagnez-la jusqu'à la porte et ramenez-la vivante. Elle ne sait pas se battre.",
+              "destination": "lieu:devant_la_porte_refermee",
+              "proteges": [
+                {
+                  "prenom": "Aélis",
+                  "nom": "de Montfaucon",
+                  "race": "humain",
+                  "sex": "F",
+                  "image": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+                  "description": "Architecte de l'Institut. Elle a relu tous les soirs les pages recopiées dans la boîte de Villard. Un compas, un carnet, un crayon. Elle ne sait pas se battre."
+                }
+              ],
+              "unique": true,
+              "proba": 1,
+              "rang_min": {
+                "cite": "lieu:lutecia",
+                "rang": "B"
+              },
+              "recompenses": {
+                "xp": 200,
+                "cuivre": 3000
+              }
+            },
+            "noeuds": {
+              "accepte": "vestiges_accepte"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "_id": "pnj:commandeur_de_l_enclos_du_temple",
+    "type": "pnj",
+    "nom": "Le commandeur de l'Enclos",
+    "race": "humain",
+    "vocation": "templier",
+    "portrait": "templier_humain_m_commandeur_enclos01.png",
+    "description": "Commandeur de l'Enclos du Temple, la maison des Templiers de Lutecia. Ses hommes gardent les catacombes et leur donjon, et en remontent les cristaux jaunes.",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "livre": "pli_lu",
+          "incomplet": "pli_absent"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:cristal_de_l_ossuaire",
+          "titre": "Le cristal de l'ossuaire",
+          "description": "Le commandeur de l'Enclos du Temple veut que vous descendiez dans les catacombes de Lutecia jusqu'à l'ossuaire, le dernier étage, et que vous lui rapportiez le cristal jaune de son coffre. Ensuite seulement, il écrira sa réponse à la Guilde.",
+          "item": "item:cristal_de_mana_jaune",
+          "quantite": 1,
+          "unique": true,
+          "rang": "B",
+          "recompenses": {
+            "xp": 60,
+            "cuivre": 1200
+          }
+        },
+        "noeuds": {
+          "accepte": "cristal_accepte",
+          "remis": "cristal_remis",
+          "partiel": "cristal_partiel"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:galerie_du_commandeur",
+        "noeuds": {
+          "ouvre": "vestiges_ouvre",
+          "refus": "vestiges_refus"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'Enclos du Temple est une ville dans la ville : une tour carrée, des murs épais, une cour où des Templiers déchargent des caisses qui tintent. Le commandeur vous reçoit debout, dans une salle sans fenêtre éclairée par un cristal jaune posé sur la table. « La paix sur vous. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Que gardez-vous, ici ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                  "attendu": false
+                }
+              },
+              "next": "garde"
+            },
+            {
+              "id": "pli",
+              "label": "Lui remettre le pli de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "descente",
+              "label": "« Vous vouliez que je descende ? »",
+              "condition": {
+                "apport_offert": true,
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                },
+                "transport_a_livrer": false
+              },
+              "next": "cristal_propose"
+            },
+            {
+              "id": "cristal",
+              "label": "Poser le cristal jaune de l'ossuaire sur la table.",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "relance",
+              "label": "« Au sujet de l'ossuaire… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "cristal_relance"
+            },
+            {
+              "id": "attente",
+              "label": "« Votre réponse part pour la Guilde. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                },
+                "transport_a_livrer": false,
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
+              },
+              "next": "attente"
+            },
+            {
+              "id": "apres",
+              "label": "« L'ossuaire ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "vestiges_connu",
+              "label": "« Aélis de Montfaucon veut voir votre porte. »",
+              "next": "vestiges_01_connu",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:vestiges_du_premier_passage"
+                },
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
+              }
+            },
+            {
+              "id": "vestiges_inconnu",
+              "label": "« L'Institut voudrait voir votre porte. »",
+              "next": "vestiges_01_inconnu",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:vestiges_du_premier_passage"
+                },
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire",
+                  "attendu": false
+                }
+              }
+            },
+            {
+              "id": "vestiges_apres",
+              "label": "« La porte, au fond de la galerie ? »",
+              "next": "vestiges_souvenir",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:vestiges_du_premier_passage"
+                }
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "garde": {
+          "texte": "« Ce qu'il y a sous vos pieds. » Il pose la main sur le cristal. « Les catacombes, et ce qu'elles sont devenues depuis la Vague. Nous en remontons ceci. Sans eux, les portes de cette ville s'éteindraient l'une après l'autre. » Il retire la main. « C'est un travail de patience. Bonne journée. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pli_lu": {
+          "texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte de pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là : j'ai creusé moi-même ce couloir. » Il repousse la lettre. « Je ne répondrai pas à votre maîtresse sur ma parole. Je répondrai sur la vôtre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est-à-dire ? »",
+              "next": "cristal_propose"
+            }
+          ]
+        },
+        "cristal_propose": {
+          "texte": "« Descendez. » Il désigne le sol. « Par la porte des catacombes, comme tout le monde : trois étages, jusqu'à l'ossuaire. Mes hommes n'y vont plus depuis que la paroi s'est ouverte ; ce qui rôde en bas s'y est rassemblé. Au fond, il y a un coffre. Nous y laissions le cristal du mois. Rapportez-le-moi, et dites-moi ce que vous avez vu. Ensuite, j'écrirai à la Guilde. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je descends. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_accepte": {
+          "texte": "Le commandeur hoche la tête. « Trois étages. Ne vous attardez pas au deuxième, et n'ouvrez le coffre qu'une fois la salle vide : certains coffres, en bas, ont des dents. » Il revient à son cristal. « Je vous attends. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_relance": {
+          "texte": "« L'ossuaire. » Il ne lève pas les yeux. « Le troisième étage, le coffre du fond. Je ne réponds pas à la Guilde avant. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_partiel": {
+          "texte": "« Il en manque. » Le commandeur compte : il reste {reste} pièce à rapporter.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_remis": {
+          "texte": "Le commandeur prend le cristal, le pose à côté du sien, et les regarde briller ensemble. Il vous écoute : les étages, ce qui rôdait, l'ossuaire, la paroi ouverte et la porte derrière, tiède sous la main. « Vous l'avez touchée. Moi aussi. » Il fait glisser vers vous {prime} pièces de cuivre, trempe sa plume et écrit vite. « Voici ma réponse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre la réponse.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pli_absent": {
+          "texte": "Le commandeur attend. « La Guilde m'écrit, dit-on. Sans pli, je n'ai rien à lire, et rien à répondre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "attente": {
+          "texte": "« Portez-la vite. » Il ne lève pas les yeux du cristal. « Et dites-lui que je ne suis plus poli. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Toujours fermée. Toujours tiède. » Le commandeur a l'air plus vieux. « Je crois qu'elle a toujours été là, et que nous l'avons seulement découverte en creusant. Mon second croit que c'est l'extraction qui la fait venir, comme l'eau fait venir une racine. Nous continuons d'extraire, tous les deux, et chacun espère avoir raison. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_01_connu": {
+          "texte": "Le commandeur regarde Aélis, puis vous. « Vous l'avez touchée. Moi aussi. Et maintenant l'Institut veut la lire. » Il pose la main à plat sur la table, près du cristal. « Pas par les catacombes : trois étages, ce serait vous perdre avant d'arriver. Par ma galerie. Je l'ai creusée moi-même, jusqu'au fond de l'ossuaire, pour remonter les cristaux sans passer par les morts. »",
+          "choix": [
+            {
+              "id": "vestiges_suite",
+              "label": "« Vous nous l'ouvrez ? »",
+              "next": "vestiges_02"
+            }
+          ]
+        },
+        "vestiges_01_inconnu": {
+          "texte": "Le commandeur considère Aélis un long moment. « Une porte de pierre, au fond de l'ossuaire, derrière une paroi qui s'est ouverte le mois dernier. Tiède sous la main. Gravée d'un signe que nul ici ne sait lire. Elle n'était pas là : j'ai creusé moi-même ce couloir. » Il pose la main à plat sur la table. « Ma galerie descend jusqu'à elle. On n'y passe pas par les morts. »",
+          "choix": [
+            {
+              "id": "vestiges_suite",
+              "label": "« Vous nous l'ouvrez ? »",
+              "next": "vestiges_02"
+            }
+          ]
+        },
+        "vestiges_02": {
+          "texte": "« À une condition. » Il se tourne vers Aélis. « Vous me direz ce qu'elle dit, même si ça ne me plaît pas. Surtout si ça ne me plaît pas. » Aélis hoche la tête. Il décroche une clé de fer du mur.",
+          "choix": [
+            {
+              "id": "vestiges_passer",
+              "label": "Prendre la clé de la galerie.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "vestiges_deja",
+              "label": "« Nous avons déjà la clé. »",
+              "next": "vestiges_deja",
+              "condition": {
+                "acces_ouvert": true
+              }
+            },
+            {
+              "id": "vestiges_attendre",
+              "label": "« Plus tard. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_ouvre": {
+          "texte": "Il vous tend la clé. « La porte au fond de la cour, sous la tour. Fermez derrière vous. Ce qui est en bas n'a jamais demandé à monter, et je voudrais que ça dure. »",
+          "choix": [
+            {
+              "id": "vestiges_ouvre_fin",
+              "label": "« Merci, commandeur. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_refus": {
+          "texte": "« Pas sans l'architecte. » Il raccroche la clé. « C'est elle qui sait lire. Vous, vous savez revenir. Il me faut les deux. »",
+          "choix": [
+            {
+              "id": "vestiges_refus_fin",
+              "label": "Prendre congé.",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_deja": {
+          "texte": "« Alors descendez. Et revenez. »",
+          "choix": [
+            {
+              "id": "vestiges_deja_fin",
+              "label": "Prendre congé.",
+              "next": "fin"
+            }
+          ]
+        },
+        "vestiges_souvenir": {
+          "texte": "« Refermée. » Le commandeur fait tourner le cristal jaune sur la table. « Mes hommes l'ont entendue de l'autre bout de la galerie : un bruit de pierre qu'on repose. Elle est toujours tiède. » Il lève les yeux. « Votre architecte m'a tout dit, comme promis. Une arche, et un nom. Mon second dit que ce nom ne veut rien dire, que c'est une prière de bâtisseurs. Moi, je dis qu'on ne grave pas une prière sur une clé de voûte. Nous continuons d'extraire. »",
+          "choix": [
+            {
+              "id": "vestiges_souvenir_fin",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:les_archives_des_seuils",
+    "type": "lieu",
+    "label": "Les Archives des Seuils",
+    "image": "archives_des_seuils_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "refus": "Un archiviste referme la porte vitrée devant vous, poliment mais sans appel : les Archives des Seuils ne s'ouvrent qu'aux Architectes, et à ceux qui reviennent d'un seuil avec eux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "combat_gagne": {
+            "lieu": "lieu:nef_de_l_abbaye_de_jumieges"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_archives",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_aelis_abbaye_de_jumieges"
+            }
+          },
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:seuil_de_la_boite",
+              "attendu": false
+            }
+          },
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:devant_la_porte_refermee",
+              "attendu": false
+            }
+          }
+        ],
+        "description": "Une jeune architecte au milieu de relevés étalés, une plume entre les dents et un compas à la main."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:galerie_du_commandeur",
+    "type": "lieu",
+    "label": "La galerie du commandeur",
+    "image": "galerie_du_commandeur01.jpg",
+    "categorie": "temple_templier",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "gardien": "pnj:commandeur_de_l_enclos_du_temple",
+      "cycle": 1,
+      "refus": "Une porte de fer, au pied de la tour carrée. Fermée à clé.",
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:devant_la_porte_refermee"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_galerie",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:devant_la_porte_refermee"
+            }
+          }
+        ],
+        "description": "Aélis, la lanterne levée devant une porte de pierre, qui ne la touche pas encore."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:antichambre_de_l_arche",
+    "type": "lieu",
+    "label": "L'antichambre de l'arche",
+    "image": "antichambre_de_l_arche01.jpg",
+    "categorie": "temple_templier",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "cycle": 1,
+      "refus": "La porte de pierre est refermée. Tiède sous la main, comme avant.",
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:devant_la_porte_refermee"
+          }
+        },
+        {
+          "enigme_resolue": {
+            "id": "enigme:anneaux_de_la_porte_tiede"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_antichambre",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:devant_la_porte_refermee"
+            }
+          }
+        ],
+        "description": "Aélis, immobile sous une arche de pierre noire, le carnet ouvert et le crayon arrêté."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:devant_la_porte_refermee",
+    "type": "lieu",
+    "label": "Devant la porte refermée",
+    "image": "galerie_du_commandeur01.jpg",
+    "categorie": "temple_templier",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "cycle": 1,
+      "refus": "La porte de l'antichambre ne s'ouvre que de l'intérieur, et pas encore.",
+      "conditions": [
+        {
+          "enigme_resolue": {
+            "id": "enigme:serrure_du_retour"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:salle_de_l_arche_eteinte",
+    "type": "lieu",
+    "label": "La salle de l'arche éteinte",
+    "image": "salle_de_l_arche_eteinte.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 20,
+      "y": 14
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "tags": [
+      "sous-terrain",
+      "donjon",
+      "couvert",
+      "humide"
+    ],
+    "acces": {
+      "gardien": "pnj:aelis_de_montfaucon_antichambre",
+      "refus": "L'arche est éteinte. Rien n'en sort plus.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:devant_la_porte_refermee"
+          }
+        },
+        {
+          "enigme_resolue": {
+            "id": "enigme:arche_eteinte"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:salle_de_l_arche_eteinte",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:enclos_du_temple_to_galerie_du_commandeur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:enclos_du_temple",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Remonter dans la cour de l'Enclos"
+      },
+      {
+        "lieu": "lieu:galerie_du_commandeur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Descendre par la galerie du commandeur"
+      }
+    ],
+    "metadata": {
+      "type": "temple_templier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:galerie_du_commandeur_to_antichambre_de_l_arche",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:galerie_du_commandeur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Revenir dans la galerie"
+      },
+      {
+        "lieu": "lieu:antichambre_de_l_arche",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte entrouverte"
+      }
+    ],
+    "metadata": {
+      "type": "temple_templier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:antichambre_de_l_arche_to_devant_la_porte_refermee",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:antichambre_de_l_arche",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Rentrer dans l'antichambre"
+      },
+      {
+        "lieu": "lieu:devant_la_porte_refermee",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Ressortir par la porte"
+      }
+    ],
+    "metadata": {
+      "type": "temple_templier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:devant_la_porte_refermee_to_galerie_du_commandeur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:galerie_du_commandeur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Revenir devant la porte refermée"
+      },
+      {
+        "lieu": "lieu:devant_la_porte_refermee",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Remonter la galerie"
+      }
+    ],
+    "metadata": {
+      "type": "temple_templier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_galerie",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+    "description": "Aélis de Montfaucon, architecte de l'Institut, sous l'ossuaire de Lutecia.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La galerie descend en pente douce, étayée de poutres neuves, jusqu'à une paroi éventrée. Derrière, une porte de pierre grise, sans gonds ni poignée, couverte de gravures. L'air est froid ; la porte ne l'est pas. Aélis tient sa lanterne à bout de bras.",
+          "choix": [
+            {
+              "id": "porte",
+              "label": "« Vous la reconnaissez ? »",
+              "next": "porte",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:gravures_de_la_porte_tiede",
+                  "attendu": false
+                }
+              }
+            },
+            {
+              "id": "anneaux",
+              "label": "« Ces anneaux, autour du signe… »",
+              "next": "anneaux",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:gravures_de_la_porte_tiede"
+                }
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser regarder.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "porte": {
+          "texte": "« Pas elle. Ce qui est écrit dessus. » Elle approche la lanterne sans toucher la pierre. « Les Templiers ont relevé un signe. Il y en a quatre, et je les ai tous déjà vus, dans un endroit qui tenait dans la main de Villard. » Elle ouvre son carnet aux pages recopiées. « Comparons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "anneaux": {
+          "texte": "« Trois anneaux de pierre, l'un dans l'autre. Ils tournent. » Elle en effleure un, et retire la main. « On dit que les Frères déplaçaient la destination d'un portail en faisant tourner une bolas. Leurs héritiers ont peut-être gardé le geste, à défaut de la main. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    },
+    "vocation": "lettre"
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_antichambre",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+    "description": "Aélis de Montfaucon, architecte de l'Institut, sous l'ossuaire de Lutecia.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Derrière la porte, une salle ronde que personne n'a creusée : la pierre est d'un seul tenant, lisse comme du verre noir. Au fond se dresse une arche, plus haute que trois hommes. Rien ne la traverse que l'obscurité. Aélis s'est arrêtée sur le seuil.",
+          "choix": [
+            {
+              "id": "arche",
+              "label": "« Un portail ? »",
+              "next": "arche",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:arche_eteinte",
+                  "attendu": false
+                }
+              }
+            },
+            {
+              "id": "cle",
+              "label": "« Ce signe, sur la clé de voûte… »",
+              "next": "cle",
+              "condition": {
+                "enigme_resolue": {
+                  "id": "enigme:arche_eteinte"
+                }
+              }
+            },
+            {
+              "id": "venir",
+              "label": "Écouter ce qui vient de l'arche.",
+              "next": "venir",
+              "condition": {
+                "acces_ouvrable": true
+              }
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini ? »",
+              "next": "apres",
+              "condition": {
+                "acces_libere": true
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(Se taire.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "arche": {
+          "texte": "« Ce qu'il en reste. » Elle ne s'approche pas. « Un logement pour un cristal, sous la clé, et il est vide. Les portails des Frères s'en passaient ; ceux de leurs héritiers, jamais. Celui-ci a été bâti par quelqu'un qui avait appris d'eux. » Elle regarde le seuil, gravé de lignes. « Et il a laissé le mode d'emploi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cle": {
+          "texte": "Aélis lève la lanterne vers la clé de voûte. Un seul signe y est gravé, plus profond que les autres. Elle le regarde longtemps. « Celui-là, je le connais d'ailleurs que de la boîte. Il est peint sous la coupole des Archives, au-dessus de la porte des vieux maîtres. » Elle baisse la voix, comme sous la coupole. « Ils l'appellent Mu. »",
+          "choix": [
+            {
+              "id": "mu",
+              "label": "« Mu ? »",
+              "next": "mu"
+            }
+          ]
+        },
+        "mu": {
+          "texte": "« Un nom qu'on apprend à dire en levant les yeux, à l'Institut. Un endroit où l'on finit d'apprendre, disent les uns ; une image qu'on révère, disent les autres. Je n'en sais pas plus. » Elle referme son carnet sur son crayon. « Ici, il dit peut-être où menait l'arche. Ou qui l'a bâtie. Ou les deux. Je ne sais pas lequel. Et je crois que je ne veux pas choisir trop vite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "venir": {
+          "texte": "Un souffle sort de l'arche éteinte, chargé d'une odeur de sel et de vase, comme une marée qui monterait sous Lutecia. Puis des formes pâles glissent dans le noir, à hauteur d'homme : des têtes de femmes, qui traînent sous elles ce qui leur reste de corps. Aélis recule d'un pas, et pas d'un de plus. « Elles sentent la mer. Ici. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "« Restez derrière moi. »",
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "pas_encore",
+              "label": "« Reculons. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "salle_ouverte": {
+          "texte": "Elles fondent sur vous en silence. Aélis serre son compas comme une arme qu'elle ne sait pas tenir, et ne quitte pas votre dos.",
+          "choix": [
+            {
+              "id": "arme",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "salle_close": {
+          "texte": "Aélis secoue la tête. « L'arche dort. Elle ne répond qu'à ce qu'on lui a appris. »",
+          "choix": [
+            {
+              "id": "reculer",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Aélis s'est assise sur le seuil gravé, le carnet sur les genoux, et elle recopie la clé de voûte trait par trait. Ses mains tremblent un peu ; son écriture, non. « Elles sont venues par là. Je ne sais pas d'où. » Elle désigne la porte par laquelle vous êtes entrés. « Elle ne s'ouvre que d'ici, maintenant. Et elle demande un sceau. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    },
+    "vocation": "lettre",
+    "services": {
+      "acces": {
+        "lieu": "lieu:salle_de_l_arche_eteinte",
+        "noeuds": {
+          "ouvre": "salle_ouverte",
+          "refus": "salle_close"
+        }
+      }
+    }
+  },
+  {
+    "_id": "enigme:gravures_de_la_porte_tiede",
+    "type": "enigme",
+    "nom": "Les gravures de la porte tiède",
+    "famille": "association",
+    "lieux": [
+      "lieu:galerie_du_commandeur"
+    ],
+    "texte": "Quatre gravures couvrent la porte de pierre. Aélis ouvre son carnet aux pages de la boîte de Villard. Chacune de ces gravures, vous l'avez déjà vue là-dedans : dites où.",
+    "elements": {
+      "gauche": [
+        {
+          "id": "cercles",
+          "texte": "Trois cercles entrelacés."
+        },
+        {
+          "id": "file",
+          "texte": "Une spirale, un triangle et un cercle, en file."
+        },
+        {
+          "id": "astres",
+          "texte": "Un soleil, une étoile, une lune et un cercle vide."
+        },
+        {
+          "id": "traits",
+          "texte": "Six lieux reliés de traits, dont certains s'interrompent."
+        }
+      ],
+      "droite": [
+        {
+          "id": "socle",
+          "texte": "Sous le socle vide, dans la réserve de Villard."
+        },
+        {
+          "id": "tissu",
+          "texte": "Sur le tissu noir du meuble aux trois tiroirs."
+        },
+        {
+          "id": "dessin",
+          "texte": "Sur le dessin de l'enfant de la maison."
+        },
+        {
+          "id": "plaque",
+          "texte": "Sur la plaque de bronze de la maison pliée."
+        }
+      ]
+    },
+    "solution": {
+      "paires": {
+        "cercles": "socle",
+        "file": "tissu",
+        "astres": "dessin",
+        "traits": "plaque"
+      },
+      "seuil": 3
+    },
+    "reussite": "Aélis referme le carnet. « Toute la boîte est écrite sur cette porte. Ou toute la porte était écrite dans la boîte. » Au centre, autour du signe que les Templiers ont relevé, trois anneaux de pierre portent chacun les cinq signes des arches de la cave. Au-dessus, la file : une spirale, un triangle, un cercle.",
+    "echec": "Aélis secoue la tête, le doigt sur une page. « Pas là. Je m'en souviens, j'y étais. »",
+    "conditions": [
+      {
+        "quete_active": {
+          "types": [
+            "escorte"
+          ],
+          "cible": "lieu:devant_la_porte_refermee"
+        }
+      }
+    ],
+    "commentaires": [
+      {
+        "quand": "ouverture",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Prenez votre temps. Ce que nous avons vu dans la boîte, nous l'avons vu ensemble."
+      },
+      {
+        "quand": "echec",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Une seule de travers. Le dessin de l'enfant n'avait pas de traits, la plaque n'avait pas d'astres."
+      },
+      {
+        "quand": "ouverture",
+        "qui": {
+          "vocation": "lettre"
+        },
+        "texte": "Ce n'est pas une écriture. Ce sont des renvois, comme dans un registre."
+      },
+      {
+        "quand": "ouverture",
+        "qui": {
+          "vocation": "mage"
+        },
+        "texte": "La pierre est tiède parce que quelque chose la traverse encore. Très peu."
+      }
+    ],
+    "bouton": true
+  },
+  {
+    "_id": "enigme:anneaux_de_la_porte_tiede",
+    "type": "enigme",
+    "nom": "Les trois anneaux",
+    "famille": "crans",
+    "lieux": [
+      "lieu:galerie_du_commandeur"
+    ],
+    "texte": "Trois anneaux de pierre, l'un dans l'autre, autour du signe central. Sur chacun, les cinq signes des arches de la cave se suivent dans le même ordre, du premier cran au cinquième : la Ligne, le Cercle, la Spirale, la Croix, le Triangle.",
+    "elements": {
+      "pieces": [
+        {
+          "id": "exterieur",
+          "label": "Anneau extérieur",
+          "crans": 5,
+          "depart": 0
+        },
+        {
+          "id": "median",
+          "label": "Anneau du milieu",
+          "crans": 5,
+          "depart": 2
+        },
+        {
+          "id": "interieur",
+          "label": "Anneau intérieur",
+          "crans": 5,
+          "depart": 4
+        }
+      ]
+    },
+    "solution": {
+      "positions": {
+        "exterieur": 2,
+        "median": 4,
+        "interieur": 1
+      }
+    },
+    "reussite": "Le dernier anneau s'enclenche avec un bruit de pierre qu'on repose. La porte ne s'ouvre pas : elle recule d'un doigt dans la paroi, et un souffle tiède passe par l'interstice. Elle est entrouverte.",
+    "echec": "Les anneaux tournent, puis reviennent d'eux-mêmes à leur place, lentement.",
+    "conditions": [
+      {
+        "quete_active": {
+          "types": [
+            "escorte"
+          ],
+          "cible": "lieu:devant_la_porte_refermee"
+        }
+      }
+    ],
+    "commentaires": [
+      {
+        "quand": "ouverture",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "La file, au-dessus. Une spirale, un triangle, un cercle. C'est l'ordre du tissu de Villard."
+      },
+      {
+        "quand": "echec",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Le tissu avait quatre signes. La porte n'a que trois anneaux. Le quatrième est peut-être de l'autre côté."
+      },
+      {
+        "quand": "reussite",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "On ne l'a pas ouverte. On l'a réglée. Comme on règle un instrument, ou une destination."
+      },
+      {
+        "quand": "ouverture",
+        "qui": {
+          "vocation": "voleur"
+        },
+        "texte": "Une serrure à combinaison. Mais qui revient seule en place : on ne l'a pas faite pour qu'on la force."
+      },
+      {
+        "quand": "echec",
+        "qui": {
+          "vocation": "forestier"
+        },
+        "texte": "Elle respire, cette porte. Plus fort quand on approche du bon cran."
+      }
+    ],
+    "bouton": true,
+    "prerequis": [
+      "enigme:gravures_de_la_porte_tiede"
+    ]
+  },
+  {
+    "_id": "enigme:arche_eteinte",
+    "type": "enigme",
+    "nom": "L'arche éteinte",
+    "famille": "reseau",
+    "lieux": [
+      "lieu:antichambre_de_l_arche"
+    ],
+    "texte": "Gravé sur le seuil, le plan de l'arche : six points reliés de traits. Dessous, une règle : « On monte par la gauche ; la droite est rompue. Ce qui attendait la pierre jaune est vide : n'y touchez pas. Ce qui mène au-delà tremble : tenez-le à la pierre. » Une clé ouvre un trait, une pierre l'ancre, un miroir montre ce que le seuil ne montre pas.",
+    "elements": {
+      "noeuds": [
+        {
+          "id": "seuil",
+          "label": "Seuil"
+        },
+        {
+          "id": "pied_gauche",
+          "label": "Pied gauche"
+        },
+        {
+          "id": "pied_droit",
+          "label": "Pied droit"
+        },
+        {
+          "id": "cle",
+          "label": "Clé de voûte"
+        },
+        {
+          "id": "logement",
+          "label": "Logement du cristal"
+        },
+        {
+          "id": "au_dela",
+          "label": "Au-delà"
+        }
+      ],
+      "liaisons": [
+        {
+          "id": "seuil_pied_gauche",
+          "a": "seuil",
+          "b": "pied_gauche"
+        },
+        {
+          "id": "seuil_pied_droit",
+          "a": "seuil",
+          "b": "pied_droit"
+        },
+        {
+          "id": "pied_gauche_cle",
+          "a": "pied_gauche",
+          "b": "cle"
+        },
+        {
+          "id": "pied_droit_cle",
+          "a": "pied_droit",
+          "b": "cle"
+        },
+        {
+          "id": "logement_cle",
+          "a": "logement",
+          "b": "cle"
+        }
+      ]
+    },
+    "solution": {
+      "liaisons_cachees": [
+        {
+          "id": "cle_au_dela",
+          "a": "cle",
+          "b": "au_dela"
+        },
+        {
+          "id": "logement_au_dela",
+          "a": "logement",
+          "b": "au_dela"
+        }
+      ],
+      "actives": [
+        "seuil_pied_gauche",
+        "pied_gauche_cle",
+        "cle_au_dela"
+      ],
+      "ancrees": [
+        "cle_au_dela"
+      ]
+    },
+    "reussite": "Les traits du seuil cessent de bouger. L'arche ne s'allume pas. Mais tout au fond, dans le noir qu'elle encadre, quelque chose a entendu.",
+    "echec": "Les traits glissent dans la pierre et reprennent leur place d'avant.",
+    "conditions": [
+      {
+        "quete_active": {
+          "types": [
+            "escorte"
+          ],
+          "cible": "lieu:devant_la_porte_refermee"
+        }
+      }
+    ],
+    "commentaires": [
+      {
+        "quand": "ouverture",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Un plan de liens. On monte par la gauche, la règle le dit. Et le logement du cristal reste vide."
+      },
+      {
+        "quand": "revele:cle",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Il y avait un lien au-dessus de la clé. Il tremble. Une pierre, dit le seuil."
+      },
+      {
+        "quand": "revele:logement",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Le logement mène au-delà, lui aussi. Mais il est vide : « n'y touchez pas »."
+      },
+      {
+        "quand": "echec",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Ce qui tremble se tient à la pierre. Et rien par la droite : elle est rompue."
+      },
+      {
+        "quand": "ouverture",
+        "qui": {
+          "vocation": "mage"
+        },
+        "texte": "Il reste du mana dans ces traits. Pas assez pour un passage. Assez pour un appel."
+      },
+      {
+        "quand": "revele:cle",
+        "qui": {
+          "vocation": "lettre"
+        },
+        "texte": "Les héritiers des Frères ancraient leurs arches à la clé. On le lit dans les vieux traités."
+      }
+    ],
+    "bouton": true,
+    "prerequis": [
+      "enigme:anneaux_de_la_porte_tiede"
+    ]
+  },
+  {
+    "_id": "enigme:serrure_du_retour",
+    "type": "enigme",
+    "nom": "La serrure du retour",
+    "famille": "placement",
+    "lieux": [
+      "lieu:antichambre_de_l_arche"
+    ],
+    "texte": "De ce côté, la porte n'a pas d'anneaux. Une serrure ronde, où l'on pose un sceau, et une niche où reposent cinq sceaux de pierre.",
+    "elements": {
+      "symboles": [
+        {
+          "id": "spirale_double",
+          "label": "Spirale double"
+        },
+        {
+          "id": "trois_cercles",
+          "label": "Trois cercles entrelacés"
+        },
+        {
+          "id": "sept_traits",
+          "label": "Sept traits sous un arc"
+        },
+        {
+          "id": "vague",
+          "label": "Une vague"
+        },
+        {
+          "id": "bolas",
+          "label": "Deux pierres reliées d'un trait"
+        }
+      ],
+      "emplacements": [
+        {
+          "id": "serrure",
+          "label": "La serrure"
+        }
+      ]
+    },
+    "solution": {
+      "placement": {
+        "serrure": "trois_cercles"
+      }
+    },
+    "reussite": "La porte recule, pivote, et vous rend la galerie du commandeur. Vous êtes à peine passés qu'elle revient d'elle-même, sans hâte, et se referme avec un bruit de pierre qu'on repose. Elle est toujours tiède.",
+    "echec": "Le sceau tourne dans la serrure sans rien accrocher.",
+    "conditions": [
+      {
+        "quete_active": {
+          "types": [
+            "escorte"
+          ],
+          "cible": "lieu:devant_la_porte_refermee"
+        }
+      },
+      {
+        "combat_gagne": {
+          "lieu": "lieu:salle_de_l_arche_eteinte"
+        }
+      }
+    ],
+    "commentaires": [
+      {
+        "quand": "ouverture",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Un sceau. Le premier signe de la porte, et le premier de la boîte : celui du socle."
+      },
+      {
+        "quand": "echec",
+        "qui": {
+          "protege": "Aélis"
+        },
+        "texte": "Pas celui-là. Celui que Villard posait sur l'armoire."
+      },
+      {
+        "quand": "ouverture",
+        "qui": {
+          "vocation": "voleur"
+        },
+        "texte": "Une serrure qui prend un sceau au lieu d'une clé. On ne la crochète pas, celle-là."
+      }
+    ],
+    "bouton": true,
+    "prerequis": [
+      "enigme:arche_eteinte"
+    ]
+  },
+  {
+    "_id": "donjon:arche_eteinte",
+    "type": "donjon",
+    "nom": "L'arche éteinte",
+    "description": "Une salle ronde sous l'ossuaire de Lutecia, d'une pierre que personne n'a creusée, et au fond une arche bâtie par un héritier des Frères, éteinte.",
+    "portail": "lieu:antichambre_de_l_arche",
+    "niveau_min": 4,
+    "niveau_max": 5,
+    "musique": "Ambience_Cave_00.mp3",
+    "musique_volume": 0.45,
+    "battle_maps": [
+      {
+        "lieu": "lieu:salle_de_l_arche_eteinte",
+        "especes": [
+          "espece:penanggalan"
+        ],
+        "composition": {
+          "espece:penanggalan": 3
+        },
+        "niveau_min": 4,
+        "niveau_max": 5
+      }
+    ]
+  }
+]

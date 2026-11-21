@@ -39,11 +39,25 @@ def _py(script: str, *args: str) -> list:
 	⚠️ **`-u` n'est pas décoratif** : le stdout d'un processus fils redirigé vers un tube est
 	BLOC-bufférisé, donc un `print` par doc traité n'arriverait qu'à la toute fin — un « tail »
 	muet pendant deux minutes puis tout d'un coup. C'est le piège nº 1 de ce genre d'écran.
-	⚠️ `sys.executable` et non « python » : c'est l'interpréteur qui fait tourner l'app."""
+	⚠️ `sys.executable` et non « python » : c'est l'interpréteur qui fait tourner l'app.
+	⚠️ Un script de `dev/retires/` ne se lance plus (dumps figés disparus, sorties qui
+	écraseraient la base) : le viser lève dès le chargement du catalogue."""
+	_refuser_retire(script)
 	return [sys.executable, "-u", os.path.join("dev", script), *args]
 
 
+# Scripts gardés pour l'historique, jamais relancés (dev/retires/README.md).
+DOSSIER_RETIRES = "retires"
+
+
+def _refuser_retire(script: str) -> None:
+	parties = os.path.normpath(script).split(os.sep)
+	if DOSSIER_RETIRES in parties or ".." in parties:
+		raise ValueError(f"dev/{script} : script retiré ou hors de dev/, il ne se lance plus")
+
+
 def _node(script: str, *args: str) -> list:
+	_refuser_retire(script)
 	return ["node", os.path.join("dev", script), *args]
 
 
@@ -333,15 +347,6 @@ CATALOGUE = [
 			"le plus récent et n'injecte que ce champ : régénération idempotente.",
 	},
 	{
-		"id": "gen_escorte_marchands",
-		"label": "🧵 Ouvrir l'escorte de progéniture chez les tenanciers",
-		"argv": _py("gen_escorte_marchands.py"),
-		"ecrit": "Écrit jsons/marchands_escorte_a_importer.json.",
-		"description": "Pose les nœuds de dialogue de l'escorte sur les 29 `pnj:marchand_*`. "
-			"Relit les docs depuis le dump figé et n'y injecte que ce fragment : régénération "
-			"idempotente. Sans familles écrites, ces nœuds restent inatteignables.",
-	},
-	{
 		"id": "gen_direction_marchands",
 		"label": "🧭 Demander son chemin aux tenanciers",
 		"argv": _py("gen_direction_marchands.py"),
@@ -361,14 +366,6 @@ CATALOGUE = [
 			"parent comme au comptoir de la guilde.",
 	},
 	{
-		"id": "gen_escorte_guilde",
-		"label": "📖 Ouvrir le registre des disparitions au comptoir",
-		"argv": _py("gen_escorte_guilde.py"),
-		"ecrit": "Écrit jsons/borin_recherche_escorte_a_importer.json.",
-		"description": "Pose `services.escorte.recherche` sur Borin : la guilde recense les "
-			"familles de la cité qui attendent un enfant et en confie la recherche.",
-	},
-	{
 		"id": "gen_secours",
 		"label": "🆘 Ouvrir les secours d'aventuriers aux comptoirs",
 		"argv": _py("gen_secours.py"),
@@ -376,58 +373,6 @@ CATALOGUE = [
 		"description": "Pose `services.escorte.secours` et ses nœuds de dialogue sur le PNJ de "
 			"chaque comptoir de guilde : le comptoir confie le sauvetage d'aventuriers en péril "
 			"autour de la cité ou dans un donjon proche (utils/secours.py).",
-	},
-	{
-		"id": "gen_acces_donjon",
-		"label": "🗝️ Générer la chaîne d'accès du donjon-mine",
-		"argv": _py("gen_acces_donjon.py"),
-		"ecrit": "Écrit 3 fichiers jsons/*_a_importer.json.",
-		"description": "Rang D → Borin → Gautier → George → Armand. Relit les docs depuis le "
-			"dump figé et n'y injecte que le champ ajouté : régénération idempotente.",
-	},
-	{
-		"id": "gen_relation_guilde",
-		"label": "🏛️ Consolider la réputation de la guilde sur son comptoir",
-		"argv": _py("gen_relation_guilde.py"),
-		"ecrit": "Écrit jsons/relation_guilde_a_importer.json.",
-		"description": "Pose `relation_lieu` sur la façade, la réception et le bureau du maître "
-			"du Bastion : les quatre lieux partagent alors UNE cote. Relit les docs depuis le "
-			"dump figé et n'y injecte que ce champ : régénération idempotente.",
-	},
-	{
-		"id": "gen_stock_cible_ateliers",
-		"label": "🏺 Débloquer le chaînage des ateliers (stock_cible)",
-		"argv": _py("gen_stock_cible_ateliers.py"),
-		"ecrit": "Écrit jsons/stock_cible_ateliers_a_importer.json.",
-		"description": "Abaisse à 12 la cible de vitrine des intermédiaires qu'un atelier "
-			"fabrique pour lui-même (manche, Table_d_harmonie, saumure…), sous le défaut de 25 : "
-			"un intermédiaire est un en-cours, pas de la marchandise. Divise encore par deux le "
-			"démarrage du chaînage (1re pièce à la visite 5 au lieu de 10). La BOYAUDERIE, seul "
-			"métier sans aucune feuille d'appro, descend à 2 (CIBLE_PAR_CATEGORIE). Dérivé du "
-			"graphe de recettes, relit le dump figé et n'injecte que `stock_cible` : idempotent.",
-	},
-	{
-		"id": "gen_repurgateur_noire",
-		"label": "🔱 Basculer le répurgateur en magie noire (+ invocations)",
-		"argv": _py("gen_repurgateur_noire.py"),
-		"ecrit": "Écrit jsons/repurgateur_magie_noire_a_importer.json (3 docs).",
-		"description": "Le répurgateur quitte la magie Sainte pour la Démonologie du démoniste, "
-			"dont il est exclu des INVOCATIONS (`familles_exclues` de rules:vocations). Recopie "
-			"le doc de vocations ENTIER (PUT complet) et ajoute un sort d'invocation par école "
-			"noire — sans quoi l'exclusion ne mordrait sur rien. ⚠️ Ses 3 sorts Saints ne sont PAS "
-			"repris : ils restent tels quels et sortent de son répertoire (le script les liste "
-			"avant l'import). Relit le dump figé : régénération idempotente.",
-	},
-	{
-		"id": "gen_depecage_tags",
-		"label": "🍖 Publier la table de dépeçage (DEPECAGE_TAGS)",
-		"argv": _py("gen_depecage_tags.py"),
-		"ecrit": "Écrit jsons/depecage_tags_a_importer.json (doc rules:world_variables).",
-		"description": "Pousse `DEPECAGE_TAGS` + les réglages de découpe des carcasses du défaut "
-			"de code vers `rules:world_variables` — le doc GAGNE toujours, donc éditer le code "
-			"seul ne change rien en jeu. Imprime le diff avant d'écrire. ⚠️ Après l'import, "
-			"/admin → Recharger les variables de monde, PUIS relancer la génération des "
-			"portions de carcasse (leur dépeçage est baké).",
 	},
 	{
 		"id": "gen_fabrication_matieres",
@@ -471,15 +416,6 @@ CATALOGUE = [
 			"d'une ancienne génération à supprimer à la main.",
 	},
 	{
-		"id": "gen_armes_tranchantes",
-		"label": "🗡️ Taguer les armes qui ont un fil (tranchant)",
-		"argv": _py("gen_armes_tranchantes.py"),
-		"ecrit": "Écrit jsons/armes_tranchantes_a_importer.json.",
-		"description": "Pose `tranchant` sur les 40 armes capables d'ouvrir une bête (épées, "
-			"couteaux, haches, lames de jet, hast à fer tranchant). Liste explicite : les armes "
-			"n'ont ni sous-catégorie ni description d'où « a un fil » se déduirait.",
-	},
-	{
 		"id": "gen_typologie_armes",
 		"label": "⚖️ Typologie des armes : lourdes / équilibrées / légères",
 		"argv": _py("gen_typologie_armes.py"),
@@ -488,40 +424,6 @@ CATALOGUE = [
 			"(aucun tag = équilibrée), d'après la restriction F/Ag, le poids et les deux mains, "
 			"plus une liste d'exceptions (daishō, hast d'adresse). Ne porte que le delta avec le "
 			"dump ; le tir n'est pas concerné.",
-	},
-	{
-		"id": "gen_coherence_france",
-		"label": "🗺️ Corriger la cohérence de lieu:france",
-		"argv": _py("gen_coherence_france.py"),
-		"ecrit": "Écrit jsons/france_coherence_a_importer.json et …/profils_tag_magique_….",
-		"description": "La carte du monde n'avait AUCUNE ressource récoltable (tout événement "
-			"`ressource` était un no-op) et trois zones posées — marais, collines, glacier — "
-			"n'avaient aucune espèce, donc aucun combat. Ajoute les deux, dédoublonne les "
-			"placements, et corrige `restriction_tags: [\"magie\"]` → `[\"magique\"]` sur les "
-			"4 profils concernés (aucune espèce ne portait `magie`). Relit les docs depuis les "
-			"sources figées : régénération idempotente.",
-	},
-	{
-		"id": "gen_grades_france",
-		"label": "⚔️ Confiner les hauts grades à la zone dangereuse (France)",
-		"argv": _py("gen_grades_france.py"),
-		"ecrit": "Écrit jsons/france_grades_a_importer.json.",
-		"description": "Les 6 profils de niveau 5-6 étaient dans le `profil_weights` du LIEU : "
-			"23 % de TOUS les monstres de la France, gobelins de la plaine compris. Les descend "
-			"sur les 36 placements de `zone:tres_dangereuse` — seul endroit où "
-			"`resolve_profil_weights` les lira. ⚠️ La table d'un placement REMPLACE celle du "
-			"lieu, elle doit donc rester complète.",
-	},
-	{
-		"id": "gen_lutecia",
-		"label": "🏰 Donner ses zones à la capitale Lutèce",
-		"argv": _py("gen_lutecia.py"),
-		"ecrit": "Écrit jsons/lutecia_zones_a_importer.json.",
-		"description": "Lutèce n'avait que 10 placements de forêt (6 % de la carte) et ses "
-			"rencontres, copiées d'Auxerre, citaient des zones jamais posées. Ajoute les zones "
-			"urbaines de capitale (cœur, politique, bas quartiers, remparts), la Seine, les "
-			"faubourgs et la campagne, calés sur paris_capital.png — et contrôle que les "
-			"4 portes venant de la France tombent bien dans une zone.",
 	},
 	{
 		"id": "gen_armures",
@@ -924,23 +826,6 @@ CATALOGUE = [
 		"ecrit": "Écrit un jsons/*_a_importer.json.",
 		"description": "Vocabulaire de DÉCOR lu par select_battle_map — à ne pas confondre "
 			"avec les tags d'une entrée de table_evenements, qui sont des créatures.",
-	},
-	{
-		"id": "purge_quetes_simulation",
-		"label": "🧹 Purge des quêtes acceptées — SIMULATION",
-		"argv": _py("purge_quetes_acceptees.py"),
-		"ecrit": "Lecture seule (aperçu).",
-		"description": "Compte les docs quete:* générés déjà acceptés — du poids mort que "
-			"offres_du_giver rapatrie à chaque ouverture du tableau de guilde.",
-	},
-	{
-		"id": "purge_quetes_appliquer",
-		"label": "🧹 Purge des quêtes acceptées — APPLIQUER (supprime en base)",
-		"argv": _py("purge_quetes_acceptees.py", "--appliquer"),
-		"ecrit": "⚠️ SUPPRIME des documents en base. Irréversible.",
-		"danger": True,
-		"description": "One-shot destiné à solder l'arriéré. Seules les quêtes source=genere "
-			"sont supprimées ; une quête AUTHORÉE n'est jamais touchée.",
 	},
 	{
 		"id": "purge_connexions_simulation",

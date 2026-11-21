@@ -685,6 +685,15 @@ def _substituer(texte: str, contexte: dict, soin: dict | None) -> str:
 	return _espaces_insecables(texte)
 
 
+def choix_ferme(choix: dict) -> bool:
+	"""Le choix ne fait que fermer le dialogue : aucune `action`, aucun hook (`deplacer`,
+	`enigme`, `saisie`, `rejouer`), et sa suite est `fin` ou absente. Le serveur n'y attache aucun
+	effet (`fin` n'est pas un nœud : rien à armer)."""
+	if any(choix.get(k) for k in ("action", "deplacer", "enigme", "saisie", "rejouer")):
+		return False
+	return choix.get("next") in (None, "", "fin")
+
+
 def noeud_client(pnj_doc: dict, noeud_id: str, contexte: dict, soin: dict | None = None) -> dict | None:
 	"""Nœud prêt à afficher : texte (variante `texte_gratuit` si le soin est offert),
 	placeholders substitués, choix filtrés par condition (id + label + marqueur action
@@ -709,6 +718,10 @@ def noeud_client(pnj_doc: dict, noeud_id: str, contexte: dict, soin: dict | None
 			# Choix à SAISIE LIBRE : le client affiche un champ texte et envoie sa valeur en
 			# `saisie` avec le `choix_id`.
 			"saisie": bool(choix.get("saisie")),
+			# Choix qui ne fait que CLORE : le client ferme le panneau sans requête. Le serveur ne
+			# faisait rien pour lui, et le PNJ a pu partir entre-temps (Aélis rejoint le groupe à
+			# l'acceptation et quitte les Archives) : le POST tombait en 404.
+			"ferme": choix_ferme(choix),
 		}
 		for choix in _choix_visibles(pnj_doc, noeud_id, contexte)
 	]

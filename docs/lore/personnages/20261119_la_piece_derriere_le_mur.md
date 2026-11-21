@@ -34,13 +34,31 @@ La boîte n'est pas un contenant : des vivants l'habitent, ce que Villard interd
 
 ## La suite
 
-Au **rang B** viendra « **Les vestiges du premier passage** », puis au **rang A** l'offre faite à Aélis de partir pour Mu. ?{Au rang B, un portail condamné, bâti par un héritier des frères et gardé par les Templiers, porte les mêmes gravures que la boîte ; Aélis y prononce pour la première fois le nom de Mu. Au rang A, l'Institut lui offre de parfaire sa formation à Mu, et elle demande à l'aventurier de l'accompagner, par Notre-Dame et un cristal jaune.}?
+Au **rang B** viendra « **Les vestiges du premier passage** », puis au **rang A** l'offre faite à Aélis de partir pour Mu. Le chemin se suit dans cet ordre, sans raccourci : c'est par Aélis que l'aventurier arrive à Mu.
+
+Au fond de l'ossuaire des catacombes, là où les Templiers extraient les cristaux jaunes, une paroi s'est ouverte sur une porte de pierre tiède, gravée d'un signe que personne n'a su lire. Ce sont les gravures de la boîte de Villard. Aélis les a reconnues, et c'est elle, seule, qui demande à l'aventurier de l'y conduire. Une fois encore, elle ne se bat pas : il faut la ramener vivante.
+
+## Les vestiges du premier passage
+
+On ne descend pas jusqu'à la porte par les catacombes. Le commandeur de l'Enclos du Temple a creusé lui-même une galerie qui descend jusqu'au fond de l'ossuaire, pour remonter les cristaux sans passer par les morts. Il l'ouvre à Aélis, à une condition : qu'elle lui dise ce que dit la porte, même si cela ne lui plaît pas.
+
+La porte porte quatre gravures, et toutes sortent de la boîte : les trois cercles du socle, la file du tissu, les astres du dessin de l'enfant, les traits de la plaque de bronze. Autour du signe central tournent trois anneaux de pierre qui portent les cinq signes des arches. On dit que les Frères déplaçaient la destination d'un portail en faisant tourner une bolas, et les anneaux se règlent dans l'ordre du tissu. Alors la porte recule d'un doigt et s'entrouvre.
+
+Derrière, une salle ronde que personne n'a creusée, et au fond une **arche éteinte**. Sous sa clé de voûte, le logement d'un cristal est vide : les portails des Frères s'en passaient, ceux de leurs héritiers jamais. Le seuil porte la règle de l'arche. Quand on l'a suivie, l'arche ne s'allume pas, mais quelque chose répond au fond du noir : des **penanggalan**, des têtes de femmes qui traînent ce qui leur reste de corps, et qui sentent la mer. Aélis est dans la salle, derrière l'aventurier.
+
+C'est devant l'arche qu'Aélis prononce pour la première fois le nom de **Mu**. Le signe gravé sur la clé de voûte est aussi peint sous la coupole des Archives, au-dessus de la porte des vieux maîtres, et l'on apprend à l'Institut à dire ce nom en levant les yeux. Sur l'arche, il nomme peut-être une destination, ou peut-être celui qui l'a bâtie, et rien ne le dit. Pour ressortir, il faut poser dans la serrure le sceau des trois cercles. La porte se referme alors derrière l'aventurier. Elle est toujours tiède.
+
+?{Le commandeur, ensuite : « Une arche, et un nom. Mon second dit que ce nom ne veut rien dire, que c'est une prière de bâtisseurs. Moi, je dis qu'on ne grave pas une prière sur une clé de voûte. » Aélis, aux Archives : « Les vieux maîtres ne répondent pas quand je demande. Ils sourient, et ils parlent d'autre chose. »}?
+
+À **Mu-la-Centrale**, on entre en invité de l'Institut. Quelques quartiers sont ouverts : une auberge, un marché restreint. Le reste est gardé et ne s'ouvre qu'avec la réputation et les quêtes. Il n'y a là aucune maison de la Guilde des Aventuriers. Sous la cité vit **Échidna**. On peut lui parler ou la combattre, et la parole peut aboutir sans combat comme elle peut y basculer. Ce qui s'est passé reste attaché à l'aventurier pour toujours, et aucune des deux voies n'est la bonne.
+
+?{Au rang B, un portail condamné, bâti par un héritier des frères et gardé par les Templiers, porte les mêmes gravures que la boîte ; Aélis y prononce pour la première fois le nom de Mu. Au rang A, l'Institut lui offre de parfaire sa formation à Mu, et elle demande à l'aventurier de l'accompagner, par Notre-Dame et un cristal jaune.}?
 
 ## 🗂 Échanges de travail
 
 - **Source :** séance Claude Code du 19/11/2026, d'après deux brouillons ChatGPT collés par l'Auteur (« La pièce derrière le mur » / « Les vestiges du premier passage » / « Partir pour Mu », et « La quête de la boîte de Mu — les systèmes d'énigmes »).
 - **Créée :** 19/11/2026
-- **Statut :** le § 1 **fait foi** (arbitrage de l'Auteur, 19/11, questionnaire) ; le scénario (§ 3-5) et les répliques restent **proposés**. Rien en jeu.
+- **Statut :** le § 1 **fait foi** (arbitrage de l'Auteur, 19/11 et 21/11, questionnaires) ; le scénario (§ 3-5) et les répliques restent **proposés**. Rien en jeu.
 
 ---
 
@@ -77,6 +95,22 @@ Au **rang B** viendra « **Les vestiges du premier passage** », puis au **rang 
 | 11 | Bestiaire | **Deux espèces neuves** : `espece:homme_au_sac` (être unique, boss du rang C) et `espece:nopperabo` (mineure, en groupe) ; Púca et Zashiki-warashi = **PNJ** |
 | 12 | Croisement | **Chaîne + un retour** : carnet de Villard → plan du meuble ; tissu du meuble → ordre des arches ; Púca → la maison ; Zashiki-warashi → plan impossible ; la sortie demande un symbole vu dans l'atelier au début |
 | 13 | Fin | La Zashiki-warashi **ne dit rien** : elle referme la porte de sa maison derrière vous |
+
+### Troisième arbitrage (Auteur, 21/11, questionnaire — la suite vers Mu)
+
+| # | Point | Décision |
+|---|---|---|
+| 14 | Ordre | **Arc complet dans l'ordre** : « Les vestiges du premier passage » (rang B) → « Partir pour Mu » (rang A) → Mu ; on n'arrive à Mu que par l'arc d'Aélis |
+| 15 | Première livraison sur Mu | **Accès + cité explorable** : lien Notre-Dame ↔ Mu (un cristal jaune), Mu-la-Centrale avec ses premiers sous-lieux et PNJ (Institut, Sept Sages, lieux de vie) ; Échidna dans une **seconde passe** |
+| 16 | Accueil à Mu-la-Centrale | **Cité à demi fermée** : on y entre en invité de l'Institut ; quelques quartiers ouverts (auberge, marché restreint), le reste gardé et ouvert par réputation et quêtes ; **aucune maison de la Guilde des Aventuriers** |
+| 17 | Échidna | **Deux voies, choix définitif** : le dialogue peut aboutir sans combat ou basculer en combat ; l'issue est inscrite sur le personnage ; aucune voie présentée comme la bonne |
+| 18 | Portail des vestiges | **La porte de l'ossuaire** des catacombes (épreuve « La porte qui ne devait pas s'ouvrir » de Maëlys) : la porte de pierre tiède au signe illisible porte les gravures de la boîte ; gardée par les Templiers |
+| 19 | Forme des vestiges | **Escorte + énigmes + un combat**, comme au rang C : Aélis escortée, à ramener vivante ; chaîne d'énigmes sur les gravures |
+| 20 | Départ des vestiges | **Aélis seule**, aux Archives des Seuils ; condition : « La pièce derrière le mur » réussie et rang B atteint |
+| 21 | Chemin | **Galerie des Templiers** creusée par le commandeur depuis l'Enclos du Temple jusqu'au fond de l'ossuaire, ouverte par lui (service `acces`) ; pas par les étages des catacombes (un passage d'étage ne consulte aucune barrière) |
+| 22 | Combat | Aélis **dans la salle**, à protéger (pas de `proteges_restent_dehors`) ; trois penanggalan |
+| 23 | Récompense | **200 XP, 3 000 cu**, sans objet |
+| 24 | Le nom de Mu | Prononcé par Aélis **devant l'arche éteinte**, signe de la clé de voûte reconnu sous la coupole des Archives ; destination ou bâtisseur, jamais tranché |
 
 ## 2. Écarts corrigés dans les brouillons
 
@@ -168,6 +202,25 @@ Chaque prompt est complet, bloc de style compris (`docs/prompts_images.md` § 0.
 
 **Le Nopperabō (monstre)**
 > Réalise l'image en pied d'un nopperabō : une silhouette humaine ordinaire vêtue d'un simple kimono gris de passant, aux cheveux noirs noués, qui se retourne ; à la place du visage, une peau pâle parfaitement lisse comme un œuf, sans yeux, sans nez, sans bouche ; les mains légèrement levées, dans une attitude à la fois banale et dérangeante. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+## 7 ter. Les vestiges — contenu livré et prompts d'image (21/11)
+
+`dev/gen_vestiges_premier_passage.py` → `jsons/vestiges_premier_passage_a_importer.json` (18 docs : Aélis des Archives, le commandeur et `lieu:les_archives_des_seuils` RELUS du dump, + quatre lieux, quatre liens, deux voix d'Aélis, quatre énigmes, `donjon:arche_eteinte`). Verrouillé par `tests/test_vestiges_premier_passage.py`. L'escorte d'Aélis devient une liste `offres` (la pièce + les vestiges) : `gen_piece_derriere_le_mur.py`, qui l'aurait réécrite en offre seule, est retiré dans `dev/retires/` (21/11). Trois penanggalan aux grades 4-5 (≈ 128-141 chacune, rang C ; à trois, au-dessus du plancher B) : calibrage à éprouver en jeu, Aélis étant dans la salle. Images livrées par l'Auteur (21/11), toutes posées ; grille de la salle LUE sur l'image (20 × 14 cases de 61,6 px : dallage, massif de l'arche, piliers du chambranle, couloir de la porte).
+
+| Fichier | Dossier | Format |
+|---|---|---|
+| `galerie_du_commandeur01.jpg` | `towns/` | paysage 16:9 (aussi l'image de « Devant la porte refermée ») |
+| `antichambre_de_l_arche01.jpg` | `towns/` | paysage 16:9 |
+| `salle_de_l_arche_eteinte.jpg` | `battle_maps/` | 20 × 14 cases (10:7) |
+
+**La galerie du commandeur**
+> Réalise l'image d'une galerie souterraine creusée de main d'homme sous une cité médiévale, en format paysage large 16:9. Un couloir en pente douce, étayé de poutres de chêne neuves, éclairé par quelques lanternes accrochées aux étais ; sur les parois, des niches remplies d'ossements et de crânes empilés avec soin, comme dans un ossuaire ; au sol, des rails de bois et un petit chariot vide. Au fond, la paroi de terre et d'os est éventrée, et dans la brèche se dresse une porte de pierre grise, sans gonds ni poignée, couverte de gravures géométriques : trois cercles entrelacés, une spirale, un triangle, des petits astres, des traits reliant des points ; au centre, trois anneaux de pierre concentriques. Une très légère buée monte de la porte, comme d'une pierre tiède dans l'air froid. Des symboles seulement, aucune lettre. La galerie est entièrement vide de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+**L'antichambre de l'arche**
+> Réalise l'image d'une salle souterraine ronde, taillée d'un seul tenant dans une pierre noire et lisse comme du verre, que personne ne semble avoir creusée, en format paysage large 16:9. Au premier plan, un seuil de pierre gravé d'un réseau de six points reliés par des traits. Au fond se dresse une arche de pierre noire, plus haute que trois hommes, couverte de gravures géométriques ; sous sa clé de voûte, un logement vide en forme de cristal, et sur la clé elle-même un seul symbole gravé, plus profond que les autres. Rien ne traverse l'arche que l'obscurité : aucune lumière, aucun tourbillon, un noir mat. La seule lumière vient d'une lanterne posée sur le seuil, qui fait luire la pierre. Des symboles seulement, aucune lettre. La salle est entièrement vide de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+**La salle de l'arche éteinte (battle map)**
+> Réalise l'image d'une carte de combat vue du dessus : une salle souterraine taillée dans une pierre noire et lisse, au format 10:7 (vingt cases de large sur quatorze de haut). Un mur de roche sombre tout autour, sur deux cases d'épaisseur ; au centre du mur du haut, une arche de pierre noire encastrée, dont l'ouverture n'est qu'un noir mat ; près d'elle, quelques flaques d'eau saumâtre et des traînées de vase, comme si la mer était passée là. Le sol est un dallage lisse, sans obstacle, gravé de lignes géométriques fines près de l'arche ; en bas, une porte de pierre grise entrouverte. Lumière froide et basse, quelques lanternes posées au sol. Aucun personnage, aucune créature : la salle est vide. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
 
 ## 8. À faire
 

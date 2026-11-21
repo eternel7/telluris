@@ -1291,6 +1291,21 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 }
 /* Badge d'état furtif du joueur (🥷) dans l'en-tête de tour. */
 #furtif-badge { font-size: 1.05rem; margin-left: 6px; filter: drop-shadow(0 0 4px #b26bff); }
+/* Membre FURTIF du groupe (combattant, monture ou escorté) : jeton voilé + halo violet sur la
+   carte, pastille 🥷 sur son badge d'initiative. Sur le PORTRAIT et non sur le jeton : le
+   liseré `.spellcast` et l'anneau de PV restent nets. Position absolue : aucune dimension ne
+   bouge quand l'état bascule (CLAUDE.md §17). */
+.ally-token.furtif .at-portrait,
+.ally-token.furtif .jt-portrait,
+.player-token.furtif .pt-img { opacity: 0.5; filter: drop-shadow(0 0 6px #b26bff); }
+.ib-furtif {
+	position: absolute; left: -3px; bottom: -3px; z-index: 2;
+	width: 17px; height: 17px; border-radius: 50%;
+	background: #241a30; border: 1px solid #b26bff;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 10px; line-height: 1; filter: drop-shadow(0 0 3px #b26bff);
+}
+.ib-furtif[hidden] { display: none; }
 /* Œil barré sur le badge d'un ennemi qui ne vous a pas encore repéré (joueur furtif). */
 .ib-eye {
 	position: absolute; right: -3px; bottom: -3px; z-index: 2;
@@ -1668,6 +1683,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 								<path class="vit-pv" id="ib-pv-{{ actor_id }}" d="M21 38 A17 17 0 0 1 21 4"></path>
 								<path class="vit-pm" id="ib-pm-{{ actor_id }}" d="M21 38 A17 17 0 0 0 21 4"></path>
 							</svg>
+							<span class="ib-furtif" id="furtif-{{ actor_id }}"{% if not (jp and jp.furtif and jp.currentPV > 0) %} hidden{% endif %} title="Furtif : un ennemi qui ne l'a pas repéré ne le vise pas.">🥷</span>
 						</div>
 					{% else %}
 						{% set m_item = combat.monstres | selectattr('id', 'equalto', actor_id) | first %}
@@ -1717,6 +1733,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 							<path class="vit-pv" id="ib-pv-{{ jp.id }}" d="M21 38 A17 17 0 0 1 21 4"></path>
 							<path class="vit-pm" id="ib-pm-{{ jp.id }}" d="M21 38 A17 17 0 0 0 21 4"></path>
 						</svg>
+						<span class="ib-furtif" id="furtif-{{ jp.id }}"{% if not (jp.furtif and jp.currentPV > 0) %} hidden{% endif %} title="Furtif : un ennemi qui ne l'a pas repéré ne le vise pas.">🥷</span>
 					</div>
 				{% endfor %}
 			</div>
@@ -2445,9 +2462,23 @@ function updateChargeBar(j) {
 // Anneaux PV/PM + classe KO d'un badge du camp du joueur. Partagé par la passe
 // `ordre_initiative` et par celle des acteurs HORS TOUR : trois lignes recopiées auraient
 // fini par diverger, et l'anneau d'une monture figé sur ses PV d'entrée ne se voit pas.
+// Membre du groupe marqué furtif (jeton voilé, pastille 🥷) : vivant ET `furtif` — monture et
+// escorté compris, l'état du moteur. Qu'un ennemi l'ait repéré se lit sur L'ENNEMI (œil barré).
+function _membreFurtif(p) {
+	return !!p && (p.currentPV || 0) > 0 && !!p.furtif;
+}
+
+// Le membre ACTIF n'est pas un `.ally-token` : son jeton fixe (`.player-token`) prend le même voile.
+function _majJetonActifFurtif(data) {
+	const tok = document.querySelector('.player-token');
+	if (tok) tok.classList.toggle('furtif', _membreFurtif(activePlayer(data)));
+}
+
 function _majBadgeVitaux(el, p) {
 	if (!el || !p) return;
 	el.classList.toggle('dead', (p.currentPV || 0) <= 0);
+	const pastille = document.getElementById(`furtif-${p.id}`);
+	if (pastille) pastille.hidden = !_membreFurtif(p);
 	setArc(document.getElementById(`ib-pv-${p.id}`), p.pv_max > 0 ? p.currentPV / p.pv_max : 0);
 	setArc(document.getElementById(`ib-pm-${p.id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
 }
@@ -2522,9 +2553,15 @@ function _creerBadgeMonstreInvoque(m) {
 	return el;
 }
 
+// L'œil barré a un sens dès qu'UN combattant vivant du groupe est furtif. Montures et
+// personnes escortées (`jouable === false`) entrent furtives et ne frappent jamais : elles
+// le restent tout le combat et l'œil ne disparaissait plus.
+function _groupeFurtif(joueurs) {
+	return (joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif && j.jouable !== false);
+}
+
 function updateInitiativeStrip(data) {
-	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
-	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
+	const furtif = _groupeFurtif(data.joueurs);
 	// Invocations : le serveur RETIRE d'`ordre_initiative` celles qui se dissipent ou
 	// tombent (`_purger_invocations`), et y INSÈRE les nouvelles juste après l'acteur
 	// courant. Le bandeau suit : badge orphelin retiré, badge manquant créé à SA place
@@ -3291,6 +3328,7 @@ function renderTokens() {
 					  + (p.est_monture ? ' monture' : '')
 					  + (p.est_protege ? ' protege' : '')
 					  + (p.est_invocation ? ' invocation' : '')
+					  + (_membreFurtif(p) ? ' furtif' : '')
 					  + (vise ? ' spellcast' : '');
 		if (gabarit) _placerGabarit(tok, p, j);
 		else _placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
@@ -4504,6 +4542,7 @@ function updateUI(data) {
 	// glissait de sa largeur à chaque passage d'un membre furtif à un membre repéré.
 	document.getElementById('furtif-badge').style.visibility =
 		(activePlayer(data) || {}).furtif ? '' : 'hidden';
+	_majJetonActifFurtif(data);
 	updateInitiativeStrip(data);
 	updateAttackButtons(data);
 	renderTokens();
@@ -5520,6 +5559,7 @@ updateButtons(state);
 updateJoueur(activePlayer(state), isPlayerTurn(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
 document.getElementById('furtif-badge').style.visibility = (activePlayer(state) || {}).furtif ? '' : 'hidden';
+_majJetonActifFurtif(state);
 renderEnemyPortrait(state);
 document.getElementById('combat-log').scrollTop = 0;
 window._combatReady = true;

@@ -14547,6 +14547,10 @@ function renderPnjNoeud(noeud) {
 		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"${_pnjAideAttr(c)}
 				placeholder="Nom ou type de lieu…" onkeydown="if(event.key==='Enter'){setTimeout(()=>choisirPnjSaisie('${c.id}'));}">${_pnjAideListe(c)}
 			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
+		: c.ferme
+		// Choix qui ne fait que clore (`ferme`, utils/pnj.choix_ferme) : aucune requête — le PNJ a
+		// pu partir entre-temps (une escorte acceptée l'emmène), le POST tomberait en 404.
+		? `<li><button class="sub-loc-btn" onclick="closePnjPanel()">${_marquePastille(c.marque)}${c.label}</button></li>`
 		: `<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
 	if (typeof noeud.seuils_dans_s === 'number') _pnjSeuilsEcheance = recu + noeud.seuils_dans_s * 1000;
@@ -14740,6 +14744,10 @@ async function choisirPnj(choixId, extra) {
 		// Indispensable — accepter une course doit faire disparaître le « ! » du 🗣 et poser
 		// le « ? » sur la porte du destinataire, sans attendre un rechargement de page.
 		if ('pnj_marque' in data) _majPnjMarque(data.pnj_marque);
+		// Lignes 🗣 du lieu après une ACTION (escorte acceptée : le PNJ part avec vous) — absents
+		// de la réponse ⇒ rien ne bouge.
+		_majPnjsIci(data.pnjs_ici);
+		_majPnjMarques(data.pnj_marques);
 		if (_majLieuxMarques(data)) buildLocationslist();
 		// Contrats d'une mission arrivés à terme (rang, commission, course rendue à la guilde).
 		// ⚠️ AVANT les sorties anticipées ci-dessous : un `combat_id` ou un `deplacer` quitte
