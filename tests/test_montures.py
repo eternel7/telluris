@@ -14,6 +14,7 @@ import pytest
 from models import character_stats
 from utils import montures
 from utils import recrutement
+from utils import transmission
 from utils import characters as characters_util
 
 
@@ -232,16 +233,18 @@ def test_transfert_vers_monture_message_nomme_la_bete(monde):
 	assert len(source["inventaire"]) == 1   # source jamais amputée sur un refus
 
 
-def test_ramasser_pour_une_monture_borne_par_sa_capacite(monde):
+def test_transmettre_du_sol_a_une_monture_borne_par_sa_capacite(monde):
 	"""Du sol droit sur l'âne : bornée par `charge_max_porteur` (400 kg), pas par la Force
 	brute — une enclume qu'aucun humain du test (100 kg) n'aurait pu soulever 4 fois."""
 	m = montures.creer_monture(ANE, ETABLE, perso())
 	m["inventaire"] = [{"item": "item:enclume", "poids": 90}] * 3   # 270/400 kg
 	sol = [{"item": "item:enclume", "poids": 90}, {"item": "item:enclume", "poids": 90}]
-	ok, _, _ = recrutement.ramasser_pour(sol, m, 0, "item:enclume")
+	vers_ane = lambda: transmission.transmettre(transmission.emplacement_sol(), transmission.emplacement_sac(m),
+												sol, 0, "item:enclume", lambda _id: None, 0)
+	ok, _, _, _ = vers_ane()
 	assert ok and len(sol) == 1 and len(m["inventaire"]) == 4          # 360/400 kg
-	ok, raison, ref = recrutement.ramasser_pour(sol, m, 0, "item:enclume")
-	assert ok is False and ref is None and raison.startswith("Âne")
+	ok, code, raison, ref = vers_ane()
+	assert ok is False and code == 409 and ref is None and raison.startswith("Âne")
 	assert len(sol) == 1                                             # sol jamais amputé
 
 

@@ -193,15 +193,6 @@ def sortir(porteur: dict, pos_c: int, j: int) -> object:
 	return ref
 
 
-def poser(porteur: dict, pos_c: int, j: int, au_sol: list) -> object:
-	"""Pose `contenu[j]` du contenant `inventaire[pos_c]` sur `au_sol` (le sol du PRINCIPAL),
-	sans passer par le sac : AUCUN contrôle de charge — c'est tout l'intérêt, un contenant
-	porte plus que son porteur. Le sol reste transitoire (perdu au prochain déplacement)."""
-	ref = _extraire(porteur, pos_c, j)
-	au_sol.append(ref)
-	return ref
-
-
 # ── Contenants comme porteurs (vente, remises de quête) ─────────────────────────
 #
 # Auteur, 07/11 : à la vente en boutique et aux remises de quête, un contenant est un PORTEUR
@@ -298,7 +289,7 @@ def nettoyer(ref_c) -> None:
 # ── Contenants comme DESTINATAIRES (butin, sol, inventaire de groupe) ───────────
 #
 # Chaque contenant porté par le principal, un compagnon ou une monture reçoit comme un porteur
-# de plus : butin de combat (`/collect`, butin d'étage), objet du sol (🤝), transfert du panneau
+# de plus : butin de combat (`/collect`, butin d'étage), objet du sol (menu ⇄), transfert du panneau
 # 👥. Adressage : porteur + `contenant_index` vérifié par `contenant_item_id` (`localiser`).
 # Déposer reste possible à marée basse ; reprendre non (même règle que ranger / sortir).
 

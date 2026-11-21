@@ -1611,32 +1611,6 @@ def _take_ref(refs: list, idx, item_id):
 	return None
 
 
-@user_router.post("/drop_item")
-def drop_item(
-	current_user: Annotated[User, Depends(get_current_user)],
-	body: dict = Body(...),
-):
-	"""Pose au sol un objet de l'inventaire (transitoire : perdu au prochain déplacement).
-	Un compagnon pose au sol DU JOUEUR : le sac est le sien, le tas par terre est celui du
-	lieu où se tient le principal."""
-	character, principal = _acteur(current_user, body)
-
-	inventaire = character.get("inventaire", [])
-	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
-	if ref is None:
-		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
-
-	au_sol = principal.get("objets_au_sol", [])
-	au_sol.append(ref)
-	character["inventaire"]    = inventaire
-	principal["objets_au_sol"] = au_sol
-
-	_save_acteur(character, principal)
-	payload = _inventory_payload(character, principal)
-	payload["fiche"] = _fiche_payload(character)
-	return payload
-
-
 @user_router.post("/pickup_item")
 def pickup_item(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -1649,43 +1623,10 @@ def pickup_item(
 
 	Un compagnon ramasse DANS LE SOL DU JOUEUR : le tas par terre est celui du lieu où se
 	tient le principal, le sac (et la charge max qui borne le ramassage) sont ceux du porteur —
-	mêmes règles que le principal (miroir de drop_item).
-
-	`destinataire_id` (optionnel) : un AUTRE membre du groupe (compagnon, monture, guide,
-	principal) reçoit l'objet dans son sac — refus DUR (409) s'il ne peut pas le porter, pas
-	d'auto-délestage (`recrutement.ramasser_pour`). La réponse reste celle de la fiche ouverte
-	(sac de l'acteur, sol à jour) : le sac du destinataire n'y est JAMAIS mis à la place
-	(CLAUDE.md §1) ; il voyage à part, dans `destinataire`."""
+	mêmes règles que le principal."""
 	character, principal = _acteur(current_user, body)
 
 	au_sol = principal.get("objets_au_sol", [])
-	dest_id = body.get("destinataire_id")
-	if body.get("contenant_index") is not None or body.get("contenant_item_id"):
-		return _ramasser_dans_contenant(character, principal, au_sol, dest_id, body)
-	if dest_id and dest_id != character.get("_id"):
-		dest = _membre_du_groupe(principal, character, dest_id)
-		if dest is None:
-			raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
-		ok, raison, ref = recrutement.ramasser_pour(au_sol, dest, body.get("index"), body.get("item_id"))
-		if not ok:
-			raise HTTPException(status_code=422 if raison == "Objet absent du sol" else 409,
-								detail=raison)
-		principal["objets_au_sol"] = au_sol
-		_save_acteur(dest, principal)
-		doc = resolve_item_ref(ref) or {}
-		payload = _inventory_payload(character, principal)
-		payload["destinataire"] = {
-			"id":         dest["_id"],
-			"nom":        f"{dest.get('prenom', '') or ''} {dest.get('nom', '') or ''}".strip(),
-			"charge":     round(carried_weight(dest), 2),
-			"charge_max": montures.charge_max_porteur(dest),
-		}
-		payload["pris"] = {"nom": doc.get("nom") or item_ref_id(ref), "icon": doc.get("icon", ""),
-						   "poids": round(item_ref_weight(ref), 2)}
-		# Pas de bloc `fiche` : le sac de la fiche ouverte n'a pas bougé (un grimoire posé sur
-		# un autre porteur n'ouvre ni ne ferme rien à l'apprentissage de l'acteur).
-		return payload
-
 	picked = _take_ref(au_sol, body.get("index"), body.get("item_id"))
 	if picked is None:
 		raise HTTPException(status_code=422, detail="Objet absent du sol")
@@ -1715,47 +1656,6 @@ def pickup_item(
 	payload["auto_dropped"] = auto_dropped
 	payload["fiche"] = _fiche_payload(character)
 	return payload
-
-
-def _ramasser_dans_contenant(character: dict, principal: dict, au_sol: list, dest_id, body: dict) -> dict:
-	"""Objet du sol → contenant d'un membre du groupe (`destinataire_id`, à défaut l'acteur),
-	adressé par `contenant_index`/`contenant_item_id`. Rangé = ne pèse rien : seule la capacité
-	du contenant borne (`contenants.deposer`). Le sol n'est amputé qu'APRÈS le contrôle.
-	Réponse = fiche ouverte (CLAUDE.md §1) + `destinataire` à part, comme le ramassage pour un
-	autre porteur."""
-	from utils import contenants   # import tardif : contenants dépend de utils.characters
-	porteur = character
-	if dest_id and dest_id != character.get("_id"):
-		porteur = _membre_du_groupe(principal, character, dest_id)
-		if porteur is None:
-			raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
-	pos = contenants.localiser(au_sol, body.get("index"), body.get("item_id"))
-	if pos is None:
-		raise HTTPException(status_code=422, detail="Objet absent du sol")
-	ok, raison, ref_c = contenants.deposer(porteur, body.get("contenant_index"),
-										   body.get("contenant_item_id"), au_sol[pos], get_doc)
-	if not ok:
-		raise HTTPException(status_code=404 if raison.startswith("Contenant introuvable") else 409,
-							detail=raison)
-	ref = au_sol.pop(pos)
-	principal["objets_au_sol"] = au_sol
-	_save_acteur(porteur, principal)
-	doc = resolve_item_ref(ref) or {}
-	doc_c = resolve_item_ref(ref_c) or {}
-	payload = _inventory_payload(character, principal)
-	payload["destinataire"] = {
-		"id":       porteur["_id"],
-		"nom":      f"{doc_c.get('nom') or 'Contenant'} ({_nom_porteur(porteur)})",
-		"contenant": doc_c.get("contenant"),
-	}
-	payload["pris"] = {"nom": doc.get("nom") or item_ref_id(ref), "icon": doc.get("icon", ""),
-					   "poids": round(item_ref_weight(ref), 2)}
-	# Pas de bloc `fiche` : un objet rangé est inerte (contenants.py), rien ne s'ouvre ni ne ferme.
-	return payload
-
-
-def _nom_porteur(p: dict) -> str:
-	return f"{p.get('prenom', '') or ''} {p.get('nom', '') or ''}".strip() or "?"
 
 
 @user_router.post("/renommer_objet")

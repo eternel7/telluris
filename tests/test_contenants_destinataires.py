@@ -1,7 +1,7 @@
 """Contenants comme DESTINATAIRES (`utils/contenants.py` § Contenants comme destinataires).
 
 Un contenant porté par le principal, un compagnon ou une monture reçoit comme un porteur de
-plus : butin de combat (`/collect`, butin d'étage), objet du sol (🤝 → `pickup_item`), transfert
+plus : butin de combat (`/collect`, butin d'étage), objet du sol (menu ⇄ : `tests/test_transmission.py`), transfert
 du panneau 👥 (`/groupe/transferer`). Ce que ces tests verrouillent :
 1. L'objet rangé ne pèse rien pour le porteur ; seule la capacité du contenant borne.
 2. Aucun contenant dans un autre ; refus ⇒ la source (sol, sac, butin) n'est pas amputée.
@@ -94,43 +94,6 @@ def test_retirer_refuse_a_maree_basse(docs, maree_basse):
 	assert not ok and "mer" in raison
 	ok, _r, ref = contenants.retirer(p, 0, "item:sac_maree", 0, "item:pomme", docs.get, 0)
 	assert ok and ref == "item:pomme" and "contenu" not in p["inventaire"][0]
-
-
-# ── Sol → contenant (`pickup_item`) ─────────────────────────────────────────────
-
-def _pickup(monkeypatch, acteur, principal, body, compagnons=()):
-	monkeypatch.setattr(ru, "_acteur", lambda _u, _b: (acteur, principal))
-	monkeypatch.setattr(ru, "_save_acteur", lambda porteur, p: None)
-	monkeypatch.setattr(ru.recrutement, "porteurs_effectifs", lambda c, g: list(compagnons))
-	return ru.pickup_item({"_id": "user:u"}, body)
-
-
-def test_ramasser_dans_le_contenant_d_un_compagnon(docs, monkeypatch):
-	av = {"_id": "aventurier:ami", "prenom": "Ami", "nom": "", "inventaire": [{"item": "item:besace"}]}
-	p = character(objets_au_sol=[{"item": "item:pierre", "poids": 4}])
-	out = _pickup(monkeypatch, p, p, {"index": 0, "item_id": "item:pierre", "destinataire_id": av["_id"],
-									  "contenant_index": 0, "contenant_item_id": "item:besace"}, [av])
-	assert p["objets_au_sol"] == [] and av["inventaire"][0]["contenu"] == [{"item": "item:pierre", "poids": 4}]
-	assert out["destinataire"]["id"] == av["_id"] and out["pris"]["nom"] == "Pierre"
-	# Rangé = sans poids pour le compagnon.
-	assert characters.carried_weight(av) == 0.5
-
-
-def test_ramasser_dans_son_propre_contenant_refus_garde_le_sol(docs, monkeypatch):
-	p = character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:pierre", "poids": 8}]}],
-				  objets_au_sol=[{"item": "item:pierre", "poids": 4}])
-	with pytest.raises(HTTPException) as e:
-		_pickup(monkeypatch, p, p, {"index": 0, "item_id": "item:pierre",
-									"contenant_index": 0, "contenant_item_id": "item:besace"})
-	assert e.value.status_code == 409 and len(p["objets_au_sol"]) == 1
-
-
-def test_ramasser_pour_un_contenant_hors_du_groupe_est_refuse(docs, monkeypatch):
-	p = character(objets_au_sol=["item:pomme"])
-	with pytest.raises(HTTPException) as e:
-		_pickup(monkeypatch, p, p, {"index": 0, "item_id": "item:pomme", "destinataire_id": "aventurier:x",
-									"contenant_index": 0, "contenant_item_id": "item:besace"})
-	assert e.value.status_code == 403
 
 
 # ── Panneau 👥 (`/groupe/transferer`) ────────────────────────────────────────────

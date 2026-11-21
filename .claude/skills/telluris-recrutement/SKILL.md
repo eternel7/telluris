@@ -26,7 +26,7 @@ Génération procédurale (race/sexe/vocation, stats, équipement équipé dans 
 
 **Transfert** : logique pure `recrutement.transferer_ref` + `peut_porter` (adressage index + item_id, refus avant de retirer, 409 si charge dépassée — rien ne tombe au sol, contrairement au pickup), couverte par `tests/test_groupe.py`.
 
-**Ramasser POUR un porteur** : bouton 🤝 de la liste « Au sol » (`donnerDuSol` → `#cible-allie-overlay`, porteurs trop chargés grisés). `pickup_item` + `destinataire_id` (`_membre_du_groupe`, preuve d'appartenance de `_cible_alliee`) → `recrutement.ramasser_pour` : refus DUR (409), **pas d'auto-délestage** du sac d'autrui. La réponse reste le sac de la fiche ouverte ; celui du destinataire voyage à part (`destinataire`), jamais à sa place (§1).
+**Transmettre** (menu ⇄, `scripts/transmettre.js` → `POST /api/transmettre`, `utils/transmission.py`) : tout objet que le groupe a en main (sac d'un porteur, contenant porté, sol) va à tout autre emplacement du groupe, sol compris — menu contextuel au point du clic, destinations trop chargées grisées. Remplace « Poser » et le 🤝 du sol. Vers un sac : refus DUR (409), **pas d'auto-délestage** ; réponse = sac de la fiche ouverte (`_inventory_payload(acteur)`, §1), `fiches` des sacs touchés, groupe relu par le client.
 
 
 ### Compagnie permanente — engagement durable d'un compagnon

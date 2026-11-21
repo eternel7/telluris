@@ -29,6 +29,7 @@ from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.traversee import traversee_router, payload_play as traversee_payload_play
 from routers.contenants import contenants_router
+from routers.transmission import transmission_router
 from routers.enigmes import enigmes_router
 from routers.renseignement import renseignement_router
 from routers import renseignement as renseignement_routes
@@ -252,6 +253,7 @@ app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
 app.include_router(traversee_router, prefix="/api")
 app.include_router(contenants_router, prefix="/api")
+app.include_router(transmission_router, prefix="/api")
 app.include_router(enigmes_router, prefix="/api")
 app.include_router(renseignement_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en

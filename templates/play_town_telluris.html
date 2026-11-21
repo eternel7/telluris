@@ -3814,7 +3814,30 @@
 		.cible-allie-pv { font-size: .82em; opacity: .8; white-space: nowrap; }
 		.cible-allie-btn:disabled { opacity: .45; cursor: not-allowed; }
 		.cible-allie-btn:disabled:hover { background: rgba(255,255,255,.04); }
-		.cible-allie-trop { color: #e07a5f; }
+		/* ── Menu « ⇄ Transmettre » (scripts/transmettre.js) : contextuel, posé au point du
+		   clic, au-dessus de la fiche d'objet et de la fenêtre 👜 (z-index 9200). */
+		.trm-menu {
+			position: fixed; z-index: 9500; min-width: 220px; max-width: min(92vw, 340px);
+			max-height: 70vh; overflow-y: auto; padding: .35rem;
+			background: #1d1709; color: var(--text, #e8dcc0);
+			border: 1px solid rgba(216,180,106,.55); border-radius: 8px;
+			box-shadow: 0 8px 24px rgba(0,0,0,.6);
+		}
+		.trm-titre { font-size: .85em; padding: .2rem .35rem .4rem; color: var(--gold2, var(--gold, #d8b46a)); }
+		.trm-poids { opacity: .75; font-size: .9em; }
+		.trm-item {
+			display: flex; align-items: center; gap: .5rem; width: 100%;
+			padding: .4rem .45rem; cursor: pointer; text-align: left; color: inherit;
+			background: transparent; border: 0; border-radius: 5px; font: inherit; font-size: .92em;
+		}
+		.trm-item:hover, .trm-item:focus-visible { background: rgba(216,180,106,.16); outline: none; }
+		.trm-item:disabled { opacity: .45; cursor: not-allowed; background: transparent; }
+		.trm-icone { width: 1.4em; text-align: center; flex-shrink: 0; }
+		.trm-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.trm-place { font-size: .8em; opacity: .8; white-space: nowrap; }
+		.trm-refus { color: #e07a5f; }
+		.trm-sep { height: 1px; margin: .25rem .3rem; background: rgba(216,180,106,.25); }
+		.trm-vide { padding: .4rem .45rem; font-size: .88em; opacity: .75; }
 		.clauses-part { color: var(--gold2, var(--gold, #d8b46a)); margin: .2rem 0 .8rem; }
 		.clauses-list { list-style: none; padding: 0; margin: 0 0 .9rem; }
 		.clauses-list li {
@@ -4429,6 +4452,8 @@
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
 <script src="{{ script_url('capacites_texte.js') }}"></script>
 <script src="{{ script_url('colonisation.js') }}"></script>
+{# Menu « ⇄ Transmettre » (sac, contenant, sol → tout emplacement du groupe), posé au clic. #}
+<script src="{{ script_url('transmettre.js') }}"></script>
 {# Panneau d'énigme (`ouvrirEnigme`), ouvert par un choix de dialogue `enigme` ; le serveur tranche. #}
 <script src="{{ script_url('enigmes.js') }}"></script>
 {# Sons d'action (chokepoint `installerSonsApi`), coupe-son partagé avec le combat. #}
@@ -7116,7 +7141,7 @@ function _refreshInventaire() {
 		}
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
-		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
+		const dropHtml = transmettreBtn({ porteur_id: porteurActifId() }, idx, item);
 		const couperHtml = (_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sac', item) : '';
 		// Un consommable utilisable EN COMBAT peut prendre une case de la barre. Le slot
 		// vise le TYPE d'objet (item_id) : le sac bouge, la case reste — d'où le
@@ -7147,7 +7172,6 @@ function _refreshSol() {
 	if (section) section.style.display = has ? 'flex' : 'none';
 	if (scrollEl) scrollEl.style.display = has ? '' : 'none';
 	if (!has) { solEl.innerHTML = ''; if (scrollEl) scrollEl.classList.remove('scrollable'); updateSolSortBtn(); return; }
-	const donner = _groupeAPorteurs();
 	solEl.innerHTML = _sortedOrder(_objetsAuSol, _solSort).map(idx => {
 		const item = _objetsAuSol[idx];
 		if (!item || typeof item !== 'object') return '';
@@ -7157,7 +7181,7 @@ function _refreshSol() {
 			<span class="sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
 			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
-			<span class="sh-inv-actions">${(_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sol', item) : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>${donner ? `<button class="sh-pickup-btn" onclick="donnerDuSol(${idx},'${item._id}')" title="Faire prendre par un compagnon ou une monture">🤝</button>` : ''}</span>
+			<span class="sh-inv-actions">${(_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sol', item) : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>${transmettreBtn({ sol: true }, idx, item, { compact: true, classe: 'sh-pickup-btn trm-btn' })}</span>
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _objetsAuSol.length > INV_VISIBLE);
@@ -7556,10 +7580,11 @@ function _renderMono(st) {
 		if (item.note_renseignement && porteurActifId() === PRINCIPAL_ID) acts.push(`<button class="sh-equip-btn" onclick="lireNote(${st.idx})" title="Inscrire la piste au bestiaire et au carnet">📖 Lire</button>`);
 		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
 		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac', item));
-		acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.idx},'${item._id}')">Poser</button>`);
+		acts.push(transmettreBtn({ porteur_id: porteurActifId() }, st.idx, item));
 	} else if (st.source === 'sol') {
 		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sol', item));
 		acts.push(`<button class="sh-equip-btn" onclick="_cardPickup(${st.idx},'${item._id}')">Prendre</button>`);
+		acts.push(transmettreBtn({ sol: true }, st.idx, item));
 	}
 	else if (st.source in _GRP_SENS) {
 		const dest = _grpPorteurs(st.source).dest;
@@ -7568,6 +7593,7 @@ function _renderMono(st) {
 		acts.push(`<button class="sh-equip-btn" ${rentre ? '' : 'disabled'}
 			title="${rentre ? 'Transférer' : 'Trop lourd — le destinataire est à sa charge maximale'}"
 			onclick="_cardTransferer('${st.source}',${st.idx},'${item._id}')">${fleche} Transférer</button>`);
+		acts.push(transmettreBtn(_grpSourceTrm(_GRP_SENS[st.source]), st.idx, item));
 		// Dans le sac d'une monture, un objet de harnachement s'y pose directement.
 		const slotM = st.source === 'grp_compagnon' && ((_grpEtat || {}).sacs || {})[_grpSelId]?.harnachement
 			? (item.slots || []).find(s => s in SLOTS_MONTURE_LABELS) : null;
@@ -7592,7 +7618,7 @@ function _renderSacCompare(st) {
 	const acts = [];
 	acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}',${st.candIdx})">Équiper${equipped ? ' (remplacer)' : ''}</button>`);
 	acts.push(_renommerBtn(cand));
-	acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.candIdx},'${cand._id}')">Poser</button>`);
+	acts.push(transmettreBtn({ porteur_id: porteurActifId() }, st.candIdx, cand));
 	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
 }
@@ -7677,7 +7703,6 @@ function _setDetailAlt(i) {
 // (elles rafraîchissent sac/paperdoll/stats). Les index deviennent obsolètes après coup.
 function _cardEquip(itemId, slot, idx)  { closeItemDetail(); equip(itemId, slot, idx); }
 function _cardUnequip(slot)             { closeItemDetail(); unequip(slot); }
-function _cardDrop(idx, itemId)         { closeItemDetail(); dropItem(idx, itemId); }
 function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, itemId); }
 function _cardConsommer(idx, itemId)    { closeItemDetail(); consommerItem(idx, itemId, null); }
 function _cardCouper(idx, itemId, src)  { closeItemDetail(); couperItem(idx, itemId, src); }
@@ -7764,7 +7789,8 @@ function renderContenant() {
 	document.getElementById('ctn-sac').innerHTML = sac || '<p class="q-desc">Sac vide.</p>';
 	const dedans = (c.contenu || []).map(it => {
 		const g = _ctnPeutSortir(it, charge, _chargeMax);
-		return _pcfLigne(it, it.idx, '←', '_ctnSortir', g.ok, g.titre, 'gauche', null, null, null, _ctnBoutonPoser(it));
+		return _pcfLigne(it, it.idx, '←', '_ctnSortir', g.ok, g.titre, 'gauche', null, null, null,
+			transmettreBtn({ porteur_id: porteurActifId(), contenant_index: st.index, contenant_item_id: st.item_id }, it.idx, it, { compact: true }));
 	}).join('');
 	document.getElementById('ctn-contenu').innerHTML = dedans
 		|| `<p class="q-desc">${c.accessible ? 'Rien à l’intérieur.' : 'Le sac semble vide.'}</p>`;
@@ -7790,18 +7816,6 @@ function _ctnSortir(btn) {
 	btn.disabled = true;
 	return _ctnAction('api/contenant/sortir', { index_contenu: +btn.dataset.idx, item_id: btn.dataset.item });
 }
-// Poser au sol sans passer par le sac : aucune charge à vérifier (un contenant porte plus que
-// son porteur). Le sol reste transitoire : perdu au prochain déplacement.
-function _ctnBoutonPoser(item) {
-	return `<button class="grp-move-btn" title="Poser au sol (perdu si vous vous déplacez)"
-		data-idx="${+item.idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
-		onclick="_ctnPoser(this)">⬇</button>`;
-}
-function _ctnPoser(btn) {
-	btn.disabled = true;
-	return _ctnAction('api/contenant/poser', { index_contenu: +btn.dataset.idx, item_id: btn.dataset.item });
-}
-
 // Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
 // l'équipement porté si l'objet est équipable, et actions Vendre/Acheter/Marchander.
 function openMarchandDetail(sens, arrIdx) {
@@ -8785,19 +8799,6 @@ async function apprendreCompetence(competenceId, btn) {
 	} catch(err) { console.error('Erreur apprentissage compétence', err); if (btn) btn.disabled = false; }
 }
 
-async function dropItem(index, itemId) {
-	try {
-		const res  = await fetch('api/drop_item', {
-			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({index, item_id: itemId}))
-		});
-		const data = await res.json();
-		if (!res.ok) { _erreurAction(data.detail); return; }
-		_applyInventoryPayload(data);
-		_appliquerFiche(data.fiche);   // un grimoire posé ferme son sort à l'apprentissage
-	} catch(err) { console.error('Erreur drop', err); }
-}
-
 async function pickupItem(index, itemId) {
 	try {
 		// `compagnon_id` (via _actionBody en mode compagnon) → le porteur ramasse dans le sol
@@ -8815,99 +8816,6 @@ async function pickupItem(index, itemId) {
 			showToast('Trop lourd ! Tombé au sol : ' + data.auto_dropped.join(', '));
 		}
 	} catch(err) { console.error('Erreur pickup', err); }
-}
-
-// 🤝 du sol : seulement s'il existe un AUTRE porteur que celui de la fiche — un compagnon
-// ouvert a toujours le joueur ; le joueur, dès que 👥 est visible (le groupe peut ne
-// compter qu'un escorté, qui ne porte rien : le choix le dira alors).
-function _groupeAPorteurs() {
-	if (_compagnonActif) return true;
-	// Un contenant du sac ouvert (sac dimensionnel…) est un destinataire à lui seul.
-	if ((_inventaire || []).some(it => it && it.contenant)) return true;
-	const btn = document.getElementById('btn-groupe');
-	return !!btn && !btn.hidden;
-}
-
-// Qui peut recevoir un objet du sol : tout le groupe porteur (principal, compagnons,
-// montures, guide) SAUF le porteur de la fiche, avec la place libre de chacun. `rentre`
-// = même arithmétique que `peut_porter` côté serveur (qui reste juge : 409).
-function _porteursPourRamasser(item) {
-	const d = _grpEtat || {};
-	const sacs = d.sacs || {};
-	const moi = porteurActifId();
-	const nomDe = c => `${c.prenom || ''} ${c.nom || ''}`.trim() || '?';
-	const out = [];
-	const ajouter = (c, icon, sac) => {
-		if (!c || !c.id || c.id === moi || !sac) return;
-		const libre = +(sac.charge_max || 0) - +(sac.charge || 0);
-		out.push({ id: c.id, nom: nomDe(c), icon, libre, rentre: _grpRentre(item, sac) });
-	};
-	ajouter(d.principal, '👤', d.principal);
-	(d.groupe || []).forEach(c => ajouter(c, '🧑‍🤝‍🧑', sacs[c.id]));
-	(d.montures || []).forEach(m => ajouter(m, '🐴', sacs[m.id]));
-	if (d.guide) ajouter(d.guide, '🧭', sacs[d.guide.id]);
-	// Contenants de TOUT le groupe, ceux du porteur de la fiche compris : l'objet y est rangé
-	// et ne pèse rien pour son porteur. `libre` null = marée basse : place inconnue, le serveur
-	// tranche. Un contenant ne se range pas dans un autre (contenants.peut_ranger).
-	(d.contenants || []).forEach(c => {
-		const libre = c.libre == null ? null : +c.libre;
-		out.push({
-			id: c.cle, contenant: c,
-			nom: `${c.nom || 'Contenant'} (${c.porteur_nom || '?'})`,
-			icon: c.icon || '👜', libre,
-			rentre: !item.contenant && (libre == null || +(item.poids || 0) <= libre + 1e-6),
-		});
-	});
-	return out;
-}
-
-// Décision bloquante sur le calque des cibles alliées (Conventions §8 : ✕ / Échap / clic
-// hors carte → null). Un porteur trop chargé reste listé, grisé : on voit pourquoi.
-function demanderPorteur(item, porteurs) {
-	const poids = +(item.poids || 0);
-	document.getElementById('cible-allie-body').innerHTML =
-		`<h3 style="margin:.1rem 0 .3rem">${item.icon || '📦'} ${escapeHtml(item.nom || '—')} — qui le prend ?</h3>`
-		+ `<div class="cible-allie-pv" style="margin-bottom:.7rem">${poids.toFixed(1)} kg · place libre de chacun</div>`
-		+ porteurs.map(p => `<button type="button" class="cible-allie-btn" ${p.rentre ? '' : 'disabled'}
-			onclick="_choisirCibleAllie('${p.id}')">
-			<span>${p.icon}</span><span class="cible-allie-nom">${escapeHtml(p.nom)}</span>
-			<span class="cible-allie-pv${p.rentre ? '' : ' cible-allie-trop'}">${p.libre == null ? 'place inconnue (marée basse)' : Math.max(0, p.libre).toFixed(1) + ' kg libres'}${p.rentre ? '' : (item.contenant && p.contenant ? ' · pas un contenant dans un autre' : ' · trop lourd')}</span>
-		</button>`).join('');
-	document.getElementById('cible-allie-overlay').classList.remove('clauses-hidden');
-	return new Promise(resolve => { _cibleAllieResolve = resolve; });
-}
-
-async function donnerDuSol(index, itemId) {
-	const item = (_objetsAuSol || [])[index];
-	if (!item) return;
-	// Charges RELUES : celles d'un payload de groupe gardé en mémoire datent peut-être d'avant
-	// le dernier ramassage ou transfert.
-	_grpEtat = null;
-	await _assurerGroupe();
-	const porteurs = _porteursPourRamasser(item);
-	if (!porteurs.length) { showToast('Personne d\'autre dans le groupe ne peut porter.'); return; }
-	const dest = await demanderPorteur(item, porteurs);
-	if (!dest) return;
-	// Un contenant : son PORTEUR est le destinataire, le contenant est adressé à part.
-	const ctn = (porteurs.find(p => p.id === dest) || {}).contenant;
-	const corps = ctn
-		? { index, item_id: itemId, destinataire_id: ctn.porteur_id,
-			contenant_index: ctn.index, contenant_item_id: ctn.item_id }
-		: { index, item_id: itemId, destinataire_id: dest };
-	try {
-		// `compagnon_id` (via _actionBody) = la fiche ouverte : la réponse est SON sac, le sol
-		// à jour ; le sac du destinataire voyage à part (`destinataire`), jamais à sa place.
-		const res = await fetch('api/pickup_item', {
-			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody(corps))
-		});
-		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
-		_applyInventoryPayload(data);
-		_grpEtat = null;   // sacs du groupe périmés : rechargés à la prochaine ouverture de 👥
-		const p = data.pris || {}, d = data.destinataire || {};
-		showToast(`${p.icon || '📦'} ${p.nom || 'Objet'} → ${d.nom || '?'}`);
-	} catch (err) { console.error('Erreur ramassage pour un porteur', err); }
 }
 
 // Applique la réponse partagée des endpoints drop/pickup (inventaire/sol/slots + charge).
@@ -11984,6 +11892,13 @@ function _pcfAdresse() {
 	return _pcfGauche ? { compagnon_id: _pcfGauche } : {};
 }
 
+// Même sac de gauche, adressé pour « ⇄ Transmettre » (scripts/transmettre.js) ; `c` = son
+// contenant (`_pcfSacGauche(…).contenant`), absent pour le sac d'un porteur.
+function _pcfSourceTrm(c) {
+	return c ? { porteur_id: c.porteur_id, contenant_index: c.index, contenant_item_id: c.item_id }
+		: { porteur_id: _pcfGauche || PRINCIPAL_ID };
+}
+
 function _pcfAppliquer(data) {
 	_pcfEtat = data;
 	if (data.purse) updatePurse(data.purse);
@@ -12075,7 +11990,8 @@ function renderCoffre(data) {
 				!c.depot ? 'Vous ne pouvez rien déposer ici' : (+it.poids || 0) > libre + 1e-6 ? 'Trop lourd — plus assez de place' : 'Ranger ici',
 				'droite', 'pcf_sac', null, i,
 				// Implantation : verser l'objet aux RÉSERVES du lieu, sans changer de panneau.
-				colonie && typeof colVerserBtn === 'function' ? colVerserBtn(it, _pcfGauche, posG(i), data.reserves) : '');
+				(colonie && typeof colVerserBtn === 'function' ? colVerserBtn(it, _pcfGauche, posG(i), data.reserves) : '')
+				+ transmettreBtn(_pcfSourceTrm(ctnG), posG(i), it, { compact: true }));
 		}).join('') : videG);
 		const items = c.inventaire || [];
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
@@ -12106,7 +12022,8 @@ function renderCoffre(data) {
 		+ _sortedOrder(c.contenu || [], 'asc').map(j => { const it = c.contenu[j];
 			return _pcfLigne(it, it.idx, '→', 'atelierDonner', gere, 'Confier à ce marchand', 'droite', '', c); }).join('')).join('');
 	_grpRemplirSac('pcf-principal', inv.concat(...ctns.map(c => c.contenu || [])), (inv.length ? ordInv.map(i =>
-		_pcfLigne(inv[i], posG(i), '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac', ctnG, i)).join('')
+		_pcfLigne(inv[i], posG(i), '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac', ctnG, i,
+			transmettreBtn(_pcfSourceTrm(ctnG), posG(i), inv[i], { compact: true }))).join('')
 		: videG) + lignesCtn);
 	const prodsAtelier = a.produits || [];
 	// Pas de poids d'instance au rayon : la flèche reste active, le serveur tranche (409).
@@ -14019,6 +13936,16 @@ function _grpRentre(item, dest) {
 	return +(item.poids || 0) <= (+(dest.charge_max || 0) - +(dest.charge || 0)) + 1e-6;
 }
 
+// Adresse « Transmettre » (scripts/transmettre.js) du sac qui DONNE dans ce sens : le vôtre
+// à gauche ; à droite le porteur choisi, ou son contenant (porteur + position vérifiée).
+function _grpSourceTrm(sens) {
+	const d = _grpEtat || {};
+	if (sens === 'vers_compagnon') return { porteur_id: (d.principal || {}).id || PRINCIPAL_ID };
+	const c = ((d.sacs || {})[_grpSelId] || {}).contenant;
+	return c ? { porteur_id: c.porteur_id, contenant_index: c.index, contenant_item_id: c.item_id }
+		: { porteur_id: _grpSelId };
+}
+
 // Une ligne par objet ; la flèche est grisée quand l'objet ne rentre pas chez le destinataire.
 // Icône + nom ouvrent la fiche de l'objet, comme dans le sac de la fiche perso.
 // Affichage trié par nom via `_sortedOrder` : l'index d'origine est conservé pour l'adressage
@@ -14027,6 +13954,7 @@ function _grpSac(items, dest, sens, harnachable) {
 	items = items || [];
 	if (!items.length) return '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
 	const source = _GRP_SOURCE[sens];
+	const src = _grpSourceTrm(sens);
 	const fleche = sens === 'vers_compagnon' ? '→' : '←';
 	return _sortedOrder(items, 'asc').map(idx => {
 		const item = items[idx];
@@ -14040,8 +13968,10 @@ function _grpSac(items, dest, sens, harnachable) {
 			<span class="sh-inv-poids">${poids.toFixed(1)} kg</span>`;
 		// Le bouton se place du côté où part l'objet : à droite pour →, à gauche pour ←.
 		// Sac d'une monture : 🐴 en bout de ligne pour un objet de harnachement.
+		// ⇄ : transmettre à n'importe qui d'autre du groupe, ou au sol (scripts/transmettre.js).
 		const harn = harnachable ? _grpBtnHarnacher(item, idx) : '';
-		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row + harn : row + btn}</div>`;
+		const trm = transmettreBtn(src, idx, item, { compact: true });
+		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row + trm + harn : row + trm + btn}</div>`;
 	}).join('');
 }
 
