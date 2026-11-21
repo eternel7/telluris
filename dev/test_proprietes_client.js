@@ -65,7 +65,7 @@ vm.runInThisContext(extraireConst('INV_VISIBLE'));
 vm.runInThisContext(extraireConst('_ECH_ICONES'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
 	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', '_propNomPnj', '_propNegoce', '_propImages', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
-	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
+	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfDroite', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -397,6 +397,41 @@ t('coffre : un contenant au sélecteur de gauche, dépôt et prise adressés au 
 	globalThis._pcfGauche = 'aventurier:x';
 	assert.deepStrictEqual(_pcfAdresse(), { compagnon_id: 'aventurier:x' });
 	globalThis._pcfGauche = '';
+});
+
+// Rangements d'une implantation (`colonie`) : même panneau, droite = entrepôt / petit coffre.
+function colonieRang(extra) {
+	return Object.assign({ colonie: true, role: 'associe', associes: null,
+		principal: { inventaire: [{ _id: 'item:p', nom: 'Pomme', poids: 1 }], charge: 1, charge_max: 50 },
+		porteurs: PORTEURS, sacs_contenants: [],
+		rangements: {
+			entrepot: { label: '📦 Entrepôt commun', visible: true, depot: true, retrait: false, charge: 1, charge_max: 300,
+				note: 'Dépôt seulement : le fondateur autorise le retrait.', inventaire: [{ _id: 'item:b', idx: 0, nom: XSS, poids: 1 }] },
+			coffre: { label: '🔒 Votre petit coffre', visible: true, depot: true, retrait: true, charge: 0, charge_max: 0.5,
+				note: '', inventaire: [] },
+		} }, extra || {});
+}
+
+t('rangements de colonie : sélecteur entrepôt / coffre, retrait non autorisé grisé, note affichée', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = '';
+	globalThis.colAutorisationsHtml = () => '';
+	renderCoffre(colonieRang());
+	assert.strictEqual(_pcfSel, 'coffre', 'le petit coffre existe : gardé');
+	globalThis._pcfSel = 'atelier';
+	renderCoffre(colonieRang());
+	assert.strictEqual(_pcfSel, 'entrepot', 'une cible inconnue retombe sur l\'entrepôt');
+	const sel = noeuds['pcf-select'].innerHTML;
+	assert.ok(sel.includes('value="entrepot"') && sel.includes('value="coffre"') && !sel.includes('Rangement<'));
+	const d = noeuds['pcf-droite'].innerHTML;
+	assert.ok(!d.includes(XSS) && /disabled[^>]*Dépôt seulement[\s\S]*coffrePrendre/.test(d), 'prise grisée sans autorisation');
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Ranger ici'));
+	assert.strictEqual(noeuds['pcf-etat'].textContent, 'Dépôt seulement : le fondateur autorise le retrait.');
+	assert.ok(noeuds['pcf-select-gauche'].innerHTML.includes('aventurier:x'), 'sacs du groupe à gauche');
+	globalThis._pcfSel = 'coffre';
+	renderCoffre(colonieRang());
+	assert.ok(/disabled[^>]*Trop lourd/.test(noeuds['pcf-principal'].innerHTML), 'coffre trop petit : dépôt grisé');
+	renderCoffre(colonieRang({ rangements: { entrepot: colonieRang().rangements.entrepot } }));
+	assert.strictEqual(noeuds['pcf-select'].disabled, true, 'une seule cible : sélecteur figé');
 });
 
 t('coffre : contenant à marée basse — charge inconnue, prise laissée au serveur', () => {

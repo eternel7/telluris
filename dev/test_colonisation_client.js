@@ -179,15 +179,13 @@ test('guilde : le visiteur la rejoint, le maître ouvre l\'échelon, seuls les r
 	assert.ok(avant.includes('Fonder la guilde') && !avant.includes('colOuvrirGuilde'));
 });
 
-test('rangements : l\'associé dépose, ne prend que s\'il est autorisé ; seul le fondateur autorise', () => {
-	const base = { entrepot: { objets: [{ index: 0, nom: MECHANT, icon: '' }], kg: 1, kg_max: 300, peut_retirer: false },
-		coffre: { objets: [], kg: 0, kg_max: 30 }, associes: null, sac: [{ index: 0, item_id: 'item:a', nom: MECHANT, icon: '' }] };
-	const associe = colRangementsHtml(base);
-	assert.ok(!associe.includes('<script>') && associe.includes('colDeposer') && !associe.includes('data-cible="entrepot" data-index="0" onclick="colRetirer'));
-	assert.ok(!associe.includes('colAutoriser'));
-	const fondateur = colRangementsHtml(Object.assign({}, base, { entrepot: Object.assign({}, base.entrepot, { peut_retirer: true }),
-		coffre: null, associes: [{ id: 'character:b', nom: MECHANT, retrait: false }] }));
-	assert.ok(fondateur.includes('colRetirer') && fondateur.includes('colAutoriser') && !fondateur.includes('petit coffre'));
+test('rangements : seules les autorisations de retrait sont propres à la colonie (fondateur seul)', () => {
+	// Le reste est le panneau du coffre d'une propriété (`renderCoffre` de /play), hors de ce harnais.
+	assert.strictEqual(colAutorisationsHtml({ associes: null }), '', 'associé : rien à autoriser');
+	const fondateur = colAutorisationsHtml({ associes: [{ id: 'character:b', nom: MECHANT, retrait: false },
+		{ id: 'character:c', nom: 'Milo', retrait: true }] });
+	assert.ok(!fondateur.includes('<script>') && (fondateur.match(/colAutoriser\(this\)/g) || []).length === 2);
+	assert.ok(fondateur.includes('data-retrait="1"') && fondateur.includes('Retirer l\'autorisation'));
 	const colons = colColonsHtml({ cite: MECHANT, convoi: { nombre: 3, label: MECHANT }, offres: [{ id: 'i', label: MECHANT, nombre: 0, refus: MECHANT }] });
 	assert.ok(!colons.includes('<script>') && /disabled/.test(colons) && colons.includes('3 colon'));
 });
@@ -239,13 +237,25 @@ test('approvisionnement : consignes au fondateur seul, lecture pour l\'associé,
 		consignes: [{ stock: 'bois', label: MECHANT, acheter: true, plafond_jour: 300 }],
 		livraisons: [{ stock: 'bois', label: 'Bois', unites: 12, cite: MECHANT, arrivee: Date.now() / 1000 + 3600 }],
 	};
-	const f = colOngletPopulationHtml(gerant('fondateur', { approvisionnement: appro }));
+	const f = colOngletSiteHtml(gerant('fondateur', { approvisionnement: appro }));
 	assert.ok(f.includes('colConsigne(this)') && f.includes('class="col-consigne-plafond" data-stock="bois"'));
 	assert.ok(!f.includes(MECHANT) && f.includes('Bois +0.6 / jour') && f.includes('de &lt;script&gt;'));
-	const a = colOngletPopulationHtml(gerant('associe', { approvisionnement: appro }));
+	const a = colOngletSiteHtml(gerant('associe', { approvisionnement: appro }));
 	assert.ok(a.includes('🧺 Approvisionnement') && !a.includes('colConsigne') && !a.includes(MECHANT));
-	assert.ok(!colOngletPopulationHtml(gerant('fondateur')).includes('🧺'), 'sans bloc, aucune section');
+	assert.ok(!colOngletSiteHtml(gerant('fondateur')).includes('🧺'), 'sans bloc, aucune section');
+	assert.ok(!colOngletPopulationHtml(gerant('fondateur', { approvisionnement: appro })).includes('🧺'), 'plus sur l\'onglet Population');
 	assert.ok(!tout(visiteur()).includes('🧺'));
+});
+
+test('onglet Site : réserves puis approvisionnement, AVANT le tableau des besoins', () => {
+	const d = gerant('fondateur', { stocks: [{ stock: 'bois', label: MECHANT, quantite: 1, seuil: 5, capacite: 50 }],
+		approvisionnement: { intendant: false, autonome: {}, consignes: [], livraisons: [] }, besoins: [{ label: 'Bois' }] });
+	const site = colOngletSiteHtml(d);
+	const r = site.indexOf('📦 Réserves'), a = site.indexOf('🧺 Approvisionnement'), b = site.indexOf('📋 Tableau des besoins');
+	assert.ok(r >= 0 && r < a && a < b, 'ordre : Réserves, Approvisionnement, Besoins');
+	assert.ok(!site.includes('<script>') && site.includes('⚠️ &lt;script&gt;'));
+	assert.ok(!colOngletPopulationHtml(d).includes('📦 Réserves'), 'plus sur l\'onglet Population');
+	assert.ok(!tout(visiteur()).includes('📦 Réserves'));
 });
 
 console.log(`OK — ${n} tests du panneau de colonisation.`);

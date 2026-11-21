@@ -3089,6 +3089,8 @@
 				<div class="sh-inv-scroll sh-scroll"><div id="pcf-droite" class="sh-inv-box"></div></div>
 			</div>
 		</div>
+		{# Rangements d'une implantation : autorisations de retrait des associés (fondateur). #}
+		<div id="pcf-extra"></div>
 	</div><!-- /#prop-coffre-panel -->
 	{# Embauche : comme le tableau de recrues — des cartes de personnage, ici des PNJ
 	   marchands (portrait /pnj), sans vitaux ni clauses. #}
@@ -7605,7 +7607,7 @@ function openItemDetail(source, idx) {
 	// Panneau coffre : fiche en lecture seule (mono, sans action — le transfert reste sur la flèche).
 	// 'pcf_sac' : idx = position dans le sac de gauche (vous ou un porteur) ; 'pcf_coffre' : idx = `idx` réel de l'objet du coffre.
 	else if (source === 'pcf_sac')    item = (_pcfSacGauche(_pcfEtat).inventaire || [])[idx];
-	else if (source === 'pcf_coffre') item = ((_pcfEtat && _pcfEtat.coffre || {}).inventaire || []).find(x => x.idx === idx);
+	else if (source === 'pcf_coffre') item = (_pcfDroite(_pcfEtat).inventaire || []).find(x => x.idx === idx);
 	if (!item || typeof item !== 'object') return;
 
 	if (source === 'equip') {
@@ -11904,9 +11906,18 @@ window.addEventListener('resize', () => {
 });
 
 function closeCoffre() {
-	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('prop-coffre-panel').classList.add('panel-hidden');
+	// Rangements d'une implantation : on revient à son panneau, pas à la carte.
+	if (_pcfEtat && _pcfEtat.colonie && typeof openColonie === 'function') { openColonie(); return; }
+	document.getElementById('game-container').classList.remove('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Colonne de droite « rangement » : le coffre d'une propriété, ou l'entrepôt commun / le
+// petit coffre d'une implantation (`rangements`, même forme que `coffre`).
+function _pcfDroite(data) {
+	if (!data) return {};
+	return (data.colonie ? (data.rangements || {})[_pcfSel] : data.coffre) || {};
 }
 
 async function openCoffre() {
@@ -11967,16 +11978,25 @@ function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn, fi
 function renderCoffre(data) {
 	if (!data) return;
 	const ateliers = data.ateliers || [];
+	const colonie = !!data.colonie;
+	const rangs = data.rangements || {};
 	const sel = document.getElementById('pcf-select');
-	if (_pcfSel !== 'coffre' && !ateliers.some(a => a.id === _pcfSel)) _pcfSel = 'coffre';
+	if (colonie) { if (!rangs[_pcfSel]) _pcfSel = 'entrepot'; }
+	else if (_pcfSel !== 'coffre' && !ateliers.some(a => a.id === _pcfSel)) _pcfSel = 'coffre';
 	if (sel) {
-		sel.innerHTML = `<option value="coffre">📦 Rangement</option>` + ateliers.map(a =>
-			`<option value="${escapeHtml(a.id)}">🏷️ ${escapeHtml(a.nom)} — ${escapeHtml(a.metier_label)}</option>`).join('');
+		sel.innerHTML = colonie
+			? Object.keys(rangs).map(k => `<option value="${escapeHtml(k)}">${escapeHtml(rangs[k].label || k)}</option>`).join('')
+			: `<option value="coffre">📦 Rangement</option>` + ateliers.map(a =>
+				`<option value="${escapeHtml(a.id)}">🏷️ ${escapeHtml(a.nom)} — ${escapeHtml(a.metier_label)}</option>`).join('');
+		sel.disabled = colonie && Object.keys(rangs).length < 2;
 		sel.value = _pcfSel;
 	}
 	const etat = document.getElementById('pcf-etat');
-	if (etat) etat.textContent = data.gardien ? '🛡️ Un gardien veille sur les lieux.'
+	if (etat) etat.textContent = colonie ? (_pcfDroite(data).note || '')
+		: data.gardien ? '🛡️ Un gardien veille sur les lieux.'
 		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
+	const extra = document.getElementById('pcf-extra');
+	if (extra) extra.innerHTML = colonie && typeof colAutorisationsHtml === 'function' ? colAutorisationsHtml(data) : '';
 
 	const porteurs = data.porteurs || [];
 	// Contenants (sac dimensionnel…) portés par vous, un compagnon ou une monture : un sac de
@@ -12012,14 +12032,15 @@ function renderCoffre(data) {
 	// sont conservés pour l'adressage serveur (ordre d'affichage seulement).
 	const ordInv = _sortedOrder(inv, 'asc');
 
-	if (_pcfSel === 'coffre') {
-		const c = data.coffre || {};
+	if (colonie || _pcfSel === 'coffre') {
+		const c = _pcfDroite(data);
 		_grpCharge('pcf-charge-droite', c);
 		const libre = (+c.charge_max || 0) - (+c.charge || 0);
 		_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i => {
 			const it = inv[i];
 			return _pcfLigne(it, posG(i), '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
-				c.depot ? 'Ranger ici' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac', null, i);
+				!c.depot ? 'Vous ne pouvez rien déposer ici' : (+it.poids || 0) > libre + 1e-6 ? 'Trop lourd — plus assez de place' : 'Ranger ici',
+				'droite', 'pcf_sac', null, i);
 		}).join('') : videG);
 		const items = c.inventaire || [];
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
@@ -12027,12 +12048,15 @@ function renderCoffre(data) {
 			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
 			: items.length ? ordCoffre.map(it => {
 				const rentre = _grpRentre(it, moi);
-				return _pcfLigne(it, it.idx, '←', 'coffrePrendre', rentre,
-					!rentre ? (ctnG && it.contenant ? 'Un contenant magique ne se range pas dans un autre'
+				// `retrait` absent (coffre d'une propriété) : seul le poids décide.
+				const permis = c.retrait !== false;
+				return _pcfLigne(it, it.idx, '←', 'coffrePrendre', rentre && permis,
+					!permis ? 'Dépôt seulement : le fondateur autorise le retrait'
+					: !rentre ? (ctnG && it.contenant ? 'Un contenant magique ne se range pas dans un autre'
 						: ctnG ? 'Trop lourd — le contenant est plein' : 'Trop lourd — le destinataire est à sa charge maximale')
 					: data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre');
 			}).join('')
-			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Rangement vide</div>');
+			: `<div class="sh-empty"><span class="sh-empty-icon">📦</span>${colonie ? escapeHtml(c.label || 'Rangement').replace(/^\S+\s/, '') + ' : vide' : 'Rangement vide'}</div>`);
 		_pcfOmbres();
 		return;
 	}
@@ -12075,11 +12099,19 @@ function _pcfCorps(sens, btn) {
 	return { sens, index: +btn.dataset.idx, item_id: btn.dataset.item || null, ..._pcfAdresse() };
 }
 
+// Rangements d'une implantation : mêmes corps, routes de la colonie, cible = colonne de droite.
+function _pcfCorpsColonie(btn) {
+	const { sens, ...corps } = _pcfCorps('', btn);
+	return { cible: _pcfSel, ...corps };
+}
+
 function coffreDeposer(btn) {
+	if (_pcfEtat && _pcfEtat.colonie) return _pcfPost('api/colonisation/rangements/deposer', _pcfCorpsColonie(btn));
 	return _pcfPost('api/proprietes/coffre/transferer', _pcfCorps('vers_coffre', btn));
 }
 
 async function coffrePrendre(btn) {
+	if (_pcfEtat && _pcfEtat.colonie) return _pcfPost('api/colonisation/rangements/retirer', _pcfCorpsColonie(btn));
 	const data = await _pcfPost('api/proprietes/coffre/transferer', _pcfCorps('vers_principal', btn));
 	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le rangement…');
 }
