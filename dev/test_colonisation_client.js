@@ -69,11 +69,12 @@ function gerant(role, extra) {
 			conditions: [{ label: 'Population', valeur: 3, cible: 5, ok: false }, { label: 'Palissade', valeur: null, cible: null, ok: true }] },
 		menace: { etape: 2, mot: 'la bête a remarqué le lieu' },
 		associes: [{ id: 'character:b', nom: MECHANT, apports: { bois: 4 } }],
-		journal: [{ at: 1, texte: MECHANT }], demandes: [{ id: 'character:c', nom: 'Cy', texte: MECHANT }], soutiens: [],
+		// Le carnet n'est servi qu'au fondateur (`vue`).
+		journal: role === 'fondateur' ? [{ at: 1, texte: MECHANT, genre: 'don' }, { at: 2, texte: 'Grand feu.' }] : undefined, demandes: [{ id: 'character:c', nom: 'Cy', texte: MECHANT }], soutiens: [],
 	}, extra || {});
 }
 
-const tout = (d) => ['site', 'population', 'batiments', 'defense'].map(o => colImplantationHtml(d, o)).join('');
+const tout = (d) => ['site', 'population', 'batiments', 'defense', 'carnet'].map(o => colImplantationHtml(d, o)).join('');
 
 test('aucune chaîne saisie ne sort sans échappement', () => {
 	for (const html of [tout(visiteur()), tout(gerant('fondateur')), tout(gerant('associe')),
@@ -104,7 +105,10 @@ test('une demande en attente remplace le champ de demande', () => {
 test('le fondateur a tous les onglets, les chiffres et toutes les décisions', () => {
 	const d = gerant('fondateur');
 	const fondable = Object.assign({}, d, { guilde: { existe: false, suivant: { label: 'Auberge', prix: 1, palier: 'Village', refus: '' } } });
-	assert.strictEqual((colImplantationHtml(fondable, 'site').match(/data-onglet=/g) || []).length, COL_ONGLETS.length);
+	assert.strictEqual((colImplantationHtml(fondable, 'site').match(/<button class="sheet-tab-btn[^"]*" data-onglet=/g) || []).length, COL_ONGLETS.length);
+	// seul le corps de l'onglet défile : il porte l'onglet (position gardée au redessin)
+	assert.ok(colImplantationHtml(fondable, 'batiments').includes('<div class="col-corps" data-onglet="batiments">'));
+	assert.ok(colImplantationHtml(visiteur(), 'site').includes('<div class="col-corps">'), 'visiteur : corps défilant aussi');
 	// guilde ni fondée ni fondable au palier courant : pas d'onglet, et l'onglet demandé retombe sur le Site
 	const sansGuilde = Object.assign({}, d, { guilde: { existe: false, suivant: null } });
 	assert.ok(!colImplantationHtml(sansGuilde, 'site').includes('data-onglet="guilde"'));
@@ -179,13 +183,19 @@ test('guilde : le visiteur la rejoint, le maître ouvre l\'échelon, seuls les r
 	assert.ok(avant.includes('Fonder la guilde') && !avant.includes('colOuvrirGuilde'));
 });
 
-test('rangements : seules les autorisations de retrait sont propres à la colonie (fondateur seul)', () => {
+test('rangements : autorisations et mouvements au fondateur, flèche « réserves » des seuls objets acceptés', () => {
 	// Le reste est le panneau du coffre d'une propriété (`renderCoffre` de /play), hors de ce harnais.
-	assert.strictEqual(colAutorisationsHtml({ associes: null }), '', 'associé : rien à autoriser');
-	const fondateur = colAutorisationsHtml({ associes: [{ id: 'character:b', nom: MECHANT, retrait: false },
-		{ id: 'character:c', nom: 'Milo', retrait: true }] });
+	assert.strictEqual(colRangementsExtraHtml({ associes: null, mouvements: null }), '', 'associé : rien de plus');
+	const fondateur = colRangementsExtraHtml({ associes: [{ id: 'character:b', nom: MECHANT, retrait: false },
+		{ id: 'character:c', nom: 'Milo', retrait: true }], mouvements: [{ at: 1, texte: MECHANT, genre: 'entrepot' }] });
 	assert.ok(!fondateur.includes('<script>') && (fondateur.match(/colAutoriser\(this\)/g) || []).length === 2);
 	assert.ok(fondateur.includes('data-retrait="1"') && fondateur.includes('Retirer l\'autorisation'));
+	assert.ok(fondateur.includes('Mouvements de l\'entrepôt') && fondateur.includes('&lt;script&gt;'));
+	assert.ok(colRangementsExtraHtml({ associes: [], mouvements: [] }).includes('Aucun mouvement'));
+	const btn = colVerserBtn({ _id: 'item:pain' }, 'aventurier:1#0', 2, { 'item:pain': MECHANT });
+	assert.ok(btn.includes('data-sac="aventurier:1#0"') && btn.includes('data-idx="2"') && btn.includes('colVerserReserves(this)'));
+	assert.ok(!btn.includes('<script>'));
+	assert.strictEqual(colVerserBtn({ _id: 'item:epee' }, '', 0, { 'item:pain': 'Nourriture' }), '', 'objet sans usage : pas de flèche');
 	const colons = colColonsHtml({ cite: MECHANT, convoi: { nombre: 3, label: MECHANT }, offres: [{ id: 'i', label: MECHANT, nombre: 0, refus: MECHANT }] });
 	assert.ok(!colons.includes('<script>') && /disabled/.test(colons) && colons.includes('3 colon'));
 });
@@ -256,6 +266,102 @@ test('onglet Site : réserves puis approvisionnement, AVANT le tableau des besoi
 	assert.ok(!site.includes('<script>') && site.includes('⚠️ &lt;script&gt;'));
 	assert.ok(!colOngletPopulationHtml(d).includes('📦 Réserves'), 'plus sur l\'onglet Population');
 	assert.ok(!tout(visiteur()).includes('📦 Réserves'));
+});
+
+test('réserves en jauges : seuil, solde par jour, autonomie', () => {
+	const d = gerant('fondateur', { stocks: [
+		{ stock: 'bois', label: 'Bois', quantite: 6, capacite: 60, seuil: 18, par_jour: -3, jours: 2 },
+		{ stock: 'nourriture', label: MECHANT, quantite: 30, capacite: 60, seuil: 10, par_jour: 1.5, jours: null },
+		{ stock: 'medicaments', label: 'Médicaments', quantite: 0, capacite: 60, seuil: 0, par_jour: 0, jours: null }] });
+	const r = colReservesHtml(d);
+	assert.ok(!r.includes('<script>'));
+	assert.ok(r.includes('width:10.0%') && r.includes('left:30.0%'), 'remplissage et repère du seuil en %');
+	assert.ok(r.includes('col-barre bas') && r.includes('⚠️ Bois'), 'sous le seuil : barre basse');
+	assert.ok(r.includes('−3 / jour · ≈ 2 jours') && r.includes('+1.5 / jour · se remplit') && r.includes('±0 / jour · stable'));
+	assert.ok(colReservesHtml(gerant('fondateur')).includes('Bois : 1 / 60') && !colReservesHtml(gerant('fondateur')).includes('/ jour'),
+		'payload sans solde : jauge seule');
+	assert.strictEqual(_colJours(0.4), 'moins d\'un jour');
+	assert.strictEqual(_colJours(90), 'plus de 60 jours');
+});
+
+test('dons groupés par sac et objet, « Tout donner », pastilles par réserve', () => {
+	const pain = { sac: 'character:v', item_id: 'item:pain', nom: MECHANT, icon: '🍞', stock: 'nourriture', stock_label: 'Nourriture', unites: 2 };
+	const d = visiteur({ stocks_ouverts: [{ stock: 'nourriture', label: 'Nourriture' }, { stock: 'bois', label: 'Bois' }],
+		dons_possibles: [Object.assign({}, pain, { index: 0 }), Object.assign({}, pain, { index: 3 }),
+			Object.assign({}, pain, { index: 0, sac: 'aventurier:1', porteur: 'Bo' }),
+			{ sac: 'character:v', index: 1, item_id: 'item:buche', nom: 'Bûche', icon: '🪵', stock: 'bois', stock_label: 'Bois', unites: 1.5 }] });
+	_colDonsFiltre = '';
+	const h = colDonsHtml(d);
+	assert.strictEqual((h.match(/onclick="colDonner\(this\)"/g) || []).length, 4, '3 lignes, une seule avec « Tout donner »');
+	assert.ok(h.includes('× 2') && h.includes('(tout : +4)') && h.includes('data-tout="1"'));
+	assert.ok(h.includes('col-filtre bas') && h.includes('⚠️ Bois'), 'le bois manque (besoins) : pastille en avant');
+	_colDonsFiltre = 'bois';
+	const b = colDonsHtml(d);
+	assert.ok(b.includes('Bûche') && !b.includes('Nourriture +'), 'filtre sur le bois');
+	_colDonsFiltre = 'medicaments';
+	assert.ok(colDonsHtml(d).includes('Bûche') && _colDonsFiltre === '', 'filtre sans objet : retombe sur tout');
+	assert.ok(!colDonsHtml(visiteur()).includes('col-filtres'), 'une seule réserve : pas de pastilles');
+});
+
+test('pastilles d\'alerte des onglets ; onglet mémorisé par implantation', () => {
+	assert.deepStrictEqual(Object.keys(colAlertes(gerant('fondateur'))), ['site'], 'besoins ⇒ Site');
+	const attaque = colAlertes(gerant('fondateur', { besoins: [], attaque_en_cours: true }));
+	assert.deepStrictEqual(Object.keys(attaque), ['defense']);
+	const pret = gerant('fondateur', { besoins: [], palier_suivant: Object.assign({}, gerant('fondateur').palier_suivant, { pret: true }) });
+	assert.ok(colAlertes(pret).population && !colAlertes(Object.assign({}, pret, { role: 'associe' })).population, 'décision du fondateur seul');
+	assert.ok(colAlertes(gerant('fondateur', { chantier: { genre: 'statut', reste: 0, cout: 1, verse: 1, label: 'x' } })).population);
+	const html = colImplantationHtml(gerant('fondateur', { attaque_en_cours: true }), 'site');
+	assert.ok(/data-onglet="defense"[^>]*title="Le lieu est attaqué">[^<]*<span class="col-alerte"/.test(html));
+	const memo = {};
+	globalThis.localStorage = { getItem: k => memo[k] || null, setItem: (k, v) => { memo[k] = v; } };
+	assert.strictEqual(_colOngletLu('implantation:a'), 'site');
+	_colOngletEcrit('implantation:a', 'batiments');
+	assert.strictEqual(_colOngletLu('implantation:a'), 'batiments');
+	assert.strictEqual(_colOngletLu('implantation:b'), 'site', 'par implantation');
+	globalThis.localStorage = { getItem: () => { throw new Error('bloqué'); }, setItem: () => { throw new Error('bloqué'); } };
+	assert.strictEqual(_colOngletLu('implantation:a'), 'site', 'stockage bloqué : Site');
+	_colOngletEcrit('implantation:a', 'defense');
+	assert.strictEqual(colImplantationHtml(gerant('fondateur'), 'inconnu'), colImplantationHtml(gerant('fondateur'), 'site'));
+});
+
+test('carnet : onglet du fondateur, filtré par genre, lignes anciennes en « divers »', () => {
+	const d = gerant('fondateur');
+	assert.ok(!colOngletSiteHtml(d).includes('📓 Carnet'), 'plus sur l\'onglet Site');
+	_colCarnetFiltre = '';
+	const c = colCarnetHtml(d);
+	assert.ok(!c.includes('<script>') && c.includes('data-genre="don"') && c.includes('data-genre="divers"'));
+	_colCarnetFiltre = 'divers';
+	const f = colCarnetHtml(d);
+	assert.ok(f.includes('Grand feu.') && !f.includes('&lt;script&gt;'));
+	assert.ok(!colImplantationHtml(gerant('associe'), 'site').includes('data-onglet="carnet"'));
+	assert.strictEqual(colImplantationHtml(gerant('associe'), 'carnet'), colImplantationHtml(gerant('associe'), 'site'));
+	_colCarnetFiltre = '';
+});
+
+test('bâtiments : état, postes vacants (« Engager » au fondateur), mini-plan, barre de chantier', () => {
+	const d = gerant('fondateur', { batiments: [
+		{ id: 'b_1', label: 'Forge', icone: '⚒️', pos: [3, 4], endommage: false,
+			postes: [{ metier: 'forgeron', label: 'Forgeron', places: 2, tenus: [{ id: 'employe:x', nom: 'Jehan' }] }] },
+		{ id: 'b_2', label: MECHANT, icone: '🏠', pos: [1, 1], endommage: true, postes: [] }],
+		plan: { image: '/towns/colonie a.jpg', dimensions: { x: 40, y: 20 }, entrees: [[19, 19]] } });
+	const h = colOngletBatimentsHtml(d);
+	assert.ok(!h.includes('<script>'));
+	assert.ok(h.includes('🟢 en service') && h.includes('1 poste vacant') && h.includes('⬜ Forgeron 1/2'));
+	assert.ok(h.includes('🔴 endommagé'));
+	assert.strictEqual((h.match(/>Engager</g) || []).length, 1);
+	assert.ok(!colOngletBatimentsHtml(Object.assign({}, d, { role: 'associe' })).includes('>Engager<'));
+	assert.ok(h.includes('viewBox="0 0 40 20"') && h.includes('aspect-ratio:40 / 20') && h.includes('colonie%20a.jpg'));
+	assert.ok(h.includes('cx="3.5" cy="4.5"') && h.includes('cx="19.5" cy="19.5"') && h.includes('cx="1.5" cy="2.5"'), 'bâtiment, entrée, vous');
+	assert.strictEqual(colPlanHtml(gerant('fondateur')), '', 'sans plan : rien');
+	const ch = colChantierHtml(gerant('fondateur', { chantier: { genre: 'fortification', label: 'Palissade', cout: 200, verse: 50, reste: 150 } }));
+	assert.ok(ch.includes('width:25.0%') && ch.includes('(25 %)'));
+});
+
+test('en-tête : 📦 Rangements aux gérants seulement', () => {
+	assert.ok(colEnteteHtml(gerant('fondateur')).includes('openColonieRangements()'));
+	assert.ok(colEnteteHtml(gerant('associe')).includes('petit coffre'));
+	assert.ok(!colEnteteHtml(visiteur()).includes('openColonieRangements'));
+	assert.ok(!colOngletSiteHtml(gerant('fondateur')).includes('openColonieRangements'), 'plus en bas du Site');
 });
 
 console.log(`OK — ${n} tests du panneau de colonisation.`);

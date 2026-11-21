@@ -286,6 +286,37 @@ def test_on_donne_depuis_tout_le_groupe_compagnons_montures_et_contenants(monde)
 	assert rep["dons_possibles"] == [] and rep["role"] == col.SOUTIEN
 
 
+def test_tout_donner_verse_chaque_exemplaire_du_meme_sac(monde):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	visiteur = _perso("v", lieu=imp_id, position=dict(fondateur["position"]),
+					  inventaire=["item:pain", "item:epee", "item:pain", "item:pain"])
+	avant = monde["docs"][imp_id]["stocks"]["nourriture"]
+	rep = _appel(monde, visiteur, rc.donner, None, {"index": 0, "item_id": "item:pain", "tout": True})
+	assert rep["don"]["nombre"] == 3 and visiteur["inventaire"] == ["item:epee"]
+	assert monde["docs"][imp_id]["stocks"]["nourriture"] == round(avant + rep["don"]["unites"], 1)
+	# sans `tout`, un seul exemplaire
+	visiteur["inventaire"] = ["item:pain", "item:pain"]
+	assert _appel(monde, visiteur, rc.donner, None, {"index": 1, "item_id": "item:pain"})["don"]["nombre"] == 1
+	assert visiteur["inventaire"] == ["item:pain"]
+
+
+def test_le_mini_plan_vient_du_lieu_modele_et_reste_aux_gerants(monde, monkeypatch):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	monkeypatch.setattr(rc.os.path, "exists", lambda chemin: True)
+	modele = monde["get"](monde["docs"][imp_id]["modele"])
+	plan = _appel(monde, fondateur, rc.ici, None)["plan"]
+	assert plan["dimensions"] == {"x": modele["dimensions"]["x"], "y": modele["dimensions"]["y"]}
+	assert plan["entrees"] == modele["entrees"] and plan["image"].endswith("/" + modele["image"])
+	visiteur = _perso("v", lieu=imp_id, position=dict(fondateur["position"]))
+	assert "plan" not in _appel(monde, visiteur, rc.ici, None)
+	monkeypatch.setattr(rc.os.path, "exists", lambda chemin: False)
+	assert _appel(monde, fondateur, rc.ici, None)["plan"] is None, "image absente du disque : pas de plan"
+
+
 def test_le_fondateur_choisit_l_icone_de_la_carte_le_visiteur_non(monde, monkeypatch):
 	rc = monde["rc"]
 	fondateur = _perso()
@@ -608,6 +639,13 @@ def test_entrepot_commun_et_petit_coffre_par_les_routes(monde):
 	assert _refus(monde, fondateur, rc.rangements_deposer, None, {"cible": "coffre", "index": 0, "item_id": "item:pain"}) == 403
 	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1}, inventaire=["item:pain"])
 	assert _refus(monde, visiteur, rc.rangements_deposer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain"}) == 403
+	# journal des mouvements de l'entrepôt : au fondateur seul, sans le petit coffre
+	mvts = _appel(monde, fondateur, rc.rangements, None)["mouvements"]
+	assert [m["texte"] for m in mvts] == ["Milo prend Pain à l'entrepôt.", "Milo dépose Pain à l'entrepôt."]
+	assert rep["mouvements"] is None
+	# objets que les réserves acceptent (flèche « réserves ») : le pain, pas l'épée
+	associe["inventaire"] = ["item:pain", "item:epee"]
+	assert _appel(monde, associe, rc.rangements, None)["reserves"] == {"item:pain": _reg(monde)["stocks_labels"]["nourriture"]}
 
 
 def test_les_rangements_servent_tous_les_sacs_du_groupe(monde):

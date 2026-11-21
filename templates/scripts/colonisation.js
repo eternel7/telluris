@@ -16,6 +16,8 @@
 let _colData = null;      // dernier bloc reçu (implantation)
 let _colOnglet = 'site';
 let _colVue = null;       // 'site' (fonder) | 'ici' | 'embauche'
+let _colDonsFiltre = '';  // stock choisi aux pastilles des dons ('' = tous)
+let _colCarnetFiltre = '';// genre choisi aux pastilles du carnet ('' = tout)
 
 const COL_AXES = { eau: '💧 Eau', nourriture: '🌾 Nourriture', materiaux: '🪵 Matériaux',
 	commerce: '⚖️ Commerce', defense: '⛰️ Défense', danger: '🐺 Danger' };
@@ -26,6 +28,10 @@ const COL_FACTEURS = {
 	morts: 'Morts récentes', prosperite: 'Prospérité', expeditions: 'Expéditions réussies',
 	reputation: 'Réputation du fondateur', feu: 'Feu', securite: 'Sécurité' };
 const COL_ROLES = { fondateur: 'Fondateur', associe: 'Associé', soutien: 'Soutien', visiteur: 'Visiteur' };
+// Genres des lignes du carnet (`colonisation.GENRES_JOURNAL`) ; sans genre ⇒ « divers ».
+const COL_GENRES = { association: '🤝 Association', population: '👥 Population', batiment: '🏘️ Bâtiments',
+	chantier: '🏗️ Chantiers', personnel: '🧑‍🔧 Personnel', don: '🎁 Dons', feu: '🔥 Feu', evenement: '📜 Vie du lieu',
+	caisse: '💰 Caisse', guilde: '🏰 Guilde', attaque: '⚔️ Attaques', entrepot: '📦 Entrepôt', divers: '· Divers' };
 const COL_APPORTS = { nourriture: 'nourriture', bois: 'bois', materiaux: 'matériaux', medicaments: 'médicaments', cuivre: 'cu' };
 
 function _colE(s) { return escapeHtml(String(s === null || s === undefined ? '' : s)); }
@@ -166,6 +172,7 @@ function colEnteteHtml(d) {
 		<span>🙂 Moral : ${_colE(d.moral.mot)}</span>
 		<span>🔥 ${d.feu === 'grand' ? 'Grand feu' : 'Feu réduit'}</span>
 		<span>🎭 ${COL_ROLES[d.role] || ''}</span>
+		${_colGere(d) ? `<button class="sh-drop-btn" onclick="openColonieRangements()" title="Entrepôt commun${d.role === 'associe' ? ' et votre petit coffre' : ''}">📦 Rangements</button>` : ''}
 	</div></section>`;
 }
 
@@ -175,13 +182,31 @@ function colBesoinsHtml(d) {
 		${b ? `<div class="prop-caps">${b}</div>` : '<div class="sell-empty">Le lieu ne manque de rien.</div>'}</section>`;
 }
 
+// Dons : un objet identique d'un même sac = une ligne « × N » (Donner 1 / Tout donner) ;
+// pastilles par stock, celles d'un stock sous le seuil bas mises en avant.
 function colDonsHtml(d) {
-	const lignes = (d.dons_possibles || []).map(o => `<div class="prop-ligne"><div class="prop-txt">
-		<strong>${_colE(o.icon)} ${_colE(o.nom)}</strong>
-		<span class="q-desc">${o.porteur ? `🎒 ${_colE(o.porteur)} · ` : ''}${_colE(o.stock_label)} +${_colE(o.unites)}</span></div>
-		<button class="sh-drop-btn" data-sac="${_colE(o.sac || '')}" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colDonner(this)">Donner</button></div>`).join('');
+	const groupes = [];
+	const parCle = {};
+	(d.dons_possibles || []).forEach(o => {
+		const cle = `${o.sac || ''}|${o.item_id}`;
+		if (!parCle[cle]) { parCle[cle] = Object.assign({}, o, { n: 0, total: 0 }); groupes.push(parCle[cle]); }
+		parCle[cle].n += 1;
+		parCle[cle].total = Math.round((parCle[cle].total + (+o.unites || 0)) * 10) / 10;
+	});
+	const bas = new Set((d.besoins || []).map(b => b.stock));
+	const presents = (d.stocks_ouverts || []).filter(st => groupes.some(g => g.stock === st.stock));
+	if (_colDonsFiltre && !presents.some(st => st.stock === _colDonsFiltre)) _colDonsFiltre = '';
+	const filtres = presents.length > 1 ? `<div class="col-filtres" role="group" aria-label="Filtrer par réserve">`
+		+ `<button type="button" class="col-filtre" data-stock="" aria-pressed="${!_colDonsFiltre}" onclick="colDonsFiltre(this)">Tout</button>`
+		+ presents.map(st => `<button type="button" class="col-filtre${bas.has(st.stock) ? ' bas' : ''}" data-stock="${_colE(st.stock)}" aria-pressed="${_colDonsFiltre === st.stock}" onclick="colDonsFiltre(this)">${bas.has(st.stock) ? '⚠️ ' : ''}${_colE(st.label)}</button>`).join('')
+		+ `</div>` : '';
+	const lignes = groupes.filter(g => !_colDonsFiltre || g.stock === _colDonsFiltre).map(o => `<div class="prop-ligne"><div class="prop-txt">
+		<strong>${_colE(o.icon)} ${_colE(o.nom)}${o.n > 1 ? ` <span class="sh-inv-qty">× ${o.n}</span>` : ''}</strong>
+		<span class="q-desc">${o.porteur ? `🎒 ${_colE(o.porteur)} · ` : ''}${_colE(o.stock_label)} +${_colE(o.unites)}${o.n > 1 ? ` (tout : +${_colE(o.total)})` : ''}</span></div>
+		<button class="sh-drop-btn" data-sac="${_colE(o.sac || '')}" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colDonner(this)">Donner</button>
+		${o.n > 1 ? `<button class="sh-drop-btn" data-sac="${_colE(o.sac || '')}" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" data-tout="1" onclick="colDonner(this)">Tout donner</button>` : ''}</div>`).join('');
 	return `<section class="prop-section"><h3>🎁 ${d.role === 'fondateur' ? 'Verser aux réserves' : 'Donner au lieu'}</h3>
-		<div class="prop-liste">${lignes || '<div class="sell-empty">Rien dans les sacs du groupe dont le lieu ait l\'usage.</div>'}</div></section>`;
+		${filtres}<div class="prop-liste">${lignes || '<div class="sell-empty">Rien dans les sacs du groupe dont le lieu ait l\'usage.</div>'}</div></section>`;
 }
 
 function _colFacteurs(bloc) {
@@ -247,21 +272,61 @@ function colOngletSiteHtml(d) {
 	let html = colSiteHtml(d.site, _colGere(d)) + colSousLieuxHtml(d) + colReservesHtml(d) + colApproHtml(d)
 		+ colBesoinsHtml(d) + colDonsHtml(d) + colAssociationHtml(d);
 	if (d.role === 'fondateur') html += colIconeHtml(d.icone_carte);
-	if (_colGere(d)) html += `<section class="prop-section"><div class="prop-ligne"><div class="prop-txt">
-		<span class="q-desc">Entrepôt commun${d.role === 'associe' ? ' et votre petit coffre' : ''}.</span></div>
-		<button class="sh-drop-btn" onclick="openColonieRangements()">📦 Rangements</button></div></section>`;
-	if (d.role === 'fondateur' && (d.journal || []).length) {
-		html += `<section class="prop-section"><h3>📓 Carnet</h3><div class="prop-liste">`
-			+ d.journal.slice(0, 20).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(new Date(j.at * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))} — ${_colE(j.texte)}</span></div></div>`).join('')
-			+ `</div></section>`;
-	}
 	return html;
 }
 
-// 📦 Réserves : les quatre stocks (gérants seulement — le visiteur n'a pas `stocks`).
+function _colDate(at) {
+	return new Date(at * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+// 📓 Carnet (fondateur) : son onglet, filtré par genre (`COL_GENRES`), toutes les lignes gardées.
+function colCarnetHtml(d) {
+	const journal = d.journal || [];
+	const genre = j => (j.genre && COL_GENRES[j.genre]) ? j.genre : 'divers';
+	const presents = Object.keys(COL_GENRES).filter(g => journal.some(j => genre(j) === g));
+	if (_colCarnetFiltre && !presents.includes(_colCarnetFiltre)) _colCarnetFiltre = '';
+	const filtres = presents.length > 1 ? `<div class="col-filtres" role="group" aria-label="Filtrer le carnet">`
+		+ `<button type="button" class="col-filtre" data-genre="" aria-pressed="${!_colCarnetFiltre}" onclick="colCarnetFiltre(this)">Tout</button>`
+		+ presents.map(g => `<button type="button" class="col-filtre" data-genre="${g}" aria-pressed="${_colCarnetFiltre === g}" onclick="colCarnetFiltre(this)">${COL_GENRES[g]}</button>`).join('')
+		+ `</div>` : '';
+	const lignes = journal.filter(j => !_colCarnetFiltre || genre(j) === _colCarnetFiltre).map(j => `<div class="prop-ligne"><div class="prop-txt">
+		<span class="q-desc">${COL_GENRES[genre(j)].split(' ')[0]} ${_colE(_colDate(j.at))} — ${_colE(j.texte)}</span></div></div>`).join('');
+	return `<section class="prop-section"><h3>📓 Carnet</h3>${filtres}
+		<div class="prop-liste">${lignes || '<div class="sell-empty">Rien n\'est encore noté.</div>'}</div></section>`;
+}
+
+// Jauge (pure) : barre remplie à `valeur / max`, repère au `seuil` s'il y en a un.
+function _colBarre(valeur, max, seuil, label) {
+	const pct = x => (max > 0 ? Math.max(0, Math.min(100, x / max * 100)) : 0).toFixed(1);
+	const bas = seuil > 0 && valeur < seuil;
+	return `<div class="col-barre${bas ? ' bas' : ''}" role="meter" aria-label="${_colE(label)}" aria-valuemin="0" aria-valuemax="${_colE(max)}" aria-valuenow="${_colE(valeur)}">
+		<span class="col-plein" style="width:${pct(valeur)}%"></span>${seuil > 0 ? `<span class="col-seuil" style="left:${pct(seuil)}%" title="Seuil bas : ${_colE(seuil)}"></span>` : ''}</div>`;
+}
+
+function _colJours(j) {
+	if (j < 1) return 'moins d\'un jour';
+	if (j > 60) return 'plus de 60 jours';
+	const n = Math.round(j);
+	return `${n} jour${n > 1 ? 's' : ''}`;
+}
+
+// 📦 Réserves (gérants seulement — le visiteur n'a pas `stocks`) : une jauge par stock, repère
+// du seuil bas, solde estimé par jour et autonomie (`par_jour`, `jours` du serveur).
 function colReservesHtml(d) {
-	const stocks = (d.stocks || []).map(s => `<span>${s.quantite < s.seuil ? '⚠️ ' : ''}${_colE(s.label)} : ${_colE(s.quantite)} / ${_colE(s.capacite)}</span>`).join('');
-	return stocks ? `<section class="prop-section"><h3>📦 Réserves</h3><div class="prop-caps">${stocks}</div></section>` : '';
+	const stocks = d.stocks || [];
+	if (!stocks.length) return '';
+	const jauges = stocks.map(s => {
+		const pj = s.par_jour;
+		const solde = pj === undefined || pj === null ? '' : `${pj > 0 ? '+' + pj : pj < 0 ? '−' + (-pj) : '±0'} / jour`;
+		const autonomie = pj === undefined || pj === null ? ''
+			: s.jours !== null && s.jours !== undefined ? `≈ ${_colJours(s.jours)}` : (pj > 0 ? 'se remplit' : 'stable');
+		return `<div class="col-jauge"><div class="col-jauge-tete">
+			<span>${s.quantite < s.seuil ? '⚠️ ' : ''}${_colE(s.label)} : ${_colE(s.quantite)} / ${_colE(s.capacite)}</span>
+			<span class="q-desc">${[solde, autonomie].filter(Boolean).map(_colE).join(' · ')}</span></div>
+			${_colBarre(+s.quantite || 0, +s.capacite || 0, +s.seuil || 0, s.label)}</div>`;
+	}).join('');
+	return `<section class="prop-section"><h3>📦 Réserves</h3><div class="col-jauges">${jauges}</div>
+		<span class="q-desc">Solde estimé : métiers, glanage et simples, moins les bouches et le feu — hors convois, achats, soins et attaques.</span></section>`;
 }
 
 function colOngletPopulationHtml(d) {
@@ -319,8 +384,10 @@ function colApproHtml(d) {
 function colChantierHtml(d) {
 	const c = d.chantier;
 	if (!c) return '';
-	let html = `<section class="prop-section"><h3>🏗️ Chantier : ${_colE(c.label)}</h3><div class="prop-ligne"><div class="prop-txt">
-		<span class="q-desc">Versé : ${_prixTexte(c.verse)} sur ${_prixTexte(c.cout)}${c.reste ? ` — reste ${_prixTexte(c.reste)}` : ''}</span></div>`;
+	let html = `<section class="prop-section"><h3>🏗️ Chantier : ${_colE(c.label)}</h3>
+		${_colBarre(+c.verse || 0, +c.cout || 0, 0, 'Chantier : ' + (c.label || ''))}
+		<div class="prop-ligne"><div class="prop-txt">
+		<span class="q-desc">Versé : ${_prixTexte(c.verse)} sur ${_prixTexte(c.cout)} (${c.cout ? Math.floor(Math.min(1, c.verse / c.cout) * 100) : 100} %)${c.reste ? ` — reste ${_prixTexte(c.reste)}` : ''}</span></div>`;
 	if (c.reste) html += `<button class="sh-drop-btn" data-montant="${_colE(c.reste)}" onclick="colFinancer(this)">Verser ce que je peux</button>`;
 	html += `</div>`;
 	if (!c.reste && c.genre === 'statut' && d.role === 'fondateur') {
@@ -330,20 +397,30 @@ function colChantierHtml(d) {
 	return html + `</section>`;
 }
 
+// État d'un bâtiment (pur) : à poser, endommagé (postes à l'arrêt), ou en service.
+function _colEtatBatiment(b) {
+	if (!b.pos) return '⚠️ à poser';
+	if (b.endommage) return '🔴 endommagé — postes à l\'arrêt';
+	return '🟢 en service';
+}
+
 function colOngletBatimentsHtml(d) {
 	const peutPoser = _colGere(d);
 	const bat = (d.batiments || []).map(b => {
 		const tenu = t => _colE(t.nom) + (t.vend === null || t.vend === undefined || d.role !== 'fondateur' ? ''
 			: ` <button class="sh-drop-btn" data-id="${_colE(t.id)}" data-vente="${t.vend ? '' : '1'}" onclick="colVente(this)">${t.vend ? '💰 vend' : '🔒 garde'}</button>`);
-		const postes = (b.postes || []).map(p => `${_colE(p.label)} ${p.tenus.length}/${_colE(p.places)}${p.tenus.length ? ' (' + p.tenus.map(tenu).join(', ') + ')' : ''}`).join(' · ');
+		const vacants = (b.postes || []).reduce((n, p) => n + Math.max(0, (+p.places || 0) - p.tenus.length), 0);
+		const postes = (b.postes || []).map(p => `${p.tenus.length < p.places ? '⬜' : '✅'} ${_colE(p.label)} ${p.tenus.length}/${_colE(p.places)}${p.tenus.length ? ' (' + p.tenus.map(tenu).join(', ') + ')' : ''}`).join(' · ');
 		return `<div class="prop-ligne"><div class="prop-txt">
-			<strong>${_colE(b.icone)} ${_colE(b.label)}${b.endommage ? ' — endommagé' : ''}</strong>
-			<span class="q-desc">${b.pos ? `case ${_colE(b.pos[0])}, ${_colE(b.pos[1])}` : '⚠️ à poser'}${postes ? ' · ' + postes : ''}</span></div>
+			<strong>${_colE(b.icone)} ${_colE(b.label)}</strong>
+			<span class="q-desc">${_colEtatBatiment(b)}${b.pos ? ` · case ${_colE(b.pos[0])}, ${_colE(b.pos[1])}` : ''}${vacants ? ` · ${vacants} poste${vacants > 1 ? 's' : ''} vacant${vacants > 1 ? 's' : ''}` : ''}</span>
+			${postes ? `<span class="q-desc">${postes}</span>` : ''}</div>
 			${peutPoser ? `<button class="sh-drop-btn" data-batiment="${_colE(b.id)}" onclick="colPoser(this)">${b.pos ? 'Déplacer ici' : 'Poser ici'}</button>` : ''}
+			${vacants && d.role === 'fondateur' ? '<button class="sh-drop-btn" onclick="colOuvrirEmbauche()">Engager</button>' : ''}
 			${b.endommage && d.role === 'fondateur' ? `<button class="sh-drop-btn" data-batiment="${_colE(b.id)}" onclick="colReparer(this)">Réparer</button>` : ''}
 		</div>`;
 	}).join('');
-	let html = `<section class="prop-section"><h3>🏘️ Bâtiments</h3>
+	let html = colPlanHtml(d) + `<section class="prop-section"><h3>🏘️ Bâtiments</h3>
 		<span class="q-desc">« Poser ici » pose le bâtiment sous vos pieds (case ${_colE((d.position || {}).x)}, ${_colE((d.position || {}).y)}).</span>
 		<div class="prop-liste">${bat || '<div class="sell-empty">Aucun bâtiment.</div>'}</div></section>`;
 	if (d.role === 'fondateur') {
@@ -363,6 +440,26 @@ function colOngletBatimentsHtml(d) {
 		html += colNegoceHtml(d);
 	}
 	return html;
+}
+
+// 🗺️ Mini-plan (pur) : l'image du lieu, ses entrées 🚪, les bâtiments posés et vous (●).
+// Une case = une unité du viewBox ; le cadre a les proportions de la grille.
+function colPlanHtml(d) {
+	const p = d.plan;
+	if (!p || !p.dimensions) return '';
+	const X = +p.dimensions.x || 0, Y = +p.dimensions.y || 0;
+	if (!X || !Y) return '';
+	const t = Math.max(1.2, Math.min(X, Y) / 14);   // taille des repères, en cases
+	const repere = (x, y, txt, titre) => `<g><title>${_colE(titre)}</title><circle cx="${+x + .5}" cy="${+y + .5}" r="${t * .62}" fill="rgba(20,16,10,.72)" stroke="#ffd700" stroke-width="${t * .08}"/>
+		<text x="${+x + .5}" y="${+y + .5}" font-size="${t * .8}" text-anchor="middle" dominant-baseline="central">${txt}</text></g>`;
+	const entrees = (p.entrees || []).map((e, i) => repere(e[0], e[1], '🚪', i ? `Entrée ${i + 1}` : 'Arrivée')).join('');
+	const bats = (d.batiments || []).filter(b => b.pos).map(b => repere(b.pos[0], b.pos[1], _colE(b.icone || '🏠'), b.label + (b.endommage ? ' (endommagé)' : ''))).join('');
+	const moi = d.position && d.position.x !== undefined
+		? `<g><title>Vous</title><circle cx="${+d.position.x + .5}" cy="${+d.position.y + .5}" r="${t * .45}" fill="#4aa3ff" stroke="#fff" stroke-width="${t * .1}"/></g>` : '';
+	return `<section class="prop-section"><h3>🗺️ Plan</h3>
+		<div class="col-plan" style="aspect-ratio:${X} / ${Y};background-image:url('${_colE(encodeURI(p.image))}')" role="img" aria-label="Plan de l'implantation">
+		<svg viewBox="0 0 ${X} ${Y}" preserveAspectRatio="none">${entrees}${bats}${moi}</svg></div>
+		<span class="q-desc">● vous · 🚪 entrées · chaque bâtiment posé à sa case.</span></section>`;
 }
 
 // Caisse du lieu et journal du négoce (fondateur) : la production vendue aux boutiques du lieu.
@@ -395,7 +492,25 @@ function colOngletDefenseHtml(d) {
 	return html + `</div></section>` + colChantierHtml(d);
 }
 
-const COL_ONGLETS = [['site', '🧭 Site'], ['population', '👥 Population'], ['batiments', '🏘️ Bâtiments'], ['defense', '🛡️ Défense'], ['guilde', '🏰 Guilde']];
+const COL_ONGLETS = [['site', '🧭 Site'], ['population', '👥 Population'], ['batiments', '🏘️ Bâtiments'], ['defense', '🛡️ Défense'], ['guilde', '🏰 Guilde'], ['carnet', '📓 Carnet']];
+
+// Pastilles d'alerte (pure) : `{onglet: raison}` — attaque ou tanière (Défense), chantier de
+// statut prêt à ouvrir ou à conclure (Population, fondateur), stock sous le seuil (Site).
+function colAlertes(d) {
+	const a = {};
+	if ((d.besoins || []).length) a.site = 'Une réserve est sous le seuil bas';
+	const c = d.chantier;
+	if (d.role === 'fondateur' && ((!c && d.palier_suivant && d.palier_suivant.pret) || (c && !c.reste && c.genre === 'statut')))
+		a.population = 'Le chantier de statut attend votre décision';
+	if (d.attaque_en_cours) a.defense = 'Le lieu est attaqué';
+	else if (d.menace && d.menace.taniere) a.defense = 'La tanière peut être vidée';
+	return a;
+}
+
+// Dernier onglet consulté, par implantation (stockage du navigateur ; absent ⇒ Site).
+function _colOngletCle(id) { return 'telluris.colonie.onglet.' + (id || ''); }
+function _colOngletLu(id) { try { return localStorage.getItem(_colOngletCle(id)) || 'site'; } catch (e) { return 'site'; } }
+function _colOngletEcrit(id, onglet) { try { localStorage.setItem(_colOngletCle(id), onglet); } catch (e) {} }
 const COL_TITRES = { maitre: 'Maître', fondateur: 'Membre fondateur', membre: 'Membre' };
 const COL_FONCTIONS = { recrutement: 'tableau de recrues', expeditions: 'expéditions', missions: 'missions et contrats',
 	specialistes: 'spécialistes', coffre: 'matériel commun', donjons: 'donjons alentour', defense: 'défense du lieu',
@@ -457,17 +572,22 @@ function colGuildeHtml(g, role, purse) {
 // Rendu complet (pure : rend une chaîne). Le visiteur n'a que la lecture : site en mots,
 // tableau des besoins, dons (§ 12.7).
 function colImplantationHtml(d, onglet) {
-	if (!_colGere(d)) return colEnteteHtml(d) + colOngletSiteHtml(d) + (d.guilde && d.guilde.existe ? colGuildeHtml(d.guilde, d.role, d.purse) : '');
+	// `.col-corps` = la seule partie qui défile : en-tête et onglets restent en place (CSS).
+	if (!_colGere(d)) return colEnteteHtml(d) + `<div class="col-corps">${colOngletSiteHtml(d)}${d.guilde && d.guilde.existe ? colGuildeHtml(d.guilde, d.role, d.purse) : ''}</div>`;
 	// L'onglet Guilde n'existe qu'une fois la guilde fondée ou fondable au palier courant.
 	const avecGuilde = !!(d.guilde && (d.guilde.existe || d.guilde.suivant));
-	if (onglet === 'guilde' && !avecGuilde) onglet = 'site';
-	const tabs = `<div class="col-onglets">` + COL_ONGLETS.filter(([id]) => id !== 'guilde' || avecGuilde).map(([id, nom]) =>
-		`<button class="sheet-tab-btn${id === onglet ? ' active' : ''}" data-onglet="${id}" onclick="colOnglet(this)">${nom}</button>`).join('') + `</div>`;
+	const avecCarnet = Array.isArray(d.journal);   // le carnet est au fondateur
+	const present = id => (id !== 'guilde' || avecGuilde) && (id !== 'carnet' || avecCarnet);
+	if (!COL_ONGLETS.some(([id]) => id === onglet) || !present(onglet)) onglet = 'site';
+	const alertes = colAlertes(d);
+	const tabs = `<div class="col-onglets">` + COL_ONGLETS.filter(([id]) => present(id)).map(([id, nom]) =>
+		`<button class="sheet-tab-btn${id === onglet ? ' active' : ''}" data-onglet="${id}" onclick="colOnglet(this)"${alertes[id] ? ` title="${_colE(alertes[id])}"` : ''}>${nom}${alertes[id] ? '<span class="col-alerte" aria-label="alerte">⚠️</span>' : ''}</button>`).join('') + `</div>`;
 	const corps = onglet === 'population' ? colOngletPopulationHtml(d)
+		: onglet === 'carnet' ? colCarnetHtml(d)
 		: onglet === 'guilde' ? colGuildeHtml(d.guilde, d.role, d.purse)
 		: onglet === 'batiments' ? colOngletBatimentsHtml(d)
 		: onglet === 'defense' ? colOngletDefenseHtml(d) : colOngletSiteHtml(d);
-	return colEnteteHtml(d) + tabs + corps;
+	return colEnteteHtml(d) + tabs + `<div class="col-corps" data-onglet="${onglet}">${corps}</div>`;
 }
 
 function colRendre(d) {
@@ -478,14 +598,28 @@ function colRendre(d) {
 	// Don puisé dans le sac d'un compagnon / d'une monture (ou d'un contenant qu'il porte).
 	if (d.compagnon_id) _resyncSacPorteur(d.compagnon_id, d.compagnon);
 	(d.evenements || []).forEach(t => showToast(t));
+	// Redessiner après une action (don, filtre…) garde la position de défilement de l'onglet ;
+	// changer d'onglet repart en haut.
+	const avant = document.querySelector('#colonie-contenu > .col-corps');
+	const garde = avant && avant.dataset.onglet === _colOnglet ? avant.scrollTop : 0;
 	_colEcrire('🏕️ ' + (d.label || 'Implantation'), colImplantationHtml(d, _colOnglet));
+	const apres = garde && document.querySelector('#colonie-contenu > .col-corps');
+	if (apres) apres.scrollTop = garde;
 }
 
-function colOnglet(btn) { _colOnglet = btn.dataset.onglet; colRendre(Object.assign({}, _colData, { evenements: [] })); }
+function _colRedessiner() { colRendre(Object.assign({}, _colData, { evenements: [] })); }
+function colOnglet(btn) {
+	_colOnglet = btn.dataset.onglet;
+	_colOngletEcrit(_colData && _colData.id, _colOnglet);
+	_colRedessiner();
+}
+function colDonsFiltre(btn) { _colDonsFiltre = btn.dataset.stock || ''; _colRedessiner(); }
+function colCarnetFiltre(btn) { _colCarnetFiltre = btn.dataset.genre || ''; _colRedessiner(); }
 
 async function openColonie() {
 	const d = await _aubFetch('api/colonisation/ici');
 	if (!d) return;
+	_colOnglet = _colOngletLu(d.id);
 	colRendre(d);
 	_colAfficher();
 }
@@ -498,8 +632,8 @@ async function _colAction(url, corps, apres) {
 }
 
 function colDonner(btn) {
-	_colAction('api/colonisation/donner', { sac: btn.dataset.sac || null, index: +btn.dataset.index, item_id: btn.dataset.item },
-		d => d.don && showToast(`${d.don.nom} : ${d.don.stock} +${d.don.unites}`));
+	_colAction('api/colonisation/donner', { sac: btn.dataset.sac || null, index: +btn.dataset.index, item_id: btn.dataset.item, tout: !!btn.dataset.tout },
+		d => d.don && showToast(`${d.don.nom}${d.don.nombre > 1 ? ' × ' + d.don.nombre : ''} : ${d.don.stock} +${d.don.unites}`));
 }
 function colFeu(btn) { _colAction('api/colonisation/feu', { reglage: btn.dataset.reglage }); }
 function colConstruire(btn) {
@@ -569,12 +703,33 @@ function colOuvrirGuilde() {
 // à gauche votre sac, celui d'un compagnon, d'une monture ou d'un contenant ; à droite
 // l'entrepôt commun ou votre petit coffre. Seules les autorisations de retrait (fondateur)
 // sont propres à la colonie : `colAutorisationsHtml`, rendu sous les deux colonnes.
-function colAutorisationsHtml(d) {
-	if (!d.associes) return '';
-	return `<section class="prop-section"><h3>🤝 Retrait de l'entrepôt</h3><div class="prop-liste">` + (d.associes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(a.nom)}</strong>
+function colRangementsExtraHtml(d) {
+	let html = '';
+	if (d.associes) html += `<section class="prop-section"><h3>🤝 Retrait de l'entrepôt</h3><div class="prop-liste">` + (d.associes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(a.nom)}</strong>
 		<span class="q-desc">${a.retrait ? 'peut prendre' : 'dépôt seulement'}</span></div>
 		<button class="sh-drop-btn" data-id="${_colE(a.id)}" data-retrait="${a.retrait ? '' : '1'}" onclick="colAutoriser(this)">${a.retrait ? 'Retirer l\'autorisation' : 'Autoriser'}</button></div>`).join('')
 		|| '<div class="sell-empty">Aucun associé.</div>') + `</div></section>`;
+	// Journal des mouvements de l'entrepôt (fondateur) : qui a déposé ou pris quoi.
+	if (d.mouvements) html += `<section class="prop-section"><h3>📒 Mouvements de l'entrepôt</h3><div class="prop-liste">`
+		+ (d.mouvements.map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(_colDate(j.at))} — ${_colE(j.texte)}</span></div></div>`).join('')
+		|| '<div class="sell-empty">Aucun mouvement noté.</div>') + `</div></section>`;
+	return html;
+}
+// « 🎁 → Réserves » sur une ligne du sac de gauche (`renderCoffre`, mode colonie) : l'objet est
+// de ceux qu'un stock accepte (`reserves[item_id]` = son libellé). `sac` = '' (vous), l'id d'un
+// porteur ou la clé `porteur#index` d'un contenant — l'adresse des dons (`_sacs_dons`).
+function colVerserBtn(item, sac, index, reserves) {
+	const stock = (reserves || {})[item && item._id];
+	if (!stock) return '';
+	return `<button class="sh-drop-btn" data-sac="${_colE(sac || '')}" data-idx="${_colE(index)}" data-item="${_colE(item._id)}"
+		title="Verser aux réserves : ${_colE(stock)}" onclick="colVerserReserves(this)">🎁 ${_colE(stock)}</button>`;
+}
+async function colVerserReserves(btn) {
+	const d = await _aubFetch('api/colonisation/donner', { sac: btn.dataset.sac || null, index: +btn.dataset.idx, item_id: btn.dataset.item });
+	if (!d) return;
+	if (d.don) showToast(`${d.don.nom} : ${d.don.stock} +${d.don.unites}`);
+	const r = await _aubFetch('api/colonisation/rangements');
+	if (r) _pcfAppliquer(r);
 }
 async function openColonieRangements() {
 	const d = await _aubFetch('api/colonisation/rangements');

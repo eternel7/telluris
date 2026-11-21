@@ -793,6 +793,50 @@ def test_une_passe_produit_et_consomme_selon_le_site():
 	assert imp["stocks"]["materiaux"] == 0
 
 
+def test_le_bilan_par_jour_est_celui_qu_une_journee_de_passes_produit():
+	"""`bilan_jour` (jauges des réserves) et la passe lisent les mêmes formules : sans plafond ni
+	plancher atteint, une journée de passes déplace chaque stock de son solde."""
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	site = _site(reg)
+	imp = _imp(reg, rattrape_at=0)
+	imp["stocks"].update({"bois": 500, "materiaux": 500})
+	b = col.construire(imp, reg, "entrepot", now=0)
+	imp["stocks"] = {"nourriture": 50.0, "bois": 50.0, "materiaux": 0.0, "medicaments": 0.0}
+	bucheron = _employe(imp, "bucheron", b["id"])
+	solde = col.bilan_jour(imp, reg, site, [bucheron])
+	assert set(solde) == set(reg["stocks"])
+	avant = dict(imp["stocks"])
+	col.rattraper(imp, reg, site, [bucheron], now=(col.JOUR_S // pas) * pas, rand=Hasard())
+	for s in ("nourriture", "bois"):
+		assert abs(imp["stocks"][s] - (avant[s] + solde[s])) < 0.05, s
+	assert solde["nourriture"] < 0
+	assert col.autonomie_jours(10, -4) == 2.5
+	assert col.autonomie_jours(10, 0) is None and col.autonomie_jours(10, 1) is None
+	assert col.autonomie_jours(-1, -4) == 0.0
+	# la vue des gérants porte le solde et l'autonomie de chaque stock ; le visiteur, rien
+	v = col.vue(imp, reg, col.FONDATEUR, site, [bucheron])
+	nourr = next(x for x in v["stocks"] if x["stock"] == "nourriture")
+	assert nourr["par_jour"] == round(solde["nourriture"], 1)
+	assert nourr["jours"] == col.autonomie_jours(imp["stocks"]["nourriture"], solde["nourriture"])
+	assert "stocks" not in col.vue(imp, reg, col.VISITEUR, site, [bucheron])
+
+
+def test_chaque_ligne_du_carnet_porte_un_genre_connu():
+	reg = _reg()
+	imp = _imp(reg)
+	col.regler_feu(imp, reg, "reduit")
+	col.noter(imp, "sans genre")
+	assert imp["journal"][-2]["genre"] == "feu" and "genre" not in imp["journal"][-1]
+	# chaque genre posé par le moteur est l'un de ceux que le carnet sait filtrer
+	import re
+	source = open(col.__file__, encoding="utf-8").read()
+	assert set(re.findall(r'genre="([a-z_]+)"', source)) <= set(col.GENRES_JOURNAL)
+	for _ in range(col.JOURNAL_MAX + 5):
+		col.noter(imp, "x", genre="don")
+	assert len(imp["journal"]) == col.JOURNAL_MAX
+
+
 def test_sans_bois_le_grand_feu_tombe_et_un_pecheur_sans_eau_ne_peche_rien():
 	reg = _reg()
 	pas = reg["temps"]["passe_s"]

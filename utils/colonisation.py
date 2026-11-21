@@ -52,7 +52,10 @@ PREFIXE_SOUS_LIEU = "lieu:colonie_"
 EMPLOYE_MORT = "mort"
 EMPLOYE_PARTI = "parti"
 
-JOURNAL_MAX = 40
+JOURNAL_MAX = 100   # le carnet a son onglet, filtré par genre : on en garde davantage
+# Genres des lignes du carnet (`noter`) — le client en tient les libellés (`COL_GENRES`).
+GENRES_JOURNAL = ("association", "population", "batiment", "chantier", "personnel", "don", "feu",
+				  "evenement", "caisse", "guilde", "attaque", "entrepot")
 JOUR_S = 86400
 
 # Teinte du halo des REPÈRES (§ 12.4) : une couleur qu'aucune famille de métier ne porte
@@ -1053,7 +1056,7 @@ def demander(character: dict, imp: dict, texte, now: int | None = None) -> None:
 	imp.setdefault("demandes", []).append(
 		{"id": character.get("_id"), "nom": qui, "texte": " ".join(str(texte or "").split())[:300], "at": now})
 	character["demande_association"] = imp.get("_id")
-	noter(imp, f"{qui} demande à s'associer.", now)
+	noter(imp, f"{qui} demande à s'associer.", now, genre="association")
 
 
 def repondre(imp: dict, reg: dict, demandeur_id, accepter: bool, now: int | None = None) -> tuple[bool, str, dict | None]:
@@ -1070,9 +1073,9 @@ def repondre(imp: dict, reg: dict, demandeur_id, accepter: bool, now: int | None
 	if accepter:
 		imp.setdefault("associes", []).append(
 			{"id": demandeur_id, "nom": demande.get("nom", ""), "depuis": now, "apports": {}})
-		noter(imp, f"{demande.get('nom', '')} devient associé.", now)
+		noter(imp, f"{demande.get('nom', '')} devient associé.", now, genre="association")
 	else:
-		noter(imp, f"La demande de {demande.get('nom', '')} est refusée.", now)
+		noter(imp, f"La demande de {demande.get('nom', '')} est refusée.", now, genre="association")
 	return True, "", demande
 
 
@@ -1082,7 +1085,7 @@ def retirer_associe(imp: dict, associe_id, exclu: bool, now: int | None = None) 
 	if associe is None:
 		return False
 	imp["associes"] = [a for a in imp["associes"] if a.get("id") != associe_id]
-	noter(imp, f"{associe.get('nom', '')} {'est exclu' if exclu else 'quitte'} l'association.", now)
+	noter(imp, f"{associe.get('nom', '')} {'est exclu' if exclu else 'quitte'} l'association.", now, genre="association")
 	return True
 
 
@@ -1210,16 +1213,18 @@ def deposer_colons(character: dict, imp: dict, reg: dict, employes: list, now: i
 	if n:
 		imp["population"] = _int(imp.get("population")) + n
 		_compter_apport(imp, character, "colons", n)
-		noter(imp, f"{proprietes.nom_personnage(character)} amène {n} colon(s).", now)
+		noter(imp, f"{proprietes.nom_personnage(character)} amène {n} colon(s).", now, genre="population")
 	return n
 
 
 # ── Journal (le carnet du fondateur) ─────────────────────────────────────────────────
 
-def noter(imp: dict, texte: str, now: int | None = None) -> None:
+def noter(imp: dict, texte: str, now: int | None = None, genre: str | None = None) -> None:
+	"""Une ligne au carnet. `genre` (clé de `GENRES_JOURNAL`) sert au filtre du carnet ; une
+	ligne ancienne sans genre se lit « divers »."""
 	now = now_epoch() if now is None else now
 	journal = imp.setdefault("journal", [])
-	journal.append({"at": now, "texte": texte})
+	journal.append({"at": now, "texte": texte, **({"genre": genre} if genre else {})})
 	del journal[:-JOURNAL_MAX]
 
 
@@ -1334,7 +1339,7 @@ def construire(imp: dict, reg: dict, type_id, now: int | None = None, categorie=
 		b["categorie"] = bdef.get("categorie") or categorie
 	imp.setdefault("batiments", []).append(b)
 	noter(imp, f"Construction : {bdef.get('label', type_id)}"
-			   + (f" ({libelle_metier(b['categorie'])})" if b.get("categorie") and _choisit_metier(bdef) else "") + ".", now)
+			   + (f" ({libelle_metier(b['categorie'])})" if b.get("categorie") and _choisit_metier(bdef) else "") + ".", now, genre="batiment")
 	return b
 
 
@@ -1511,7 +1516,7 @@ def reparer(imp: dict, reg: dict, bid, now: int | None = None) -> tuple[bool, st
 		return False, f"Il faut {cout} de matériaux pour réparer."
 	imp["stocks"]["materiaux"] = _num(imp["stocks"].get("materiaux")) - cout
 	b.pop("endommage", None)
-	noter(imp, f"Réparation : {(batiment_def(reg, b.get('type')) or {}).get('label', '')}.", now)
+	noter(imp, f"Réparation : {(batiment_def(reg, b.get('type')) or {}).get('label', '')}.", now, genre="batiment")
 	return True, ""
 
 
@@ -1632,7 +1637,7 @@ def ouvrir_chantier(imp: dict, reg: dict, chantier: dict, now: int | None = None
 	if chantier["genre"] == CHANTIER_FORTIFICATION:
 		_payer_stocks(imp, fortification_def(reg, chantier["objet"]) or {})
 	imp["chantier"] = chantier
-	noter(imp, f"Chantier ouvert : {chantier['label']}.", now)
+	noter(imp, f"Chantier ouvert : {chantier['label']}.", now, genre="chantier")
 
 
 def reste_chantier(imp: dict) -> int:
@@ -1651,7 +1656,7 @@ def financer(imp: dict, payeur: dict, montant: int, now: int | None = None) -> i
 	parts = c.setdefault("parts", {})
 	parts[payeur.get("_id")] = _int(parts.get(payeur.get("_id"))) + retenu
 	_compter_apport(imp, payeur, "cuivre", retenu)
-	noter(imp, f"{proprietes.nom_personnage(payeur)} verse {retenu} cu au chantier « {c.get('label', '')} ».", now)
+	noter(imp, f"{proprietes.nom_personnage(payeur)} verse {retenu} cu au chantier « {c.get('label', '')} ».", now, genre="chantier")
 	return retenu
 
 
@@ -1666,7 +1671,7 @@ def achever_fortification(imp: dict, now: int | None = None) -> bool:
 		return False
 	imp.setdefault("fortifications", []).append(c["objet"])
 	imp.pop("chantier", None)
-	noter(imp, f"Achevé : {c.get('label', '')}.", now)
+	noter(imp, f"Achevé : {c.get('label', '')}.", now, genre="chantier")
 	return True
 
 
@@ -1680,7 +1685,7 @@ def changer_palier(imp: dict, reg: dict, modele: dict, anciennes_dims: dict, now
 	imp["modele"] = modele.get("_id")
 	replacer_batiments(imp, anciennes_dims, modele)
 	imp.pop("chantier", None)
-	noter(imp, f"Le lieu devient {(palier_def(reg, imp['palier']) or {}).get('label', imp['palier'])}.", now)
+	noter(imp, f"Le lieu devient {(palier_def(reg, imp['palier']) or {}).get('label', imp['palier'])}.", now, genre="chantier")
 	return True
 
 
@@ -1789,13 +1794,13 @@ def engager(imp: dict, candidat: dict, fondateur: dict, now: int | None = None) 
 	employe = proprietes.creer_employe(imp, candidat, fondateur)
 	proprietes.engager(imp, employe)
 	proprietes.retirer_candidat(imp, candidat.get("id"))
-	noter(imp, f"Engagé : {proprietes.nom_personnage(employe)}.", now)
+	noter(imp, f"Engagé : {proprietes.nom_personnage(employe)}.", now, genre="personnel")
 	return employe
 
 
 def renvoyer(imp: dict, employe: dict, now: int | None = None) -> None:
 	proprietes.renvoyer(imp, employe)
-	noter(imp, f"Renvoyé : {proprietes.nom_personnage(employe)}.", now)
+	noter(imp, f"Renvoyé : {proprietes.nom_personnage(employe)}.", now, genre="personnel")
 
 
 # ── Stocks, dons, besoins (§ 7, § 10) ────────────────────────────────────────────────
@@ -1850,7 +1855,7 @@ def deposer(imp: dict, reg: dict, donateur: dict, stock: str, unites: float, nom
 	_compter_apport(imp, donateur, stock, entre)
 	if (donateur or {}).get("_id") != imp.get("fondateur"):
 		libelle = (reg.get("stocks_labels") or {}).get(stock, stock)
-		noter(imp, f"{proprietes.nom_personnage(donateur)} donne {nom_objet or libelle} ({libelle} +{entre}).", now)
+		noter(imp, f"{proprietes.nom_personnage(donateur)} donne {nom_objet or libelle} ({libelle} +{entre}).", now, genre="don")
 	return entre
 
 
@@ -1878,7 +1883,7 @@ def regler_feu(imp: dict, reg: dict, reglage, now: int | None = None) -> bool:
 	if reglage not in (reg.get("feu") or []) or imp.get("feu") == reglage:
 		return False
 	imp["feu"] = reglage
-	noter(imp, "Grand feu." if reglage == "grand" else "Feu réduit.", now)
+	noter(imp, "Grand feu." if reglage == "grand" else "Feu réduit.", now, genre="feu")
 	return True
 
 
@@ -1985,7 +1990,7 @@ def rattraper(imp: dict, reg: dict, site: dict, employes: list, now: int | None 
 		bilan["evenements_attente"] = True
 	if not n:
 		for texte in bilan["evenements"]:
-			noter(imp, texte, now)
+			noter(imp, texte, now, genre="evenement")
 		return bilan
 	# Au-delà du plafond, le temps perdu l'est pour de bon : on ne rejoue que les dernières
 	# passes. En deçà, le reliquat (moins d'une passe) reste dû au prochain passage.
@@ -1996,7 +2001,7 @@ def rattraper(imp: dict, reg: dict, site: dict, employes: list, now: int | None 
 		_passe(imp, reg, site, employes, debut + (i + 1) * pas, pas, rand, bilan)
 	imp["rattrape_at"] = debut + n * pas
 	for texte in bilan["evenements"]:
-		noter(imp, texte, now)
+		noter(imp, texte, now, genre="evenement")
 	return bilan
 
 
@@ -2015,6 +2020,49 @@ def _perdre_un(imp: dict, employes: list, rand, statut: str, bilan: dict) -> str
 	return proprietes.nom_personnage(e)
 
 
+def production_metiers_jour(imp: dict, reg: dict, site: dict, employes: list, actifs: list | None = None) -> dict:
+	"""Production par jour des PNJ AU POSTE, par stock, pondérée par le site (§ 7). Lue par la
+	passe ET par `bilan_jour` : une seule formule."""
+	par_metier = {m.get("id"): m for m in reg.get("metiers_def") or []}
+	out = {}
+	for e in au_poste(imp, reg, employes) if actifs is None else actifs:
+		produit = (par_metier.get(e.get("metier")) or {}).get("produit")
+		if not produit:
+			continue
+		if produit.get("exige_axe") and not _int(((site or {}).get(produit.get("axe")) or {}).get("note")):
+			continue
+		s = produit.get("stock")
+		out[s] = out.get(s, 0.0) + _num(produit.get("par_jour")) * facteur_axe(site, produit.get("axe"), reg)
+	return out
+
+
+def consommation_jour(imp: dict, reg: dict, employes: list) -> dict:
+	"""Ce que le lieu consomme par jour, par stock : les bouches (nourriture, moins l'économie de
+	l'intendant) et le feu (bois). Les remèdes des soins, tirés au hasard, n'y sont pas."""
+	c = reg.get("consommation") or {}
+	economie = _num(reg.get("intendant_economie")) if _du_role(imp, reg, employes, "intendants") else 0.0
+	bouches = habitants(imp, employes) + 1
+	return {"nourriture": bouches * _num(c.get("nourriture_par_habitant_jour"), 1) * (1 - economie),
+			"bois": _num((c.get("bois_feu_jour") or {}).get(imp.get("feu"), 2))}
+
+
+def bilan_jour(imp: dict, reg: dict, site: dict, employes: list) -> dict:
+	"""Solde par jour de chaque stock : métiers + glanage/simples − bouches et feu. Une
+	estimation (convois, achats, soins et attaques n'y sont pas)."""
+	out = {s: 0.0 for s in reg.get("stocks") or []}
+	for bloc, signe in ((production_metiers_jour(imp, reg, site, employes), 1),
+						(production_autonome(imp, reg, site, employes), 1),
+						(consommation_jour(imp, reg, employes), -1)):
+		for s, v in bloc.items():
+			out[s] = out.get(s, 0.0) + signe * v
+	return out
+
+
+def autonomie_jours(quantite: float, solde: float) -> float | None:
+	"""Jours avant que le stock ne s'épuise au solde courant ; None s'il ne baisse pas."""
+	return round(max(0.0, quantite) / -solde, 1) if solde < 0 else None
+
+
 def _passe(imp: dict, reg: dict, site: dict, employes: list, instant: int, pas: int, rand, bilan: dict) -> None:
 	part = pas / JOUR_S                     # fraction de jour que dure la passe
 	stocks = imp.setdefault("stocks", {})
@@ -2023,27 +2071,17 @@ def _passe(imp: dict, reg: dict, site: dict, employes: list, instant: int, pas: 
 	c = reg.get("consommation") or {}
 
 	# 1. Production des PNJ au poste, pondérée par le site.
-	par_metier = {m.get("id"): m for m in reg.get("metiers_def") or []}
-	for e in actifs:
-		produit = (par_metier.get(e.get("metier")) or {}).get("produit")
-		if not produit:
-			continue
-		if produit.get("exige_axe") and not _int(((site or {}).get(produit.get("axe")) or {}).get("note")):
-			continue
-		gain = _num(produit.get("par_jour")) * part * facteur_axe(site, produit.get("axe"), reg)
-		s = produit.get("stock")
-		stocks[s] = min(float(capacite), _num(stocks.get(s)) + gain)
+	for s, gain in production_metiers_jour(imp, reg, site, employes, actifs).items():
+		stocks[s] = min(float(capacite), _num(stocks.get(s)) + gain * part)
 	# Glanage des comptés, simples des soignants, convois arrivés.
 	for s, gain in production_autonome(imp, reg, site, employes).items():
 		stocks[s] = min(float(capacite), _num(stocks.get(s)) + gain * part)
 	livrer(imp, reg, instant, bilan)
 
 	# 2. Consommation : bouches et feu.
-	economie = _num(reg.get("intendant_economie")) if _du_role(imp, reg, employes, "intendants") else 0.0
+	for s, perte in consommation_jour(imp, reg, employes).items():
+		stocks[s] = max(0.0, _num(stocks.get(s)) - perte * part)
 	bouches = habitants(imp, employes) + 1
-	stocks["nourriture"] = max(0.0, _num(stocks.get("nourriture"))
-							   - bouches * _num(c.get("nourriture_par_habitant_jour"), 1) * part * (1 - economie))
-	stocks["bois"] = max(0.0, _num(stocks.get("bois")) - _num((c.get("bois_feu_jour") or {}).get(imp.get("feu"), 2)) * part)
 	if _num(stocks.get("bois")) <= 0 and imp.get("feu") == "grand":
 		imp["feu"] = "reduit"                       # plus de bois : le grand feu ne tient pas
 		bilan["evenements"].append("Faute de bois, le grand feu est tombé.")
@@ -2299,7 +2337,7 @@ def relever_caisse(imp: dict, fondateur: dict, now: int | None = None) -> int:
 	montant = _int(imp.get("caisse_cuivre"))
 	imp["caisse_cuivre"] = 0
 	if montant:
-		noter(imp, f"Caisse relevée : {montant} cu.", now)
+		noter(imp, f"Caisse relevée : {montant} cu.", now, genre="caisse")
 	return montant
 
 
@@ -2566,7 +2604,7 @@ def achever_guilde(imp: dict, reg: dict, nom=None, now: int | None = None) -> bo
 	else:
 		g["echelon"] = c["objet"]
 	imp.pop("chantier", None)
-	noter(imp, f"La guilde devient {c.get('label', '')}.", now)
+	noter(imp, f"La guilde devient {c.get('label', '')}.", now, genre="guilde")
 	return True
 
 
@@ -2579,7 +2617,7 @@ def rejoindre(character: dict, imp: dict) -> tuple[bool, str]:
 		return False, "Vous en êtes déjà."
 	g["membres"][character["_id"]] = {"nom": proprietes.nom_personnage(character), "titre": MEMBRE,
 									  "depuis": now_epoch()}
-	noter(imp, f"{proprietes.nom_personnage(character)} rejoint la guilde.")
+	noter(imp, f"{proprietes.nom_personnage(character)} rejoint la guilde.", genre="guilde")
 	return True, ""
 
 
@@ -2593,7 +2631,7 @@ def quitter_guilde(character: dict, imp: dict) -> tuple[bool, str]:
 	if any(e.get("par") == character.get("_id") for e in g.get("expeditions") or []):
 		return False, "Vos compagnons sont encore en mission."
 	g["membres"].pop(character["_id"], None)
-	noter(imp, f"{proprietes.nom_personnage(character)} quitte la guilde.")
+	noter(imp, f"{proprietes.nom_personnage(character)} quitte la guilde.", genre="guilde")
 	return True, ""
 
 
@@ -2663,7 +2701,7 @@ def envoyer(character: dict, imp: dict, reg: dict, employes: list, mission: dict
 	for c in compagnons:
 		c["en_mission"] = {"implantation": imp["_id"], "expedition": exp["id"]}
 		c.pop("auras_recues", None)
-	noter(imp, f"{exp['par_nom']} envoie {len(compagnons)} compagnon(s) : {mission.get('label', '')}.", now)
+	noter(imp, f"{exp['par_nom']} envoie {len(compagnons)} compagnon(s) : {mission.get('label', '')}.", now, genre="guilde")
 	return exp
 
 
@@ -2708,7 +2746,7 @@ def accueillir(character: dict, imp: dict, reg: dict, employes: list, exp_id, co
 		if c["_id"] not in groupe:
 			groupe.append(c["_id"])
 	g["expeditions"] = [e for e in g["expeditions"] if e.get("id") != exp_id]
-	noter(imp, f"Retour de mission ({issue['mission']}) : {'réussite' if reussie else 'échec'}.", now)
+	noter(imp, f"Retour de mission ({issue['mission']}) : {'réussite' if reussie else 'échec'}.", now, genre="guilde")
 	return True, "", issue
 
 
@@ -2792,7 +2830,7 @@ def attaque_presente(imp: dict, reg: dict, site: dict, employes: list, now: int 
 	if rand.random() >= proba:
 		return False
 	imp["attaque_en_cours"] = {"at": now, "espece": menace["espece"]}
-	noter(imp, "Le lieu est attaqué !", now)
+	noter(imp, "Le lieu est attaqué !", now, genre="attaque")
 	return True
 
 
@@ -2884,7 +2922,7 @@ def issue_combat(imp: dict, reg: dict, info: dict, status: str, gardes_morts: li
 		imp["expeditions_reussies"] = _int(imp.get("expeditions_reussies")) + 1
 		bilan["evenements"].append("La tanière est vidée : la contrée respire.")
 	for texte in bilan["evenements"]:
-		noter(imp, texte, now)
+		noter(imp, texte, now, genre="attaque")
 	return bilan["employes_touches"]
 
 
@@ -2924,6 +2962,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 	if role not in (FONDATEUR, ASSOCIE):
 		return base
 	capacite = stockage(imp, reg)
+	soldes = bilan_jour(imp, reg, site, employes)
 	par_poste = {}
 	for e in employes or []:
 		par_poste.setdefault(e.get("poste"), []).append(e)
@@ -2931,7 +2970,9 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"securite": secu, "moral": mor,
 		"site": site,
 		"stocks": [{"stock": s, "label": labels.get(s, s), "quantite": round(_num((imp.get("stocks") or {}).get(s)), 1),
-					"capacite": capacite, "seuil": round(seuils_stocks(imp, reg, employes).get(s, 0), 1)}
+					"capacite": capacite, "seuil": round(seuils_stocks(imp, reg, employes).get(s, 0), 1),
+					"par_jour": round(soldes.get(s, 0.0), 1),
+					"jours": autonomie_jours(_num((imp.get("stocks") or {}).get(s)), soldes.get(s, 0.0))}
 				   for s in reg.get("stocks") or []],
 		"population": _int(imp.get("population")), "nommes": len(employes or []),
 		"logements": logements(imp, reg), "souffrants": _int(imp.get("souffrants")),
