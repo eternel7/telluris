@@ -414,7 +414,7 @@ function colonieRang(extra) {
 
 t('rangements de colonie : sélecteur entrepôt / coffre, retrait non autorisé grisé, note affichée', () => {
 	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = '';
-	globalThis.colAutorisationsHtml = () => '';
+	globalThis.colRangementsExtraHtml = () => '';
 	renderCoffre(colonieRang());
 	assert.strictEqual(_pcfSel, 'coffre', 'le petit coffre existe : gardé');
 	globalThis._pcfSel = 'atelier';

@@ -635,6 +635,15 @@
 		#prop-coffre-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
 		#prop-coffre-panel .sh-inv-box { max-height: none; flex: 1 1 auto; min-height: 0; }
 		@media (max-width: 720px) { #prop-coffre-panel .grp-inv-wrap { grid-template-rows: repeat(2, minmax(0, 1fr)); } }
+		/* ── #colonie-panel : même recette — hauteur FIXE (la fenêtre), titre, en-tête et
+		   onglets en place ; seul le corps de l'onglet (`.col-corps`) défile. Changer d'onglet
+		   ne fait plus bouger le haut du panneau. Les autres vues (fonder, embauche, colons) n'ont
+		   pas de `.col-corps` : c'est alors `#colonie-contenu` entier qui défile. */
+		#colonie-panel { height: calc(100vh - 20px); min-height: 0; gap: .5rem; }
+		#colonie-panel > .sell-topbar { flex: 0 0 auto; }
+		#colonie-contenu { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
+		#colonie-contenu > * { flex: 0 0 auto; }
+		#colonie-contenu > .col-corps { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: .2rem; }
 		/* ── #groupe-panel : même recette — la section OUVERTE prend la hauteur restante ;
 		   🎒 ses deux sacs défilent, 👥 la liste des cartes défile. */
 		#groupe-panel { height: calc(100vh - 20px); min-height: 0; gap: .5rem; }
@@ -2080,7 +2089,7 @@
 				min-height: calc(var(--app-h, 100svh) - var(--marge-bas));
 			}
 			#sheet-panel { height: calc(var(--app-h, 100svh) - var(--marge-bas)); min-height: 0; }
-			#sell-panel, #prop-coffre-panel, #groupe-panel {
+			#sell-panel, #prop-coffre-panel, #groupe-panel, #colonie-panel {
 				height: calc(var(--app-h, 100vh) - 20px - var(--marge-bas));
 				min-height: 0;
 			}
@@ -3343,6 +3352,27 @@
 		.col-modele { display: flex; flex-direction: column; gap: .2rem; cursor: pointer; }
 		.col-modele img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
 		.col-modele input:checked ~ img { outline: 2px solid currentColor; }
+		/* Pastille d'alerte d'un onglet (⚠️ : attaque, chantier prêt, stock sous le seuil). */
+		.col-onglets .col-alerte { margin-left: .3rem; color: #ff9f43; }
+		/* Jauges des réserves et du chantier : barre, repère du seuil bas, texte dessous. */
+		.col-jauges { display: flex; flex-direction: column; gap: .5rem; }
+		.col-jauge { display: flex; flex-direction: column; gap: .15rem; }
+		.col-jauge-tete { display: flex; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+		.col-barre { position: relative; height: 10px; border-radius: 5px; overflow: hidden;
+			background: rgba(120, 90, 50, .25); border: 1px solid rgba(120, 90, 50, .45); }
+		.col-barre > .col-plein { position: absolute; inset: 0 auto 0 0; background: #6ab04c; }
+		.col-barre.bas > .col-plein { background: #e17055; }
+		.col-barre > .col-seuil { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--accent-color); }
+		/* Pastilles de filtre (dons par stock, carnet par genre) : celles de l'onglet ⚡. */
+		.col-filtres { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 .4rem; }
+		.col-filtre { height: 24px; padding: 0 .7rem; border-radius: 999px; cursor: pointer; white-space: nowrap;
+			border: 1px solid var(--border-color); background: transparent; color: var(--muted); font: inherit; font-size: 12px; }
+		.col-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
+		.col-filtre.bas { border-color: #e17055; }
+		/* Mini-plan de l'onglet Bâtiments : image du lieu, bâtiments posés, vous. */
+		.col-plan { position: relative; width: 100%; max-width: 32rem; border-radius: 6px; overflow: hidden;
+			border: 1px solid rgba(120, 90, 50, .45); background-size: 100% 100%; }
+		.col-plan svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 		/* 🖼️ Image du bien : vignettes des images de son type, la courante cerclée. */
 		.prop-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
 		.prop-image { display: flex; flex-direction: column; gap: .2rem; padding: .25rem; cursor: pointer;
@@ -11996,7 +12026,7 @@ function renderCoffre(data) {
 		: data.gardien ? '🛡️ Un gardien veille sur les lieux.'
 		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
 	const extra = document.getElementById('pcf-extra');
-	if (extra) extra.innerHTML = colonie && typeof colAutorisationsHtml === 'function' ? colAutorisationsHtml(data) : '';
+	if (extra) extra.innerHTML = colonie && typeof colRangementsExtraHtml === 'function' ? colRangementsExtraHtml(data) : '';
 
 	const porteurs = data.porteurs || [];
 	// Contenants (sac dimensionnel…) portés par vous, un compagnon ou une monture : un sac de
@@ -12040,7 +12070,9 @@ function renderCoffre(data) {
 			const it = inv[i];
 			return _pcfLigne(it, posG(i), '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
 				!c.depot ? 'Vous ne pouvez rien déposer ici' : (+it.poids || 0) > libre + 1e-6 ? 'Trop lourd — plus assez de place' : 'Ranger ici',
-				'droite', 'pcf_sac', null, i);
+				'droite', 'pcf_sac', null, i,
+				// Implantation : verser l'objet aux RÉSERVES du lieu, sans changer de panneau.
+				colonie && typeof colVerserBtn === 'function' ? colVerserBtn(it, _pcfGauche, posG(i), data.reserves) : '');
 		}).join('') : videG);
 		const items = c.inventaire || [];
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);

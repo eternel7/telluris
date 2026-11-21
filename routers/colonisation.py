@@ -235,6 +235,8 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	payload["dons_possibles"] = _dons_possibles(character, reg)
 	payload["reperes"] = colonisation.reperes_carte(imp, reg)
 	payload["guilde"] = _vue_guilde(character, imp, reg, employes)
+	if role in (colonisation.FONDATEUR, colonisation.ASSOCIE):
+		payload["plan"] = _plan(imp)
 	if role == colonisation.FONDATEUR:
 		# Sélecteur 🏷️ de l'icône montrée sur la carte du pays.
 		payload["icone_carte"] = colonisation.vue_icone(imp, reg, fichiers_towns(), regions_du_monde())
@@ -249,6 +251,18 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	if extra:
 		payload.update(extra)
 	return payload
+
+
+def _plan(imp: dict) -> dict | None:
+	"""Mini-plan de l'onglet Bâtiments : image et grille du lieu modèle (lien pur, posées par
+	`get_doc`) et ses entrées ; None sans grille ou sans image sur le disque."""
+	dims, image = imp.get("dimensions") or {}, imp.get("image")
+	route = next((r for r, chemin in ORIGINES_IMAGE_LIEU
+				  if image and os.path.exists(os.path.join(chemin, image))), None)
+	if not dims.get("x") or not dims.get("y") or not route:
+		return None
+	return {"image": f"/{route}/{image}", "dimensions": {"x": dims["x"], "y": dims["y"]},
+			"entrees": imp.get("entrees") or []}
 
 
 def _sacs_dons(character: dict) -> list:
@@ -437,14 +451,25 @@ async def donner(current_user: Annotated[dict, Depends(get_current_user)], body:
 	stock = regle["stock"]
 	if float((imp.get("stocks") or {}).get(stock) or 0) >= colonisation.stockage(imp, reg):
 		raise HTTPException(status_code=409, detail="Cette réserve est pleine.")
-	entre = colonisation.deposer(imp, reg, character, stock, colonisation.unites_de_item(item, regle),
-								 item.get("nom", ""))
-	refs.pop(pos)
+	# `tout` : chaque exemplaire du même objet dans CE sac, du dernier au premier (les positions
+	# restent valables), tant que la réserve a de la place.
+	iid = item_ref_id(refs[pos])
+	positions = [i for i in range(len(refs) - 1, -1, -1) if item_ref_id(refs[i]) == iid] if body.get("tout") else [pos]
+	entre, nombre = 0.0, 0
+	for i in positions:
+		if float(imp["stocks"].get(stock) or 0) >= colonisation.stockage(imp, reg):
+			break
+		entre += colonisation.deposer(imp, reg, character, stock,
+									  colonisation.unites_de_item(resolve_item_ref(refs[i]) or item, regle),
+									  item.get("nom", ""))
+		refs.pop(i)
+		nombre += 1
+	entre = round(entre, 1)
 	contenants.reporter([sac])                          # sac virtuel → référence du contenant
 	porteur = contenants.porteurs_reels([sac])[0]
 	_sauver(imp, porteur)
 	role = colonisation.role_de(character, imp)        # un premier don fait un soutien
-	extra = {"don": {"stock": stock, "unites": entre, "nom": item.get("nom", "")},
+	extra = {"don": {"stock": stock, "unites": entre, "nom": item.get("nom", ""), "nombre": nombre},
 			 "inventaire_payload": _inventory_payload(character)}
 	if porteur is not character:
 		# Sac d'un compagnon / d'une monture allégé : son payload voyage à part (Convention §10),
@@ -1020,6 +1045,23 @@ def _rangement(refs: list, kg_max: float, depot: bool, retrait: bool, note: str)
 	}
 
 
+def _reserves_acceptees(character: dict, reg: dict) -> dict:
+	"""`{item_id: libellé du stock}` pour chaque objet des sacs du groupe (contenants ouverts
+	compris) que l'un des quatre stocks accepte — mêmes sacs et même règle que les dons."""
+	labels = reg.get("stocks_labels") or {}
+	out = {}
+	for sac in _sacs_dons(character):
+		for ref in sac.get("inventaire") or []:
+			iid = item_ref_id(ref)
+			if iid in out:
+				continue
+			item = resolve_item_ref(ref)
+			regle = colonisation.stock_de_item(item, filtres_boutique.filtres_item(item), reg) if item else None
+			if regle:
+				out[iid] = labels.get(regle["stock"], regle["stock"])
+	return out
+
+
 def _payload_rangements(character: dict, imp: dict, reg: dict, extra=None) -> dict:
 	"""Même panneau que le coffre d'une propriété (`routers/proprietes._payload_coffre`) : à
 	gauche le sac du personnage, d'un porteur ou d'un contenant ; à droite l'entrepôt commun
@@ -1040,6 +1082,11 @@ def _payload_rangements(character: dict, imp: dict, reg: dict, extra=None) -> di
 		"rangements": rangements,
 		"associes": ([{"id": a.get("id"), "nom": a.get("nom"), "retrait": bool(a.get("retrait"))}
 					  for a in imp.get("associes") or []] if role == colonisation.FONDATEUR else None),
+		# Journal des mouvements de l'entrepôt (fondateur) : les lignes `entrepot` du carnet.
+		"mouvements": ([j for j in reversed(imp.get("journal") or []) if j.get("genre") == "entrepot"][:30]
+					   if role == colonisation.FONDATEUR else None),
+		# Objets du groupe que les RÉSERVES acceptent (flèche « verser aux réserves ») : stock par item.
+		"reserves": _reserves_acceptees(character, reg),
 		"principal": _inventory_payload(character),
 		"porteurs": sacs_groupe.porteurs_payload(character, get_doc, resolve_item_ref),
 		"sacs_contenants": sacs_groupe.sacs_contenants(character, get_doc, resolve_item_ref, colonisation.now_epoch()),
@@ -1091,6 +1138,9 @@ async def rangements_deposer(current_user: Annotated[dict, Depends(get_current_u
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
 	if _poids(refs) + item_ref_weight(sac[pos]) > kg_max:
 		raise HTTPException(status_code=409, detail="Il n'y a plus de place.")
+	if body.get("cible") != "coffre":
+		colonisation.noter(imp, f"{proprietes.nom_personnage(character)} dépose "
+						   f"{(resolve_item_ref(sac[pos]) or {}).get('nom', '')} à l'entrepôt.", genre="entrepot")
 	refs.append(sac.pop(pos))
 	contenants.nettoyer(ref_c)
 	_sauver(imp, porteur)
@@ -1109,6 +1159,7 @@ async def rangements_retirer(current_user: Annotated[dict, Depends(get_current_u
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Cet objet n'y est plus.")
 	porteur = _porteur_rangement(character, body)
+	nom_objet = (resolve_item_ref(refs[pos]) or {}).get("nom", "")
 	pos_c, doc_c, introuvable = sacs_groupe.contenant_vise(porteur, body, get_doc)
 	if introuvable:
 		raise HTTPException(status_code=404, detail="Contenant introuvable dans ce sac.")
@@ -1124,6 +1175,8 @@ async def rangements_retirer(current_user: Annotated[dict, Depends(get_current_u
 			raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
 								if porteur is character else "Ce porteur ne peut pas porter davantage.")
 		porteur.setdefault("inventaire", []).append(refs.pop(pos))
+	if body.get("cible") != "coffre":
+		colonisation.noter(imp, f"{proprietes.nom_personnage(character)} prend {nom_objet} à l'entrepôt.", genre="entrepot")
 	_sauver(imp, porteur)
 	return _payload_rangements(character, imp, reg)
 
