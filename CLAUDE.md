@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes` · `transmettre`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -69,6 +69,7 @@ routers/
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
   renseignement.py       # /api/renseignement/* : offre, catalogue, chercher, lire (🔎 Se renseigner)
   contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
+  transmission.py        # /api/transmettre : menu ⇄ — sac / contenant / sol → tout autre emplacement du groupe
   enigmes.py             # /api/enigme (+ /action) : panneau d'énigme — le SERVEUR tranche, ouverture revérifiée à chaque requête
   colonisation.py        # /api/colonisation/* : charte (bureau d'un maître de guilde), site, fonder (carte d'un pays),
                          #   colons (auberge d'une cité), puis DANS l'implantation : ici, donner, feu, construire, poser,
@@ -156,6 +157,8 @@ utils/
                          #   association, placement, réseau), état sur `character.enigmes` (résolue pour toujours), échec sans
                          #   perte, condition `enigme_resolue` (dialogue + accès), aucun indice système : commentaires des escortés
                          #   et compagnons ; ⚠️ `vue_client` SEUL filtre de la solution ; `valider_enigme` / `cycles_prerequis`
+  transmission.py        # transmettre un objet (pur) : source et cible ∈ sol / sac d'un porteur / contenant porté ;
+                         #   refus (charge, place, marée, même tas) ⇒ rien ne bouge ; réf du contenant visé figée avant retrait
   sacs_groupe.py         # sacs du groupe d'un panneau de rangement à deux colonnes (pur) : porteurs, contenants,
                          #   porteur / contenant visé — coffre d'une propriété ET rangements d'une implantation
   contenants.py          # contenants (pur) : capacité sur le doc item (`contenant`), CONTENU sur la RÉFÉRENCE
@@ -299,6 +302,8 @@ templates/
                          #   partage.js (bouton `data-partager`, icône SVG sans libellé, couleur `--muted` de la page : partage natif, sinon copie de l'URL ; pages du lore)
                          #   conflit.js (409 « Conflit de sauvegarde » dit en douceur : bulle unique via `showToast`, /play ↔ /combat)
                          #   colonisation.js (panneau de l'implantation : fonder, onglets Site / Population / Bâtiments / Défense)
+                         #   transmettre.js (menu contextuel ⇄ Transmettre au point du clic : remplace « Poser », le 🤝 du sol, le ⬇ des contenants ;
+                         #     sacs de la fiche, fiche d'objet, panneau 👥, fenêtre 👜, colonne gauche des rangements)
                          #   enigmes.js (panneau d'énigme de /play : scène illustrée `/enigmes` + commandes parchemin/SVG ; hook `enigme` d'un choix)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons

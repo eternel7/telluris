@@ -65,9 +65,12 @@ vm.runInThisContext(extraireConst('INV_VISIBLE'));
 vm.runInThisContext(extraireConst('_ECH_ICONES'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
 	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', '_propNomPnj', '_propNegoce', '_propImages', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
-	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfDroite', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
+	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfDroite', '_pcfAdresse', '_pcfSourceTrm', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
+// Bouton « ⇄ Transmettre » de la colonne de gauche : le VRAI script partagé.
+globalThis.PRINCIPAL_ID = 'character:moi';
+vm.runInThisContext(require('fs').readFileSync(path.join(__dirname, '..', 'templates', 'scripts', 'transmettre.js'), 'utf8'));
 
 let passes = 0, echecs = 0;
 function t(nom, fn) {

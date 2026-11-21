@@ -91,28 +91,30 @@ test('durée courte : jamais « 0 min » ni négatif', () => {
 	assert.strictEqual(_dureeCourte(3600), '1 h 00');
 });
 
-// ── Poser au sol depuis le contenu (⬇) : aucune garde de charge côté client non plus ──
-// Classe de bug : le bouton greffé hors de la ligne, ou désactivé par la charge du sac.
-for (const nom of ['_pcfLigne', '_ctnBoutonPoser']) vm.runInThisContext(extraire(nom));
+// ── Transmettre depuis le contenu (⇄) : aucune garde de charge du sac côté client ──
+// Classe de bug : le bouton greffé hors de la ligne, ou adressé au sac au lieu du contenant.
 globalThis.escapeHtml = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+vm.runInThisContext(extraire('_pcfLigne'));
+vm.runInThisContext(require('fs').readFileSync(path.join(__dirname, '..', 'templates', 'scripts', 'transmettre.js'), 'utf8'));
+for (const nom of ['_grpRentre']) vm.runInThisContext(extraire(nom));
 
-test('ligne du contenu : ← sortir ET ⬇ poser, dans la même ligne', () => {
-	const it = { idx: 2, item: 'item:pierre', nom: 'Pierre', poids: 40 };
-	const html = _pcfLigne(it, it.idx, '←', '_ctnSortir', false, 'Trop lourd', 'gauche', null, null, null, _ctnBoutonPoser(it));
-	assert.ok(/^<div class="sh-inv-item">[\s\S]*_ctnSortir[\s\S]*_ctnPoser\(this\)">⬇<\/button><\/div>$/.test(html));
-	const poser = _ctnBoutonPoser(it);
-	assert.ok(!/disabled/.test(poser), 'trop lourd pour le sac ne bloque pas la pose au sol');
-	assert.ok(/data-idx="2"/.test(poser) && /data-item="item:pierre"/.test(poser));
+test('ligne du contenu : ← sortir ET ⇄ transmettre, dans la même ligne, adressé au contenant', () => {
+	const it = { idx: 2, _id: 'item:pierre', nom: 'Pierre', poids: 40 };
+	const src = { porteur_id: 'character:moi', contenant_index: 1, contenant_item_id: 'item:besace' };
+	const trm = transmettreBtn(src, it.idx, it, { compact: true });
+	const html = _pcfLigne(it, it.idx, '←', '_ctnSortir', false, 'Trop lourd', 'gauche', null, null, null, trm);
+	assert.ok(/^<div class="sh-inv-item">[\s\S]*_ctnSortir[\s\S]*ouvrirTransmettre\(event, this\)">⇄<\/button><\/div>$/.test(html));
+	assert.ok(!/disabled/.test(trm), 'trop lourd pour le sac ne bloque pas le menu');
+	assert.ok(/data-idx="2"/.test(trm) && /data-item="item:pierre"/.test(trm));
+	const lu = JSON.parse(trm.match(/data-trm-src="([^"]*)"/)[1].replace(/&#34;/g, '"'));
+	assert.deepStrictEqual(lu, src);
 });
 
-// ── Contenants comme DESTINATAIRES (sol 🤝, panneau 👥, butin de combat) ─────────
+// ── Contenants comme DESTINATAIRES (menu ⇄, panneau 👥, butin de combat) ─────────
 // Classes de bug : un contenant oublié de la liste (celui du porteur de la fiche compris),
 // un contenant proposé comme destination d'un autre contenant, une place masquée (marée
 // basse) prise pour « plein » ou « vide ».
-for (const nom of ['_grpRentre', '_porteursPourRamasser']) vm.runInThisContext(extraire(nom));
-
-globalThis.porteurActifId = () => 'character:moi';
-globalThis._grpEtat = {
+const GRP = {
 	principal: { id: 'character:moi', prenom: 'Moi', nom: '', charge: 10, charge_max: 20 },
 	groupe: [], montures: [], sacs: {},
 	contenants: [
@@ -123,16 +125,17 @@ globalThis._grpEtat = {
 	],
 };
 
-test('sol 🤝 : les contenants du groupe, celui de la fiche ouverte compris', () => {
-	const out = _porteursPourRamasser({ poids: 4 });
-	assert.deepStrictEqual(out.map(p => p.id), ['character:moi#2', 'monture:ane#0']);
+test('menu ⇄ depuis le sol : les contenants du groupe, celui de la fiche ouverte compris', () => {
+	const out = destinationsTransmettre(GRP, { sol: true }, { poids: 4 }).filter(d => d.cible.contenant_index != null);
+	assert.deepStrictEqual(out.map(p => p.cle), ['character:moi#2', 'monture:ane#0']);
 	assert.strictEqual(out[0].rentre, false, 'besace : 3 kg libres pour 4 kg');
 	assert.strictEqual(out[1].rentre, true, 'marée basse : place inconnue, le serveur tranche');
-	assert.strictEqual(out[1].contenant.porteur_id, 'monture:ane');
+	assert.strictEqual(out[1].cible.porteur_id, 'monture:ane');
 });
 
-test('sol 🤝 : un contenant ne va jamais dans un autre', () => {
-	assert.ok(_porteursPourRamasser({ poids: 0.5, contenant: {} }).every(p => !p.rentre));
+test('menu ⇄ : un contenant ne va jamais dans un autre', () => {
+	const out = destinationsTransmettre(GRP, { sol: true }, { poids: 0.5, contenant: {} });
+	assert.ok(out.filter(d => d.cible.contenant_index != null).every(p => !p.rentre));
 });
 
 test('panneau 👥 : _grpRentre vers un contenant', () => {
