@@ -601,10 +601,54 @@ def test_entrepot_commun_et_petit_coffre_par_les_routes(monde):
 	_appel(monde, associe, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0})
 	assert associe["inventaire"] == ["item:pain", "item:pain"]
 	rep = _appel(monde, associe, rc.rangements_deposer, None, {"cible": "coffre", "index": 0, "item_id": "item:pain"})
-	assert monde["docs"][imp_id]["coffres"]["character:b"] == ["item:pain"] and rep["coffre"]["objets"]
+	assert monde["docs"][imp_id]["coffres"]["character:b"] == ["item:pain"]
+	assert [o["_id"] for o in rep["rangements"]["coffre"]["inventaire"]] == ["item:pain"]
+	assert rep["colonie"] and set(rep["rangements"]) == {"entrepot", "coffre"} and rep["associes"] is None
+	assert set(_appel(monde, fondateur, rc.rangements, None)["rangements"]) == {"entrepot"}
 	assert _refus(monde, fondateur, rc.rangements_deposer, None, {"cible": "coffre", "index": 0, "item_id": "item:pain"}) == 403
 	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1}, inventaire=["item:pain"])
 	assert _refus(monde, visiteur, rc.rangements_deposer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain"}) == 403
+
+
+def test_les_rangements_servent_tous_les_sacs_du_groupe(monde):
+	"""Même panneau que le coffre d'une propriété : on dépose depuis le sac d'un compagnon,
+	d'une monture ou d'un contenant, on y reprend ; le sac d'autrui n'est pas adressable."""
+	rc = monde["rc"]
+	monde["docs"]["item:besace"] = {"_id": "item:besace", "type": "item", "nom": "Besace profonde",
+									"categorie": "outil", "sous_categorie": "contenant", "slots": [], "poids": 0.5,
+									"tags": ["contenant", "non_personnalisable"], "contenant": {"capacite_kg": 10}}
+	fondateur = _perso(inventaire=[{"item": "item:besace", "contenu": ["item:pain"]}])
+	imp_id = _fonder(monde, fondateur)
+	monde["docs"][imp_id]["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [1, 1]}]
+	av = {"_id": "aventurier:1", "type": "aventurier", "statut": "embauche", "embauche_par": fondateur["_id"],
+		  "prenom": "Bo", "nom": "", "caracteristiques_current": dict(CARACTS), "inventaire": ["item:pain"]}
+	mule = {"_id": "monture:1", "type": "monture", "statut": "acquise", "acquise_par": fondateur["_id"],
+			"nom": "Mule", "inventaire": ["item:pain"]}
+	etranger = {"_id": "aventurier:2", "type": "aventurier", "statut": "embauche", "embauche_par": "character:x",
+				"prenom": "Nul", "nom": "", "inventaire": ["item:pain"]}
+	for d in (av, mule, etranger):
+		monde["docs"][d["_id"]] = d
+	fondateur["groupe"], fondateur["montures"] = [av["_id"], etranger["_id"]], [mule["_id"]]
+	rep = _appel(monde, fondateur, rc.rangements, None)
+	assert [p["id"] for p in rep["porteurs"]] == ["aventurier:1", "monture:1"]
+	assert [c["cle"] for c in rep["sacs_contenants"]] == [f"{fondateur['_id']}#0"]
+	base = {"cible": "entrepot", "index": 0, "item_id": "item:pain"}
+	assert _refus(monde, fondateur, rc.rangements_deposer, None, dict(base, compagnon_id="aventurier:2")) == 403
+	_appel(monde, fondateur, rc.rangements_deposer, None, dict(base, compagnon_id="aventurier:1"))
+	_appel(monde, fondateur, rc.rangements_deposer, None, dict(base, compagnon_id="monture:1"))
+	rep = _appel(monde, fondateur, rc.rangements_deposer, None,
+				 dict(base, index_contenant=0, item_id_contenant="item:besace"))
+	assert monde["docs"][imp_id]["entrepot"] == ["item:pain"] * 3
+	docs = monde["docs"]
+	assert docs["aventurier:1"]["inventaire"] == [] and docs["monture:1"]["inventaire"] == []
+	assert fondateur["inventaire"] == [{"item": "item:besace"}]
+	assert [o["idx"] for o in rep["rangements"]["entrepot"]["inventaire"]] == [0, 1, 2]
+	# on reprend vers le compagnon, puis dans la besace (rangé sans peser)
+	_appel(monde, fondateur, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain", "compagnon_id": "aventurier:1"})
+	_appel(monde, fondateur, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain",
+														   "index_contenant": 0, "item_id_contenant": "item:besace"})
+	assert docs["aventurier:1"]["inventaire"] == ["item:pain"] and fondateur["inventaire"] == [{"item": "item:besace", "contenu": ["item:pain"]}]
+	assert monde["docs"][imp_id]["entrepot"] == ["item:pain"]
 
 
 def test_les_colons_se_trouvent_a_l_auberge_d_une_cite(monde):

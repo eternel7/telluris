@@ -31,6 +31,7 @@ from utils import montures
 from utils import proprietes
 from utils import echanges_cite
 from utils import contenants
+from utils import sacs_groupe
 from utils import escorte
 from utils import commande as commande_util
 from utils import fiche as fiche_util
@@ -716,15 +717,7 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 		"role": role,
 		"gardien": gardien,
 		"principal": _inventory_payload(character),
-		# ⚠️ `charge_max_porteur` et non `charge_max_of` : une monture porte bien davantage,
-		# et le client recopie ce plafond pour griser ses flèches.
-		"porteurs": [
-			{"id": p["_id"], "prenom": p.get("prenom", ""), "nom": p.get("nom", ""),
-			 "monture": montures.est_monture(p),
-			 "charge": round(carried_weight(p), 2), "charge_max": montures.charge_max_porteur(p),
-			 "inventaire": [d for r in p.get("inventaire") or [] if (d := resolve_item_ref(r))]}
-			for p in recrutement.porteurs_effectifs(character, get_doc)
-		],
+		"porteurs": sacs_groupe.porteurs_payload(character, get_doc, resolve_item_ref),
 		"coffre": {
 			"visible": coffre_visible,
 			"depot": role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE),
@@ -775,41 +768,21 @@ def _contenants_sacs(character: dict) -> dict:
 
 
 def _sacs_contenants(character: dict) -> list:
-	"""Chaque contenant porté (vous, compagnons, montures), vide ou plein, au format d'un sac :
-	`cle` (`porteur#index`, sélecteur), `porteur_id` (= `compagnon_id` des transferts, vous
-	compris), `index`/`item_id` (adresse), `charge`/`charge_max` (rangé / capacité) et contenu
-	indexé par sa position réelle. Hors marée : rien de visible, `accessible` faux."""
-	now = int(time.time())
-	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
-	par_id = {p.get("_id"): p for p in porteurs}
-	out = []
-	for c in contenants.destinations(porteurs, get_doc, now):
-		ref_c = (par_id[c["porteur_id"]].get("inventaire") or [])[c["index"]]
-		vue = contenants.vue(ref_c, get_doc(c["item_id"]), now, resolve_item_ref)
-		out.append(dict(c, charge=c["charge_kg"] if c["accessible"] else 0,
-						charge_max=c["capacite_kg"], inventaire=vue.get("contenu") or []))
-	return out
+	return sacs_groupe.sacs_contenants(character, get_doc, resolve_item_ref, int(time.time()))
 
 
 def _contenant_vise(porteur: dict, body: dict) -> tuple[int | None, dict | None]:
-	"""(position, doc) du contenant DESTINATAIRE adressé par `index_contenant`/`item_id_contenant`
-	dans ce sac ; (None, None) sans adresse ; 404 si l'adresse ne désigne plus un contenant."""
-	idx_c, iid_c = body.get("index_contenant"), body.get("item_id_contenant")
-	if idx_c is None and not iid_c:
-		return None, None
-	pos_c, doc_c = contenants.contenant_de(porteur, idx_c, iid_c, get_doc)
-	if pos_c is None:
+	"""(position, doc) du contenant DESTINATAIRE adressé dans ce sac ; (None, None) sans
+	adresse ; 404 si l'adresse ne désigne plus un contenant."""
+	pos_c, doc_c, introuvable = sacs_groupe.contenant_vise(porteur, body, get_doc)
+	if introuvable:
 		raise HTTPException(status_code=404, detail="Contenant introuvable dans ce sac.")
 	return pos_c, doc_c
 
 
 def _porteur(character: dict, compagnon_id) -> dict:
-	"""Le sac visé : le personnage, ou l'un de ses porteurs (compagnon OU monture). Un doc
-	`aventurier:*`/`monture:*` n'a pas de `user_id` : `porteurs_effectifs` (statut + lien vers
-	CE personnage) est la seule preuve d'appartenance — miroir de `routers/user._acteur`."""
-	if not compagnon_id or compagnon_id == character.get("_id"):
-		return character
-	p = next((x for x in recrutement.porteurs_effectifs(character, get_doc) if x.get("_id") == compagnon_id), None)
+	"""Le sac visé (`sacs_groupe.porteur_vise`) ; 403 hors du groupe."""
+	p = sacs_groupe.porteur_vise(character, compagnon_id, get_doc)
 	if p is None:
 		raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe.")
 	return p

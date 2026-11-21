@@ -156,6 +156,8 @@ utils/
                          #   association, placement, réseau), état sur `character.enigmes` (résolue pour toujours), échec sans
                          #   perte, condition `enigme_resolue` (dialogue + accès), aucun indice système : commentaires des escortés
                          #   et compagnons ; ⚠️ `vue_client` SEUL filtre de la solution ; `valider_enigme` / `cycles_prerequis`
+  sacs_groupe.py         # sacs du groupe d'un panneau de rangement à deux colonnes (pur) : porteurs, contenants,
+                         #   porteur / contenant visé — coffre d'une propriété ET rangements d'une implantation
   contenants.py          # contenants (pur) : capacité sur le doc item (`contenant`), CONTENU sur la RÉFÉRENCE
                          #   (`ref.contenu`) → suit l'objet partout, ne pèse rien (physique ET magique), INERTE
                          #   pour tout autre système ; aucun contenant dans un autre ; marée en temps réel
