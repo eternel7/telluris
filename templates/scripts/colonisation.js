@@ -397,6 +397,15 @@ function colChantierHtml(d) {
 	return html + `</section>`;
 }
 
+// « Vend son surplus aux boutiques » d'un PNJ producteur (fondateur) : un interrupteur dont le
+// libellé reste fixe — seul l'état (coché / non) dit ce qui se passe. Éteint : le surplus reste
+// aux réserves. (L'ancien bouton « 💰 vend / 🔒 garde » montrait l'état ET basculait au clic.)
+function colInterrupteurVente(t) {
+	return `<label class="col-interrupteur" title="${t.vend ? 'Son surplus est vendu aux boutiques du lieu (recette dans la caisse)' : 'Éteint : son surplus reste dans les réserves du lieu'}">
+		<input type="checkbox" role="switch" data-id="${_colE(t.id)}" ${t.vend ? 'checked' : ''} onchange="colVente(this)">
+		<span class="col-interrupteur-piste" aria-hidden="true"></span><span>Vend son surplus aux boutiques</span></label>`;
+}
+
 // État d'un bâtiment (pur) : à poser, endommagé (postes à l'arrêt), ou en service.
 function _colEtatBatiment(b) {
 	if (!b.pos) return '⚠️ à poser';
@@ -407,14 +416,16 @@ function _colEtatBatiment(b) {
 function colOngletBatimentsHtml(d) {
 	const peutPoser = _colGere(d);
 	const bat = (d.batiments || []).map(b => {
-		const tenu = t => _colE(t.nom) + (t.vend === null || t.vend === undefined || d.role !== 'fondateur' ? ''
-			: ` <button class="sh-drop-btn" data-id="${_colE(t.id)}" data-vente="${t.vend ? '' : '1'}" onclick="colVente(this)">${t.vend ? '💰 vend' : '🔒 garde'}</button>`);
+		const tenu = t => _colE(t.nom);
+		// PNJ producteurs (`vend` non nul) : une ligne chacun, l'interrupteur au fondateur seul.
+		const ventes = d.role !== 'fondateur' ? '' : (b.postes || []).flatMap(p => p.tenus.filter(t => t.vend !== null && t.vend !== undefined)
+			.map(t => `<span class="col-vente">${_colE(t.nom)} — ${_colE(p.label)} ${colInterrupteurVente(t)}</span>`)).join('');
 		const vacants = (b.postes || []).reduce((n, p) => n + Math.max(0, (+p.places || 0) - p.tenus.length), 0);
 		const postes = (b.postes || []).map(p => `${p.tenus.length < p.places ? '⬜' : '✅'} ${_colE(p.label)} ${p.tenus.length}/${_colE(p.places)}${p.tenus.length ? ' (' + p.tenus.map(tenu).join(', ') + ')' : ''}`).join(' · ');
 		return `<div class="prop-ligne"><div class="prop-txt">
 			<strong>${_colE(b.icone)} ${_colE(b.label)}</strong>
 			<span class="q-desc">${_colEtatBatiment(b)}${b.pos ? ` · case ${_colE(b.pos[0])}, ${_colE(b.pos[1])}` : ''}${vacants ? ` · ${vacants} poste${vacants > 1 ? 's' : ''} vacant${vacants > 1 ? 's' : ''}` : ''}</span>
-			${postes ? `<span class="q-desc">${postes}</span>` : ''}</div>
+			${postes ? `<span class="q-desc">${postes}</span>` : ''}${ventes}</div>
 			${peutPoser ? `<button class="sh-drop-btn" data-batiment="${_colE(b.id)}" onclick="colPoser(this)">${b.pos ? 'Déplacer ici' : 'Poser ici'}</button>` : ''}
 			${vacants && d.role === 'fondateur' ? '<button class="sh-drop-btn" onclick="colOuvrirEmbauche()">Engager</button>' : ''}
 			${b.endommage && d.role === 'fondateur' ? `<button class="sh-drop-btn" data-batiment="${_colE(b.id)}" onclick="colReparer(this)">Réparer</button>` : ''}
@@ -650,7 +661,12 @@ async function colTaniere() {
 	const d = await _aubFetch('api/colonisation/taniere', {});
 	if (d && d.combat_id) window.location.href = '/combat/' + encodeURIComponent(d.combat_id);
 }
-function colVente(btn) { _colAction('api/colonisation/employe/vente', { employe_id: btn.dataset.id, vente: !!btn.dataset.vente }); }
+// L'interrupteur DIT l'état (coché = vend) ; le libellé ne change jamais.
+// Refus du serveur : on redessine, l'interrupteur reprend l'état réel.
+async function colVente(input) {
+	const d = await _aubFetch('api/colonisation/employe/vente', { employe_id: input.dataset.id, vente: !!input.checked });
+	if (d) colRendre(d); else _colRedessiner();
+}
 function colConsigne(btn) {
 	// Valeurs lues dans le DOM (jamais interpolées dans un onclick).
 	const stock = btn.dataset.stock;
