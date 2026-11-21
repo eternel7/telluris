@@ -73,7 +73,7 @@ const SONS_UI = {
 // Seule une réponse HTTP RÉUSSIE sonne : un refus du serveur reste muet.
 const SONS_API = {
 	'equip': 'equiper', 'unequip': 'desequiper',
-	'drop_item': 'poser', 'pickup_item': 'ramasser', 'groupe/transferer': 'poser', 'transmettre': 'poser',
+	'pickup_item': 'ramasser', 'groupe/transferer': 'poser', 'transmettre': 'poser',
 	'buy_item': 'pieces', 'sell_item': 'pieces', 'marchander': 'pieces',
 	'consommer': 'boire', 'couper': 'bois', 'recolter': 'recolte',
 	'spend_xp': 'progression', 'spend_xp_vocation': 'progression',

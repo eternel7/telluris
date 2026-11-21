@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from routers import user as user_router
 from utils import characters
+from utils import transmission
 
 ITEMS = {
 	"item:epee": {"_id": "item:epee", "type": "item", "nom": "Épée", "categorie": "arme",
@@ -65,8 +66,10 @@ def test_renommer_au_sac_puis_le_nom_suit_equiper_desequiper_poser(db, monkeypat
 	assert perso["slots"]["main_droite"]["nom_perso"] == "Crocdeloup"
 	_appel(monkeypatch, perso, perso, user_router.unequip_item, {"slot": "main_droite"})
 	assert perso["inventaire"][0]["nom_perso"] == "Crocdeloup"
-	_appel(monkeypatch, perso, perso, user_router.drop_item, {"index": 0, "item_id": "item:epee"})
-	assert perso["objets_au_sol"][0]["nom_perso"] == "Crocdeloup"
+	sol = perso.setdefault("objets_au_sol", [])
+	assert transmission.transmettre(transmission.emplacement_sac(perso), transmission.emplacement_sol(),
+									sol, 0, "item:epee", ITEMS.get, 0)[0]
+	assert sol[0]["nom_perso"] == "Crocdeloup"
 
 
 def test_equiper_par_index_prend_le_bon_exemplaire(db, monkeypatch):

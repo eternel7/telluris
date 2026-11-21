@@ -28,8 +28,6 @@ Génération procédurale (race/sexe/vocation, stats, équipement équipé dans 
 
 **Transmettre** (menu ⇄, `scripts/transmettre.js` → `POST /api/transmettre`, `utils/transmission.py`) : tout objet que le groupe a en main (sac d'un porteur, contenant porté, sol) va à tout autre emplacement du groupe, sol compris — menu contextuel au point du clic, destinations trop chargées grisées. Remplace « Poser » et le 🤝 du sol. Vers un sac : refus DUR (409), **pas d'auto-délestage** ; réponse = sac de la fiche ouverte (`_inventory_payload(acteur)`, §1), `fiches` des sacs touchés, groupe relu par le client.
 
-**Ramasser POUR un porteur** (API conservée, plus appelée par /play) : `pickup_item` + `destinataire_id` (`_membre_du_groupe`, preuve d'appartenance de `_cible_alliee`) → `recrutement.ramasser_pour` : refus DUR (409), **pas d'auto-délestage** du sac d'autrui. La réponse reste le sac de la fiche ouverte ; celui du destinataire voyage à part (`destinataire`), jamais à sa place (§1).
-
 
 ### Compagnie permanente — engagement durable d'un compagnon
 Au-delà d'`AFFINITE_SEUIL_ENGAGEMENT`, un compagnon cesse d'être un contrat : il renonce à sa part de butin, sort du plafond de groupe, et rejoint la COMPAGNIE du joueur (bouton du panneau 👥, pas de tirage). État `av["permanent"] = True` + `character["compagnie"]`. XP partagée avec le principal (au lieu d'une part de butin) via `partager_xp`/`compagnie_effective`, appliquée aux quatre turn-in de quête et à l'XP de découverte de lieu/conclusion d'intro — **jamais en combat**, où tous les compagnons touchent l'XP pleine. Invariants (un permanent ne part jamais de lui-même, la compagnie garde son nom même sans membre, le plafond de groupe ne compte que les non-permanents) couverts par `tests/test_recrutement.py`.

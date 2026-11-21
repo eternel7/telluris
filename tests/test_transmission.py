@@ -95,6 +95,26 @@ def test_sol_vers_contenant(docs):
 	assert sol == [] and moi["inventaire"][0]["contenu"] == ["item:pierre"]
 
 
+def test_contenant_vers_le_sol_sans_controle_de_charge(docs):
+	"""Ce que le porteur ne pourrait pas sortir dans son sac, il le pose par terre : la charge
+	n'est pas vérifiée vers le sol (le contenu d'un contenant ne pèse rien pour lui)."""
+	moi = character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:enclume", "poids": 9}]}],
+					caracteristiques_current={"F": 1})
+	sol = []
+	assert not _t(tr.emplacement_contenant(moi, 0, "item:besace"), tr.emplacement_sac(moi), sol, 0, "item:enclume", docs)[0]
+	assert _t(tr.emplacement_contenant(moi, 0, "item:besace"), tr.emplacement_sol(), sol, 0, "item:enclume", docs)[0]
+	assert sol == [{"item": "item:enclume", "poids": 9}]
+
+
+def test_index_desaligne_repli_sur_item_id_et_poids_d_instance(docs):
+	moi = character()
+	sol = [{"item": "item:pierre", "poids": 2}, "item:besace", {"item": "item:pierre", "poids": 8}]
+	ok, _c, _r, ref = _t(tr.emplacement_sol(), tr.emplacement_sac(moi), sol, 2, "item:pierre", docs)
+	assert ok and ref == {"item": "item:pierre", "poids": 8}
+	ok, _c, _r, ref = _t(tr.emplacement_sol(), tr.emplacement_sac(moi), sol, 0, "item:besace", docs)
+	assert ok and ref == "item:besace" and sol == [{"item": "item:pierre", "poids": 2}]
+
+
 # ── Pur : refus ⇒ rien ne bouge ──────────────────────────────────────────────────
 
 def test_refus_charge_ne_touche_pas_la_source(docs):
