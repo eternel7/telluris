@@ -2221,7 +2221,7 @@
 							{% endif %}
 							{# Coupe-son : même réglage que le 🔊 du combat (scripts/sons.js). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-son" aria-checked="true" onclick="basculerSonsMenu()">🔊 Sons</button>
-							{% if intro_musique %}<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-musique" aria-checked="true" onclick="basculerMusiqueMenu()">🎵 Musique</button>{% endif %}
+							{% if intro_musique or taverne_musique %}<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-musique" aria-checked="true" onclick="basculerMusiqueMenu()">🎵 Musique</button>{% endif %}
 							{# Bouton « ? » d'aide des cartes du joueur (classe `aide-masquee` de <html>). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-aide" aria-checked="true" onclick="basculerAideMenu()">❓ Bouton d'aide</button>
 							{# Porte de rempart franchie d'un geste : `passe_muraille` de `moveTo` (utils/passe_muraille.py). #}
@@ -5369,7 +5369,7 @@
 		jouerSonUi('choix');   // muet si l'on vient de couper : c'est le retour attendu
 	}
 	_majMenuSons();
-	// 🎵 Musique : présent tant que l'intro a une musique (même réglage que le 🎵 du combat).
+	// 🎵 Musique : présent quand l'intro ou la taverne a une musique (même réglage que le 🎵 du combat).
 	function _majMenuMusique() {
 		const b = document.getElementById('affichage-musique');
 		if (b) b.setAttribute('aria-checked', musiqueCoupee() ? 'false' : 'true');
@@ -5543,11 +5543,19 @@
 			sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
 		}
 	}
+	// Durée du fondu de sortie (ms) si une musique de TAVERNE joue, sinon 0 — posée au démarrage
+	// de la musique. ⚠️ `var` et non `const` : `moveTo` la lit sans risque de TDZ même si le
+	// script s'est arrêté avant ce démarrage.
+	var _taverneFonduSortie = 0;
 	async function moveTo(linkId, guideAdieu = false) {
 		const moveData = guideAdieu ? {link: linkId, guide_adieu: true} : {link: linkId};
 		if (passeMurailleActif()) moveData.passe_muraille = true;
 		// Au clic et non au retour : la page se recharge dès la réponse, le son y serait coupé net.
 		jouerSonUi('porte');
+		// Sortie de taverne : le fondu de la musique part AU CLIC, en même temps que la requête,
+		// et l'on n'attend avant de recharger que ce qu'il en reste. Refus ⇒ le volume remonte.
+		const fondu = _taverneFonduSortie ? attenuerMusique(_taverneFonduSortie) : null;
+		const _annulerFondu = () => { if (fondu) retablirMusique(400); };
 		try {
 			const response = await fetch('api/move_character', {
 				method: 'POST',
@@ -5557,7 +5565,8 @@
 			if (response.ok) {
 				const data = await response.json();
 				// Le guide prévient avant de quitter sa cité : rien n'a bougé côté serveur.
-				if (data.guide_avertissement) { _ouvrirGuideDepart(data.guide_avertissement, () => moveTo(linkId, true)); return; }
+				if (data.guide_avertissement) { _annulerFondu(); _ouvrirGuideDepart(data.guide_avertissement, () => moveTo(linkId, true)); return; }
+				if (fondu) await fondu;
 				// Notifs d'arrivée AVANT le départ au combat : un gardien de lieu (`combat_arrivee`)
 				// ouvre le combat APRÈS l'arrivée réelle (XP de découverte, escortes…), relues au
 				// retour sur /play. Inerte pour un donjon à étages (rien de tel dans la réponse).
@@ -5570,11 +5579,12 @@
 				if (await _lancerCombatZone(data.zone_event)) return;
 				window.location.reload(true);
 			} else {
+				_annulerFondu();
 				const error = await response.json();
 				console.log(error.detail)
 				_erreurAction(error.detail);
 			}
-		} catch (err) { console.error("Erreur de connexion", err); }
+		} catch (err) { _annulerFondu(); console.error("Erreur de connexion", err); }
 	}
 
 	// ── TRAVERSÉE MARITIME (utils/traversee.py, routers/traversee.py) ─────────────
@@ -6912,7 +6922,16 @@ async function spendXp(statKey, useMaxBonus = false) {
 	// (`telluris.musique`) : une musique coupée un jour dans un donjon ferait sinon naître
 	// le personnage suivant dans une intro muette. Le joueur peut la recouper au menu ⚙️.
 	{% if intro %}if (INTRO_MUSIQUE && musiqueCoupee()) { basculerMusique(); _majMenuMusique(); }{% endif %}
-	demarrerMusique(INTRO_MUSIQUE);
+	// Taverne : un morceau tiré au hasard dans `sounds/taverne` (`auberge.musique_taverne`),
+	// un autre à sa fin. L'intro, si elle joue, garde la main. Fondu à l'entrée ; à la sortie,
+	// `moveTo` l'atténue (`_taverneFonduSortie`) avant de recharger.
+	const TAVERNE_MUSIQUE = {{ taverne_musique | tojson | safe }};
+	if (!INTRO_MUSIQUE && TAVERNE_MUSIQUE) {
+		_taverneFonduSortie = 800;   // court : c'est autant de retard au rechargement
+		demarrerMusique(Object.assign({ fondu: 1500 }, TAVERNE_MUSIQUE));
+	} else {
+		demarrerMusique(INTRO_MUSIQUE);
+	}
 	async function choisirRaisonIntro(raisonId) {
 		try {
 			const res = await fetch('api/intro/raison', {

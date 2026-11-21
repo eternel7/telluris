@@ -1294,6 +1294,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	intro_payload = intro_util.payload_overlay(character, grid_doc)
 	# Musique de l'intro : de l'écran-seuil jusqu'à la conclusion, rechargements compris.
 	intro_musique = intro_util.musique(character, grid_doc)
+	# Musique d'ambiance d'une taverne : un morceau au hasard du dossier `sounds/taverne`.
+	taverne_musique = auberge_util.musique_taverne(grid_doc, lambda: os.listdir(
+		os.path.join(SOUNDS_PATH, auberge_util.MUSIQUE_TAVERNE_DOSSIER)))
 
 	return templates.TemplateResponse(
 		request=request,
@@ -1410,6 +1413,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"chambres_reprises": chambres_reprises,
 			"intro": intro_payload,
 			"intro_musique": intro_musique,
+			"taverne_musique": taverne_musique,
 			"ressource_recoltable": ressource_recoltable,
 			# Hache / lame portées par N'IMPORTE QUEL membre de l'expédition (bouton 🪓/🔪) ;
 			# resynchronisé par `outils_groupe` de `_inventory_payload`.

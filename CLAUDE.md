@@ -306,7 +306,7 @@ templates/
                          #     sacs de la fiche, fiche d'objet, panneau 👥, fenêtre 👜, colonne gauche des rangements)
                          #   enigmes.js (panneau d'énigme de /play : scène illustrée `/enigmes` + commandes parchemin/SVG ; hook `enigme` d'un choix)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
-  resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons
+  resources/sounds/      # sonothèque À PLAT (mount /sounds, URL par `urlSon`) sauf `taverne/` (musiques tirées au hasard) ; détail : telluris-social-ui § Sons
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)

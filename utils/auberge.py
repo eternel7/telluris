@@ -23,6 +23,7 @@ from models.character_stats import BaseStats, compute_derived_stats
 from utils.characters import sync_equipment_bonus, item_ref_id, item_sous_categorie
 from utils.consommables import caracts_avec_buffs
 from utils import expedition
+from utils.animations import est_son
 
 TYPE_TABLE = "table"
 TYPE_MESSAGE = "message"
@@ -220,6 +221,30 @@ def lieu_est_taverne(lieu_doc: dict) -> bool:
 		return False
 	return (lieu_doc.get("categorie") == "auberge"
 			or "taverne" in (lieu_doc.get("tags") or []))
+
+
+# Musique d'ambiance des tavernes : TOUT fichier jouable du sous-dossier, tiré au hasard par le
+# client (`demarrerMusique({fichiers})`, scripts/sons.js). Ajouter un morceau = déposer le
+# fichier, rien d'autre. Volume sous celui d'un donjon (0,5) : la salle commune se lit.
+MUSIQUE_TAVERNE_DOSSIER = "taverne"
+MUSIQUE_TAVERNE_VOLUME = 0.35
+
+
+def musique_taverne(lieu_doc: dict, lister_fn) -> dict | None:
+	"""`{fichiers: ["taverne/<nom>", …], volume}` pour une taverne, sinon None (lieu non taverne,
+	dossier absent ou sans fichier jouable). `lister_fn()` → noms du dossier (injecté : pur).
+	Chemins relatifs à la sonothèque, triés (rendu stable) ; fichiers cachés écartés."""
+	if not lieu_est_taverne(lieu_doc):
+		return None
+	try:
+		noms = lister_fn() or []
+	except OSError:
+		return None
+	fichiers = sorted(f"{MUSIQUE_TAVERNE_DOSSIER}/{n}" for n in noms
+		if n and not n.startswith(".") and "/" not in n and "\\" not in n and est_son(n))
+	if not fichiers:
+		return None
+	return {"fichiers": fichiers, "volume": MUSIQUE_TAVERNE_VOLUME}
 
 
 # ── Bornage des saisies joueur ──────────────────────────────────────────────────

@@ -60,6 +60,32 @@ t('choisirFichier reste dans la liste', () => {
 	assert.strictEqual(choisirFichier(null, () => 0), '');
 });
 
+t('urlSon encode chaque segment, garde le /', () => {
+	assert.strictEqual(urlSon('a b.mp3'), '/sounds/a%20b.mp3');
+	assert.strictEqual(urlSon('taverne/Ambiance Taverne !.mp3'), '/sounds/taverne/Ambiance%20Taverne%20!.mp3');
+	assert.strictEqual(urlSon('taverne/Médiévale #1.mp3'), '/sounds/taverne/M%C3%A9di%C3%A9vale%20%231.mp3');
+});
+t('morceauSuivant ne rejoue pas le même morceau', () => {
+	const l = ['a', 'b', 'c'];
+	for (const r of [0, 0.4, 0.9999]) assert.notStrictEqual(morceauSuivant(l, 'b', () => r), 'b');
+	assert.strictEqual(morceauSuivant(['a'], 'a', () => 0), 'a');           // liste d'un seul
+	assert.strictEqual(morceauSuivant(l, undefined, () => 0), 'a');         // premier tirage
+	assert.strictEqual(morceauSuivant([], 'a', () => 0), '');
+});
+
+t('_rampe : durée nulle = volume posé, rampe récente prioritaire', () => {
+	const a = { volume: 0.8 };
+	_rampe(a, 0.3, 0);
+	assert.strictEqual(a.volume, 0.3);
+	_rampe(a, 0, 10000);            // rampe longue en cours…
+	const j = a._rampe;
+	_rampe(a, 0.5, 0);              // …la plus récente gagne
+	assert.ok(a._rampe > j);
+	assert.strictEqual(a.volume, 0.5);
+	_rampe(a, 2, 0);
+	assert.strictEqual(a.volume, 1);   // borné à [0, 1]
+});
+
 const SONS = new Set(fs.readdirSync(path.join(RACINE, 'templates', 'resources', 'sounds')));
 t('chaque fichier de SONS_UI existe', () => {
 	const manquants = [];

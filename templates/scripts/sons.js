@@ -6,7 +6,8 @@
 //      de la table joue sa clé. Une action neuve se sonorise en ajoutant UNE ligne à
 //      `SONS_API`, sans toucher à son gestionnaire ;
 //   3. `demarrerMusique({fichier, volume})` — une musique en BOUCLE (celle d'un donjon,
-//      `donjon.musique_du_donjon`), reprise là où elle en était après un rechargement.
+//      `donjon.musique_du_donjon`), reprise là où elle en était après un rechargement ;
+//      ou `demarrerMusique({fichiers, volume})` — une liste jouée au hasard (taverne).
 //
 // ⚠️ Les sons de COMBAT (coups, sorts) ne passent PAS par ici : ils sont portés par les docs
 // `animation:*` et joués par `jouerSon` (combat_telluris.html), un seul lecteur à la fois.
@@ -131,6 +132,19 @@ function choisirFichier(entree, alea) {
 	return f[Math.min(f.length - 1, Math.max(0, Math.floor(r * f.length)))];
 }
 
+// URL d'un fichier de la sonothèque. Encodée SEGMENT par segment : une musique peut vivre
+// dans un sous-dossier (`taverne/…`), et `encodeURIComponent` du tout ferait du `/` un `%2F`.
+function urlSon(fichier) {
+	return '/sounds/' + String(fichier || '').split('/').map(encodeURIComponent).join('/');
+}
+
+// Morceau suivant d'une liste de lecture : tiré au hasard, jamais deux fois de suite le même
+// (sauf liste d'un seul morceau).
+function morceauSuivant(fichiers, courant, alea) {
+	const f = (fichiers || []).filter(x => x !== courant);
+	return choisirFichier({ fichiers: f.length ? f : (fichiers || []) }, alea);
+}
+
 function _lireCle(stockage, cle) {
 	try { return stockage.getItem(cle); } catch (e) { return null; }   // mode privé, bac à sable
 }
@@ -200,7 +214,7 @@ let _musiqueVolume = 0.5;
 function musiqueCoupee() { return _lireCle(localStorage, MUSIQUE_COUPEE_CLE) === '0'; }
 
 function _memoriserMusique() {
-	if (!_musique || !_musique.dataset.fichier) return;
+	if (!_musique || !_musique.dataset.fichier || _musique.dataset.liste) return;   // liste : jamais reprise
 	_ecrireCle(sessionStorage, MUSIQUE_REPRISE_CLE,
 		JSON.stringify({ fichier: _musique.dataset.fichier, t: _musique.currentTime || 0 }));
 }
@@ -220,19 +234,68 @@ function _lancerMusique() {
 	});
 }
 
-// `m` = `{fichier, volume}` (cf. `donjon.musique_du_donjon`) ; null ⇒ rien.
-function demarrerMusique(m) {
-	if (!m || !m.fichier || typeof Audio === 'undefined') return;
+// Rampe de volume de `a` jusqu'à `cible` en `ms` → Promise résolue à la fin (ou à
+// l'interruption par une rampe plus récente sur le même élément : la dernière gagne).
+function _rampe(a, cible, ms) {
+	return new Promise(resolve => {
+		if (!a) { resolve(); return; }
+		const jeton = a._rampe = (a._rampe || 0) + 1;
+		const v0 = a.volume, t0 = Date.now();
+		if (!ms || ms <= 0) { a.volume = Math.min(1, Math.max(0, cible)); resolve(); return; }
+		const pas = () => {
+			if (a._rampe !== jeton) { resolve(); return; }
+			const k = Math.min(1, (Date.now() - t0) / ms);
+			a.volume = Math.min(1, Math.max(0, v0 + (cible - v0) * k));
+			if (k < 1) setTimeout(pas, 50); else resolve();
+		};
+		pas();
+	});
+}
+
+// Fondu SORTANT sans arrêter (la page va se recharger) → Promise. Musique coupée ou absente :
+// résolue tout de suite. `retablirMusique` annule (déplacement refusé).
+function attenuerMusique(ms) {
+	if (!_musique || musiqueCoupee() || _musique.paused) return Promise.resolve();
+	return _rampe(_musique, 0, ms);
+}
+function retablirMusique(ms) {
+	if (_musique) _rampe(_musique, _musiqueVolume, ms);
+}
+
+// `m` = `{fichier, volume}` (cf. `donjon.musique_du_donjon`) — un morceau en boucle —, ou
+// `{fichiers: [...], volume}` (cf. `auberge.musique_taverne`) — une LISTE de lecture : un
+// morceau tiré au hasard, puis un autre à sa fin. null ⇒ rien.
+// `precedent` (interne) : morceau qui vient de finir — on enchaîne sans reprise.
+function demarrerMusique(m, precedent) {
+	if (!m || typeof Audio === 'undefined') return;
+	const liste = Array.isArray(m.fichiers) ? m.fichiers.filter(Boolean) : null;
+	// Reprise après rechargement : morceau UNIQUE seulement (donjon, intro). Une liste tire au
+	// hasard à CHAQUE démarrage — sinon on retrouverait le même morceau à chaque entrée.
+	let reprise = null;
+	if (!liste) {
+		try { reprise = JSON.parse(_lireCle(sessionStorage, MUSIQUE_REPRISE_CLE) || 'null'); } catch (e) { reprise = null; }
+	}
+	const fichier = liste ? morceauSuivant(liste, precedent) : m.fichier;
+	if (!fichier) return;
 	if (_musique) _musique.pause();   // ⚠️ pas arreterMusique : elle effacerait la reprise
 	_musiqueVolume = Math.min(1, Math.max(0, parseFloat(m.volume)));
 	if (isNaN(_musiqueVolume)) _musiqueVolume = 0.5;
-	const a = new Audio('/sounds/' + encodeURIComponent(m.fichier));
-	a.loop = true;
+	const a = new Audio(urlSon(fichier));
+	a.loop = !liste || liste.length < 2;
 	a.volume = _musiqueVolume;
-	a.dataset.fichier = m.fichier;
-	let reprise = null;
-	try { reprise = JSON.parse(_lireCle(sessionStorage, MUSIQUE_REPRISE_CLE) || 'null'); } catch (e) { reprise = null; }
-	if (reprise && reprise.fichier === m.fichier && reprise.t > 0) {
+	a.dataset.fichier = fichier;
+	if (liste) a.dataset.liste = '1';
+	// Fondu ENTRANT (`m.fondu` ms) : part du silence au premier vrai `playing` — après le
+	// premier geste si la lecture était bloquée, au réarmement du 🎵 si elle était coupée.
+	const fondu = parseFloat(m.fondu) || 0;
+	if (fondu > 0) {
+		a.volume = 0;
+		a.addEventListener('playing', () => _rampe(a, _musiqueVolume, fondu), { once: true });
+	}
+	if (!a.loop) a.addEventListener('ended', () => {
+		if (_musique === a) demarrerMusique({ fichiers: liste, volume: _musiqueVolume }, fichier);
+	}, { once: true });
+	if (reprise && reprise.fichier === fichier && reprise.t > 0) {
 		// ⚠️ `currentTime` ne se pose qu'une fois les métadonnées là (sinon ignoré).
 		a.addEventListener('loadedmetadata', () => {
 			try { a.currentTime = reprise.t % (a.duration || Infinity); } catch (e) { /* pas de seek */ }

@@ -84,6 +84,24 @@ def test_lieu_est_taverne(doc, attendu):
 	assert auberge.lieu_est_taverne(doc) is attendu
 
 
+# ── Musique d'ambiance ───────────────────────────────────────────────────────────
+
+def test_musique_taverne_liste_les_fichiers_jouables_tries():
+	m = auberge.musique_taverne({"categorie": "auberge"},
+		lambda: ["b.mp3", "licence.txt", ".cache.mp3", "a.ogg"])
+	d = auberge.MUSIQUE_TAVERNE_DOSSIER
+	assert m == {"fichiers": [f"{d}/a.ogg", f"{d}/b.mp3"], "volume": auberge.MUSIQUE_TAVERNE_VOLUME}
+
+
+def test_musique_taverne_absente_hors_taverne_ou_sans_fichier():
+	assert auberge.musique_taverne({"categorie": "etable"}, lambda: ["a.mp3"]) is None
+	assert auberge.musique_taverne({"categorie": "auberge"}, lambda: ["notes.txt"]) is None
+
+	def dossier_absent():
+		raise FileNotFoundError
+	assert auberge.musique_taverne({"categorie": "auberge"}, dossier_absent) is None
+
+
 # ── Bornage ──────────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("brut, attendu", [
