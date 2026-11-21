@@ -8,6 +8,10 @@
 #     la leur).
 # Les GRADES ne bougent pas : la part de budget par spécimen se calcule sur le milieu de la
 # fourchette, quel que soit l'effectif tiré.
+# Auteur 21/11 — « seul, sans bruit, presque rien sur le dos : beaucoup moins d'adversaires » :
+#   • NUÉES (sans fourchette) : plafond × position (`plafond_nuee`), à tout niveau ;
+#   • SILENCIEUX (r < `RENCONTRE_BRUIT_SILENCIEUX`) : plancher de fourchette abaissé à 1
+#     (`fourchette_tirage`), meute réduite à 1 (`meute_min`), aucun second groupe.
 #
 # Points = 1 (joueur) + compagnons, montures (guides compris) et escortés pondérés, + le TAUX DE
 # CHARGE du groupe (poids porté par tous les porteurs / leur charge max cumulée) × un poids.
@@ -16,6 +20,8 @@
 # Portée : zones de nature (ni ville, ni mer ; les donjons à étages ont leurs salles) — `s_applique`.
 
 from models import character_stats
+
+SILENCIEUX = ("silencieux", "🌿 Silencieux")   # sous `RENCONTRE_BRUIT_SILENCIEUX` (réglable)
 
 NIVEAUX = (
 	# (rapport maximal, clé, libellé) — le premier dont le rapport tient gagne.
@@ -77,8 +83,34 @@ def position_fourchette(pts: float) -> float:
 	return max(0.0, min(1.0, rapport(pts) / 2))
 
 
+def silencieux(pts: float) -> bool:
+	"""Sous le seuil SILENCIEUX : les effets drastiques (plancher, meute, second groupe)."""
+	return actif() and rapport(pts) < float(character_stats.RENCONTRE_BRUIT_SILENCIEUX or 0)
+
+
 def facteur_second(pts: float) -> float:
+	"""Silencieux ⇒ 0 : jamais de second groupe."""
+	if silencieux(pts):
+		return 0.0
 	return max(0.0, min(rapport(pts), float(character_stats.RENCONTRE_BRUIT_SECOND_MAX)))
+
+
+def plafond_nuee(pts: float, plafond: int) -> int:
+	"""Effectif max d'une nuée : `plafond` × position dans la fourchette, planché à 1
+	(référence ⇒ moitié, convoi ⇒ plafond entier)."""
+	return max(1, min(int(plafond), int(round(int(plafond) * position_fourchette(pts)))))
+
+
+def fourchette_tirage(fourch: tuple, pts: float) -> tuple:
+	"""Fourchette où l'effectif est TIRÉ : silencieux ⇒ plancher abaissé à 1 (une bête isolée
+	d'une espèce grégaire). Le milieu de la fourchette d'origine fixe toujours les grades."""
+	mn, mx = fourch
+	return (min(mn, 1), mx) if silencieux(pts) else (mn, mx)
+
+
+def meute_min(mini: int, pts: float) -> int:
+	"""Minimum d'une meute : silencieux ⇒ 1 (l'éclaireur isolé)."""
+	return min(int(mini), 1) if silencieux(pts) else int(mini)
 
 
 def facteur_combat(pts: float) -> float:
@@ -90,6 +122,8 @@ def facteur_combat(pts: float) -> float:
 
 def niveau(pts: float) -> tuple:
 	"""`(clé, libellé)` du niveau de bruit affiché au joueur."""
+	if silencieux(pts):
+		return SILENCIEUX
 	r = rapport(pts)
 	for borne, cle, libelle in NIVEAUX:
 		if borne is None or r < borne:
