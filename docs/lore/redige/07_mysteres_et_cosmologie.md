@@ -10,7 +10,7 @@ Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On 
 
 ## Échidna
 
-On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère. Elle prenait soin de Cerbère, son préféré, quand Mu scella la porte des Enfers d'Hadès en sacrifiant son continent : Cerbère resta de l'autre côté, elle resta prise dessous. L'aventurier la rencontre là, sous la cité engloutie ; les Naga de Mu, fils de Kadru, voient en elle une image de mère. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il l'élimine, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**.
+On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère. Elle prenait soin de Cerbère, son préféré, quand Mu scella la porte des Enfers d'Hadès en sacrifiant son continent : Cerbère resta de l'autre côté, elle resta prise dessous. Elle aurait pu partir ; elle est restée, par choix : pour demeurer au plus près de Cerbère, et pour protéger le sacrifice de Mu, qu'elle respecte profondément et dont elle ne tient pas rigueur à son peuple. Elle surveille la porte et garde la cité des monstres des grands fonds. Elle seule connaît la vérité de la fermeture et du sacrifice organisé, et c'est d'elle seule que l'aventurier peut l'apprendre (le lien avec la Vague, elle l'ignore). L'aventurier la rencontre là, sous la cité engloutie ; les Naga de Mu, fils de Kadru, voient en elle une image de mère. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il la combat, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**. Celui qui lui parle entend sa demande, être réunie à Cerbère : au bout de cette voie, un passage bref, tenu avec les Architectes de Mu, laisse Cerbère la rejoindre, et la porte reste close. Celui qui la combat ne la tue pas : elle est immortelle. Vaincue, elle s'enfuit, et on ne la retrouve plus. Elle ne défend plus Mu, mais reste quelque part non loin, dans l'espoir de retrouver un jour Cerbère ; à terme, les créatures des grands fonds se font plus pressantes autour de la bulle, sans que la cité comprenne pourquoi.
 
 Commence alors une série de donjons contre les dieux eux-mêmes. Mais chaque réponse ouvre deux questions. Échidna dit que les dieux ont créé les monstres ; les dieux répondent qu'ils en ont hérité.
 
@@ -42,7 +42,7 @@ Le chemin de l'aventurier est une suite de questions. Comment survivre ? Comment
 
 Certaines questions restent volontairement ouvertes. On peut les placer dans la bouche d'un personnage, jamais les résoudre :
 
-- la nature de la Vague, et si elle était la première ;
+- la nature de la Vague, et si elle était la première (sa cause, la fermeture du portail sous Mu, est une vérité du monde que nul ne tient pour sûre) ;
 - l'origine ultime des monstres ;
 - ce que sont les entités extérieures, et ce que veut dire « finir le jeu » ;
 - les limites des Révélateurs ;

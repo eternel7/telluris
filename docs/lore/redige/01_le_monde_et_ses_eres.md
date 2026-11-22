@@ -48,7 +48,7 @@ Puis le savoir se dégrade lentement : on entretient les portails sans plus comp
 
 ### L'Âge des Donjons
 
-Il y a sept à huit siècles, une **vague de mana** d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus changent de couleur, et les premiers voyageurs qui les franchissent découvrent les premiers **donjons**. Le continent de **Mu** sombre sous le Grand Océan ; sa cité survit sous les eaux. Les Templiers se recentrent sur les temples, les Paladins rouvrent les routes, les **cristaux de mana** deviennent la ressource dont tout dépend.
+Il y a sept à huit siècles, une **vague de mana** d'origine inconnue balaie Telluris (la vérité du monde, que nul ne tient pour sûre, la fait naître de la fermeture d'un portail sous Mu). Les portails mal créés ou mal entretenus changent de couleur, et les premiers voyageurs qui les franchissent découvrent les premiers **donjons**. Le continent de **Mu** sombre sous le Grand Océan ; sa cité survit sous les eaux. Les Templiers se recentrent sur les temples, les Paladins rouvrent les routes, les **cristaux de mana** deviennent la ressource dont tout dépend.
 
 Un siècle après la Vague, **Charlemagne** fait d'Aix-la-Chapelle la tête d'un réseau de cités qui se portent secours. Puis naissent les **Guildes d'Aventuriers**, Gênes fonde sa banque sur le commerce des cristaux, et Marco Polo, Averroès ou les ducs de Bourgogne marquent les siècles qui mènent à aujourd'hui.
 

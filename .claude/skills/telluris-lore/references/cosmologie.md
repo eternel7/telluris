@@ -19,9 +19,9 @@ Sources principales : [monde/20260812_monde_medieval_fantastique.md] (séance fo
 - L'histoire de Telluris s'axe sur **deux pendants** : l'influence de la magie, et l'émergence des Cités-États. Pas de conquêtes.
 
 ### Échidna (anciennement « Lilith / Échidna »)
-Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres. **À Mu, Échidna seule, jamais Lilith** (Auteur, 11/10) : mère des monstres grecs (Cerbère, Hydre, Chimère, Orthos…) ; **prise sous Mu** quand la **porte des Enfers d'Hadès** (le portail vorace) fut scellée, alors qu'elle soignait Cerbère, **resté de l'autre côté**. Les **Naga** sont fils de **Kadru** (Inde), ont parcouru les océans ; ceux de Mu voient en Échidna une image de mère (`docs/lore/cites/20261011_histoire_de_mu_chatgpt.md` § 7). **Deux mondes distincts** (Auteur, 11/10) : les Enfers d'**Hadès** (porte scellée sous Mu) et l'Enfer de **Lucifer** (porte de l'Hekla). Les mentions « Lilith » ci-dessous datent d'avant cet arbitrage.
+Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres. **À Mu, Échidna seule, jamais Lilith** (Auteur, 11/10) : mère des monstres grecs (Cerbère, Hydre, Chimère, Orthos…) ; **prise sous Mu** quand la **porte des Enfers d'Hadès** (le portail vorace) fut scellée, alors qu'elle soignait Cerbère, **resté de l'autre côté** ; puis **restée par choix** : près de Cerbère, protectrice du sacrifice de Mu (respect, aucune animosité), surveille la porte, garde la cité des monstres des fonds ; **seule** à révéler la vérité du sacrifice organisé, **ignore** le lien avec la Vague ; **immortelle** : la voie du combat ne la tue pas, elle **s'enfuit** et on ne la retrouve plus ; elle ne défend plus Mu mais reste proche, dans l'espoir de retrouver Cerbère ; Mu le paie à terme (Auteur, 22/11). Les **Naga** sont fils de **Kadru** (Inde), ont parcouru les océans ; ceux de Mu voient en Échidna une image de mère (`docs/lore/cites/20261011_histoire_de_mu_chatgpt.md` § 7). **Deux mondes distincts** (Auteur, 11/10) : les Enfers d'**Hadès** (porte scellée sous Mu) et l'Enfer de **Lucifer** (porte de l'Hekla). Les mentions « Lilith » ci-dessous datent d'avant cet arbitrage.
 - **L'Enfer** est le donjon qui éveille le personnage. Deux formes envisagées : celui de **Dante**, avec Lucifer en boss final, ou celui des **Grecs**, avec **Hadès** dans la dernière salle. ⚠️ Depuis le 11/10, les **deux existent** comme mondes distincts : Enfer de Lucifer (Hekla), Enfers d'Hadès (porte scellée sous Mu) ; **l'un ou l'autre** peut éveiller le personnage (Auteur, 11/10). **Plusieurs portes peuvent mener au même autre monde**.
-- Si le personnage comprend qu'elles **ne sont pas les monstres qu'on décrit**, ou s'il les élimine, il apprend que **les dieux jouent avec les Lignées d'Anthropes**.
+- Si le personnage comprend qu'elles **ne sont pas les monstres qu'on décrit**, ou s'il les élimine (Échidna, immortelle, s'enfuit — Auteur, 22/11), il apprend que **les dieux jouent avec les Lignées d'Anthropes**.
 - Suit une série de donjons contre les dieux :
 	- **Yggdrasil** = de multiples portes vers les mondes qu'il relie, chacune un donjon ;
 	- monter au sommet de l'**Olympe**.
@@ -81,7 +81,7 @@ Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres. **
 
 ## Points ouverts
 Ne pas les trancher dans un texte ; les laisser au conditionnel ou dans la bouche d'un personnage :
-- la nature de la Vague ;
+- la nature de la Vague (vérité du monde, cachée et disputée : déclenchée par la fermeture du portail sous Mu — Auteur, 22/11) ;
 - l'origine ultime des monstres ;
 - les entités extérieures ;
 - les limites des Révélateurs ;
