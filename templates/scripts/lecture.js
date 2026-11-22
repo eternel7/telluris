@@ -2,7 +2,7 @@
 // /admin/lore (séances, parcours) ↔ livres de /play (fiche d'un livre du sac ou de la vitrine).
 //
 // Fonctions pures (dev/test_lecture_lore_client.js, dev/test_livres_client.js) :
-//   lectureNettoyer, lectureDecouper, livreTextesALire, livreImagesHtml.
+//   lectureNettoyer, lectureDecouper, livreTextesALire, livreImagesHtml, livreImageBascule.
 // Lecteur des livres de /play : livreLire(btn) / livreArreter(). Le lore garde son propre
 // lecteur (surlignage des blocs, reprise au clic) et n'emprunte ici que les deux fonctions pures.
 
@@ -48,13 +48,26 @@ function livreTextesALire(item) {
 }
 
 /** Planche et illustrations d'un livre (`item.images` = [{url}], URL bâties et encodées par
- *  le serveur). Rien pour un livre scellé. Une image absente s'efface d'elle-même. */
+ *  le serveur). Rien pour un livre scellé. Une image absente s'efface d'elle-même.
+ *  Vignette cliquable : elle s'ouvre EN TAILLE RÉELLE dans la fiche même (cadre qui défile),
+ *  jamais dans un nouvel onglet ; un second clic la referme (`livreImageBascule`). */
 function livreImagesHtml(item) {
 	if (!item || item.contenu_scelle || !Array.isArray(item.images) || !item.images.length) return '';
 	const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 	return '<div class="livre-images">' + item.images.map(im =>
-		`<a href="${esc(im.url)}" target="_blank" rel="noopener"><img src="${esc(im.url)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></a>`
+		`<button type="button" class="livre-image" aria-expanded="false" title="Voir en taille réelle" onclick="livreImageBascule(this)">`
+		+ `<img src="${esc(im.url)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></button>`
 	).join('') + '</div>';
+}
+
+/** Vignette ⇄ taille réelle. Ouverte, l'image prend toute la largeur de la fiche dans un cadre
+ *  qui défile dans les deux sens si elle dépasse ; le cadre revient en haut à gauche. */
+function livreImageBascule(btn) {
+	if (!btn) return;
+	const ouverte = btn.classList.toggle('livre-image-reelle');
+	btn.setAttribute('aria-expanded', ouverte ? 'true' : 'false');
+	btn.title = ouverte ? 'Revenir à la vignette' : 'Voir en taille réelle';
+	if (ouverte) { btn.scrollTop = 0; btn.scrollLeft = 0; }
 }
 
 // ── Lecteur des livres de /play ──────────────────────────────────────────────

@@ -2165,10 +2165,17 @@ def tick_detaille(lieu_doc: dict, recettes: list | None = None, flux: dict | Non
 	puise = puiser_revente(lieu_doc, flux) or puise
 	approvisionne = approvisionner(lieu_doc) if appro else False
 	produits = tenter_production(lieu_doc, recettes)
+	# Famille du scriptorium : toujours une planche en rayon (`scriptorium.garnir_planche`),
+	# hors production et hors de sa probabilité. Boutique de la cité seulement (`appro`) : le
+	# marchand d'une propriété ne vend que ce qu'on lui confie. Import PARESSEUX (cycle).
+	garni = False
+	if appro:
+		from utils import scriptorium
+		garni = scriptorium.garnir_planche(lieu_doc, get_doc, save_doc)
 	ecoules = (ecouler or ecouler_produits_pnj)(lieu_doc)
 	_crediter_flux(flux, ecoules)
 	deverse = _deverser_surplus_flux(lieu_doc, flux, reserve=appro)
-	return bool(puise or approvisionne or produits or ecoules or deverse), ecoules
+	return bool(puise or approvisionne or produits or garni or ecoules or deverse), ecoules
 
 
 def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = None) -> bool:

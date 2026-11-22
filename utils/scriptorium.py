@@ -376,6 +376,35 @@ def famille_scriptorium(lieu_doc: dict) -> bool:
 		(lieu_doc or {}).get("categorie"))
 
 
+def planche_en_rayon(lieu_doc: dict) -> bool:
+	"""Une planche (id `item:planche_*`) est-elle en rayon ? Lu sur l'id seul : aucun accès base."""
+	from utils import livres_images
+	prefixe = f"item:{livres_images.PREFIXE_PLANCHE}"
+	return any(str(e.get("item_id", "")).startswith(prefixe) and int(e.get("qty", 0)) > 0
+			   for e in (lieu_doc or {}).get("stock_vente") or [])
+
+
+def garnir_planche(lieu_doc: dict, get_doc_fn, save_doc_fn, racine: str | None = None) -> bool:
+	"""TOUJOURS UNE PLANCHE en rayon (Auteur, 22/11) : un magasin de la famille du scriptorium
+	sans aucune planche en reçoit une, tirée au hasard, SANS matière ni passe de production —
+	sinon, au même poids que chacune des ~280 recettes et derrière `ATELIER_TRANSFO_PROBA`,
+	elle ne sortait qu'à une visite sur dix ou plus. Au-delà, `recettes_planches` (rareté
+	ordinaire) en ajoute d'autres. Mute `lieu_doc` ; True si une planche a été posée (l'appelant
+	persiste — c'est un changement du tick)."""
+	if not get_doc_fn or not save_doc_fn or not famille_scriptorium(lieu_doc) or planche_en_rayon(lieu_doc):
+		return False
+	from utils import livres_images
+	fichiers = livres_images.planches(racine or livres_images.RACINE)
+	if not fichiers:
+		return False
+	fichier = random.choice(fichiers)
+	item_id = livres_images.item_id_planche(fichier)
+	if get_doc_fn(item_id) is None:
+		save_doc_fn(livres_images.doc_planche(fichier))
+	lieu_doc.setdefault("stock_vente", []).append({"item_id": item_id, "qty": 1})
+	return True
+
+
 def recettes_planches(get_doc_fn, save_doc_fn, racine: str | None = None) -> list[dict]:
 	"""AU PLUS UNE planche par appel (même règle de rareté que `recettes_virtuelles`) : une
 	image tirée parmi celles déposées à la racine de `resources/livres`, son doc créé au

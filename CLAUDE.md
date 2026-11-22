@@ -198,7 +198,8 @@ utils/
   mercenaires.py         # compagnons-JOUEURS (pur) : offre `service:*` au tableau, clone synchronisé (progression +
                          #   équipement porté, sac propre), un seul recruteur, XP/part → original par compteurs, mort = sac au sol
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier ;
-                         #   planches (`recettes_planches`) dans toute la famille du scriptorium (bibliothèques comprises)
+                         #   planches (`recettes_planches`) dans toute la famille du scriptorium (bibliothèques comprises),
+                         #   TOUJOURS une en rayon (`garnir_planche`, posée par `marche.tick_detaille`)
   recits.py              # récits historiques (pur) : plafond de TITRES distincts en rayon (`RECITS_PLAFOND`, capitale),
                          #   tenu à la fabrication et à la vente d'un atelier de propriété ; contenu : dev/gen_ouvrages_historiques.py
   livres_images.py       # images des livres (mount /livres) : image à la RACINE = planche achetable sans import (carte_… / œuvre),

@@ -17,7 +17,7 @@ const assert = require('assert');
 const vm = require('vm');
 
 const SRC = fs.readFileSync(path.join(__dirname, '..', 'templates', 'scripts', 'lecture.js'), 'utf8');
-vm.runInThisContext(SRC + '\nglobalThis.F = { lectureNettoyer, lectureDecouper, livreTextesALire, livreImagesHtml };');
+vm.runInThisContext(SRC + '\nglobalThis.F = { lectureNettoyer, lectureDecouper, livreTextesALire, livreImagesHtml, livreImageBascule };');
 
 let echecs = 0, n = 0;
 function test(nom, fn) {
@@ -52,6 +52,28 @@ test('les images se rendent, une par lien', () => {
 	const html = F.livreImagesHtml({ images: [{ url: '/livres/a.jpg' }, { url: '/livres/ouvrage_x/01.jpg' }] });
 	assert.strictEqual((html.match(/<img /g) || []).length, 2);
 	assert.ok(html.includes('src="/livres/ouvrage_x/01.jpg"'));
+});
+
+test('la vignette s\'ouvre dans la fiche, jamais dans un nouvel onglet', () => {
+	const html = F.livreImagesHtml({ images: [{ url: '/livres/a.jpg' }] });
+	assert.ok(!html.includes('target='), 'aucun lien vers un onglet');
+	assert.ok(!html.includes('<a '), 'aucun lien');
+	assert.ok(html.includes('onclick="livreImageBascule(this)"'));
+	assert.ok(html.includes('aria-expanded="false"'));
+});
+
+test('bascule vignette ⇄ taille réelle', () => {
+	const classes = new Set();
+	const attrs = {};
+	const btn = { classList: { toggle: c => (classes.has(c) ? (classes.delete(c), false) : (classes.add(c), true)) },
+		setAttribute: (k, v) => { attrs[k] = v; }, title: '', scrollTop: 9, scrollLeft: 9 };
+	F.livreImageBascule(btn);
+	assert.ok(classes.has('livre-image-reelle'));
+	assert.strictEqual(attrs['aria-expanded'], 'true');
+	assert.strictEqual(btn.scrollTop, 0);
+	F.livreImageBascule(btn);
+	assert.ok(!classes.has('livre-image-reelle'));
+	assert.strictEqual(attrs['aria-expanded'], 'false');
 });
 
 test('une URL ne casse jamais l\'attribut', () => {

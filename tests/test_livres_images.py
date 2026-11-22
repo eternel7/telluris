@@ -132,6 +132,53 @@ def test_bibliotheque_tire_une_planche_sans_livres_de_contenu(monkeypatch):
 	assert r == [{"objet_final": "planche_z"}]
 
 
+# ── Toujours une planche en rayon ────────────────────────────────────────────────
+
+def _base():
+	base = {}
+	return base, base.get, lambda doc: base.__setitem__(doc["_id"], doc)
+
+
+def test_garnir_pose_une_planche_si_aucune(tmp_path, monkeypatch):
+	_deposer(tmp_path, "carte_x.jpg", "vue.png")
+	monkeypatch.setattr(scriptorium.random, "choice", lambda seq: seq[-1])
+	base, get, save = _base()
+	lieu = {"categorie": "scriptorium", "stock_vente": [{"item_id": "item:Papier", "qty": 4}]}
+	assert scriptorium.garnir_planche(lieu, get, save, racine=str(tmp_path)) is True
+	assert lieu["stock_vente"][-1] == {"item_id": "item:planche_vue", "qty": 1}
+	assert "item:planche_vue" in base                            # doc créé au premier tirage
+	# Une planche déjà là : rien de plus.
+	assert scriptorium.garnir_planche(lieu, get, save, racine=str(tmp_path)) is False
+	assert len(lieu["stock_vente"]) == 2
+
+
+def test_garnir_ignore_une_ligne_videe(tmp_path):
+	_deposer(tmp_path, "vue.png")
+	_base_, get, save = _base()
+	lieu = {"categorie": "bibliotheque", "stock_vente": [{"item_id": "item:planche_vue", "qty": 0}]}
+	assert scriptorium.garnir_planche(lieu, get, save, racine=str(tmp_path)) is True
+
+
+def test_garnir_hors_famille_ou_sans_image(tmp_path):
+	_base_, get, save = _base()
+	assert scriptorium.garnir_planche({"categorie": "boulangerie"}, get, save, racine=str(tmp_path)) is False
+	lieu = {"categorie": "scriptorium"}
+	assert scriptorium.garnir_planche(lieu, get, save, racine=str(tmp_path / "vide")) is False
+	assert "stock_vente" not in lieu
+
+
+def test_tick_garnit_la_boutique_mais_pas_le_marchand_d_une_propriete(monkeypatch):
+	poses = []
+	monkeypatch.setattr(scriptorium, "garnir_planche", lambda lieu, g, s: poses.append(lieu) or True)
+	monkeypatch.setattr(marche, "tenter_production", lambda lieu, r: [])
+	monkeypatch.setattr(marche, "ecouler_produits_pnj", lambda lieu: [])
+	lieu = {"categorie": "scriptorium", "stock_vente": [], "stock_matieres": {}}
+	change, _ = marche.tick_detaille(lieu, [], None)
+	assert change is True and poses == [lieu]               # la pose suffit à faire sauver le lieu
+	marche.tick_detaille(lieu, [], None, appro=False, ecouler=lambda l: [])
+	assert poses == [lieu]                                  # appro=False : jamais
+
+
 def test_hors_famille_comportement_d_avant(monkeypatch):
 	monkeypatch.setattr(marche, "recettes_lieu", lambda lieu: ["base"])
 	monkeypatch.setattr(scriptorium, "recettes_planches", lambda *a, **k: pytest.fail("pas de planche"))
