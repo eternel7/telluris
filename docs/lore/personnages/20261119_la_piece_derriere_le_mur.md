@@ -50,6 +50,8 @@ C'est devant l'arche qu'Aélis prononce pour la première fois le nom de **Mu**.
 
 ?{Le commandeur, ensuite : « Une arche, et un nom. Mon second dit que ce nom ne veut rien dire, que c'est une prière de bâtisseurs. Moi, je dis qu'on ne grave pas une prière sur une clé de voûte. » Aélis, aux Archives : « Les vieux maîtres ne répondent pas quand je demande. Ils sourient, et ils parlent d'autre chose. »}?
 
+Au **rang A**, l'Institut offre à Aélis de parfaire sa formation à Mu. Elle le dit elle-même aux Archives des Seuils, et Maëlys le fait savoir à la Guilde : Aélis veut l'aventurier à ses côtés. On ne se bat pas pour partir. Sous les voûtes de Notre-Dame, Aénor de Sully, commanderesse des Templiers, ouvre le passage à qui pose un cristal jaune sur l'autel d'ancrage, et c'est à l'aventurier de l'apporter. De l'autre côté, un seuil gardé, une auberge, un marché où l'on ne vend pas tout à n'importe qui.
+
 À **Mu-la-Centrale**, on entre en invité de l'Institut. Quelques quartiers sont ouverts : une auberge, un marché restreint. Le reste est gardé et ne s'ouvre qu'avec la réputation et les quêtes. Il n'y a là aucune maison de la Guilde des Aventuriers. Sous la cité vit **Échidna**. On peut lui parler ou la combattre, et la parole peut aboutir sans combat comme elle peut y basculer. Ce qui s'est passé reste attaché à l'aventurier pour toujours, et aucune des deux voies n'est la bonne.
 
 ?{Au rang B, un portail condamné, bâti par un héritier des frères et gardé par les Templiers, porte les mêmes gravures que la boîte ; Aélis y prononce pour la première fois le nom de Mu. Au rang A, l'Institut lui offre de parfaire sa formation à Mu, et elle demande à l'aventurier de l'accompagner, par Notre-Dame et un cristal jaune.}?
@@ -111,6 +113,15 @@ C'est devant l'arche qu'Aélis prononce pour la première fois le nom de **Mu**.
 | 22 | Combat | Aélis **dans la salle**, à protéger (pas de `proteges_restent_dehors`) ; trois penanggalan |
 | 23 | Récompense | **200 XP, 3 000 cu**, sans objet |
 | 24 | Le nom de Mu | Prononcé par Aélis **devant l'arche éteinte**, signe de la clé de voûte reconnu sous la coupole des Archives ; destination ou bâtisseur, jamais tranché |
+
+### Quatrième arbitrage (Auteur, 22/11, questionnaire — « Partir pour Mu », rang A)
+
+| # | Point | Décision |
+|---|---|---|
+| 25 | Départ | **Deux départs** : **Aélis aux Archives des Seuils** et **Maëlys à la Guilde** (condition : « Les vestiges du premier passage » réussie et rang A atteint) |
+| 26 | Forme | **Passage gardé à Notre-Dame** : barrière d'accès tenue par **Aénor de Sully** (`pnj:aenor_de_sully`), ouverte par la quête ; arrivée à Mu = quête réussie ; **aucun combat** — l'épreuve est d'avoir le cristal |
+| 27 | Cristal du premier passage | **Payé par le joueur** dès le premier passage (règle du 25/10 : un cristal jaune par passage ; gisements : fond des catacombes, puits de Chartres) |
+| 28 | Première livraison à Mu-la-Centrale | **Portail d'arrivée de Mu** (seuil côté Mu, lié à Notre-Dame) + **auberge** et **marché restreint** ; Institut de Mu et Sept Sages **plus tard** |
 
 ## 2. Écarts corrigés dans les brouillons
 
