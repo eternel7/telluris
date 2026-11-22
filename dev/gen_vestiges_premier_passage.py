@@ -363,9 +363,17 @@ def lieux_neufs():
 			 ANTICHAMBRE, "Franchir la porte entrouverte"),
 		lien("link:antichambre_de_l_arche_to_devant_la_porte_refermee", ANTICHAMBRE, "Rentrer dans l'antichambre",
 			 RETOUR, "Ressortir par la porte"),
-		lien("link:devant_la_porte_refermee_to_galerie_du_commandeur", GALERIE, "Revenir devant la porte refermée",
-			 RETOUR, "Remonter la galerie"),
+		# Libellé d'un nœud = ce qu'on lit en allant VERS lui (lieux.passages_carte, nœud destination).
+		lien("link:devant_la_porte_refermee_to_galerie_du_commandeur", GALERIE, "Remonter la galerie",
+			 RETOUR, "Revenir devant la porte refermée"),
 	]
+	# Sortie SANS GARDIEN vers l'Enclos : l'escorte finie, l'antichambre et la galerie (escorte
+	# OU clé du commandeur) sont closes, et qui n'a pas pris la clé restait sans aucune sortie.
+	# `bouton: false` côté Enclos : on en ressort par là, on n'y redescend pas (lieux.depart_interdit).
+	sortie = lien("link:devant_la_porte_refermee_to_enclos_du_temple", ENCLOS, "Remonter dans la cour de l'Enclos",
+				  RETOUR, "Redescendre devant la porte refermée")
+	sortie["nodes"][0]["bouton"] = False
+	liens.append(sortie)
 	return [galerie, antichambre, retour, salle] + liens
 
 

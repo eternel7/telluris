@@ -226,6 +226,8 @@ def vue_client(doc: dict, character: dict) -> dict:
 		"etat": etat,
 		"journal": list(e.get("journal") or []),
 		"resolue": bool(e.get("resolue")),
+		# Essais FAUX cumulés (toutes ouvertures) : le verdict « ✗ Tentative n » du panneau.
+		"echecs": int(e.get("echecs", 0)),
 	}
 	if vue["resolue"]:
 		vue["reussite"] = doc.get("reussite", "")

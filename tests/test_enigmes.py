@@ -148,6 +148,16 @@ def test_vue_deduction_ne_montre_le_fait_qu_au_journal():
 	assert enigmes.vue_client(DEDUCTION, perso)["journal"] == ["Aucune effraction."]
 
 
+def test_vue_client_porte_le_total_des_echecs():
+	perso = _perso()
+	assert enigmes.vue_client(RESEAU, perso)["echecs"] == 0
+	for _ in range(2):
+		_agir(RESEAU, perso, "essayer", actives=[], ancrees=[])
+	# Une révélation n'est pas un essai : le total ne bouge pas.
+	_agir(RESEAU, perso, "reveler", cle="inconnue")
+	assert enigmes.vue_client(RESEAU, perso)["echecs"] == 2
+
+
 def test_vue_reseau_ne_montre_que_les_liaisons_revelees():
 	perso = _perso()
 	assert [l["id"] for l in enigmes.vue_client(RESEAU, perso)["elements"]["liaisons"]] == ["l1", "l2"]

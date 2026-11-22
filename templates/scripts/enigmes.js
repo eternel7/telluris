@@ -128,9 +128,14 @@ function _eniReseau(vue, b, outil) {
 			l.revelee ? 'eni-revele' : ''].filter(Boolean).join(' ');
 		return `<line class="${cls}" data-eni-lien="${_eniEsc(l.id)}" x1="${pos[l.a][0]}" y1="${pos[l.a][1]}" x2="${pos[l.b][0]}" y2="${pos[l.b][1]}"/>`;
 	}).join('');
-	const points = noeuds.map(x =>
-		`<g class="eni-noeud" data-eni-noeud="${_eniEsc(x.id)}"><circle cx="${pos[x.id][0]}" cy="${pos[x.id][1]}" r="9"/>`
-		+ `<text x="${pos[x.id][0]}" y="${pos[x.id][1] - 14}" text-anchor="middle">${_eniEsc(x.label || x.id)}</text></g>`).join('');
+	// Libellé ancré du côté du nœud : centré, un long libellé à gauche ou à droite déborde du viewBox
+	// et y est rogné (« ogement du cristal »). À gauche, il part du nœud vers le centre ; à droite, il y finit.
+	const points = noeuds.map(x => {
+		const [cx, cy] = pos[x.id];
+		const [tx, ancre] = cx < 110 ? [cx - 9, 'start'] : cx > 190 ? [cx + 9, 'end'] : [cx, 'middle'];
+		return `<g class="eni-noeud" data-eni-noeud="${_eniEsc(x.id)}"><circle cx="${cx}" cy="${cy}" r="9"/>`
+			+ `<text x="${tx}" y="${cy - 14}" text-anchor="${ancre}">${_eniEsc(x.label || x.id)}</text></g>`;
+	}).join('');
 	const outils = [['cle', '🗝️ Clé'], ['pierre', '🪨 Pierre'], ['miroir', '🪞 Miroir']].map(([k, l]) =>
 		`<button type="button" class="eni-btn${outil === k ? ' eni-choisi' : ''}" data-eni-outil="${k}">${l}</button>`).join('');
 	const liste = (el.liaisons || []).map(l =>
@@ -217,6 +222,11 @@ const _ENI_CSS = `
 .eni-lien.eni-ouvert { stroke: #e2c58a; stroke-dasharray: none; }
 .eni-lien.eni-ancre { stroke-width: 5; }
 .eni-lien.eni-revele { stroke: #9ab0d8; }
+/* Une liaison cachée, révélée par le miroir, TREMBLE : c'est elle que « ce qui tremble se tient à la
+   pierre » désigne. La pierre posée la fige. */
+.eni-lien.eni-revele:not(.eni-ancre) { animation: eni-tremble .18s linear infinite alternate; }
+@keyframes eni-tremble { from { transform: translate(-1.2px, .8px); } to { transform: translate(1.2px, -.8px); } }
+@media (prefers-reduced-motion: reduce) { .eni-lien.eni-revele:not(.eni-ancre) { animation: none; stroke-dasharray: 2 3; } }
 .eni-noeud circle { fill: #3b3122; stroke: #e2c58a; stroke-width: 2; cursor: pointer; }
 .eni-noeud text { fill: #eadfc8; font-size: 11px; }
 .eni-scene { position: relative; margin: .4rem 0; }
@@ -224,6 +234,23 @@ const _ENI_CSS = `
 .eni-zone { position: absolute; background: transparent; border: 1px dashed transparent; border-radius: 6px; cursor: pointer; padding: 0; }
 .eni-zone:hover, .eni-zone:focus-visible { border-color: rgba(226, 197, 138, .8); background: rgba(226, 197, 138, .12); }
 .eni-message { margin: .6rem 0 0; min-height: 1.2rem; }
+/* Verdict d'un essai (_eniVerdict) : le texte d'échec est le même d'un essai à l'autre, donc le
+   compteur et l'animation, rejouée à CHAQUE essai, disent que la tentative a été prise en compte. */
+.eni-verdict { margin: .6rem 0 0; font-weight: bold; transform-origin: left center; }
+/* La secousse décale #eni-corps de quelques px : sans ceci, le panneau (overflow:auto) affiche une
+   barre horizontale le temps de l'animation. */
+#enigme-overlay .eni-carte-panneau { overflow-x: hidden; }
+.eni-verdict:empty { display: none; }
+.eni-verdict.eni-echec { color: #e89a8a; }
+.eni-verdict.eni-succes { color: #e2c58a; }
+.eni-verdict.eni-joue { animation: eni-flash .7s ease-out; }
+.eni-corps-secoue { animation: eni-secoue .45s ease-in-out; }
+.eni-corps-brille { animation: eni-brille 1.2s ease-out; border-radius: 8px; }
+.eni-essayer.eni-envoi { opacity: .7; cursor: progress; }
+@keyframes eni-flash { 0% { opacity: 0; transform: scale(1.15); } 40% { opacity: 1; } 100% { transform: none; } }
+@keyframes eni-secoue { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+@keyframes eni-brille { 0% { box-shadow: 0 0 0 0 rgba(226, 197, 138, .8); } 100% { box-shadow: 0 0 0 18px rgba(226, 197, 138, 0); } }
+@media (prefers-reduced-motion: reduce) { .eni-verdict.eni-joue, .eni-corps-secoue, .eni-corps-brille { animation: none; } }
 .eni-voix { margin: .3rem 0; padding: .35rem .6rem; border-left: 3px solid #c8a96e; background: rgba(0,0,0,.18); }
 .eni-reussite { font-size: 1.05rem; color: #e2c58a; }
 .eni-journal { margin-top: .8rem; font-size: .9rem; }
@@ -246,6 +273,7 @@ function _eniPanneau() {
 		<button type="button" class="eni-fermer" title="Fermer" aria-label="Fermer">✕</button>
 		<h3 id="eni-nom"></h3><p class="eni-texte" id="eni-texte"></p>
 		<div id="eni-scene"></div><div id="eni-corps"></div>
+		<div class="eni-verdict" id="eni-verdict" aria-live="polite"></div>
 		<div class="eni-message" id="eni-message" aria-live="polite"></div>
 		<div id="eni-voix"></div><div id="eni-journal"></div></div>`;
 	document.body.appendChild(o);
@@ -277,6 +305,10 @@ function _eniRendre(message, commentaires) {
 	o.querySelector('#eni-scene').innerHTML = vue.resolue ? '' : enigmeScene(vue);
 	o.querySelector('#eni-corps').innerHTML = enigmeCorps(vue, _enigme.brouillon, _enigme.outil, _enigme.selection);
 	o.querySelector('#eni-message').textContent = message || '';
+	// Le verdict ne survit pas à une manipulation : la tentative suivante n'est pas encore jugée.
+	const verdict = o.querySelector('#eni-verdict');
+	verdict.textContent = '';
+	verdict.className = 'eni-verdict';
 	o.querySelector('#eni-voix').innerHTML = enigmeVoix(commentaires);
 	o.querySelector('#eni-journal').innerHTML = enigmeJournal(vue);
 }
@@ -322,21 +354,54 @@ function fermerEnigme() {
 	}
 }
 
+// Rejoue une animation CSS même si la classe est déjà posée (essais faux enchaînés).
+function _eniRejouer(el, cls) {
+	if (!el) return;
+	el.classList.remove(cls);
+	void el.offsetWidth;
+	el.classList.add(cls);
+}
+
+// Verdict visible d'un essai jugé par le serveur : ✗ + total des essais faux (`vue.echecs`),
+// secousse des commandes ; ✓ + lueur à la réussite.
+function _eniVerdict(echec, n) {
+	const o = _eniPanneau();
+	const verdict = o.querySelector('#eni-verdict');
+	const corps = o.querySelector('#eni-corps');
+	verdict.textContent = echec ? `✗ Tentative ${n} : échec` : '✓ Réussi !';
+	verdict.className = 'eni-verdict ' + (echec ? 'eni-echec' : 'eni-succes');
+	_eniRejouer(verdict, 'eni-joue');
+	corps.classList.remove('eni-corps-secoue', 'eni-corps-brille');
+	_eniRejouer(corps, echec ? 'eni-corps-secoue' : 'eni-corps-brille');
+}
+
 async function _eniEnvoyer(action, extra) {
 	if (!_enigme) return;
+	// Prise en compte immédiate : le bouton s'occupe le temps de la réponse (re-rendu ensuite).
+	const bouton = action === 'essayer' ? _eniPanneau().querySelector('[data-eni-essayer]') : null;
+	if (bouton) { bouton.disabled = true; bouton.classList.add('eni-envoi'); bouton.textContent = 'Essai…'; }
 	try {
 		const res = await fetch('api/enigme/action', {
 			method: 'POST', headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(Object.assign({ id: _enigme.vue.id, action }, extra || {})),
 		});
 		const data = await res.json();
-		if (!res.ok) { if (typeof showToast === 'function') showToast(data.detail || 'Erreur.'); return; }
+		if (!res.ok) {
+			if (bouton) { bouton.disabled = false; bouton.classList.remove('eni-envoi'); bouton.textContent = 'Essayer'; }
+			if (typeof showToast === 'function') showToast(data.detail || 'Erreur.');
+			return;
+		}
 		const garde = _enigme;
 		const r = data.resultat || {};
+		const evts = r.evenements || [];
+		const echec = evts.includes('echec');
 		_enigme = { vue: data.enigme, brouillon: enigmeBrouillonInitial(data.enigme),
 			outil: garde.outil, selection: {},
 			resolue_ici: garde.resolue_ici || (r.resolue && Array.isArray(data.links)) };
 		_eniRendre(r.resolue ? '' : (r.texte || ''), data.commentaires);
+		// Total des essais faux tenu par le SERVEUR (`vue.echecs`), toutes ouvertures confondues.
+		if (echec) _eniVerdict(true, (data.enigme || {}).echecs || 0);
+		else if (evts.includes('reussite')) _eniVerdict(false);
 		// Onglet 📖 : les notes 🧩 de la quête viennent de bouger (convention 10).
 		if (data.journal && typeof renderFicheJournal === 'function') renderFicheJournal(data.journal);
 		// Résolution : portes, énigmes à bouton (✓), lignes 🗣 — servis SEULEMENT à la
@@ -347,7 +412,10 @@ async function _eniEnvoyer(action, extra) {
 		if (data.xp && data.xp.xp_gain && typeof showToast === 'function') {
 			showToast(`+${data.xp.xp_gain} XP` + (data.xp.niveau_up ? ` — niveau ${data.xp.niveau_apres} !` : ''));
 		}
-	} catch (err) { console.error('Erreur action énigme', err); }
+	} catch (err) {
+		console.error('Erreur action énigme', err);
+		if (bouton && bouton.isConnected) { bouton.disabled = false; bouton.classList.remove('eni-envoi'); bouton.textContent = 'Essayer'; }
+	}
 }
 
 function _eniClic(ev) {
