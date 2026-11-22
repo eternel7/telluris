@@ -147,7 +147,7 @@ Script : `dev/gen_images_magasins.py --cite lieu:<cite>` — **un seul générat
 | nain·e | taille nettement plus petite qu'un humain, proportions de nain (tête et mains grandes pour la taille) | robuste ou malingre, barbu — une **naine n'a jamais de barbe** (consigne de l'auteur, 10/10) —, jeune ou chenu·e |
 | hobbit | toute petite taille d'adulte, pieds nus | rond·e ou fluet·te, enfantin·e ou ridé·e, soigné·e ou débraillé·e |
 | elfe | oreilles longues et pointues | élancé·e ou râblé·e, d'apparence jeune ou visiblement ancien·ne |
-| ogre | bien plus grand·e et massif·ve qu'un humain, peau épaisse | imposant·e ou voûté·e, défenses ou non, sage ou rustre |
+| ogre | bien plus grand·e et massif·ve qu'un humain, peau épaisse | imposant·e ou voûté·e, défenses ou non, sage ou rustre ; un ogre d'allure presque humaine est admis — les Lignées sont interfécondes, il n'est peut-être pas de pur sang (Auteur, 22/11, Hemi Taurua) : ne pas refaire une image pour ça |
 | humain·e | *(aucun marqueur)* | tout est ouvert |
 
 Exemple : « Une naine maigre et âgée, aux mains noueuses, nettement plus petite qu'un humain… » — et non « une naine trapue » par défaut.

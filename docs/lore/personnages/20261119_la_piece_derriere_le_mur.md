@@ -253,7 +253,7 @@ Chaque prompt est complet, bloc de style compris (`docs/prompts_images.md` § 0.
 
 | Fichier | Dossier | Format |
 |---|---|---|
-| `seuil_de_mu01.jpg` | `towns/` | paysage 16:9 — ⚠️ 1ʳᵉ version refusée : la porte ouvrait sur le fond de la mer |
+| `seuil_de_mu01.jpg` | `towns/` | paysage 16:9 — posée (22/11), 2ᵉ version : la 1ʳᵉ ouvrait sur le fond de la mer |
 | `fare_des_marees01.jpg` | `towns/` | paysage 16:9 — posée (22/11) : salle adossée à la paroi du dôme, baies sur la mer |
 | `marche_du_dome01.jpg` | `towns/` | paysage 16:9 — posée (22/11) |
 | `templier_ogre_m_seuil_de_mu01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
