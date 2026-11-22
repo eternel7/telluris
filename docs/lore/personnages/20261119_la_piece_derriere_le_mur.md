@@ -253,15 +253,15 @@ Chaque prompt est complet, bloc de style compris (`docs/prompts_images.md` § 0.
 
 | Fichier | Dossier | Format |
 |---|---|---|
-| `seuil_de_mu01.jpg` | `towns/` | paysage 16:9 |
-| `fare_des_marees01.jpg` | `towns/` | paysage 16:9 |
-| `marche_du_dome01.jpg` | `towns/` | paysage 16:9 |
-| `templier_ogre_m_seuil_de_mu01.jpg` | `pnj/` | paysage 16:9 |
-| `aubergiste_nain_f_fare_des_marees01.jpg` | `pnj/` | paysage 16:9 |
-| `marchande_hobbit_f_marche_du_dome01.jpg` | `pnj/` | paysage 16:9 |
+| `seuil_de_mu01.jpg` | `towns/` | paysage 16:9 — ⚠️ 1ʳᵉ version refusée : la porte ouvrait sur le fond de la mer |
+| `fare_des_marees01.jpg` | `towns/` | paysage 16:9 — posée (22/11) : salle adossée à la paroi du dôme, baies sur la mer |
+| `marche_du_dome01.jpg` | `towns/` | paysage 16:9 — posée (22/11) |
+| `templier_ogre_m_seuil_de_mu01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
+| `aubergiste_nain_f_fare_des_marees01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
+| `marchande_hobbit_f_marche_du_dome01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
 
 **Le seuil de Mu**
-> Réalise l'image d'une salle basse taillée dans une pierre sombre veinée d'or, sous une cité engloutie, en format paysage large 16:9. Au centre du sol, un grand cercle gravé de lignes géométriques ; au-dessus, une arche de pierre dont l'ouverture est un vide qui tremble à peine, comme la surface d'un bassin immobile, d'un bleu très pâle. À côté de l'arche, une roue de pierre gravée posée sur un socle. Contre la paroi, une vasque de pierre pleine d'eau sombre où pousse une branche de corail vivant qui luit d'un jaune doux. Au fond, de hautes portes ouvertes laissent voir une lumière ondulante, bleutée, comme filtrée par l'eau. Des symboles seulement, aucune lettre. La salle est entièrement vide de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+> Réalise l'image d'une salle basse taillée dans une pierre sombre veinée d'or, sous une cité engloutie, en format paysage large 16:9. Au centre du sol, un grand cercle gravé de lignes géométriques ; au-dessus, une arche de pierre dont l'ouverture est un vide qui tremble à peine, comme la surface d'un bassin immobile, d'un bleu très pâle. À côté de l'arche, une roue de pierre gravée posée sur un socle. Contre la paroi, une vasque de pierre pleine d'eau sombre où pousse une branche de corail vivant qui luit d'un jaune doux. Au fond, de hautes portes ouvertes donnent sur une rue de la cité, au sec : des pavés, des maisons de pierre veinée d'or, des lanternes, baignés d'une lumière bleutée qui ondule comme sous l'eau. La salle est à l'intérieur de la ville, sous son dôme : par les portes on ne voit ni la mer, ni l'eau libre, ni le fond de l'océan, ni de ruines englouties, seulement la rue. Des symboles seulement, aucune lettre. La salle est entièrement vide de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 
 **Le fare des Marées**
 > Réalise l'image de la salle commune d'une auberge dans une cité engloutie sous un dôme doré, en format paysage large 16:9. Murs de pierre polie aux reflets de nacre, plafond haut sur lequel ondule une lumière bleutée venue de grandes baies qui donnent sur des canaux ; un comptoir de pierre, des bols et des gobelets de pierre, des tables basses et des coussins tressés ; près du comptoir, une vasque où pousse une branche de corail jaune lumineux ; un petit bassin d'eau douce au milieu de la salle. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales, vêtus de tissus légers aux teintes de mer, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
