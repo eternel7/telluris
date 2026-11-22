@@ -33,9 +33,10 @@ FENETRE = portails.fenetre_secondes()
 
 # ── Arrivées ─────────────────────────────────────────────────────────────────
 
-def test_chaque_noeud_d_un_portail_ouvert_est_une_arrivee_sauf_l_ancrage():
+def test_chaque_noeud_d_un_portail_ouvert_est_une_arrivee_sauf_les_portes_de_l_ancrage():
+	"""Le lien Mu ↔ Notre-Dame touche l'ancrage : c'est SA porte, jamais tirée au sort."""
 	assert {a["lieu"] for a in ARRIVEES} == {
-		"lieu:petra_khazneh", "lieu:alexandrie", "lieu:petra_ad_deir", "lieu:bucarest", "lieu:mu"}
+		"lieu:petra_khazneh", "lieu:alexandrie", "lieu:petra_ad_deir", "lieu:bucarest"}
 	alex = next(a for a in ARRIVEES if a["lieu"] == "lieu:alexandrie")
 	assert alex["pos"] == [28, 33] and alex["lien"] == "link:petra_khazneh_to_alexandrie"
 
@@ -133,6 +134,9 @@ def rp(monkeypatch):
 		arrivees.append(destination)
 		return {"moved": 1}
 	monkeypatch.setattr(rp, "_effets_arrivee", _arrivee)
+	# Barrière de Mu (porte de l'ancrage) : ouverte au seul personnage marqué `vers_mu`.
+	monkeypatch.setattr(rp.acces, "acces_autorise",
+						lambda c, d, g: (bool(c.get("vers_mu")) or d.get("_id") != "lieu:mu", "quete"))
 	rp._t0, rp._arrivees = t0, arrivees
 	return rp
 
@@ -347,3 +351,52 @@ def test_tableau_fixe_la_barriere_de_la_porte_tient(rp_fixe, monkeypatch):
 	c = {"lieu": CHAPELLE, "inventaire": []}
 	assert rp_fixe._resoudre_portail(c, PNJ_FIXE, {"_id": CHAPELLE}, "franchir", cle, {}) == "refus_acces"
 	assert c["lieu"] == CHAPELLE and not rp_fixe._arrivees
+
+
+# ── Portes de l'ancrage dans le tableau tiré (Mu ↔ Notre-Dame) ───────────────
+
+MU = "lieu:mu"
+
+
+@pytest.fixture
+def rp_mu(rp):
+	"""Barrière de Mu posée par `rp` : ouverte au seul personnage marqué `vers_mu`."""
+	return rp
+
+
+def test_la_porte_de_mu_n_est_jamais_tiree_au_sort():
+	t0 = 1_000 * FENETRE
+	for k in range(50):
+		assert all(s["lieu"] != MU for s in portails.seuils_ouverts(ARRIVEES, ANCRAGE, t0 + k * FENETRE))
+
+
+def test_la_porte_de_mu_s_affiche_en_tete_a_qui_en_franchit_la_barriere(rp_mu):
+	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non"}]}
+	rp_mu._choix_portail({"vers_mu": True}, PNJ, noeud)
+	tires = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp_mu._t0)
+	assert noeud["choix"][0]["label"] == "🌀 mu" and "rebours" not in noeud["choix"][0]
+	assert noeud["choix"][0]["rejouer"]["saisie"] == f"link:mu_to_notre_dame|{MU}"
+	assert [c["rejouer"]["saisie"] for c in noeud["choix"][1:-1]] == [s["cle"] for s in tires]
+	assert all("rebours" in c for c in noeud["choix"][1:-1])
+
+
+def test_la_porte_de_mu_reste_cachee_a_qui_n_y_a_pas_droit(rp_mu):
+	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}]}
+	rp_mu._choix_portail({}, PNJ, noeud)
+	assert all(c["rejouer"]["saisie"].split("|")[1] != MU for c in noeud["choix"])
+	c = {"lieu": ANCRAGE, "inventaire": [CRISTAL]}
+	assert rp_mu._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir",
+								   f"link:mu_to_notre_dame|{MU}", {}) == "ferme"
+	assert c["inventaire"] == [CRISTAL] and not rp_mu._arrivees
+
+
+def test_la_porte_de_mu_toujours_ouverte_et_payee_d_un_cristal(rp_mu, monkeypatch):
+	for t in (rp_mu._t0, rp_mu._t0 + 10_000 * FENETRE):
+		monkeypatch.setattr(rp_mu.quetes, "now_epoch", lambda t=t: t)
+		c = {"lieu": ANCRAGE, "inventaire": [CRISTAL], "vers_mu": True}
+		assert rp_mu._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir",
+									   f"link:mu_to_notre_dame|{MU}", {}) == "ouvert"
+		assert c["lieu"] == MU and c["position"] == {"x": 3, "y": 4} and c["inventaire"] == []
+		sans = {"lieu": ANCRAGE, "inventaire": [], "vers_mu": True}
+		assert rp_mu._resoudre_portail(sans, PNJ, {"_id": ANCRAGE}, "franchir",
+									   f"link:mu_to_notre_dame|{MU}", {}) == "refus_cristal"

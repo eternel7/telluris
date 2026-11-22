@@ -50,6 +50,10 @@ C'est devant l'arche qu'Aélis prononce pour la première fois le nom de **Mu**.
 
 ?{Le commandeur, ensuite : « Une arche, et un nom. Mon second dit que ce nom ne veut rien dire, que c'est une prière de bâtisseurs. Moi, je dis qu'on ne grave pas une prière sur une clé de voûte. » Aélis, aux Archives : « Les vieux maîtres ne répondent pas quand je demande. Ils sourient, et ils parlent d'autre chose. »}?
 
+Au **rang A**, l'Institut offre à Aélis de parfaire sa formation à Mu. Elle le dit elle-même aux Archives des Seuils, et Maëlys le fait savoir à la Guilde : Aélis veut l'aventurier à ses côtés. On ne se bat pas pour partir. Sous les voûtes de Notre-Dame, Aénor de Sully, commanderesse des Templiers, ouvre le passage à qui pose un cristal jaune sur l'autel d'ancrage, et c'est à l'aventurier de l'apporter. De l'autre côté, un seuil gardé, une auberge, un marché où l'on ne vend pas tout à n'importe qui.
+
+?{Au seuil de Mu, Hemi Taurua, Templier de Mu, tient une roue plus petite que celle de Notre-Dame et n'ouvre que le retour, au même prix. Au marché du Dôme, Kahu Rehua vend aux invités des éclats de corail mort, durcis : « chez vous, on dit cristal jaune », un or l'éclat, parce que le Conseil n'aime pas qu'il en sorte trop. Aélis attend au fare des Marées que l'Institut de Mu vienne la chercher.}?
+
 À **Mu-la-Centrale**, on entre en invité de l'Institut. Quelques quartiers sont ouverts : une auberge, un marché restreint. Le reste est gardé et ne s'ouvre qu'avec la réputation et les quêtes. Il n'y a là aucune maison de la Guilde des Aventuriers. Sous la cité vit **Échidna**. On peut lui parler ou la combattre, et la parole peut aboutir sans combat comme elle peut y basculer. Ce qui s'est passé reste attaché à l'aventurier pour toujours, et aucune des deux voies n'est la bonne.
 
 ?{Au rang B, un portail condamné, bâti par un héritier des frères et gardé par les Templiers, porte les mêmes gravures que la boîte ; Aélis y prononce pour la première fois le nom de Mu. Au rang A, l'Institut lui offre de parfaire sa formation à Mu, et elle demande à l'aventurier de l'accompagner, par Notre-Dame et un cristal jaune.}?
@@ -111,6 +115,15 @@ C'est devant l'arche qu'Aélis prononce pour la première fois le nom de **Mu**.
 | 22 | Combat | Aélis **dans la salle**, à protéger (pas de `proteges_restent_dehors`) ; trois penanggalan |
 | 23 | Récompense | **200 XP, 3 000 cu**, sans objet |
 | 24 | Le nom de Mu | Prononcé par Aélis **devant l'arche éteinte**, signe de la clé de voûte reconnu sous la coupole des Archives ; destination ou bâtisseur, jamais tranché |
+
+### Quatrième arbitrage (Auteur, 22/11, questionnaire — « Partir pour Mu », rang A)
+
+| # | Point | Décision |
+|---|---|---|
+| 25 | Départ | **Deux départs** : **Aélis aux Archives des Seuils** et **Maëlys à la Guilde** (condition : « Les vestiges du premier passage » réussie et rang A atteint) |
+| 26 | Forme | **Passage gardé à Notre-Dame** : barrière d'accès tenue par **Aénor de Sully** (`pnj:aenor_de_sully`), ouverte par la quête ; arrivée à Mu = quête réussie ; **aucun combat** — l'épreuve est d'avoir le cristal |
+| 27 | Cristal du premier passage | **Payé par le joueur** dès le premier passage (règle du 25/10 : un cristal jaune par passage ; gisements : fond des catacombes, puits de Chartres) |
+| 28 | Première livraison à Mu-la-Centrale | **Portail d'arrivée de Mu** (seuil côté Mu, lié à Notre-Dame) + **auberge** et **marché restreint** ; Institut de Mu et Sept Sages **plus tard** |
 
 ## 2. Écarts corrigés dans les brouillons
 
@@ -223,6 +236,47 @@ Chaque prompt est complet, bloc de style compris (`docs/prompts_images.md` § 0.
 
 **La salle de l'arche éteinte (battle map)**
 > Réalise l'image d'une carte de combat vue du dessus : une salle souterraine taillée dans une pierre noire et lisse, au format 10:7 (vingt cases de large sur quatorze de haut). Un mur de roche sombre tout autour, sur deux cases d'épaisseur ; au centre du mur du haut, une arche de pierre noire encastrée, dont l'ouverture n'est qu'un noir mat ; près d'elle, quelques flaques d'eau saumâtre et des traînées de vase, comme si la mer était passée là. Le sol est un dallage lisse, sans obstacle, gravé de lignes géométriques fines près de l'arche ; en bas, une porte de pierre grise entrouverte. Lumière froide et basse, quelques lanternes posées au sol. Aucun personnage, aucune créature : la salle est vide. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+
+## 7 quater. « Partir pour Mu » — contenu livré et prompts d'image (22/11)
+
+`dev/gen_partir_pour_mu.py` → `jsons/partir_pour_mu_a_importer.json` (16 docs, DELTA : Aélis des Archives, Maëlys, Aénor et `lieu:les_archives_des_seuils` RELUS du dump, + trois lieux, quatre liens, cinq PNJ). Verrouillé par `tests/test_partir_pour_mu.py`.
+
+- **Offre** : troisième entrée des `offres` d'escorte d'Aélis (vestiges réussis, rang A) ; **Maëlys renvoie aux Archives**, elle ne tient pas l'offre (modèle de la pièce : réception et Maëlys indiquaient le chemin).
+- **Porte de Mu** = lien portail `link:seuil_de_mu_to_notre_dame_portail`, sans bouton d'aucun côté. Un lien qui touche l'ancrage n'est plus tiré au sort : Aénor l'affiche **en tête, toujours ouvert**, au seul personnage qui franchit la barrière du seuil (escorte en cours, ou quête réussie) — `routers/pnj._portes_de_l_ancrage`. Un cristal jaune.
+- **Retour** : Hemi Taurua (Templier de Mu, ogre) tient un tableau **fixe** vers Notre-Dame, un cristal.
+- Proposé, non tranché (signalé dans le récit) :
+  - **le marché vend le cristal jaune** (1 or = 10 000 cu) : Mu est sous la mer, aucune route n'en sort — sans lui, qui arrive sans cristal de réserve resterait bloqué ;
+  - les trois noms polynésiens (Hemi Taurua, Moana Teriitahi, Kahu Rehua), les Lignées (ogre, naine, hobbit) ;
+  - Aélis qui attend à l'auberge que l'Institut de Mu la reçoive ;
+  - la récompense : 300 XP et 4 500 cu.
+- ⚠️ **Grille de `lieu:mu` à repeindre** : celle du dump ne suit pas le dôme (les cases praticables sont surtout hors de la bulle). Portes posées sur des cases praticables et reliées entre elles : seuil (45, 24), auberge (30, 28), marché (54, 28).
+
+| Fichier | Dossier | Format |
+|---|---|---|
+| `seuil_de_mu01.jpg` | `towns/` | paysage 16:9 — posée (22/11), 2ᵉ version : la 1ʳᵉ ouvrait sur le fond de la mer |
+| `fare_des_marees01.jpg` | `towns/` | paysage 16:9 — posée (22/11) : salle adossée à la paroi du dôme, baies sur la mer |
+| `marche_du_dome01.jpg` | `towns/` | paysage 16:9 — posée (22/11) |
+| `templier_ogre_m_seuil_de_mu01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
+| `aubergiste_nain_f_fare_des_marees01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
+| `marchande_hobbit_f_marche_du_dome01.jpg` | `pnj/` | paysage 16:9 — posée (22/11) |
+
+**Le seuil de Mu**
+> Réalise l'image d'une salle basse taillée dans une pierre sombre veinée d'or, sous une cité engloutie, en format paysage large 16:9. Au centre du sol, un grand cercle gravé de lignes géométriques ; au-dessus, une arche de pierre dont l'ouverture est un vide qui tremble à peine, comme la surface d'un bassin immobile, d'un bleu très pâle. À côté de l'arche, une roue de pierre gravée posée sur un socle. Contre la paroi, une vasque de pierre pleine d'eau sombre où pousse une branche de corail vivant qui luit d'un jaune doux. Au fond, de hautes portes ouvertes donnent sur une rue de la cité, au sec : des pavés, des maisons de pierre veinée d'or, des lanternes, baignés d'une lumière bleutée qui ondule comme sous l'eau. La salle est à l'intérieur de la ville, sous son dôme : par les portes on ne voit ni la mer, ni l'eau libre, ni le fond de l'océan, ni de ruines englouties, seulement la rue. Des symboles seulement, aucune lettre. La salle est entièrement vide de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+**Le fare des Marées**
+> Réalise l'image de la salle commune d'une auberge dans une cité engloutie sous un dôme doré, en format paysage large 16:9. Murs de pierre polie aux reflets de nacre, plafond haut sur lequel ondule une lumière bleutée venue de grandes baies qui donnent sur des canaux ; un comptoir de pierre, des bols et des gobelets de pierre, des tables basses et des coussins tressés ; près du comptoir, une vasque où pousse une branche de corail jaune lumineux ; un petit bassin d'eau douce au milieu de la salle. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales, vêtus de tissus légers aux teintes de mer, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+**Le marché du Dôme**
+> Réalise l'image d'un petit marché sur un quai de pierre, vu au niveau du sol, à l'intérieur même d'une cité bâtie sous la mer, en format paysage large 16:9. Le point de vue est celui d'un passant debout sur le quai, au milieu de la ville : on ne voit jamais la cité de l'extérieur, ni le dôme vu du dehors, ni l'océan autour. Quelques étals sous des auvents de toile pâle, des paniers de perles, de nacre, de sel et de corail mort ; un canal d'eau claire longe le quai, enjambé par une passerelle ; de part et d'autre, des maisons de pierre veinée d'or et, au fond, une rue gardée par une grille qui monte vers des pyramides illuminées. Très haut au-dessus des toits, le ciel est remplacé par une voûte dorée et translucide, lointaine comme un ciel, à travers laquelle passe une lumière bleutée qui ondule sur les pavés et sur l'eau du canal ; on devine à peine, tout là-haut, l'ombre d'un banc de poissons. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+**Hemi Taurua, Templier de Mu**
+> Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large 16:9. Un ogre, bien plus grand et massif qu'un humain, à la peau épaisse et au teint humain, d'âge mûr, le visage grave et méfiant, garde d'un seuil de portail dans une cité engloutie. Il se tient légèrement décalé du centre et regarde droit vers le spectateur, une main posée sur une roue de pierre gravée. Tenue : manteau d'écailles grises comme une peau de poisson, plastron de nacre sombre, une lance courte à pointe de corail. Décor : une salle de pierre veinée d'or, une arche dont le vide tremble comme de l'eau, une vasque où luit une branche de corail jaune. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
+
+**Moana Teriitahi, aubergiste**
+> Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large 16:9. Une naine, nettement plus petite qu'un humain, aux proportions de naine, sans barbe, d'une quarantaine d'années, solide et l'air peu commode, les tresses nouées de fils de nacre, aubergiste dans une cité engloutie. Elle se tient derrière son comptoir de pierre polie, légèrement décalée du centre, et regarde droit vers le spectateur en essuyant un bol de pierre. Tenue : tunique de lin léger teinte en bleu-vert, tablier tressé. Décor : salle commune aux murs nacrés, lumière bleutée qui ondule au plafond, une vasque de corail jaune lumineux. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
+
+**Kahu Rehua, marchande du Dôme**
+> Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large 16:9. Une hobbit, toute petite adulte aux pieds nus, jeune, ronde et vive, l'œil curieux et le sourire facile, marchande sur un quai d'une cité engloutie. Elle est assise sous un auvent de toile pâle, légèrement décalée du centre, et regarde droit vers le spectateur en lui présentant une perle au creux de la main ; à côté d'elle, un petit coffret de bois fermé. Tenue : robe légère aux teintes de mer, colliers de coquillages. Décor, vu de l'intérieur de la cité et jamais de l'extérieur : paniers de nacre, de perles et de sel, un canal bordé de maisons de pierre veinée d'or, et une lumière bleutée qui ondule sur les pavés, tombée d'une voûte dorée lointaine qu'on ne voit pas. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, en proportions égales, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
 
 ## 8. À faire
 

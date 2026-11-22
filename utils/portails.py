@@ -9,7 +9,10 @@
 #   - les destinations sont DÉRIVÉES de tous les liens portail : un portail créé demain
 #     entre au tableau sans une ligne de contenu ni de code ;
 #   - on n'arrive presque jamais À Notre-Dame : un nœud posé sur l'ancrage n'est jamais
-#     une destination (seul Mu y mène, par son propre lien).
+#     une destination (seul Mu y mène, par son propre lien) ;
+#   - un lien portail qui TOUCHE l'ancrage est une porte de l'ancrage lui-même (Mu) : jamais
+#     tiré au sort, il s'ajoute au tableau, toujours ouvert, pour qui en franchit la barrière
+#     `acces` (routers/pnj._portes_de_l_ancrage) — comme le tableau fixe, et au même cristal.
 #
 # On ne propose que quelques seuils à la fois, ceux « qui vont être empruntés dans les
 # prochains moments ». ⚠️ Aucune horloge ni tick (CLAUDE.md §5) : l'epoch réel est coupé
@@ -46,13 +49,17 @@ def _vers(nodes: list, lieu: str) -> list:
 def arrivees_candidates(connexions: list, ancrage: str) -> list:
 	"""Chaque nœud de chaque lien portail OUVERT est un point d'arrivée possible :
 	`[{cle, lien, lieu, pos, vers}]` (`vers` = l'autre bout du lien), trié par `cle` (le tirage en dépend : un ordre stable est
-	ce qui rend la graine reproductible). Les nœuds posés sur l'ancrage sont écartés."""
+	ce qui rend la graine reproductible). Les liens qui TOUCHENT l'ancrage sont écartés en
+	entier : ce sont ses propres portes (Mu ↔ Notre-Dame), pas des portails du monde à
+	court-circuiter — `arrivees_fixes` les sert, barrière `acces` comprise."""
 	vues = {}
 	for conn in connexions or []:
 		meta = conn.get("metadata") or {}
 		if meta.get("type") != TYPE_PORTAIL or meta.get("status", "ouvert") != "ouvert":
 			continue
 		nodes = conn.get("nodes") or []
+		if any(n.get("lieu") == ancrage for n in nodes):
+			continue
 		for node in nodes:
 			lieu = node.get("lieu")
 			if not lieu or lieu == ancrage:
