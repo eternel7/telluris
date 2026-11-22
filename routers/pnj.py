@@ -375,7 +375,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		cout = conf_p.get("cout") or {}
 		flags["cristal_jaune_porte"] = not cout.get("item") or quetes.compter_sacs(
 			_sacs_portail(character), cout["item"]) >= int(cout.get("quantite", 1) or 1)
-		flags["seuils_ouverts"] = bool(ouverts)
+		flags["seuils_ouverts"] = bool(ouverts) or bool(_portes_de_l_ancrage(character, conf_p))
 		placeholders["fermeture"] = (portails.texte_duree(ouverts[0]["ferme_dans_s"])
 									 if ouverts and not fixe else "—")
 		placeholders["seuils_suivants"] = "—" if fixe else ", ".join(
@@ -799,6 +799,18 @@ def _arrivees_portail(conf: dict) -> list:
 	return portails.arrivees_candidates(liens, conf.get("ancrage"))
 
 
+def _portes_de_l_ancrage(character: dict, conf: dict) -> list:
+	"""Tableau TIRÉ (Notre-Dame) : les portes de l'ancrage lui-même (lien portail qui y touche,
+	Mu), jamais tirées au sort, toujours ouvertes — mais pour le seul personnage qui en franchit
+	la barrière `acces` : une porte fermée ne s'affiche pas (elle trahirait sa destination).
+	Tableau `fixe` : aucune (ses portes SONT le tableau)."""
+	if conf.get("fixe"):
+		return []
+	liens = find_docs({"type": "connection", "metadata.type": portails.TYPE_PORTAIL}) or []
+	return [a for a in portails.arrivees_fixes(liens, conf.get("ancrage"))
+			if acces.acces_autorise(character, get_doc(a["lieu"]) or {}, get_doc)[0]]
+
+
 def _label_arrivee(arrivee: dict) -> str:
 	"""« Alexandrie », « Petra — La Khazneh » : le lieu d'arrivée, précédé de sa cité quand
 	c'est un sous-lieu."""
@@ -844,21 +856,24 @@ def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	if conf.get("fixe"):
 		ouverts = _arrivees_portail(conf)
 	else:
-		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), now)
+		# Portes de l'ancrage (Mu) EN TÊTE, sans compte à rebours ; puis les seuils tirés.
+		ouverts = _portes_de_l_ancrage(character, conf) + portails.seuils_ouverts(
+			_arrivees_portail(conf), conf.get("ancrage"), now)
 	generes = []
 	for a, label in zip(ouverts, _labels_arrivees(ouverts)):
 		base = f"🌀 {label}"
+		tire = "ferme_dans_s" in a
 		choix = {
 			"id": gabarit,
 			"label": base + (
-				"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
+				f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}" if tire else ""),
 			"action": True,
 			"marque": None,
 			"saisie": False,
 			"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
 		}
 		# Compte à rebours du libellé, tenu à la seconde par le client (`_pnjReboursTick`).
-		if not conf.get("fixe"):
+		if tire:
 			choix["rebours"] = {"base": base, "ferme_dans_s": a["ferme_dans_s"]}
 		generes.append(choix)
 	noeud["choix"][idx:idx + 1] = generes
@@ -911,7 +926,9 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 	if conf.get("fixe"):
 		seuil = next((a for a in _arrivees_portail(conf) if a["cle"] == str(saisie or "")), None)
 	else:
-		seuil = portails.seuil_franchissable(
+		# Une porte de l'ancrage n'est servie qu'à qui en franchit la barrière (revérifiée ici).
+		seuil = next((a for a in _portes_de_l_ancrage(character, conf) if a["cle"] == str(saisie or "")),
+					 None) or portails.seuil_franchissable(
 			_arrivees_portail(conf), conf.get("ancrage"), str(saisie or ""), quetes.now_epoch())
 	if not seuil:
 		return noeuds.get("ferme")
