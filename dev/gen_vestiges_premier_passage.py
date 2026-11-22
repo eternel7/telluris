@@ -69,9 +69,11 @@ E_ARCHE = "enigme:arche_eteinte"
 E_RETOUR = "enigme:serrure_du_retour"
 
 PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg"  # sans blessure (Auteur, 19/11)
-# Portrait DÉTOURÉ (fond transparent, tiré de celui de la maison pliée) : celui de TOUS les dialogues
-# de la quête (Auteur, 21/11). L'escortée garde PORTRAIT_AELIS (jeton de combat, panneau 👥).
-PORTRAIT_AELIS_DIALOGUE = "architecte_Aélis_de_Montfaucon_transparent.webp"
+# Portrait DÉTOURÉ (fond transparent) : celui de TOUS les dialogues de la quête (Auteur, 21/11).
+# Depuis le 22/11 : le GIF animé « Aelis souriante » de l'Auteur, son fond marine retiré → WebP animé
+# avec alpha (bords adoucis ; le GIF n'a qu'une transparence tout-ou-rien). L'ancien détourage fixe :
+# architecte_Aélis_de_Montfaucon_transparent.webp. L'escortée garde PORTRAIT_AELIS (jeton, panneau 👥).
+PORTRAIT_AELIS_DIALOGUE = "architecte_Aélis_de_Montfaucon_souriante_transparent.webp"
 PORTRAIT_COMMANDEUR = "templier_humain_m_commandeur_enclos01.png"
 # Images à livrer par l'Auteur (prompts dans la séance, § Prompts d'image des vestiges).
 IMAGE_GALERIE = "galerie_du_commandeur01.jpg"
