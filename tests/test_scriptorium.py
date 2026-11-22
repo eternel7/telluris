@@ -358,6 +358,8 @@ def test_recettes_effectives_scriptorium_sans_rien_a_documenter(monkeypatch):
 	monkeypatch.setattr("utils.marche._all_recettes", lambda: [])
 	monkeypatch.setattr("utils.marche._recettes_par_lieu", None)
 	monkeypatch.setattr("utils.focalisation._graphe_cache", {"at": 0.0, "graphe": None})
+	# Aucune planche non plus : le vrai dossier `resources/livres` n'entre pas dans le test.
+	monkeypatch.setattr("utils.livres_images.planches", lambda racine=None: [])
 	out = scriptorium.recettes_effectives(SCRIPTORIUM, find_docs_fn, docs.get, lambda d: d)
 	assert out == []
 

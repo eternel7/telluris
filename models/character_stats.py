@@ -288,6 +288,10 @@ LIEU_CATEGORIES_FUSION: dict[str, list[str]] = {
 	"grand_atelier_d_empennage":         ["atelier_de_l_empenneur", "plumasserie", "fletcher"],
 	"grande_boulangerie":                ["boulangerie", "cuisine"],
 	"maison_des_conserves":              ["boucherie", "salaison", "fumoir", "boulangerie"],
+	# Bibliothèques (Auteur, 22/11/2026) : tout le rayon du scriptorium, ce qui les distingue
+	# est leur plafond de récits historiques (`RECITS_PLAFOND`).
+	"bibliotheque":                      ["scriptorium"],
+	"grande_bibliotheque":               ["bibliotheque"],
 }
 
 
@@ -1106,6 +1110,22 @@ STOCK_INTERMEDIAIRE_MAX: int = 50
 # la cité (`marche.puiser_revente`) et le vend à ce facteur × la fourchette de l'artisan qui
 # le fabrique. ≥ 1 : acheter à la source reste toujours le meilleur prix (anti-arbitrage).
 REVENTE_MAJORATION: float = 1.15
+# Récits historiques (items tagués `ouvrage_historique`, `utils/recits.py`) : nombre maximal
+# de TITRES DISTINCTS en rayon, un exemplaire de chacun, par catégorie de lieu (Auteur,
+# 22/11/2026). Tenu à la FABRICATION et à la vente d'un atelier de propriété aux boutiques ;
+# un récit vendu par le joueur est toujours accepté. Catégorie absente = sans plafond.
+# `RECITS_PLAFOND_CAPITALE` remplace la valeur quand la cité du lieu est une capitale
+# (`sous_categorie: "capitale"`).
+RECITS_PLAFOND: dict[str, int] = {
+	"scriptorium": 1,
+	"grand_scriptorium": 1,
+	"bibliotheque": 5,
+	"grande_bibliotheque": 10,
+}
+RECITS_PLAFOND_CAPITALE: dict[str, int] = {
+	"scriptorium": 3,
+	"grand_scriptorium": 3,
+}
 
 
 def current_world_variables() -> dict:
@@ -1175,6 +1195,8 @@ def current_world_variables() -> dict:
 		"FLUX_PART_MAX": FLUX_PART_MAX,
 		"STOCK_INTERMEDIAIRE_MAX": STOCK_INTERMEDIAIRE_MAX,
 		"REVENTE_MAJORATION": REVENTE_MAJORATION,
+		"RECITS_PLAFOND": dict(RECITS_PLAFOND),
+		"RECITS_PLAFOND_CAPITALE": dict(RECITS_PLAFOND_CAPITALE),
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"CRIT_CHANCE_DIVISEUR": CRIT_CHANCE_DIVISEUR,
@@ -1525,6 +1547,17 @@ def load_world_variables() -> dict:
 	FLUX_PART_MAX        = float(v.get("FLUX_PART_MAX", FLUX_PART_MAX))
 	STOCK_INTERMEDIAIRE_MAX = int(v.get("STOCK_INTERMEDIAIRE_MAX", STOCK_INTERMEDIAIRE_MAX))
 	REVENTE_MAJORATION   = float(v.get("REVENTE_MAJORATION", REVENTE_MAJORATION))
+	# Dicts MUTÉS EN PLACE (lus par attribut de module dans `utils/recits.py`).
+	for nom, table in (("RECITS_PLAFOND", RECITS_PLAFOND), ("RECITS_PLAFOND_CAPITALE", RECITS_PLAFOND_CAPITALE)):
+		if isinstance(v.get(nom), dict):
+			lue = {}
+			for cat, n in v[nom].items():
+				try:
+					lue[str(cat)] = max(0, int(n))
+				except (TypeError, ValueError):
+					continue
+			table.clear()
+			table.update(lue)
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))

@@ -14,6 +14,7 @@ from models import character_stats
 from utils import fabrication
 from utils import filtres_boutique
 from utils import montures
+from utils import recits
 from utils.characters import (
 	resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse,
@@ -47,6 +48,9 @@ _FICHE_ITEM_KEYS = (
 	# ⚠️ Retirés des lignes d'ACHAT d'un livre de contenu (`resolve_stock_vente`) : c'est ce
 	# qu'on paie, il ne se lit pas en vitrine.
 	"description", "carte",
+	# `images` : planche et illustrations d'un livre (`livres_images.images_de`, posées par
+	# resolve_item_ref) — retirées elles aussi d'un livre de contenu scellé.
+	"images",
 )
 
 
@@ -136,6 +140,7 @@ _recettes_fusion_memo: dict[str, list] = {}
 _marche_map_portee: dict | None = None     # {lieu_portee: {"besoins"/"produits": {cat: set}}}
 _recettes_par_portee: dict | None = None   # {lieu_portee: {lieu_categorie: [recettes]}}
 _portees_memo: dict[str, tuple] = {}       # lieu_id → (lui-même, parent, grand-parent…)
+_cite_memo: dict[str, dict | None] = {}  # lieu_id → doc de sa cité (`lieu_parent`), plafond des récits
 _cles_consommees_memo: set | None = None   # toutes les clés matières consommées, portées comprises
 # Matière/demi-produit vs pièce finie, dérogation comprise (cf. `item_commandable`).
 _commandable_memo: dict[str, bool] = {}    # item_id → peut figurer au catalogue de commande
@@ -163,6 +168,7 @@ def reset_prix_cache() -> None:
 	_categories_incluses_memo.clear()
 	_recettes_fusion_memo.clear()
 	_portees_memo.clear()
+	_cite_memo.clear()
 	# ⚠️ Sans cette ligne, poser le tag `commandable` sur un item depuis /admin resterait
 	# sans effet jusqu'au redémarrage du process — le symptôme le plus coûteux à diagnostiquer
 	# de toute la chaîne (même piège que l'import de recette avant l'ajout de `_recettes_all`).
@@ -546,6 +552,38 @@ def portees_lieu(lieu_doc: dict, get_doc_fn=None) -> tuple:
 			courant = get_doc_fn(parent_id) if parent_id and parent_id not in vus else None
 		_portees_memo[lieu_id] = tuple(ordre)
 	return _portees_memo[lieu_id]
+
+
+def _cite_du_lieu(lieu_doc: dict, get_doc_fn=None) -> dict | None:
+	"""Doc de la cité du lieu (son `lieu_parent` direct), pour le plafond des récits (une
+	capitale en expose plus). Mémoïsé par `_id`, vidé par `reset_prix_cache()` (même raison
+	que `portees_lieu` : `lieu:` n'est pas en cache de requête). FAIL-SOFT : sans `_id` ni
+	parent (fixtures), ou base injoignable, None."""
+	lieu_id = (lieu_doc or {}).get("_id")
+	parent_id = (lieu_doc or {}).get("lieu_parent")
+	if not lieu_id or not parent_id:
+		return None
+	if lieu_id not in _cite_memo:
+		try:
+			_cite_memo[lieu_id] = (get_doc_fn or get_doc)(parent_id)
+		except Exception:
+			return None
+	return _cite_memo[lieu_id]
+
+
+def recit_refuse(lieu_doc: dict, item_doc: dict | None, resolve_fn=None) -> bool:
+	"""Ce lieu refuse-t-il ce récit historique (plafond de titres atteint, ou titre déjà en
+	rayon) ? False pour tout objet qui n'est pas un récit, et pour une catégorie sans plafond
+	— sans lire la cité. Pour le flux entrant hors fabrication (`echanges_cite`)."""
+	if not recits.est_recit(item_doc):
+		return False
+	cat = (lieu_doc or {}).get("categorie")
+	if cat not in character_stats.RECITS_PLAFOND and cat not in character_stats.RECITS_PLAFOND_CAPITALE:
+		return False
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	plafond_lieu = recits.plafond(lieu_doc, _cite_du_lieu(lieu_doc))
+	titres = recits.titres_en_rayon(lieu_doc, resolve_fn or resolve_item_ref)
+	return not recits.admis(item_id, titres, plafond_lieu)
 
 
 def _recettes_portees() -> dict:
@@ -1607,6 +1645,25 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 		deja = sum(int(e.get("qty", 0)) for e in stock_vente if e.get("item_id") == p["item_id"])
 		return deja >= plafond_inter
 
+	# ⚠️ **Récits historiques plafonnés** (`utils/recits.py`) : au plus N titres distincts en
+	# rayon, un exemplaire de chacun, N selon la catégorie et la cité (capitale). La cité n'est
+	# lue que pour une catégorie présente dans les tables — aucun accès base pour les autres.
+	plafond_recits = None
+	if categorie in character_stats.RECITS_PLAFOND or categorie in character_stats.RECITS_PLAFOND_CAPITALE:
+		plafond_recits = recits.plafond(lieu_doc, _cite_du_lieu(lieu_doc))
+	_recit_cache: dict[str, dict | None] = {}
+
+	def _resoudre(item_id: str):
+		if item_id not in _recit_cache:
+			_recit_cache[item_id] = resolve_fn(item_id) if item_id else None
+		return _recit_cache[item_id]
+
+	def _recit_refuse(p: dict) -> bool:
+		if plafond_recits is None or not recits.est_recit(_resoudre(p["item_id"])):
+			return False
+		titres = recits.titres_en_rayon({"stock_vente": stock_vente}, _resoudre)
+		return not recits.admis(p["item_id"], titres, plafond_recits)
+
 	produits: dict[str, int] = {}
 	fired = 0
 	while fired < _CONVERSION_CAP:
@@ -1616,7 +1673,8 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 		applicable = [p for p in prepared
 					  if (p["max"] is None or p["cuites"] < int(p["max"]))
 					  and all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])
-					  and not _plafonne(p)]
+					  and not _plafonne(p)
+					  and not _recit_refuse(p)]
 		if not applicable:
 			break
 		chosen = random.choices(applicable, weights=[_poids_tirage(p) for p in applicable])[0]
@@ -2198,6 +2256,7 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 		if scriptorium.contenu_scelle(item):
 			ligne.pop("description", None)
 			ligne.pop("carte", None)
+			ligne.pop("images", None)
 			ligne["contenu_scelle"] = True
 		out.append(ligne)
 	return out

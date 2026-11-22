@@ -87,6 +87,10 @@ METIERS = {
 	"grande_maison_des_arts":            ("Dame Mahaut de Lutèce", "le maître des arts", "On y taille, on y sertit et on y polit dans la même salle."),
 	"manufacture_des_savons_et_parfums": ("Dame Constance", "le maître parfumeur", "L'odeur change trois fois entre la porte et le comptoir."),
 	"grand_scriptorium":                 ("Frère Odilon", "le maître copiste", "Les cierges de l'atelier voisin brûlent au-dessus de chaque pupitre."),
+	# Bibliothèques (Auteur, 22/11/2026) : sans recette propre (fusion du scriptorium), leurs
+	# tenanciers sont bâtis par dev/gen_ouvrages_historiques.py, clonés du grand scriptorium.
+	"bibliotheque":                      ("Dame Guillemette", "la bibliothécaire", "Des rayonnages montent jusqu'aux poutres ; une échelle roule sur son rail au moindre pas."),
+	"grande_bibliotheque":               ("Maître Callimaque", "le maître des tables", "Des milliers de rouleaux dorment dans leurs niches, chacun pendu à son étiquette."),
 	"grand_laboratoire_alchimique":      ("Maître Vulcain", "le grand alchimiste", "Les creusets sont montés sur pied d'orfèvre ; on ne sait plus si l'on fond ou si l'on sertit."),
 	"institut_de_thanaturgie":           ("Docte Sereine", "le thanaturge", "On y parle des morts comme d'un procédé, ce qui met mal à l'aise."),
 	"cabinet_des_specimens":             ("Maître Théobald", "le conservateur", "Chaque vitrine vous regarde passer, et aucune ne cligne."),

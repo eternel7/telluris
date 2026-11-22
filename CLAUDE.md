@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes` · `transmettre`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones` · `aide_editeur` · `enigmes` · `transmettre` · `livres`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -197,7 +197,12 @@ utils/
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
   mercenaires.py         # compagnons-JOUEURS (pur) : offre `service:*` au tableau, clone synchronisé (progression +
                          #   équipement porté, sac propre), un seul recruteur, XP/part → original par compteurs, mort = sac au sol
-  scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
+  scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier ;
+                         #   planches (`recettes_planches`) dans toute la famille du scriptorium (bibliothèques comprises)
+  recits.py              # récits historiques (pur) : plafond de TITRES distincts en rayon (`RECITS_PLAFOND`, capitale),
+                         #   tenu à la fabrication et à la vente d'un atelier de propriété ; contenu : dev/gen_ouvrages_historiques.py
+  livres_images.py       # images des livres (mount /livres) : image à la RACINE = planche achetable sans import (carte_… / œuvre),
+                         #   SOUS-DOSSIER nommé comme un item = ses illustrations, relues dans `resolve_item_ref`
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
   secours.py             # secours (pur) : aventuriers en péril autour de la cité / dans un donjon proche, 4ᵉ source
                          #   d'escorte (comptoir), périmètre DÉRIVÉ opt-out, délai, rendez-vous EN COMBAT de donjon
@@ -306,6 +311,7 @@ templates/
                          #     sacs de la fiche, fiche d'objet, panneau 👥, fenêtre 👜, colonne gauche des rangements)
                          #   enigmes.js (panneau d'énigme de /play : scène illustrée `/enigmes` + commandes parchemin/SVG ; hook `enigme` d'un choix)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
+                         #   lecture.js (lecture à voix haute : fonctions pures du lore ↔ ▶ Lire et images d'un livre dans la fiche d'objet de /play)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, URL par `urlSon`) sauf `taverne/` (musiques tirées au hasard) ; détail : telluris-social-ui § Sons
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/

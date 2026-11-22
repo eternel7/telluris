@@ -230,6 +230,10 @@ app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
 # retombe sur ses commandes parchemin + SVG.
 ENIGMES_IMAGES_PATH = "templates/resources/enigmes"
 app.mount("/enigmes", StaticFiles(directory=ENIGMES_IMAGES_PATH), name="enigmes")
+# Images des livres (utils/livres_images.py) : une image à la racine = une planche achetable
+# au scriptorium ; un sous-dossier nommé comme un item = les illustrations de ce livre.
+LIVRES_IMAGES_PATH = "templates/resources/livres"
+app.mount("/livres", StaticFiles(directory=LIVRES_IMAGES_PATH), name="livres")
 # Sons des animations de combat — servis au COMBAT comme à l'éditeur (/admin/animations).
 # ⚠️ Des noms de fichiers contiennent des espaces (« melee sound.wav ») : côté client, tout
 # passe par encodeURIComponent, comme les feuilles d'effets.

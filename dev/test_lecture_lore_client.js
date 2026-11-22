@@ -19,8 +19,11 @@ const assert = require('assert');
 const vm = require('vm');
 const { lireAvecIncludes, scriptsInline } = require('./_template_js');
 
+const fs = require('fs');
 const TEMPLATE = path.join(__dirname, '..', 'templates', 'admin_lore.html');
-const js = scriptsInline(lireAvecIncludes(TEMPLATE));
+// `lectureNettoyer` / `lectureDecouper` vivent dans scripts/lecture.js, partagé avec /play.
+const LECTURE = path.join(__dirname, '..', 'templates', 'scripts', 'lecture.js');
+const js = scriptsInline(lireAvecIncludes(TEMPLATE)) + '\n' + fs.readFileSync(LECTURE, 'utf8');
 assert.ok(js, 'aucun bloc <script> dans ' + TEMPLATE);
 
 function extraire(nom) {

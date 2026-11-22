@@ -240,7 +240,15 @@ def test_la_table_livree_ne_reference_que_des_categories_a_recettes():
 	}
 	table = character_stats.CODE_DEFAULTS["LIEU_CATEGORIES_FUSION"]
 	assert table, "la table de fusion livrée ne doit pas être vide"
+	# Les bibliothèques (Auteur, 22/11/2026) ne sont pas des grandes maisons : elles reprennent
+	# le seul scriptorium (la grande, la bibliothèque — fusion transitive), et se distinguent par
+	# leur plafond de récits (`RECITS_PLAFOND`). Exception voulue, nommée ici.
+	bibliotheques = {"bibliotheque": ["scriptorium"], "grande_bibliotheque": ["bibliotheque"]}
+	for nom, incluses in bibliotheques.items():
+		assert table.get(nom) == incluses
 	for grande, incluses in table.items():
+		if grande in bibliotheques:
+			continue
 		assert grande not in metiers, f"{grande} écrase un métier de base"
 		assert len(incluses) >= 2, f"{grande} ne réunit pas au moins deux métiers"
 		assert len(set(incluses)) == len(incluses), f"{grande} cite deux fois le même métier"

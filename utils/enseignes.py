@@ -217,6 +217,17 @@ TOURNURES = {
         "Le Parchemin Fin", "La Lettre Dorée", "Le Codex", "La Bibliothèque",
         "Le Rouleau", "Le Livre des Scribes", "La Plume Blanche", "Le Vélin Doré"
     ],
+    "bibliotheque": [
+        "La Librairie", "Le Cabinet de Lecture", "La Salle des Livres", "Les Rayonnages",
+        "La Maison des Récits", "Le Pupitre de Lecture", "Les Chroniques",
+        "La Bibliothèque des Anciens", "Le Lutrin", "Les Annales"
+    ],
+    "grande_bibliotheque": [
+        "La Grande Bibliothèque", "La Bibliothèque des Sages", "Le Palais des Récits",
+        "La Maison des Annales", "La Salle des Mille Livres", "La Librairie Royale",
+        "Le Trésor des Chroniques", "La Grande Salle de Lecture", "Le Musée des Lettres",
+        "La Bibliothèque des Mondes"
+    ],
     "tabletterie": [
         "L'Os Tourné", "Le Buis", "Le Tour", "La Plaquette", "L'Ivoire Feint",
         "Le Peigne de Buis", "La Boîte Sculptée", "Le Jeton", "Le Pion",

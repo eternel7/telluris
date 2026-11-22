@@ -61,6 +61,8 @@ METIERS = {
 	# Savoir, magie et guilde
 	"scriptorium":            ("savoir", "📜", "un scriptorium"),
 	"grand_scriptorium":      ("savoir", "📜", "un grand scriptorium"),
+	"bibliotheque":           ("savoir", "📚", "une bibliothèque"),
+	"grande_bibliotheque":    ("savoir", "📚", "une grande bibliothèque"),
 	"necromancie":            ("savoir", "💀", "une boutique de nécromancie"),
 	"institut_de_thanaturgie": ("savoir", "💀", "un institut de thanaturgie"),
 	"guilde_aventurier":      ("savoir", "⚜️", "la guilde des aventuriers"),

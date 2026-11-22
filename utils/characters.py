@@ -252,6 +252,13 @@ def resolve_item_ref(ref):
 	if item_sous_categorie(doc) == scriptorium.SOUS_CATEGORIE_LIVRE_ECRIT and isinstance(ref, dict) and ref.get("texte"):
 		doc["description"] = ref.get("texte") or doc.get("description")
 		doc["nom"] = scriptorium.titre_livre(doc.get("nom") or item_id, ref)
+	# Images d'un livre (utils/livres_images.py) : planche déposée à la racine de
+	# `resources/livres`, illustrations du sous-dossier nommé comme l'item — relues ici, à la
+	# lecture, pour que déposer un fichier suffise. Les autres objets ne paient qu'un test.
+	if doc.get("categorie") == "livre":
+		from utils import livres_images
+		if (images := livres_images.images_de(doc)):
+			doc["images"] = images
 	# Note de renseignement (utils/renseignement.py) : la piste vit sur la RÉFÉRENCE.
 	from utils import renseignement
 	if renseignement.est_note(ref):

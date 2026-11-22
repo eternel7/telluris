@@ -303,9 +303,12 @@ class Contexte:
 def prix_vente_boutique(ctx: Contexte, boutique: dict, item_doc: dict) -> int | None:
 	"""Ce que CETTE boutique paie l'objet, ou None si elle n'en veut pas : celui qu'obtiendrait
 	le propriétaire (relation, prix négociés, stock de la boutique), décoté sans négociant,
-	bonifié par lui (jamais au-delà de `pmax`). Refus dès que son stock atteint sa cible."""
+	bonifié par lui (jamais au-delà de `pmax`). Refus dès que son stock atteint sa cible, et
+	pour un récit historique au-delà du plafond de titres de la boutique (`utils/recits.py`)."""
 	item_id = _item_id(item_doc)
 	if not marche.lieu_buys(boutique, item_doc):
+		return None
+	if marche.recit_refuse(boutique, item_doc):
 		return None
 	pmin, pmax, stock = marche.params_vente_lieu(boutique, item_doc, item_id)
 	cible = marche.stock_cible_pour(boutique, item_doc)

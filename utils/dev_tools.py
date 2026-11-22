@@ -539,6 +539,16 @@ CATALOGUE = [
 			"livre : recette pigment ×1 → encre ×2. ⚠️ L'encre passe de 12-36 cu à 30-90 cu.",
 	},
 	{
+		"id": "gen_ouvrages_historiques",
+		"label": "📚 Récits historiques et tenanciers des bibliothèques",
+		"argv": _py("gen_ouvrages_historiques.py"),
+		"ecrit": "Écrit jsons/ouvrages_historiques_a_importer.json (delta contre le dump).",
+		"description": "Livres de figures historiques ramenés à Telluris, écrits à leur manière, "
+			"dont des paires d'auteurs aux théories opposées : lecture seule, fabriqués par les "
+			"scriptoriums et bibliothèques (plafond de titres : RECITS_PLAFOND). Tenanciers "
+			"génériques bibliothèque / grande bibliothèque clonés du grand scriptorium.",
+	},
+	{
 		"id": "gen_grimoires",
 		"label": "📖 Générer les grimoires des sorts qui n'en ont pas",
 		# Sans paramètre, mais `dump_frais` : l'import est un PUT complet, relire le dump committé

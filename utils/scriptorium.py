@@ -361,6 +361,34 @@ def recettes_effectives(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -
 	doc, donc les spécialités de terroir suivent les quatre sites d'appel sans qu'aucun
 	appelant change."""
 	base = marche.recettes_lieu(lieu_doc)
-	if not lieu_est_scriptorium(lieu_doc):
+	if not famille_scriptorium(lieu_doc):
 		return base
-	return base + recettes_virtuelles(lieu_doc, find_docs_fn, get_doc_fn, save_doc_fn)
+	extra = recettes_planches(get_doc_fn, save_doc_fn)
+	if lieu_est_scriptorium(lieu_doc):
+		extra = recettes_virtuelles(lieu_doc, find_docs_fn, get_doc_fn, save_doc_fn) + extra
+	return base + extra
+
+
+def famille_scriptorium(lieu_doc: dict) -> bool:
+	"""Scriptorium, ou magasin qui en reprend les recettes (`LIEU_CATEGORIES_FUSION` : grand
+	scriptorium, bibliothèques). Pur : la fusion est mémoïsée par process."""
+	return lieu_est_scriptorium(lieu_doc) or "scriptorium" in marche.categories_incluses(
+		(lieu_doc or {}).get("categorie"))
+
+
+def recettes_planches(get_doc_fn, save_doc_fn, racine: str | None = None) -> list[dict]:
+	"""AU PLUS UNE planche par appel (même règle de rareté que `recettes_virtuelles`) : une
+	image tirée parmi celles déposées à la racine de `resources/livres`, son doc créé au
+	premier tirage (`livres_images.doc_planche`, jamais retouché ensuite), et sa recette en
+	mémoire — prix d'un livre de contenu, un exemplaire par passe."""
+	if not get_doc_fn or not save_doc_fn:
+		return []
+	from utils import livres_images
+	fichiers = livres_images.planches(racine or livres_images.RACINE)
+	if not fichiers:
+		return []
+	fichier = random.choice(fichiers)
+	item_id = livres_images.item_id_planche(fichier)
+	if get_doc_fn(item_id) is None:
+		save_doc_fn(livres_images.doc_planche(fichier))
+	return [_recette_virtuelle(item_id)]

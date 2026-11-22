@@ -498,41 +498,11 @@
 		<a class="haut" href="#haut" title="Haut de page" aria-label="Haut de page">↑</a>
 	{% endif %}
 	</main>
+	<script src="{{ script_url('lecture.js') }}"></script>
 	<script>
 	// ── Fonctions pures (dev/test_lecture_lore_client.js, dev/test_lore_client.js) ──
 
-	/** Texte à prononcer : pictogrammes retirés, en-têtes des séances lus en clair. */
-	function lectureNettoyer(texte) {
-		return String(texte || '')
-			.replace(/✍️?\s*Auteur/g, "L'Auteur")
-			.replace(/🤖\s*ChatGPT/g, 'ChatGPT')
-			.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '')
-			.replace(/[←→↔▸▾·•|#*_`]/g, ' ')
-			.replace(/\s+/g, ' ')
-			.trim();
-	}
-
-	/** Énoncés d'au plus `max` caractères, coupés aux fins de phrase puis aux virgules
-	 *  (Chrome interrompt un énoncé trop long). Un mot plus long que `max` reste entier. */
-	function lectureDecouper(texte, max) {
-		const out = [];
-		const ajouter = morceau => {
-			morceau = morceau.trim();
-			if (!morceau) return;
-			if (out.length && (out[out.length - 1] + ' ' + morceau).length <= max) out[out.length - 1] += ' ' + morceau;
-			else out.push(morceau);
-		};
-		for (const phrase of String(texte || '').match(/[^.!?…;:]+[.!?…;:]*\s*/g) || []) {
-			if (phrase.trim().length <= max) { ajouter(phrase); continue; }
-			let courant = '';
-			for (const mot of phrase.split(/(?<=,)\s+|\s+/)) {
-				if (courant && (courant + ' ' + mot).length > max) { ajouter(courant); courant = mot; }
-				else courant = courant ? courant + ' ' + mot : mot;
-			}
-			ajouter(courant);
-		}
-		return out;
-	}
+	// `lectureNettoyer` et `lectureDecouper` vivent dans scripts/lecture.js (partagé avec les livres de /play).
 
 	/** Indices des blocs à lire. `blocs` = [{h2: bool, auteur: bool}] dans l'ordre du texte.
 	 *  « Auteur seulement » : tout ce qui suit un h2 de l'Auteur, jusqu'au h2 suivant. */
