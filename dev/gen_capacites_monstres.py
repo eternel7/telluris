@@ -236,6 +236,22 @@ for _c, _especes in {
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
+# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
+for _c, _especes in {
+	"venin": ["bashmu", "ushumgallu", "mushmahhu", "labbu"],
+	"souffle_empoisonne": ["ushumgallu", "mushmahhu", "asag"],
+	"hurlement_terrifiant": ["uridimmu", "umu_dabrutu", "anzu", "gallu", "sebitti", "humbaba",
+							 "taureau_celeste", "asag", "mushmahhu"],
+	"foudre": ["anzu"],
+	"charme": ["lilu", "lilitu"],
+	"toucher_spectral": ["lilitu", "utukku", "rabisu"],
+	"lamentation": ["etemmu"],
+	"malediction_du_tombeau": ["etemmu"],
+	"etreinte": ["alu", "labbu"],
+	"souffle_de_feu": ["humbaba"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
 
 # Tags de magie (sorts tirés) — repères : apprenti 2 · mage 5 · héros mage 8 · seigneur mage 10.
 MAGIE = {
@@ -299,6 +315,13 @@ MAGIE = {
 	"kitsune": ["magie_illusoire_3"],
 	"kyubi": ["magie_illusoire_8", "magie_elementaire_5"],
 	"tanuki": ["magie_illusoire_2"],
+	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
+	"lahmu": ["magie_elementaire_3"],
+	"umu_dabrutu": ["magie_elementaire_5"],
+	"lilu": ["magie_illusoire_3"],
+	"lilitu": ["magie_illusoire_4"],
+	"utukku": ["magie_necromancie_3"],
+	"asag": ["magie_elementaire_6"],
 }
 
 # Tags d'IA.
@@ -361,6 +384,19 @@ for _tag, _especes in {
 	"ia_fuyard_40": ["kitsune"],
 	"ia_fuyard_50": ["tanuki"],
 	"ia_berserker": ["oni"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11). Les gardiens tiennent leur
+# seuil ; les vents et les démons de la nuit frappent puis s'éloignent ; les Sebitti vont en bande.
+for _tag, _especes in {
+	"ia_embuscade": ["kusarikku", "bashmu", "kulullu", "urmahlullu", "etemmu", "rabisu", "alu",
+					 "humbaba", "labbu", "mushmahhu"],
+	"ia_protecteur": ["lahmu"],
+	"ia_predateur": ["ushumgallu", "lilitu", "gallu"],
+	"ia_berserker": ["uridimmu", "taureau_celeste", "asag"],
+	"ia_hit_and_run": ["umu_dabrutu", "anzu", "lilu", "utukku"],
+	"ia_meute": ["sebitti"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)

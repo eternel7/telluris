@@ -259,6 +259,15 @@ TABLE = {
 	"ugallu": ["Dague", "Masse_de_cavalier", "Jupe_lanieres_cuir", "Bracelets_os"],
 	"homme_scorpion": ["Lance", "Arc_court", "Bracelets_os"],
 	"oni": ["Kanabo", "Tetsubo", "Braies_fourrure", "Etole_de_fourrure", "Bracelets_os"],
+	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11). Kusarikku : la hampe des
+	# gardiens de porte. Laḫmu : le montant de porte, un bâton. Uridimmu : le bâton à croissant, une
+	# masse. Kulullû : l'arme des eaux. Sebitti : les armes d'Erra, mêlée seule (une arme de tir
+	# primerait et toute la bande tirerait).
+	"kusarikku": ["Lance", "Massue", "Jupe_lanieres_cuir", "Bracelets_os"],
+	"lahmu": ["Baton_de_combat", "Jupe_lanieres_cuir"],
+	"uridimmu": ["Masse_de_fantassin", "Bracelets_os"],
+	"kulullu": ["Trident", "Bracelets_os"],
+	"sebitti": ["Masse_cannelee_perse", "Sagaris", "Jupe_lanieres_cuir", "Bracelets_os"],
 	# Chasseur du Nord en peau de loup (Auteur, 14/10) : hache, écu, fourrures — pas d'armure lourde.
 	"ulfhedinn": [
 		"Hache_de_guerre", "Hache_a_deux_mains", "Ecu",
