@@ -233,10 +233,17 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 **Proposé** : Sanctuaire de Baiame et la Templière Barangaroo à la sortie de la porte d'Aix (25/10) ; guilde « La Maison de la Grande Baie » (29/10).
 
-## Babylone — [cites/20260819_histoire_de_babylone.md]
-**Auteur** : sa tour, ses jardins suspendus, son état actuel (demande seulement). L'Auteur a demandé qui sont **Hārūt et Mārūt** dans Telluris.
+## Babylone — [cites/20260819_histoire_de_babylone.md] · [cites/20261123_tour_de_babel.md]
+**Auteur** (23/11, trois questionnaires après relecture de la synthèse ChatGPT)
+- Récit **adopté** : village de roseaux, **Marduk** (ordre de Tiamat), scribes et astrologues, **Hammurabi** (lois, influence par traités), **Etemenanki** = ziggourat de Marduk, observatoire des flux, **jardins suspendus** de Nabuchodonosor (cultures magiques, terrasses hautes sur autorisation), **Akitu** ; « Cité qui ne dort jamais ». Arcade de la Mezquita → Babylone.
+- **Deux tours** : la **Tour de Babel** ≠ Etemenanki, **sans lien** avec le temple de Marduk ; la surface les confond.
+- **Apkallu revenus** : après la Vague, des êtres sortis du golfe enseignent à la manière d'**Oannès** (le jour, puis retour à la mer) ; Babylone les croit les Sept Sages revenus, ignore d'où ils viennent (mystère) ; **disparus à l'éveil** de la tour.
+- **Tour de Babel** = **donjon vertical à étages** : école babylonienne (fragments des apkallu + tablettes de Hārūt et Mārūt, leçon oubliée), **Nemrod** commanditaire (« grand chasseur », fin ouverte), construite **1 à 2 siècles après la Vague**, **éveil il y a ≈ 5 siècles** avec **confusion des langues** (science perdue) ; intervention divine **ambiguë**. Chaque étage : un monde, **un nouveau type de monstre**, difficulté croissante, écosystèmes, monstres natifs ou venus d'ailleurs ; **sommet jamais atteint**, nombre d'étages inconnu.
+- **Point d'ancrage tous les cinq étages** : ressortir à Babylone, reprendre au même étage, **jamais sauter** ; écho voulu des Sages-ancrages de Mu ; pourquoi cinq = mystère.
+- Garde : **Babylone** (pied de la tour) + **Guilde** (entrées), **pas de Templiers** (pas un portail). La tour accepte les aventuriers sans leur obéir ; économie (artisans, marchands, chercheurs).
+- Rien en jeu (aucun `lieu:babylone` au dump du 22/11).
 
-**Proposé** : deux anges venus au temps de **Salomon**, enseignant une magie dangereuse comme une épreuve (« Le sort n'est pas coupable. Celui qui le lance répond de son intention. »). Voir cosmologie.
+**Proposé** : Hārūt et Mārūt, deux anges venus au temps de **Salomon**, enseignant une magie dangereuse comme une épreuve (« Le sort n'est pas coupable. Celui qui le lance répond de son intention. »). Voir cosmologie. Inspirations de la tour (DanMachi, Gloutons & Dragons…) : séance.
 
 ## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.

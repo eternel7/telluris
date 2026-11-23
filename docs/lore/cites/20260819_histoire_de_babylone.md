@@ -4,13 +4,13 @@
 
 ## La cité de Marduk
 
-?{Babylone est née d'un village de roseaux au bord de l'Euphrate, puis s'est placée sous la protection de **Marduk**, le dieu qui, selon ses récits, avait ordonné le chaos de Tiamat. Ses scribes et ses magiciens ont rempli des tablettes de signes et de calculs ; ses prêtres ont appris à lire les astres et les flux.}?
+Babylone est née d'un village de roseaux au bord de l'Euphrate, puis s'est placée sous la protection de **Marduk**, le dieu qui, selon ses récits, avait ordonné le chaos de Tiamat. Ses scribes et ses magiciens ont rempli des tablettes de signes et de calculs ; ses prêtres ont appris à lire les astres et les flux. **Hammurabi** lui a donné des lois gravées dans la pierre, et c'est par traités et par persuasion, jamais par les armes, qu'il a étendu son influence sur les cités voisines.
 
-?{L'**Etemenanki**, la « maison du fondement du ciel et de la terre », s'élève par degrés au-dessus de la ville : c'est la tour que d'autres peuples appellent Babel. Des astrologues, des magiciens et des gardiens y surveillent encore les fluctuations des flux depuis son sommet.}?
+L'**Etemenanki**, la « maison du fondement du ciel et de la terre », la ziggourat de Marduk, s'élève par degrés au-dessus de la ville. Des astrologues, des magiciens et des gardiens y surveillent encore les fluctuations des flux depuis son sommet. La surface la confond souvent avec la **Tour de Babel**, mais c'est un autre édifice, bien plus jeune, qui n'appartient à aucun dieu de la cité.
 
-?{Les **jardins suspendus**, que la tradition attribue à **Nabuchodonosor**, sont devenus un immense ensemble de terrasses, de vergers et de cultures magiques. Certaines sont ouvertes au public, d'autres réservées aux prêtres, aux guérisseurs et aux botanistes ; on n'accède aux plus hautes que sur autorisation, car les flux y provoquent des phénomènes étranges et certaines plantes n'y sont pas tout à fait naturelles. Chaque année, la fête de l'**Akitu** renouvelle le lien de la cité avec son dieu.}?
+Les **jardins suspendus**, que la tradition attribue à **Nabuchodonosor**, sont devenus un immense ensemble de terrasses, de vergers et de cultures magiques. Certaines sont ouvertes au public, d'autres réservées aux prêtres, aux guérisseurs et aux botanistes ; on n'accède aux plus hautes que sur autorisation, car les flux y provoquent des phénomènes étranges et certaines plantes n'y sont pas tout à fait naturelles. Chaque année, la fête de l'**Akitu** renouvelle le lien de la cité avec son dieu.
 
-?{Babylone porte bien des noms : la Porte des Dieux pour ses temples, la Cité aux Jardins, la Cité des Scribes, la Ville de Marduk. Les aventuriers l'appellent la Cité qui ne dort jamais : des monstres descendent des marais, des créatures rôdent autour des anciens canaux, et sous la ville, disent les prêtres, des passages descendent plus bas que les fondations.}? Aujourd'hui, l'une des arcades de la Mezquita de Cordoue mène à Babylone.
+Babylone porte bien des noms : la Porte des Dieux pour ses temples, la Cité aux Jardins, la Cité des Scribes, la Ville de Marduk. Les aventuriers l'appellent la Cité qui ne dort jamais : des monstres descendent des marais, des créatures rôdent autour des anciens canaux, et sous la ville, disent les prêtres, des passages descendent plus bas que les fondations. Aujourd'hui, l'une des arcades de la Mezquita de Cordoue mène à Babylone.
 
 ## Hārūt et Mārūt
 
@@ -18,10 +18,14 @@ Au temps de **Salomon**, après l'œuvre des trois frères et bien avant la Vagu
 
 Les **Nosferatu**, mages chauves et laids qu'on ne peut prendre pour des Anthropes, furent leurs élèves. Les deux sœurs sorcières qui firent de la reine Lamia la première des lamies n'avaient, elles, aucun lien avec Hārūt et Mārūt.
 
+## Les apkallu revenus et la Tour de Babel
+
+Après la Grande Vague, des êtres sortirent du golfe. Comme l'Oannès des vieux récits, ils enseignaient le jour sur le rivage et regagnaient la mer chaque soir. Babylone les prit pour les **apkallu** revenus, les Sept Sages d'avant le Déluge, et grava ce qu'ils disaient de l'espace, du mana et des ancrages, sans jamais savoir d'où ils venaient. Un ou deux siècles après la Vague, une école de savants rapprocha ces fragments des tablettes de Hārūt et Mārūt et, avec l'or de **Nemrod**, le grand chasseur, éleva un édifice expérimental plus vaste dedans que dehors. Il y a environ cinq siècles, l'édifice s'éveilla : il devint un donjon vertical, ses bâtisseurs cessèrent de se comprendre et se dispersèrent, et les êtres du golfe ne reparurent plus. C'est la **Tour de Babel**, que Babylone garde sans la commander : [la Tour de Babel](20261123_tour_de_babel.md).
+
 ## 🗂 Échanges de travail
 
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a8608e7-e174-83eb-9eeb-6bab35974fec)
-- **Créée :** 19/08/2026 · **mise à jour :** 10/09/2026
+- **Créée :** 19/08/2026 · **mise à jour :** 23/11/2026 (arbitrage de l'Auteur, en fin de page)
 - **Messages :** 4
 
 ---
@@ -769,3 +773,13 @@ Et certaines contiennent peut-être des informations que **même les prêtres ac
 :::
 
 ---
+
+## Arbitrage de l'Auteur (23/11/2026)
+
+Tranché avec la séance [la Tour de Babel](20261123_tour_de_babel.md) (trois questionnaires) ; le détail est consigné à la fin de cette séance.
+
+1. **Le récit de Babylone est adopté** : village de roseaux et Marduk, Etemenanki, jardins suspendus de Nabuchodonosor, Akitu, Hammurabi (lois, influence par traités, jamais par les armes).
+2. **Deux tours.** L'**Etemenanki** reste la ziggourat de Marduk, observatoire des flux. La **Tour de Babel** est un autre édifice, bâti après la Vague, sans lien avec le temple de Marduk ; c'est la surface qui confond les deux.
+3. **Les apkallu revenus.** Après la Vague, des êtres sortis du golfe enseignent à la manière d'Oannès ; Babylone les prend pour les Sept Sages revenus, sans savoir d'où ils viennent. Ils disparaissent à l'éveil de la tour.
+4. **La Tour de Babel** : expérience d'une école babylonienne (fragments des Sages + tablettes de Hārūt et Mārūt), financée par **Nemrod**, construite un à deux siècles après la Vague, éveillée il y a environ cinq siècles (confusion des langues) ; donjon vertical, un point d'ancrage tous les cinq étages ; gardée par Babylone et la Guilde, **sans Templiers**.
+5. Les détails sur Hārūt et Mārūt (leur enseignement, la magie de la séparation) restent des **propositions**.

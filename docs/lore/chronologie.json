@@ -764,6 +764,44 @@
 			"liens": ["mu", "vague", "trame_a"]
 		},
 		{
+			"id": "sept_sages_ancrages",
+			"titre": "Les sept derniers Sages deviennent les ancrages de Mu",
+			"titre_court": "Sages-ancrages",
+			"resume": "« Les Sept Sages » est un titre : sept sièges transmis depuis les apkallu antédiluviens. Au sacrifice du continent, les sept derniers titulaires se donnent eux-mêmes et deviennent les sept ancrages qui tiennent la bulle de Mu-la-Centrale et le sceau de la porte. À Mu, on dit qu'ils ont péri avec le continent ; les Retours nourrissent le doute.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "auteur", "note": "Au moment du sacrifice, donc de la Vague."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
+			"origine": ["mu"],
+			"tags": {"peuples": ["mu"], "lieux": ["mu"], "themes": ["vague", "mystere", "savoir"]},
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Le sacrifice change les sept derniers Sages en sept ancrages qui maintiennent la bulle de Mu et le sceau du portail"}],
+			"liens": ["mu_engloutie"]
+		},
+		{
+			"id": "apkallu_revenus",
+			"titre": "Les apkallu revenus à Babylone",
+			"titre_court": "Apkallu revenus",
+			"resume": "Après la Vague, des êtres sortent du golfe, enseignent le jour comme Oannès et regagnent la mer le soir. Babylone les prend pour les Sept Sages revenus et grave leurs fragments de savoir (espace, mana, ancrage), sans savoir d'où ils viennent. Ils ne reparaissent plus après l'éveil de la Tour de Babel.",
+			"quand": {"de": {"ere": "donjons", "entre": [800, 650]}, "a": {"ere": "donjons", "entre": [550, 450]}, "autorite": "auteur", "note": "Après la Vague, pendant quelques générations, jusqu'à l'éveil de la tour."},
+			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
+			"origine": ["mesopotamie"],
+			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["savoir", "mythes", "mystere"]},
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Des êtres sortent du golfe, enseignent le jour, regagnent la mer le soir."}],
+			"apres": ["vague"],
+			"liens": ["sept_sages_ancrages", "tour_de_babel"]
+		},
+		{
+			"id": "tour_de_babel",
+			"titre": "La Tour de Babel : construction et éveil",
+			"titre_court": "Tour de Babel",
+			"resume": "Une école babylonienne croise les fragments des apkallu revenus et les tablettes de Hārūt et Mārūt ; Nemrod finance un édifice plus vaste dedans que dehors, bâti sur des générations. Il y a environ cinq siècles, il s'éveille : niveaux séparés en mondes, savants qui ne se comprennent plus. Donjon vertical depuis, un point d'ancrage tous les cinq étages, sommet jamais atteint.",
+			"quand": {"de": {"ere": "donjons", "entre": [700, 550]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur", "note": "Construction un à deux siècles après la Vague ; éveil il y a environ cinq siècles."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
+			"origine": ["mesopotamie"],
+			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "institutions": ["guilde"], "themes": ["donjons", "savoir", "mystere"]},
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Construction un à deux siècles après la Vague, sur des générations ; éveil il y a environ cinq siècles."}, {"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Tous les cinq niveaux, un point d’ancrage permet de quitter la tour et de revenir au niveau correspondant."}],
+			"apres": ["vague"],
+			"liens": ["apkallu_revenus", "cite_babylone", "harut_marut"]
+		},
+		{
 			"id": "premiers_donjons",
 			"titre": "Les premiers donjons",
 			"titre_court": "Premiers donjons",
@@ -994,9 +1032,9 @@
 			"id": "cite_babylone",
 			"titre": "Babylone, la Porte des Dieux",
 			"titre_court": "Babylone",
-			"resume": "Cité ancienne et savante au bord de l'Euphrate : sa tour, ses jardins suspendus, ses tablettes.",
+			"resume": "Cité ancienne et savante au bord de l'Euphrate, sous la protection de Marduk : l'Etemenanki, ses jardins suspendus, ses tablettes, les lois d'Hammurabi. La Tour de Babel, donjon vivant, s'y élève à part.",
 			"quand": {"de": {"ere": "antediluvien", "rang": "premiers_ages"}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition"},
-			"couche": "histoire", "categorie": "cite", "autorite": "proposition", "visibilite": "public",
+			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["savoir"]},
 			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-08-19", "citation": "Babylone — La Porte des Dieux"}]
