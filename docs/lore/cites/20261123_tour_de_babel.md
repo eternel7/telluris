@@ -22,7 +22,7 @@ Chaque niveau est un espace à part : une salle, un labyrinthe, une forêt, une 
 
 ## Les points d'ancrage
 
-Tous les cinq étages, un **point d'ancrage** permet de ressortir à Babylone, puis de reprendre l'ascension à l'étage où l'on s'était arrêté. Il ne permet jamais de sauter un étage. Ces ancrages font écho au principe enseigné par les apkallu revenus, que les savants avaient copié sans bien le comprendre ; on les a découverts un à un, au fil des ascensions. Pourquoi tous les cinq étages ? Une loi de l'espace replié, un mécanisme de la tour, une règle divine : personne ne le sait.
+Tous les sept étages, un **point d'ancrage** permet de ressortir à Babylone, puis de reprendre l'ascension à l'étage où l'on s'était arrêté. Il ne permet jamais de sauter un étage. Ces ancrages font écho au principe enseigné par les apkallu revenus, que les savants avaient copié sans bien le comprendre ; on les a découverts un à un, au fil des ascensions. Pourquoi tous les sept étages ? À Babylone, la réponse la plus répandue est qu'il y en a un par Sage, et que la tour compte comme comptaient les apkallu. D'autres y voient une loi de l'espace replié, un mécanisme de la tour, une règle divine. Personne n'en a la preuve.
 
 ## Babylone et la tour
 
@@ -217,7 +217,7 @@ Trois questionnaires. Les propositions de ChatGPT sur la tour sont **adoptées**
 4. **Garde : Babylone et la Guilde.** La garde de Babylone tient le pied de la tour, la Guilde gère les entrées. **Pas de Templiers** : la tour n'est pas un portail de donjon.
 5. **Date.** Construction **un à deux siècles après la Vague**, sur des générations ; éveil il y a **environ cinq siècles**.
 6. **Sommet jamais atteint.** Le nombre d'étages est inconnu (mystère par décision) ; le record de la Guilde nourrit les rumeurs.
-7. **Les deux ancrages font écho volontairement.** Les savants de Babylone ont copié, sans bien le comprendre, le principe d'ancrage enseigné par les « apkallu revenus ». Pourquoi tous les cinq étages reste un mystère.
+7. **Les deux ancrages font écho volontairement.** Les savants de Babylone ont copié, sans bien le comprendre, le principe d'ancrage enseigné par les « apkallu revenus ». Pourquoi tous les cinq étages reste un mystère. *(Fréquence corrigée : sept étages, second arbitrage ci-dessous.)*
 8. **Hārūt et Mārūt, en arrière-plan.** L'école croise leurs tablettes (la séparation) avec les fragments des Sages (l'espace, le mana), et oublie leur leçon : « celui qui lance répond de son intention ».
 
 **Les Sept Sages (Mu ↔ Babylone)**
@@ -237,3 +237,18 @@ Trois questionnaires. Les propositions de ChatGPT sur la tour sont **adoptées**
 - **Babel** (Genèse 11) : les hommes, qui parlent une seule langue, bâtissent dans la plaine de Shinear une ville et une tour « dont le sommet touche au ciel ». Dieu confond leur langage, et ils se dispersent. La tour n'y porte aucun nom ; les historiens la rapprochent de l'Etemenanki (« maison du fondement du ciel et de la terre »), la ziggourat de l'Esagil de Babylone.
 - **Nemrod** (Genèse 10) : « vaillant chasseur devant l'Éternel », dont le royaume commence à Babel. Flavius Josèphe, puis les traditions juive et musulmane, font de lui l'instigateur de la tour.
 - **Oannès** (Bérose) : être mi-homme mi-poisson sorti de la mer Érythrée, qui enseigne le jour et regagne les flots le soir ; c'est le premier des apkallu (Uan/Adapa). Les sept noms viennent de la série d'incantations *Bīt mēseri* : Uanna, Uannedugga, Enmedugga, Enmegalamma, Enmebulugga, An-Enlilda, Utuabzu.
+
+---
+
+## ✍️ Auteur — 23/11/2026
+
+Est-ce que le chiffre 7 est mieux pour la fréquence des ancrages ? A-t-il une meilleure symbolique ?
+
+## 🤖 Claude Code
+
+Sept est très chargé en Mésopotamie : les **Sept Sages** (l'écho avec les sept ancrages de Mu devient lisible), les **sept portes** qu'Inanna franchit en descendant aux Enfers (elle laisse quelque chose à chaque porte), et les **sept étages** prêtés aux ziggourats. Cinq n'y a presque aucune résonance ; son seul atout est de donner des ascensions plus courtes. Piste soumise en même temps : la ziggourat de **Borsippa**, « Maison des sept guides du ciel et de la terre », dont les ruines (Birs Nimrud, « la tour de Nemrod ») ont longtemps été prises pour la Tour de Babel.
+
+## Second arbitrage de l'Auteur (23/11/2026)
+
+1. **Un point d'ancrage tous les sept étages** (remplace « tous les cinq niveaux » de la synthèse et le point 7 du premier arbitrage). À Babylone, la théorie la plus répandue le relie aux **Sept Sages**, sans preuve : « pourquoi sept » reste disputé. Les ancrages ne sont **pas** dédiés chacun à un Sage (cycle écarté).
+2. **La tour reste dans Babylone.** Borsippa et Birs Nimrud ne sont qu'une confusion de voyageurs.
