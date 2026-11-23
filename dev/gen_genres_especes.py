@@ -46,6 +46,8 @@ FEMININS = {
 	"mere_gelee", "teryel", "jorogumo", "pontianak",
 	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
 	"lamashtu",
+	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11) : « les tempêtes féroces ».
+	"lilitu", "umu_dabrutu",
 }
 
 MASCULINS = {
@@ -83,6 +85,10 @@ MASCULINS = {
 	"mokele_mbembe", "kongamato",
 	# Mésopotamie et Japon (dev/gen_monstres_mesopotamie_japon.py, 19/11).
 	"lamassu", "pazuzu", "ugallu", "homme_scorpion", "kitsune", "kyubi", "oni", "nue", "tanuki",
+	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
+	"kusarikku", "bashmu", "ushumgallu", "lahmu", "uridimmu", "kulullu", "anzu", "urmahlullu", "lilu",
+	"gallu", "utukku", "etemmu", "rabisu", "alu", "sebitti", "humbaba", "taureau_celeste", "asag", "labbu",
+	"mushmahhu",
 }
 
 PLURIELS = {
@@ -91,11 +97,15 @@ PLURIELS = {
 	"singes", "grands_singes", "antilopes", "hyenes", "autruches", "hippopotames", "flamants",
 	"elephants", "buffles", "rennes", "boeufs_musques", "bisons", "yacks", "phoques_et_morses",
 	"tortues_marines",
+	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11) : « les Sept ».
+	"umu_dabrutu", "sebitti",
 }
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
 PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupidon", "dearg_due", "failinis",
-		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "qudar", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych"}
+		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "qudar", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych",
+		   # Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
+		   "humbaba", "asag", "labbu", "mushmahhu"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.
