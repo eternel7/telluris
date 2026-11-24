@@ -89,6 +89,8 @@ MASCULINS = {
 	"kusarikku", "bashmu", "ushumgallu", "lahmu", "uridimmu", "kulullu", "anzu", "urmahlullu", "lilu",
 	"gallu", "utukku", "etemmu", "rabisu", "alu", "sebitti", "humbaba", "taureau_celeste", "asag", "labbu",
 	"mushmahhu",
+	# Madagascar (dev/gen_monstres_madagascar.py, 24/11).
+	"kalanoro", "fanany", "songomby", "lalomena", "tokantongotra", "trimobe",
 }
 
 PLURIELS = {
@@ -105,7 +107,9 @@ PLURIELS = {
 PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupidon", "dearg_due", "failinis",
 		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "qudar", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych",
 		   # Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
-		   "humbaba", "asag", "labbu", "mushmahhu"}
+		   "humbaba", "asag", "labbu", "mushmahhu",
+		   # Madagascar (dev/gen_monstres_madagascar.py, 24/11) : l'ogre des contes.
+		   "trimobe"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

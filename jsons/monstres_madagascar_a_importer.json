@@ -1,0 +1,3107 @@
+[
+  {
+    "_id": "espece:kalanoro",
+    "type": "espece",
+    "nom": "Kalanoro",
+    "genre": "m",
+    "image": "kalanoro_transparent.webp",
+    "description": "Petit être des forêts et des grottes, pas plus haut qu'un enfant, velu, à la longue chevelure et aux ongles crochus, dont les pieds sont tournés vers l'arrière : qui suit ses traces s'éloigne de lui. On dit qu'il enlève les enfants égarés pour les rendre des jours plus tard, changés, et que certains guérisseurs tiennent de lui leur savoir. Il fuit dès qu'on le voit ; s'il cherche quelque chose parmi les Anthropes, aucun récit ne s'accorde sur quoi.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 7
+      },
+      "F": {
+        "min": 15,
+        "max": 25
+      },
+      "R": {
+        "min": 20,
+        "max": 30
+      },
+      "Ag": {
+        "min": 55,
+        "max": 70
+      },
+      "Vol": {
+        "min": 50,
+        "max": 65
+      },
+      "Int": {
+        "min": 40,
+        "max": 55
+      },
+      "Cha": {
+        "min": 20,
+        "max": 35
+      },
+      "Ch": {
+        "min": 50,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "furtif",
+      "foret",
+      "magique",
+      "magie_nature_3",
+      "magie_illusoire_2",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "effectif": [
+      1,
+      2
+    ],
+    "animation": "animation:son_gobelin_03"
+  },
+  {
+    "_id": "item:kalanoro",
+    "type": "item",
+    "nom": "Carcasse de Kalanoro",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      15,
+      25
+    ],
+    "description": "Dépouille de Kalanoro récupérée à l'issue du combat.",
+    "source_espece": "espece:kalanoro",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:fanany",
+    "type": "espece",
+    "nom": "Fanany",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "capsule"
+    },
+    "image": "fanany_transparent.webp",
+    "description": "Serpent monstrueux à sept têtes cornues, qui hante les marais, les lacs et les eaux lentes. Les gens des hautes terres disent qu'il naît du corps d'un noble défunt, et que les grands ancêtres reviennent ainsi veiller sur leurs terres ; d'autres jurent qu'il ne garde que sa faim. Chaque tête a sa volonté, et toutes mordent ensemble.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 7
+      },
+      "F": {
+        "min": 65,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 85
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 60,
+        "max": 80
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "venin",
+      "aquatique",
+      "terreur",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_venin",
+      "competence:monstre_etreinte",
+      "competence:monstre_hurlement_terrifiant"
+    ],
+    "effectif": [
+      2,
+      3
+    ],
+    "armure_naturelle": 2,
+    "animation": "animation:son_dragon_01"
+  },
+  {
+    "_id": "item:fanany",
+    "type": "item",
+    "nom": "Carcasse de Fanany",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      700,
+      1000
+    ],
+    "description": "Dépouille de Fanany récupérée à l'issue du combat.",
+    "source_espece": "espece:fanany",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:fanany_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:fanany_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:fanany_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:fanany_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:songomby",
+    "type": "espece",
+    "nom": "Songomby",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "songomby_transparent.webp",
+    "description": "Bête grande comme un bœuf, couverte d'un pelage hirsute rayé de fauve, aux cornes épaisses, qui court plus vite qu'aucun cheval. Les récits du sud en font un mangeur d'hommes qui charge sans prévenir ; ceux du nord, une bête qui ne tue que ceux qui la chassent. Personne n'a jamais su lequel des deux il croisait avant d'entendre le sol trembler.",
+    "base_attributes": {
+      "V": {
+        "min": 10,
+        "max": 12
+      },
+      "F": {
+        "min": 55,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 70
+      },
+      "Ag": {
+        "min": 40,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "bestial",
+      "predateur",
+      "rapide",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ],
+    "effectif": [
+      2,
+      2
+    ],
+    "armure_naturelle": 3,
+    "animation": "animation:son_bete_06"
+  },
+  {
+    "_id": "item:songomby",
+    "type": "item",
+    "nom": "Carcasse de Songomby",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      450,
+      650
+    ],
+    "description": "Dépouille de Songomby récupérée à l'issue du combat.",
+    "source_espece": "espece:songomby",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:songomby_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:songomby_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:songomby_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:songomby_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:lalomena",
+    "type": "espece",
+    "nom": "Lalomena",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "lalomena_transparent.webp",
+    "description": "Bête des eaux au corps de bœuf lourd, à la peau grise et nue, aux cornes d'un rouge vif. Elle passe le jour immergée dans les lacs et les rivières lentes, où seuls ses naseaux affleurent, et en sort pour renverser les pirogues ou écraser qui trouble son eau. Les conteurs disent qu'elle est rare, et que la voir porte bonheur ou malheur, selon celui qui raconte.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 6
+      },
+      "F": {
+        "min": 60,
+        "max": 80
+      },
+      "R": {
+        "min": 60,
+        "max": 85
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 60
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "bestial",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_etreinte"
+    ],
+    "effectif": [
+      1,
+      2
+    ],
+    "animation": "animation:son_bete_14"
+  },
+  {
+    "_id": "item:lalomena",
+    "type": "item",
+    "nom": "Carcasse de Lalomena",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      600,
+      900
+    ],
+    "description": "Dépouille de Lalomena récupérée à l'issue du combat.",
+    "source_espece": "espece:lalomena",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:lalomena_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:lalomena_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:lalomena_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:lalomena_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:tokantongotra",
+    "type": "espece",
+    "nom": "Tokantongotra",
+    "genre": "m",
+    "image": "tokantongotra_transparent.webp",
+    "description": "Créature blanche et décharnée aux membres trop longs, qui se déplace sur une jambe autant que sur quatre et va plus vite qu'on ne court. On ne la voit que la nuit, en lisière des forêts et des fourrés, et son cri suffit à vider un village. Son nom dit « celle d'un seul pied » ; les récits ne s'accordent ni sur sa forme, ni sur ce qu'elle chasse.",
+    "base_attributes": {
+      "V": {
+        "min": 9,
+        "max": 11
+      },
+      "F": {
+        "min": 35,
+        "max": 50
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 55,
+        "max": 70
+      },
+      "Vol": {
+        "min": 40,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "nocturne",
+      "rapide",
+      "predateur",
+      "furtif",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ],
+    "effectif": [
+      1,
+      2
+    ],
+    "armure_naturelle": 1,
+    "animation": "animation:son_loup_01"
+  },
+  {
+    "_id": "item:tokantongotra",
+    "type": "item",
+    "nom": "Carcasse de Tokantongotra",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      40,
+      70
+    ],
+    "description": "Dépouille de Tokantongotra récupérée à l'issue du combat.",
+    "source_espece": "espece:tokantongotra",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:trimobe",
+    "type": "espece",
+    "nom": "Trimobe",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "trimobe_transparent.webp",
+    "description": "L'ogre des contes, géant mangeur d'hommes que les veillées appellent Itrimobe. Il vit seul dans les rochers, au-dessus d'une forêt, et les récits lui prêtent une longue queue, une faim que rien n'apaise et une ruse plus courte que sa force. Les contes veulent que des enfants l'aient trompé et vaincu ; on montre pourtant encore les rochers où il dort.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 7
+      },
+      "F": {
+        "min": 100,
+        "max": 135
+      },
+      "R": {
+        "min": 95,
+        "max": 130
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 95
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 10
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "geant",
+      "terreur",
+      "legendaire",
+      "boss",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ],
+    "effectif": [
+      1,
+      1
+    ],
+    "armure_naturelle": 3,
+    "animation": "animation:son_geant_02"
+  },
+  {
+    "_id": "item:trimobe",
+    "type": "item",
+    "nom": "Carcasse de Trimobe",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      900,
+      1300
+    ],
+    "description": "Dépouille de Trimobe récupérée à l'issue du combat.",
+    "source_espece": "espece:trimobe",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:trimobe_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:trimobe_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:trimobe_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:trimobe_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:fanany_tete",
+    "type": "item",
+    "nom": "Tête de Fanany",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      84.0,
+      120.0
+    ],
+    "description": "Tête de Fanany, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:fanany_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:fanany_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Fanany",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      42.0,
+      60.0
+    ],
+    "description": "Morceau de tête de Fanany, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:fanany_corps",
+    "type": "item",
+    "nom": "Corps de Fanany",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      364.0,
+      520.0
+    ],
+    "description": "Corps de Fanany, débité sur place.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:fanany_corps_morceau",
+        "quantite": 6,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:fanany_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Fanany",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      60.67,
+      86.67
+    ],
+    "description": "Morceau de corps de Fanany, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:fanany_patte",
+    "type": "item",
+    "nom": "Patte de Fanany",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      49.0,
+      70.0
+    ],
+    "description": "Patte de Fanany, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:fanany_queue",
+    "type": "item",
+    "nom": "Queue de Fanany",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      56.0,
+      80.0
+    ],
+    "description": "Queue de Fanany, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "terreur",
+      "venin"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:lalomena_tete",
+    "type": "item",
+    "nom": "Tête de Lalomena",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      108.0
+    ],
+    "description": "Tête de Lalomena, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "partie_tete"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:lalomena_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:lalomena_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Lalomena",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      54.0
+    ],
+    "description": "Morceau de tête de Lalomena, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "morceau",
+      "partie_tete"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:lalomena_corps",
+    "type": "item",
+    "nom": "Corps de Lalomena",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      312.0,
+      468.0
+    ],
+    "description": "Corps de Lalomena, débité sur place.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "partie_corps"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:lalomena_corps_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:lalomena_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Lalomena",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      62.4,
+      93.6
+    ],
+    "description": "Morceau de corps de Lalomena, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "morceau",
+      "partie_corps"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:lalomena_patte",
+    "type": "item",
+    "nom": "Patte de Lalomena",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      42.0,
+      63.0
+    ],
+    "description": "Patte de Lalomena, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "partie_patte"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:lalomena_queue",
+    "type": "item",
+    "nom": "Queue de Lalomena",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      48.0,
+      72.0
+    ],
+    "description": "Queue de Lalomena, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "partie_queue"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:songomby_tete",
+    "type": "item",
+    "nom": "Tête de Songomby",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      54.0,
+      78.0
+    ],
+    "description": "Tête de Songomby, débitée sur place.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:songomby_corps",
+    "type": "item",
+    "nom": "Corps de Songomby",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      234.0,
+      338.0
+    ],
+    "description": "Corps de Songomby, débité sur place.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:songomby_corps_morceau",
+        "quantite": 4,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:songomby_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Songomby",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      58.5,
+      84.5
+    ],
+    "description": "Morceau de corps de Songomby, taillé pour être emporté.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:songomby_patte",
+    "type": "item",
+    "nom": "Patte de Songomby",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      31.5,
+      45.5
+    ],
+    "description": "Patte de Songomby, débitée sur place.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:songomby_queue",
+    "type": "item",
+    "nom": "Queue de Songomby",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      36.0,
+      52.0
+    ],
+    "description": "Queue de Songomby, débitée sur place.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:trimobe_tete",
+    "type": "item",
+    "nom": "Tête de Trimobe",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      108.0,
+      156.0
+    ],
+    "description": "Tête de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:trimobe_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      54.0,
+      78.0
+    ],
+    "description": "Morceau de tête de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:trimobe_corps",
+    "type": "item",
+    "nom": "Corps de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      468.0,
+      676.0
+    ],
+    "description": "Corps de Trimobe, débité sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_corps_morceau",
+        "quantite": 7,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:trimobe_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      66.86,
+      96.57
+    ],
+    "description": "Morceau de corps de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:trimobe_patte",
+    "type": "item",
+    "nom": "Patte de Trimobe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      63.0,
+      91.0
+    ],
+    "description": "Patte de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:trimobe_queue",
+    "type": "item",
+    "nom": "Queue de Trimobe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      104.0
+    ],
+    "description": "Queue de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:trimobe_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      52.0
+    ],
+    "description": "Morceau de queue de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "terreur"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "zone:fleuve_tropical",
+    "type": "zone_influence",
+    "nom": "Fleuve tropical",
+    "intensite_max": 0.5,
+    "terrain_tags": [
+      "riviere",
+      "eau",
+      "berge",
+      "roseau",
+      "tropical"
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 0,
+      "deplacement": -1
+    },
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 45,
+        "tags": [
+          "poisson",
+          "eau_fraiche",
+          "plante_aquatique"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 20,
+        "tags": [
+          "crocodile",
+          "sirene",
+          "sangsue_geante"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 25,
+        "tags": [
+          "pecheur",
+          "passeur",
+          "lavandiere"
+        ]
+      },
+      {
+        "type": "malus",
+        "poids": 5,
+        "tags": [
+          "noyade",
+          "courant_fort"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:crocodile"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:hippopotames"
+      },
+      {
+        "espece": "espece:serpent_geant"
+      },
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:kongamato",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:lalomena",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Papyrus"
+      },
+      {
+        "ressource": "item:Lotus"
+      },
+      {
+        "ressource": "item:Acacia"
+      },
+      {
+        "ressource": "item:Eau_de_source"
+      },
+      {
+        "ressource": "item:Iroko"
+      },
+      {
+        "ressource": "item:Okoume"
+      }
+    ]
+  },
+  {
+    "_id": "zone:foret_equatoriale",
+    "type": "zone_influence",
+    "nom": "Forêt équatoriale",
+    "intensite_max": 0.95,
+    "terrain_tags": [
+      "jungle",
+      "foret",
+      "tropical"
+    ],
+    "modificateurs": {
+      "danger": 3,
+      "visibilite": -2
+    },
+    "table_evenements": [
+      {
+        "type": "combat",
+        "poids": 50,
+        "tags": [
+          "predateur_tropical",
+          "serpent",
+          "insectes"
+        ]
+      },
+      {
+        "type": "ressource",
+        "poids": 35,
+        "tags": [
+          "bois_exotique",
+          "plante_tropicale",
+          "fruit"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 5,
+        "tags": [
+          "explorateur"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 10
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:grands_singes"
+      },
+      {
+        "espece": "espece:elephants"
+      },
+      {
+        "espece": "espece:fauves"
+      },
+      {
+        "espece": "espece:serpent_geant"
+      },
+      {
+        "espece": "espece:araignee_geante"
+      },
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:mapinguari",
+        "regions": [
+          "ameriques"
+        ]
+      },
+      {
+        "espece": "espece:adze",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:pontianak",
+        "regions": [
+          "asie"
+        ]
+      },
+      {
+        "espece": "espece:kalanoro",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:tokantongotra",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Acajou"
+      },
+      {
+        "ressource": "item:Ebene"
+      },
+      {
+        "ressource": "item:Lianes"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      },
+      {
+        "ressource": "item:Okoume"
+      },
+      {
+        "ressource": "item:Iroko"
+      },
+      {
+        "ressource": "item:Palissandre"
+      }
+    ]
+  },
+  {
+    "_id": "zone:foret_galerie",
+    "type": "zone_influence",
+    "nom": "Forêt-galerie",
+    "intensite_max": 0.8,
+    "terrain_tags": [
+      "foret",
+      "riviere",
+      "berge",
+      "tropical"
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": -1
+    },
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 60,
+        "tags": [
+          "conifere",
+          "pin",
+          "buisson_vert",
+          "eau_douce"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 25,
+        "tags": [
+          "ours",
+          "faune_locale"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 10,
+        "tags": [
+          "chasseur"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:crocodile"
+      },
+      {
+        "espece": "espece:serpent"
+      },
+      {
+        "espece": "espece:fauves"
+      },
+      {
+        "espece": "espece:hippopotames"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:kongamato",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:fanany",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Acajou"
+      },
+      {
+        "ressource": "item:Figues"
+      },
+      {
+        "ressource": "item:Eau_de_source"
+      },
+      {
+        "ressource": "item:Iroko"
+      },
+      {
+        "ressource": "item:Lianes"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      }
+    ]
+  },
+  {
+    "_id": "zone:foret_tropicale_seche",
+    "type": "zone_influence",
+    "nom": "Forêt tropicale sèche",
+    "intensite_max": 0.5,
+    "terrain_tags": [
+      "foret",
+      "bois",
+      "aride",
+      "tropical"
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 0
+    },
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 50,
+        "tags": [
+          "bois",
+          "champignon",
+          "plante"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 25,
+        "tags": [
+          "voleur",
+          "faune_locale"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 5,
+        "tags": [
+          "marchand_ambulant",
+          "voyageur"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 10
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:fauves"
+      },
+      {
+        "espece": "espece:serpent"
+      },
+      {
+        "espece": "espece:sanglier"
+      },
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:araignee"
+      },
+      {
+        "espece": "espece:tokantongotra",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Teck"
+      },
+      {
+        "ressource": "item:Tamarin"
+      },
+      {
+        "ressource": "item:Herbes_a_bruler"
+      },
+      {
+        "ressource": "item:Palissandre"
+      },
+      {
+        "ressource": "item:Santal"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      }
+    ]
+  },
+  {
+    "_id": "zone:fourre_epineux",
+    "type": "zone_influence",
+    "nom": "Fourré épineux",
+    "intensite_max": 0.45,
+    "terrain_tags": [
+      "broussaille",
+      "aride",
+      "tropical",
+      "pierre"
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 1,
+      "deplacement": -1
+    },
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 45,
+        "tags": [
+          "herbe_aromatique",
+          "plante",
+          "miel",
+          "pierre"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 25,
+        "tags": [
+          "sanglier",
+          "serpent",
+          "bandit"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 20,
+        "tags": [
+          "berger",
+          "herboriste",
+          "chasseur"
+        ]
+      },
+      {
+        "type": "meteo",
+        "poids": 5,
+        "tags": [
+          "secheresse",
+          "vent_chaud"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:serpent"
+      },
+      {
+        "espece": "espece:araignee_geante"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:hyenes",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:songomby",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:tokantongotra",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Acacia"
+      },
+      {
+        "ressource": "item:Epines"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      },
+      {
+        "ressource": "item:Gomme_d_acacia"
+      }
+    ]
+  },
+  {
+    "_id": "zone:grotte",
+    "type": "zone_influence",
+    "nom": "Grotte naturelle",
+    "terrain_tags": [
+      "grotte",
+      "roche",
+      "souterrain"
+    ],
+    "intensite_max": 0.7,
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 30,
+        "tags": [
+          "minerai",
+          "cristal",
+          "champignon"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 40,
+        "tags": [
+          "chauve_souris_geante",
+          "araignee_geante",
+          "ours"
+        ]
+      },
+      {
+        "type": "tresor",
+        "poids": 15,
+        "tags": [
+          "objet_abandonne",
+          "coffre",
+          "mineral_rare"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 15
+      }
+    ],
+    "modificateurs": {
+      "danger": 2,
+      "visibilite": -3,
+      "deplacement": -2
+    },
+    "defauts_rencontres": [
+      {
+        "espece": "espece:chauve_souris"
+      },
+      {
+        "espece": "espece:chauve_souris_geante"
+      },
+      {
+        "espece": "espece:rat_geant"
+      },
+      {
+        "espece": "espece:araignee_geante"
+      },
+      {
+        "espece": "espece:troglodyte"
+      },
+      {
+        "espece": "espece:ours",
+        "regions": [
+          "europe",
+          "steppes",
+          "grand_nord"
+        ]
+      },
+      {
+        "espece": "espece:gobelin",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:camazotz",
+        "regions": [
+          "ameriques"
+        ]
+      },
+      {
+        "espece": "espece:oni",
+        "regions": [
+          "asie"
+        ]
+      },
+      {
+        "espece": "espece:gallu",
+        "regions": [
+          "afrique_du_nord"
+        ]
+      },
+      {
+        "espece": "espece:rabisu",
+        "regions": [
+          "afrique_du_nord"
+        ]
+      },
+      {
+        "espece": "espece:kalanoro",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:pierre"
+      },
+      {
+        "ressource": "item:Salpetre"
+      },
+      {
+        "ressource": "item:fer"
+      },
+      {
+        "ressource": "item:gemmes"
+      },
+      {
+        "ressource": "item:Lichen"
+      },
+      {
+        "ressource": "item:albatre"
+      }
+    ]
+  },
+  {
+    "_id": "zone:lac",
+    "type": "zone_influence",
+    "nom": "Lac et rives",
+    "terrain_tags": [
+      "lac",
+      "eau",
+      "berge",
+      "roseau"
+    ],
+    "intensite_max": 0.45,
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 45,
+        "tags": [
+          "poisson",
+          "eau_douce",
+          "roseau",
+          "plante_aquatique"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 25,
+        "tags": [
+          "pecheur",
+          "batelier",
+          "lavandiere"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 15,
+        "tags": [
+          "sangsue_geante",
+          "sirene",
+          "monstre_aquatique"
+        ]
+      },
+      {
+        "type": "meteo",
+        "poids": 10,
+        "tags": [
+          "brume",
+          "orage"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 1,
+      "deplacement": -1
+    },
+    "defauts_rencontres": [
+      {
+        "espece": "espece:serpent"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:petits_animaux_divers"
+      },
+      {
+        "espece": "espece:renard"
+      },
+      {
+        "espece": "espece:ondin"
+      },
+      {
+        "espece": "espece:naiade",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:kelpie",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:each_uisge",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:kappa",
+        "regions": [
+          "asie"
+        ]
+      },
+      {
+        "espece": "espece:ahuizotl",
+        "regions": [
+          "ameriques"
+        ]
+      },
+      {
+        "espece": "espece:kulullu",
+        "regions": [
+          "afrique_du_nord"
+        ]
+      },
+      {
+        "espece": "espece:fanany",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:lalomena",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Eau_de_source"
+      },
+      {
+        "ressource": "item:Saule"
+      },
+      {
+        "ressource": "item:Peuplier"
+      },
+      {
+        "ressource": "item:Aulne"
+      },
+      {
+        "ressource": "item:perles"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      }
+    ]
+  },
+  {
+    "_id": "zone:marecage_tropical",
+    "type": "zone_influence",
+    "nom": "Marécage tropical",
+    "intensite_max": 0.85,
+    "terrain_tags": [
+      "marais",
+      "eau",
+      "boue",
+      "tropical"
+    ],
+    "modificateurs": {
+      "danger": 3,
+      "visibilite": -2,
+      "deplacement": -1
+    },
+    "table_evenements": [
+      {
+        "type": "combat",
+        "poids": 45,
+        "tags": [
+          "serpent",
+          "grenouille_geante",
+          "mort_vivant"
+        ]
+      },
+      {
+        "type": "malus",
+        "poids": 25,
+        "tags": [
+          "maladie",
+          "empoisonnement",
+          "enlisement"
+        ]
+      },
+      {
+        "type": "ressource",
+        "poids": 20,
+        "tags": [
+          "plante_toxique",
+          "tourbe",
+          "minerai_noir"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 5,
+        "tags": [
+          "sorciere",
+          "fugitif"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "defauts_rencontres": [
+      {
+        "espece": "espece:crocodile"
+      },
+      {
+        "espece": "espece:serpent_geant"
+      },
+      {
+        "espece": "espece:hippopotames"
+      },
+      {
+        "espece": "espece:singes"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:kongamato",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:fanany",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Papyrus"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      },
+      {
+        "ressource": "item:Racine_de_mandragore"
+      },
+      {
+        "ressource": "item:Lianes"
+      }
+    ]
+  },
+  {
+    "_id": "zone:plateau",
+    "type": "zone_influence",
+    "nom": "Plateau",
+    "terrain_tags": [
+      "plateau",
+      "herbe",
+      "roche",
+      "pente"
+    ],
+    "intensite_max": 0.45,
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 40,
+        "tags": [
+          "herbe",
+          "plante",
+          "pierre",
+          "minerai"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 25,
+        "tags": [
+          "rapace",
+          "loup",
+          "bandit"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 20,
+        "tags": [
+          "berger",
+          "mineur",
+          "voyageur"
+        ]
+      },
+      {
+        "type": "meteo",
+        "poids": 10,
+        "tags": [
+          "vent_fort",
+          "orage"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 2,
+      "deplacement": -1
+    },
+    "defauts_rencontres": [
+      {
+        "espece": "espece:lievre"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:renard"
+      },
+      {
+        "espece": "espece:loup",
+        "regions": [
+          "europe",
+          "steppes",
+          "grand_nord"
+        ]
+      },
+      {
+        "espece": "espece:antilopes",
+        "regions": [
+          "afrique",
+          "afrique_du_nord"
+        ]
+      },
+      {
+        "espece": "espece:impundulu",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:songomby",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:pierre"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      },
+      {
+        "ressource": "item:graines"
+      },
+      {
+        "ressource": "item:Genevrier"
+      },
+      {
+        "ressource": "item:calcaire"
+      },
+      {
+        "ressource": "item:silex"
+      }
+    ]
+  },
+  {
+    "_id": "zone:riviere",
+    "type": "zone_influence",
+    "nom": "Rivière et berges",
+    "terrain_tags": [
+      "riviere",
+      "eau",
+      "berge",
+      "bois"
+    ],
+    "intensite_max": 0.5,
+    "table_evenements": [
+      {
+        "type": "ressource",
+        "poids": 45,
+        "tags": [
+          "poisson",
+          "eau_fraiche",
+          "plante_aquatique"
+        ]
+      },
+      {
+        "type": "combat",
+        "poids": 20,
+        "tags": [
+          "crocodile",
+          "sirene",
+          "sangsue_geante"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 25,
+        "tags": [
+          "pecheur",
+          "passeur",
+          "lavandiere"
+        ]
+      },
+      {
+        "type": "malus",
+        "poids": 5,
+        "tags": [
+          "noyade",
+          "courant_fort"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "modificateurs": {
+      "danger": 1,
+      "visibilite": 0,
+      "deplacement": -1
+    },
+    "defauts_rencontres": [
+      {
+        "espece": "espece:petits_animaux_divers",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:serpent",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:renard",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:ondin"
+      },
+      {
+        "espece": "espece:naiade",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:loup",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:cerf",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:kelpie",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "espece": "espece:kappa",
+        "regions": [
+          "asie"
+        ]
+      },
+      {
+        "espece": "espece:ahuizotl",
+        "regions": [
+          "ameriques"
+        ]
+      },
+      {
+        "espece": "espece:kulullu",
+        "regions": [
+          "afrique_du_nord"
+        ]
+      },
+      {
+        "espece": "espece:lalomena",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:Aulne",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "ressource": "item:Eau_de_source",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "ressource": "item:Herbes_medicinales",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "ressource": "item:Peuplier",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "ressource": "item:Saule",
+        "regions": [
+          "europe"
+        ]
+      },
+      {
+        "ressource": "item:perles"
+      },
+      {
+        "ressource": "item:gemmes"
+      },
+      {
+        "ressource": "item:Frene"
+      },
+      {
+        "ressource": "item:argile"
+      }
+    ]
+  },
+  {
+    "_id": "zone:savane",
+    "type": "zone_influence",
+    "nom": "Savane",
+    "terrain_tags": [
+      "savane",
+      "plaine",
+      "herbe",
+      "tropical"
+    ],
+    "intensite_max": 0.65,
+    "table_evenements": [
+      {
+        "type": "combat",
+        "poids": 40,
+        "tags": [
+          "lion",
+          "hyene",
+          "predateur"
+        ]
+      },
+      {
+        "type": "ressource",
+        "poids": 30,
+        "tags": [
+          "herbe",
+          "fruit",
+          "gibier"
+        ]
+      },
+      {
+        "type": "pnj",
+        "poids": 15,
+        "tags": [
+          "chasseur",
+          "nomade",
+          "berger"
+        ]
+      },
+      {
+        "type": "meteo",
+        "poids": 10,
+        "tags": [
+          "orage",
+          "secheresse"
+        ]
+      },
+      {
+        "type": "rien",
+        "poids": 5
+      }
+    ],
+    "modificateurs": {
+      "danger": 2,
+      "visibilite": 2,
+      "deplacement": 0
+    },
+    "defauts_rencontres": [
+      {
+        "espece": "espece:antilopes"
+      },
+      {
+        "espece": "espece:fauves"
+      },
+      {
+        "espece": "espece:hyenes"
+      },
+      {
+        "espece": "espece:elephants"
+      },
+      {
+        "espece": "espece:buffles"
+      },
+      {
+        "espece": "espece:autruches"
+      },
+      {
+        "espece": "espece:rapaces"
+      },
+      {
+        "espece": "espece:impundulu",
+        "regions": [
+          "afrique"
+        ]
+      },
+      {
+        "espece": "espece:songomby",
+        "regions": [
+          "afrique"
+        ]
+      }
+    ],
+    "defauts_ressources": [
+      {
+        "ressource": "item:graines"
+      },
+      {
+        "ressource": "item:Acacia"
+      },
+      {
+        "ressource": "item:Baobab"
+      },
+      {
+        "ressource": "item:Herbes_medicinales"
+      }
+    ]
+  }
+]

@@ -252,6 +252,14 @@ for _c, _especes in {
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
+# Madagascar (dev/gen_monstres_madagascar.py, 24/11).
+for _c, _especes in {
+	"venin": ["fanany"],
+	"etreinte": ["fanany", "lalomena"],
+	"hurlement_terrifiant": ["fanany", "songomby", "tokantongotra", "trimobe"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
 
 # Tags de magie (sorts tirés) — repères : apprenti 2 · mage 5 · héros mage 8 · seigneur mage 10.
 MAGIE = {
@@ -322,6 +330,8 @@ MAGIE = {
 	"lilitu": ["magie_illusoire_4"],
 	"utukku": ["magie_necromancie_3"],
 	"asag": ["magie_elementaire_6"],
+	# Madagascar (dev/gen_monstres_madagascar.py, 24/11) : le kalanoro, que les guérisseurs consultent.
+	"kalanoro": ["magie_nature_3", "magie_illusoire_2"],
 }
 
 # Tags d'IA.
@@ -397,6 +407,17 @@ for _tag, _especes in {
 	"ia_berserker": ["uridimmu", "taureau_celeste", "asag"],
 	"ia_hit_and_run": ["umu_dabrutu", "anzu", "lilu", "utukku"],
 	"ia_meute": ["sebitti"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# Madagascar (dev/gen_monstres_madagascar.py, 24/11). Le kalanoro, rare, fuit plutôt que de frapper
+# (choix de l'utilisateur, comme qilin et baku) ; le lalomena attend sous l'eau.
+for _tag, _especes in {
+	"ia_fuyard_50": ["kalanoro"],
+	"ia_predateur": ["fanany", "trimobe"],
+	"ia_berserker": ["songomby"],
+	"ia_embuscade": ["lalomena"],
+	"ia_hit_and_run": ["tokantongotra"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)
