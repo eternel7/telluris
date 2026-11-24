@@ -1,48 +1,90 @@
-# Mu — les sept affaires du séjour
+# De Mu aux mondes divins
+
+Chaque passage de rang, du D au S+, a sa grande quête. Jusqu'au rang B, elles restent à Lutecia et en France. À partir du rang A, elles quittent Lutecia pour Mu, puis pour les mondes que les mythes ont nommés, et servent à faire **miroir des mythologies** plutôt qu'à parler des portails et de leurs malfaçons. Chaque mythologie répond à une question et en ouvre deux, et aucune réponse n'est définitive.
+
+## La trame des rangs
+
+| Rang | Quête | Où |
+|---|---|---|
+| D | **Les rats de la crypte** | les catacombes de Lutecia |
+| C | **La route de Saint-Denis** | la route du nord |
+| B | **La porte qui ne devait pas s'ouvrir** | un temple templier près de Lutecia |
+| A | **Le serpent sous la cité** | Mu |
+| A | **L'Hekla** | Akureyri, puis l'Enfer de Lucifer |
+| S | **Rome, vers le Paradis** | Rome |
+| S | **Yggdrasil** | une cité du Nord |
+| S+ | **Celui qui était avant** | hors de toute mythologie |
+
+**Les rats de la crypte.** Des ouvriers chargés de consolider les souterrains ne reviennent pas. On croit à une infestation de rats géants. On découvre une crypte dont certaines portes ont été rouvertes récemment et, au fond, un objet portant le symbole d'un portail ancien ([Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md)).
+
+**La route de Saint-Denis.** Une escorte de Bouchard de Clignancourt, où des loups rabattent un convoi vers une bête plus vieille que la route : les monstres précèdent les donjons ([La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md)).
+
+**La porte qui ne devait pas s'ouvrir.** L'extraction des cristaux **modifie** un donjon : au fond de l'ossuaire des catacombes, une paroi s'est ouverte sur une porte de pierre fermée et tiède ([Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md)).
+
+**Le serpent sous la cité.** À Mu, sous Mu-la-Centrale, près de la porte que la cité a fermée, l'aventurier rencontre **Échidna**, la mère des serpents, que l'on accuse d'être la mère de tous les monstres. Il choisit de la combattre ou de lui parler. « Vous appelez monstres mes enfants. » S'il la croit, les dieux seraient la source de tous les maux. C'est le séjour raconté ci-dessous.
+
+## Le séjour à Mu
 
 Le séjour à Mu est court, et il se vit en trois temps. Il faut d'abord **gagner sa place**. La cité éprouve l'étranger dans ses conduites d'eau avec « Les eaux troubles de Mu ». Deux missions suivent, qui servent à gagner la confiance des habitants : « Un service qui ne peut attendre », une urgence sans éclat qu'on confie à l'aventurier parce qu'il n'appartient à aucune institution, puis « Une confiance qui se mérite », où tenir une consigne et garder un secret comptent plus que la force. Vient ensuite la **descente**, qui est d'abord une enquête. Sa longueur dépend de ce qu'on trouve : anomalies de l'eau, réseau ancien absent des plans, bassins de régulation, pièces retirées du scellement, empreintes géantes, pression venue de l'autre côté. Les énigmes y naissent des lieux, sans jamais dominer. Les Templiers de Mu y pèsent de loin. Aélis mène ses propres recherches, rejoint l'aventurier quand une découverte relève de son art, et il lui arrive de se tromper. Au bout, il y a **Échidna**. Elle est digne, accuse les dieux et tient à ses enfants. Avant toute lutte, elle prévient l'aventurier clairement, et le combat contre elle est très difficile. Celui qui choisit la parole la voit retrouver Cerbère. Celui qui choisit le combat la voit fuir, immortelle, puis découvre son antre et les reliques de ses enfants, et c'est la culpabilité qui l'en accompagne.
 
 Autour de ce fil, sept affaires attendent qui veut s'y attarder. Quatre se présentent dès l'arrivée : le chant, le marchand, les enfants, les eaux. Les trois autres, les cartographes, le gardien et le nom effacé, s'ouvrent au fil des rencontres. On les mène dans l'ordre qu'on veut, et chacune se comprend seule. Leurs indices ne dépendent pas les uns des autres : on peut les rapprocher, sans qu'aucune affaire soit nécessaire pour en comprendre une autre. Quelques visages reviennent d'une affaire à l'autre. Chacune trouve sa conclusion sur place, mais aucune ne referme le mystère des dieux. Elles apportent de la compréhension, des avantages concrets et de quoi éclairer les mondes divins, sans rien changer à l'aventure principale ni aux quêtes qui suivront. Celles qu'on laisse inachevées attendent qu'on revienne à Mu.
 
-## Le chant sous les ruines
+### Le chant sous les ruines
 
 Une vieille habitante chante une mélodie que des gens de tous âges, et parmi eux un jeune rêveur, semblent connaître sans l'avoir apprise. Ils racontent le même rêve : une ville sous un soleil impossible. La chanteuse tient ce chant de sa mère, qui le tenait de la génération d'avant. Elle n'a pas connu le temps de la catastrophe : le chant lui vient de sa famille, de bouche en bouche. En recueillant ses versions et en relevant ce que la mémoire orale a déplacé, on y reconnaît **Tangaroa**, dieu de la mer, père des poissons, à qui l'on rend les morts. On comprend aussi que la « **coque d'or** » que le chant remercie, c'est la bulle de Mu. Un ancien sanctuaire de Tangaroa dort, noyé, avec ses courants, ses passages effondrés, ses poches d'air et ses salles qui se remplissent. Il garde gravés les fragments du chant, et ses murs sont disposés pour qu'une assemblée chante d'une seule voix. Aucun combat n'y est obligé. Avec un archiviste curieux mais prudent, qui refuse d'y voir la main d'un dieu, on reconstitue la version la plus complète. Elle est chantée par la chanteuse, les rêveurs et tous ceux qui le veulent, dans le sanctuaire même, et l'archiviste en garde une copie pour que le chant ne tienne plus à la seule mémoire. Le chant dit que Mu a remercié Tangaroa pour la bulle. Il ne dit pas que Tangaroa l'a faite, ni qu'il a entendu. D'où viennent les rêves, nul ne le sait.
 
-## Le marchand qui vend le passé
+### Le marchand qui vend le passé
 
 Un marchand vend des objets anciens marqués du sceau de Mu : une plaque d'accès, un outil d'Architecte, une figurine votive, un tesson. Un artisan et un archiviste les jugent authentiques, mais ils sortent d'un secteur fermé depuis des générations. Pour le marchand, les objets doivent circuler plutôt que dormir dans des réserves. Une restauratrice, elle, veut les conserver. La filière remonte à un ancien dépôt de maintenance, dans un secteur condamné, d'où les pièces ont été déplacées récemment. Un intermédiaire les avait tirées d'une réserve effondrée et en cachait l'emplacement pour garder son monopole. On peut dénoncer les coupables, négocier une restitution ou confier les pièces, pour un temps, à la restauratrice. Le marchand garde son étal s'il accepte de documenter ses provenances. Les pièces sensibles sont inventoriées, le dépôt mis en sûreté. Au fond, deux idées de la mémoire s'affrontent, et deux façons d'accéder au passé.
 
-## Les enfants de la marée
+### Les enfants de la marée
 
 Des enfants rêvent d'une femme qui leur apprend une langue inconnue. Ils décrivent la même voix et le même geste : la femme pose la main sur l'eau et attend une réponse des profondeurs. L'un d'eux en est fasciné, un autre effrayé. Une soigneuse s'inquiète. Une vieille linguiste reconnaît des tournures sans pouvoir nommer la langue. Entendus un à un, les enfants livrent des mots qui forment une suite cohérente mais incomplète. On retrouve les mêmes signes sur des bornes anciennes, près d'un bassin de marée, puis dans une chambre hydraulique oubliée, gravés à hauteur d'enfant : on y apprenait sans doute aux petits de Mu les repères de sécurité et les mots de la navigation. Une fermeture s'est bloquée et le bassin se remplit. Il faut vider l'eau, dégager une grille et sauver une tablette, par l'œil, l'outil ou l'entraide, sans combat nécessaire. Les mots retrouvés forment une **formule de prudence** des bassins, et la linguiste en fait une leçon. Certains enfants cessent de rêver, d'autres non. La femme n'est jamais reconnue avec certitude.
 
-## Les eaux sans poissons
+### Les eaux sans poissons
 
 Depuis le sacrifice du continent, une zone de la mer est presque vide de poissons. Les pêcheurs l'évitent, des silhouettes immenses passent au fond, et les instruments de mana s'y affolent. Un pêcheur porte le deuil d'une lignée : depuis le sacrifice, les noms des siens disparus pendant les années de disette se transmettent dans sa famille. Une naturaliste cherche une cause qui se touche. Un officiant de Tangaroa rappelle que le dieu est le père des poissons et celui à qui l'on confie les morts. En recoupant les récits et les relevés, on suit le trouble du mana jusqu'à une structure immergée, à demi enfouie. On dresse la carte des courants, on repère où les poissons font demi-tour, et l'on atteint une chambre extérieure de la structure qui résonne avec le mana de Mu. On recueille aussi des récits de morts qui n'ont jamais rejoint le royaume de Tangaroa, et qui reviennent encore. On peut aider la naturaliste à isoler la structure, suivre l'officiant dans un rite de mémoire ou faire baliser la zone pour les pêcheurs. Les choses vont mieux, mais les poissons ne reviennent pas tout de suite. Le pêcheur accepte de transmettre les noms des disparus pour qu'on ne les oublie plus. À Mu, on dit que le père des poissons s'est détourné, ou qu'il n'a pas entendu. Abandon, impuissance ou simple caprice de la mer : le silence de Tangaroa pendant l'effondrement reste une blessure, et rien ne tranche.
 
-## Les cartographes qui ne dessinent plus
+### Les cartographes qui ne dessinent plus
 
 Un cartographe appelle à l'aide : deux relevés sûrs d'un même quartier ne concordent plus, et un collègue a disparu pendant une vérification. Son apprentie le croit faussaire. Un gardien des archives veut sauver les anciennes cartes. On compare trois cartes de trois époques, on refait un itinéraire de point fixe en point fixe et l'on mesure les écarts. Les notes du disparu montrent que ses instruments réagissent aux variations du mana. On le retrouve dans une ancienne salle de relevés, acharné à tirer une carte stable. On l'aide à séparer les repères de la pierre des troubles de la mesure, et à marquer les zones incertaines. Il reprend son travail, mais il ne promet plus une ville fidèle. L'apprentie garde les anciennes cartes comme témoins de ce que Mu croyait savoir. Le phénomène revient par moments, et il ne prouve pas que les quartiers bougent vraiment.
 
-## Le dernier gardien de Mu
+### Le dernier gardien de Mu
 
 Un Architecte, ou un archiviste, signale qu'une vieille sentinelle, sous une porte condamnée, répond encore à des gestes que nul ne connaît. Derrière la porte, on entend parfois des coups sourds. La sentinelle tient par un flux de mana oublié. Une archiviste veut comprendre son rite de reconnaissance sans l'éteindre. Un technicien veut tarir son mana pour reprendre la place. Elle attend une marque de reconnaissance qui n'existe plus dans aucun registre. On reconstitue son rite à partir de plaques, de marques et de gestes, et l'on comprend qu'elle garde une archive et répète un appel, en attendant qu'on y réponde. Elle se souvient qu'autrefois, quand elle frappait à la porte, **quelqu'un répondait**, et que les réponses ont cessé bien avant le sacrifice. On peut lui rendre une part de son rite, déplacer l'archive, ou la laisser veiller en lui donnant une réponse symbolique. Elle reçoit enfin une réponse, même si ce n'est pas celle qu'elle attendait. L'archive parle, de façon incomplète, d'anciens échanges avec une « **demeure** » derrière le portail, sans nommer aucun dieu avec certitude. La sentinelle ne devient pas une compagne de combat.
 
-## Le nom effacé
+### Le nom effacé
 
 Un archiviste remarque une rupture dans une suite de registres : les pages sont intactes, mais un nom a été gratté ou retiré de plusieurs copies. Il veut établir les faits sans déclencher de crise. Les descendants d'un ancien dignitaire ignorent ce que fut leur aïeul. Un Templier tient que certaines vérités auraient pu perdre Mu, dites au mauvais moment. Listes de responsables, actes de maintenance et copies recoupées rendent son titre au **dignitaire** : il avait demandé que les dieux rendent compte de la porte et du silence qui répondait aux prières. Il fut effacé par ceux qui jugeaient que la survie de Mu exigeait de se taire. Son dernier rapport ne prouvait pas que les dieux avaient fait la porte ; il demandait pourquoi l'on continuait à les prier. On peut rendre le nom public, le rétablir discrètement dans les archives ou confier les preuves à un dépositaire indépendant. Aucun choix ne renverse les institutions de Mu. Le nom revient au moins dans une copie fidèle, et les habitants ne s'accordent pas : courage, pour les uns ; mise en danger de la cité, pour les autres. L'affaire est close dans les archives, pas dans les consciences.
 
-## Ce que les affaires laissent ouvert
+### Ce que les affaires laissent ouvert
 
 Les sept affaires nourrissent plusieurs lectures sans en choisir aucune. **Aélis** croit les dieux absents : des demeures vides, des maîtres partis. **Uannedugga**, le Sage du confinement, les croit enfuis devant ce qu'ils avaient ouvert. **Un Templier de Mu** tient le sacrifice pour juste, que les dieux y aient eu part ou non. **Héraclès** n'est peut-être pas le pion qu'on croit : il a demandé la permission à Hadès, maîtrisé Cerbère à mains nues, puis l'a ramené chez lui. **Tangaroa**, enfin, reste une énigme : le chant de la « coque d'or » dit une gratitude ancienne, et son silence pendant l'effondrement nourrit le doute. On peut rapprocher ces voix ; aucune affaire ne livre la réponse.
+
+## Après Mu, les mondes divins
+
+Une copie partielle du relevé des seuils naturels d'**Uanna**, invendable, fait quitter Mu. Ses entrées marquées « demeure » sont la porte sous la cité, Saint-Pierre, l'Hekla et un arbre du nord. L'aventurier part vérifier si les autres demeures sont vides, elles aussi.
+
+**L'Hekla.** Toujours au rang A, on y va comme on revient de Mu : par Notre-Dame, puis le réseau des portails jusqu'à Reykjavik, puis la route jusqu'à Akureyri, dont les Templiers gardent le gouffre, sous le volcan, au sud de l'île. Derrière s'étend l'**Enfer de Lucifer**. Ce monde n'a rien à voir avec les Enfers d'Hadès, et il est **habité**. L'Ange de lumière déchu n'est pas parti : on l'a jeté là. L'Enfer est une prison, pas une demeure. Les demeures divines ne sont donc pas toutes vides. Mais pourquoi certains partent-ils quand d'autres restent ? Et qui jette ?
+
+**Rome, vers le Paradis.** Au rang S, le portail de Saint-Pierre ouvre sur un monde divin. ?{Les habitants de Telluris ne savent même pas si c'est vraiment le Paradis : ils l'appellent ainsi faute d'un autre mot. Beauté surnaturelle, êtres semblables à des anges, gardiens, paysages impossibles, peut-être une cité céleste. Les anges répondent de façon ambiguë : « Nous servons celui qui nous a donné notre existence », « Votre monde n'est pas notre monde », « Vos dieux vous ont menti. » Est-ce vrai ? Ces êtres semblent pourtant protéger sincèrement leur monde. À Rome, les Templiers veulent tenir l'expédition, les autorités religieuses veulent l'empêcher, la Guilde veut savoir.}?
+
+**Yggdrasil.** Au rang S encore. ?{Une cité du Nord, dont les portails mènent à un lieu qu'on appelle Yggdrasil, sans savoir si c'est un arbre, un monde, un portail gigantesque ou l'image de tout autre chose. Chaque branche ouvre un monde : Asgard, Midgard, Jötunheim, Hel. Les mondes précèdent-ils les récits qu'on en fait ? Ici, les versions se contredisent : les monstres ont été créés par les dieux, disait Échidna ; ils viennent de la corruption du monde, dit-on à Rome ; les géants existaient avant les dieux, dit le Nord.}?
+
+**Celui qui était avant.** Au rang S+. ?{L'aventurier a assez voyagé pour voir que toutes les mythologies décrivent des structures semblables : un monde des mortels, des mondes divins, des êtres primordiaux, des passages entre les mondes, des destructions et des renaissances. Il cherche l'origine commune de ces récits, dans un lieu qui ne ressemble à aucune. Quatre hypothèses restent côte à côte : Échidna disait vrai ; les dieux sont eux-mêmes des victimes ; les mythologies sont des traductions d'une même chose ; Échidna ment. Le jeu n'en tranche aucune.}?
+
+?{Chaque monde répond à une question et en ouvre deux : « Nous n'avons pas créé les monstres, nous les avons hérités » — de qui ? « Les géants existaient avant les dieux » — qui a créé les géants ? « Personne ne les a créés, ils ont toujours existé » — que signifie « toujours » ?}?
+
+Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont les marionnettes des joueurs ; mais le jeu ne le lui apprend pas tôt.
 
 ?{Restent à écrire : les scènes, dialogues et récompenses des deux quêtes de confiance ; le découpage final des modules de la descente ; le prix et les suites du passage de Cerbère ; le contenu jouable de l'Hekla, du Paradis, d'Yggdrasil et de « Celui qui était avant » ; la cité du Nord d'Yggdrasil.}?
 
 ## 🗂 Échanges de travail
 
-- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé intact ci-dessous.
+- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé ci-dessous ; ses tableaux ont été remis au format Markdown et l'encadré « Documents en retard », devenu sans objet, retiré (Auteur, 24/11). Suit la séance du 24/09/2026 « Idées de quêtes à Lutecia », reprise ici sans ses parties écartées.
 - **Créée :** 24/11/2026
 - **Statut :** **adoptée par l'Auteur**, qui l'a remise à intégrer au lore. Elle a d'abord été relue contre le canon. Cinq points ont été soumis à l'Auteur par questionnaire (deux appels, 24/11), et le récit ci-dessus applique ses réponses. Le reste est reporté tel quel.
+- **Remplace :** `personnages/20260924_idees_de_quetes_a_lutecia.md` (trame des quêtes par rang, 24/09/2026), retiré le 24/11/2026 : son récit portait l'ancienne trame (palier A+, Paradis en fin de rang A) ; ce qui n'était pas écarté est repris dans le récit ci-dessus et à la fin de ces échanges. Les quêtes D, C et B ont leurs propres séances : [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), [La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md), [Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md).
 - **Met à jour :** [Mu — les quêtes du séjour avec Aélis](20261120_quetes_de_mu_avec_aelis.md) et [Mu — vivre sous la mer](20261122_description_de_mu.md) (architecture de l'arc) ; s'appuie sur [Mu — la colère contre les dieux](20261124_mu_colere_contre_les_dieux.md).
 
 ## Relecture et arbitrage de l'Auteur (24/11/2026)
@@ -70,45 +112,18 @@ Les sept affaires nourrissent plusieurs lectures sans en choisir aucune. **Aéli
 
 ## Vue d'ensemble
 
-  -----------------------------------------------------------------------
-  Rang              Étape             Lieu              Statut
-  ----------------- ----------------- ----------------- -----------------
-  A                 Arrivée à Mu avec Lutecia →         ✅
-                    Aélis             Notre-Dame → Mu   
-
-  A                 Phase I ---       Mu-la-Centrale,   ✅ structure · 💭
-                    Gagner sa place   lisière de la     détail
-                    (≈ 2 quêtes)      bulle             
-
-  A                 Phase II ---      réseau d'eau et   ✅ structure · 💭
-                    Descendre (3-4    galeries sous la  détail
-                    quêtes)           cité              
-
-  A                 Phase III ---     la porte scellée  ✅
-                    Échidna (2-3      sous Mu           
-                    quêtes) : parler                    
-                    **ou** combattre                    
-
-  A                 Quêtes            Mu et ses eaux    ✅ liste · 💭
-                    facultatives (7)                    fonds
-
-  A                 Quitter Mu --- le siège d'Uanna     ✅
-                    relevé des seuils                   
-                    naturels                            
-
-  A                 **L'Hekla** ---   Reykjavik →       ✅
-                    l'Enfer de        Akureyri → Hekla  
-                    Lucifer                             
-
-  S                 **Rome → le       portail de        ✅ rang · 💭
-                    Paradis**         Saint-Pierre      contenu
-
-  S                 **Yggdrasil**     une cité du Nord  ✅ rang · 💭
-                                                        contenu
-
-  S+                **Celui qui était hors de toute     ✅ rang · 💭
-                    avant**           mythologie        contenu
-  -----------------------------------------------------------------------
+| Rang | Étape | Lieu | Statut |
+|---|---|---|---|
+| A | Arrivée à Mu avec Aélis | Lutecia → Notre-Dame → Mu | ✅ |
+| A | Phase I --- Gagner sa place (≈ 2 quêtes) | Mu-la-Centrale, lisière de la bulle | ✅ structure · 💭 détail |
+| A | Phase II --- Descendre (3-4 quêtes) | réseau d'eau et galeries sous la cité | ✅ structure · 💭 détail |
+| A | Phase III --- Échidna (2-3 quêtes) : parler **ou** combattre | la porte scellée sous Mu | ✅ |
+| A | Quêtes facultatives (7) | Mu et ses eaux | ✅ liste · 💭 fonds |
+| A | Quitter Mu --- le relevé des seuils naturels | siège d'Uanna | ✅ |
+| A | **L'Hekla** --- l'Enfer de Lucifer | Reykjavik → Akureyri → Hekla | ✅ |
+| S | **Rome → le Paradis** | portail de Saint-Pierre | ✅ rang · 💭 contenu |
+| S | **Yggdrasil** | une cité du Nord | ✅ rang · 💭 contenu |
+| S+ | **Celui qui était avant** | hors de toute mythologie | ✅ rang · 💭 contenu |
 
 Arc de Mu : **≈ 8 quêtes obligatoires** + facultatives ✅. Fil rouge :
 **Échidna et Cerbère**, séparés de part et d'autre du portail scellé
@@ -311,52 +326,15 @@ Anthropes des pions. **Elle seule** connaît la vérité du sacrifice ; le
 
 ## Quêtes facultatives de Mu ✅ (fonds 💭)
 
-  -----------------------------------------------------------------------
-  Quête                   Affaire                 Indice divin (24/11) ✅
-  ----------------------- ----------------------- -----------------------
-  **Les cartographes qui  des quartiers changent  ---
-  ne dessinent plus**     de place quand on les   
-                          cartographie ; un       
-                          cartographe disparu     
-
-  **Le chant sous les     un chant venu d'une     un vieux chant
-  ruines**                ruine noyée ; le rêve   **remercie Tangaroa
-                          partagé d'une ville     pour « la coque d'or
-                          sous un soleil          »** : la bulle serait
-                          impossible              la réponse du dieu
-
-  **Le marchand qui vend  artefacts authentiques  ---
-  le passé**              sortis d'une zone que   
-                          nul ne devrait          
-                          atteindre               
-
-  **Les enfants de la     des enfants rêvent      ---
-  marée**                 d'une femme qui leur    
-                          apprend une langue      
-                          inconnue                
-
-  **Le dernier gardien de un gardien enterré      il se souvient
-  Mu**                    attend un profil        qu'autrefois, quand on
-                          d'accès disparu et      frappait à la porte,
-                          protège une archive     **quelqu'un répondait**
-                                                  --- et que ces réponses
-                                                  ont cessé **bien
-                                                  avant** le sacrifice
-
-  **Les eaux sans         eaux désertées,         les eaux sont **sans
-  poissons**              silhouettes immenses,   poissons depuis le
-                          structure qui trouble   sacrifice** : le père
-                          le mana                 des poissons s'est
-                                                  détourné, ou n'a rien
-                                                  entendu
-
-  **Le nom effacé**       un nom gratté de toutes un **dignitaire** qui
-                          les archives, lié à un  avait réclamé que les
-                          savoir que Mu a cessé   dieux rendent compte de
-                          de transmettre          la porte, **rayé des
-                                                  registres** par ceux
-                                                  qui ont caché la vérité
-  -----------------------------------------------------------------------
+| Quête | Affaire | Indice divin (24/11) ✅ |
+|---|---|---|
+| **Les cartographes qui ne dessinent plus** | des quartiers changent de place quand on les cartographie ; un cartographe disparu | --- |
+| **Le chant sous les ruines** | un chant venu d'une ruine noyée ; le rêve partagé d'une ville sous un soleil impossible | un vieux chant **remercie Tangaroa pour « la coque d'or »** : la bulle serait la réponse du dieu |
+| **Le marchand qui vend le passé** | artefacts authentiques sortis d'une zone que nul ne devrait atteindre | --- |
+| **Les enfants de la marée** | des enfants rêvent d'une femme qui leur apprend une langue inconnue | --- |
+| **Le dernier gardien de Mu** | un gardien enterré attend un profil d'accès disparu et protège une archive | il se souvient qu'autrefois, quand on frappait à la porte, **quelqu'un répondait** --- et que ces réponses ont cessé **bien avant** le sacrifice |
+| **Les eaux sans poissons** | eaux désertées, silhouettes immenses, structure qui trouble le mana | les eaux sont **sans poissons depuis le sacrifice** : le père des poissons s'est détourné, ou n'a rien entendu |
+| **Le nom effacé** | un nom gratté de toutes les archives, lié à un savoir que Mu a cessé de transmettre | un **dignitaire** qui avait réclamé que les dieux rendent compte de la porte, **rayé des registres** par ceux qui ont caché la vérité |
 
 -   ❌ **Les pierres qui se souviennent** : écartée.
 -   💭 Fonds sous-jacents de ChatGPT (cartographie dimensionnelle,
@@ -518,15 +496,6 @@ ouvre deux**. Les réponses ne sont jamais définitives.* *✅ Le palier A+
 -   Tout le contenu jouable de l'Hekla, du Paradis, d'Yggdrasil et de «
     Celui qui était avant » ; la cité du Nord d'Yggdrasil.
 
-### Documents en retard sur l'arbitrage du 24/11
-
-`docs/lore/redige/06_personnages_et_trame.md` (« Fin du rang A --- Le
-Paradis ») et
-`docs/lore/personnages/20260924_idees_de_quetes_a_lutecia.md` (palier «
-A+ Rome ») portent encore l'ancienne trame. Fait foi : **Hekla au rang
-A, Paradis et Yggdrasil au rang S, « Celui qui était avant » au rang
-S+**.
-
 ### Sources
 
 -   `docs/lore/cites/20261122_description_de_mu.md` --- arc en trois
@@ -538,7 +507,7 @@ S+**.
 -   `docs/lore/cites/20261011_histoire_de_mu_chatgpt.md` --- Sept Sages,
     sacrifice, accès par Notre-Dame
 -   `docs/lore/personnages/20260924_idees_de_quetes_a_lutecia.md` ---
-    trame A → S+
+    trame A → S+ (séance reprise ci-dessous, fichier retiré)
 -   `docs/lore/redige/06_personnages_et_trame.md`,
     `docs/lore/monde/20261124_revue_des_contradictions.md`,
     `docs/lore/monde/20260821_portail_des_profondeurs.md`,
@@ -619,31 +588,15 @@ ponctuellement, en fonction de son expertise, et peut se tromper. Les
 récompenses sont variées et le gameplay répartit enquête, exploration,
 négociation, énigmes, combat et collecte.
 
-  -----------------------------------------------------------------------
-  Quête                   Accès                   Fonction narrative
-  ----------------------- ----------------------- -----------------------
-  Le chant sous les       Dès l'arrivée           Mémoire, deuil et
-  ruines                                          transmission
-
-  Le marchand qui vend le Dès l'arrivée           Patrimoine, cupidité et
-  passé                                           responsabilité
-
-  Les enfants de la marée Dès l'arrivée           Enfance, rêve et langue
-                                                  oubliée
-
-  Les eaux sans poissons  Dès l'arrivée           Conséquences du
-                                                  sacrifice et silence
-                                                  divin
-
-  Les cartographes qui ne Progressive, après      Doute et limites de la
-  dessinent plus          rencontre               connaissance
-
-  Le dernier gardien de   Progressive, après      Fidélité et solitude
-  Mu                      rencontre               
-
-  Le nom effacé           Progressive, après      Censure et mémoire
-                          rencontre               politique
-  -----------------------------------------------------------------------
+| Quête | Accès | Fonction narrative |
+|---|---|---|
+| Le chant sous les ruines | Dès l'arrivée | Mémoire, deuil et transmission |
+| Le marchand qui vend le passé | Dès l'arrivée | Patrimoine, cupidité et responsabilité |
+| Les enfants de la marée | Dès l'arrivée | Enfance, rêve et langue oubliée |
+| Les eaux sans poissons | Dès l'arrivée | Conséquences du sacrifice et silence divin |
+| Les cartographes qui ne dessinent plus | Progressive, après rencontre | Doute et limites de la connaissance |
+| Le dernier gardien de Mu | Progressive, après rencontre | Fidélité et solitude |
+| Le nom effacé | Progressive, après rencontre | Censure et mémoire politique |
 
 ## Développement des sept quêtes
 
@@ -911,81 +864,34 @@ divines sans en conditionner l'accès ni l'issue.
 
 ## Récapitulatif des décisions issues des questionnaires
 
-  -----------------------------------------------------------------------
-  Sujet                               Décision
-  ----------------------------------- -----------------------------------
-  Format de l'arc de Mu               Court
-
-  Phase I                             Trois quêtes
-
-  Phase II                            Enquête modulaire, nombre variable
-                                      de missions
-
-  Phase III                           Choix définitif entre parole et
-                                      combat, branches asymétriques
-
-  Activité dominante de la descente   Enquête
-
-  Place des énigmes                   Secondaire, intégrée aux lieux
-
-  Place des Templiers                 Secondaire
-
-  Autonomie d'Aélis                   Elle mène ses recherches,
-                                      intervient ponctuellement et peut
-                                      se tromper
-
-  Fonction des quêtes facultatives    Histoires locales, personnages et
-                                      mystère divin
-
-  Construction des indices            Indépendants, rapprochables par le
-                                      joueur
-
-  Valeur des quêtes facultatives      Compréhension, bénéfices concrets
-                                      et informations utiles aux arcs
-                                      divins
-
-  Personnages récurrents              Quelques-uns, sans prérequis
-                                      croisés
-
-  Résolution                          Chaque quête a une conclusion
-                                      locale ; le mystère global reste
-                                      ouvert
-
-  Récompenses                         Variées
-
-  Accès                               Certaines immédiates, d'autres
-                                      débloquées par rencontre
-
-  Ordre                               Libre
-
-  Conséquences sur la trame           Aucune
-  principale                          
-
-  Quêtes après le départ              Toujours accessibles si le joueur
-                                      revient à Mu
-
-  Chant --- rêves                     Leur origine reste inconnue
-
-  Chant --- chanteuse                 Transmission familiale ; elle n'a
-                                      pas entendu le chant avant la
-                                      catastrophe
-
-  Chant --- « coque d'or »            Désigne explicitement la bulle
-                                      protectrice
-
-  Chant --- ruine                     Ancien site cérémoniel dédié à
-                                      Tangaroa
-
-  Chant --- conclusion                Cérémonie collective
-
-  Méthode de conception               Concevoir les sept quêtes comme un
-                                      ensemble
-
-  Tonalité                            Émotionnelle
-
-  Gameplay                            Équilibré entre les différentes
-                                      activités
-  -----------------------------------------------------------------------
+| Sujet | Décision |
+|---|---|
+| Format de l'arc de Mu | Court |
+| Phase I | Trois quêtes |
+| Phase II | Enquête modulaire, nombre variable de missions |
+| Phase III | Choix définitif entre parole et combat, branches asymétriques |
+| Activité dominante de la descente | Enquête |
+| Place des énigmes | Secondaire, intégrée aux lieux |
+| Place des Templiers | Secondaire |
+| Autonomie d'Aélis | Elle mène ses recherches, intervient ponctuellement et peut se tromper |
+| Fonction des quêtes facultatives | Histoires locales, personnages et mystère divin |
+| Construction des indices | Indépendants, rapprochables par le joueur |
+| Valeur des quêtes facultatives | Compréhension, bénéfices concrets et informations utiles aux arcs divins |
+| Personnages récurrents | Quelques-uns, sans prérequis croisés |
+| Résolution | Chaque quête a une conclusion locale ; le mystère global reste ouvert |
+| Récompenses | Variées |
+| Accès | Certaines immédiates, d'autres débloquées par rencontre |
+| Ordre | Libre |
+| Conséquences sur la trame principale | Aucune |
+| Quêtes après le départ | Toujours accessibles si le joueur revient à Mu |
+| Chant --- rêves | Leur origine reste inconnue |
+| Chant --- chanteuse | Transmission familiale ; elle n'a pas entendu le chant avant la catastrophe |
+| Chant --- « coque d'or » | Désigne explicitement la bulle protectrice |
+| Chant --- ruine | Ancien site cérémoniel dédié à Tangaroa |
+| Chant --- conclusion | Cérémonie collective |
+| Méthode de conception | Concevoir les sept quêtes comme un ensemble |
+| Tonalité | Émotionnelle |
+| Gameplay | Équilibré entre les différentes activités |
 
 ## Points volontairement ouverts
 
@@ -999,3 +905,387 @@ divines sans en conditionner l'accès ni l'issue.
 
 Ces points restent ouverts parce qu'ils demandent une conception
 ultérieure ; ils ne remettent pas en cause les arbitrages déjà pris.
+
+------------------------------------------------------------------------
+
+## Séance reprise — Idées de quêtes à Lutecia (24/09/2026)
+
+- **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ab5526c-3eb8-83ed-ad2d-d76f7e39c627), six messages.
+- **Reprise sans ses parties écartées :** les deux premières propositions de ChatGPT (quêtes D → S+ autour de Lutecia, puis « Le bélier de Mu », « Le dernier voyage d'Orphée », « Le crépuscule des dieux », « Le jardin derrière le ciel ») ont été remplacées par la troisième (« On va garder ta dernière version »), seule gardée. Les intitulés « A+ » y deviennent « S » (Auteur, 24/11). **Lilith** n'est pas retenue : à Mu, c'est Échidna, jamais Lilith.
+
+## ✍️ Auteur — 24/09/2026
+
+Donne moi des idées de quêtes à Lutecia. Une par passage de rang à partir de D jusqu'à S+.
+
+
+*[Première proposition de ChatGPT écartée.]*
+
+---
+
+J'aimerais des quêtes moins centrées sur Lutecia à partir du rang A. Il est probable que l'aventurier parte à Mu ou ailleurs. Le but reste de parler/ faire miroir des mythologies du monde plus que de parler uniquement de portail et de leurs malfaçons.
+
+---
+
+*[Seconde proposition de ChatGPT écartée.]*
+
+## ✍️ Auteur — 24/09/2026
+
+Cela aurait été bien de plus encore baser tes propositions sur les descriptions des cités état que l'on a déjà faites. On va garder ta dernière version. Comment introduire Lilith ou Echidna que l'aventurier doit choisir de combattre ou d'échanger avec elle pour comprendre / croire que les Dieux sont la source de tous les problèmes. Puis passer à une aventure impliquant un monde divin derrière un portail (ou plusieurs portails); Rome -> Paradis ou Yggdrasil -> les mondes de la mythologie nordique, ....
+Et toujours des réponses non définitives.
+
+---
+
+## 🤖 ChatGPT — 24/09/2026
+
+Oui. Je pense que la bonne structure est de faire de **Lilith/Echidna un moment charnière** : jusqu'à elle, le joueur rencontre surtout des légendes et des êtres extraordinaires. Avec elle, il rencontre pour la première fois une créature capable de lui proposer **une interprétation cohérente de l'histoire du monde** — mais sans lui donner la certitude qu'elle dit vrai.
+
+Je garderais donc la dernière progression, mais en la réorientant ainsi.
+
+### A — Mu : « Le serpent sous la cité »
+
+L'aventure à Mu peut introduire **Lilith ou Echidna** selon la région mythologique que tu veux privilégier.
+
+Je ne ferais pas d'elle immédiatement une antagoniste.
+
+L'aventurier arrive dans une cité-État lointaine confrontée à une série de disparitions. Les autorités locales accusent une créature vivant dans une région interdite.
+
+Les récits populaires la décrivent comme :
+
+- une mère de monstres ;
+- une séductrice ;
+- une femme-serpent ;
+- une ancienne épouse ou compagne d'un dieu ;
+- une créature qui aurait refusé de se soumettre aux dieux.
+
+Mais les témoignages sont contradictoires.
+
+L'expédition finit par rencontrer **Lilith/Echidna elle-même**.
+
+Et elle ne cherche pas nécessairement à tuer le joueur.
+
+Elle lui propose de parler.
+
+Elle affirme quelque chose de très simple :
+
+> **« Vous appelez monstres mes enfants. Qui vous a dit qu'ils étaient nés pour être vos ennemis ? »**
+
+Elle raconte alors une histoire radicalement différente de celle enseignée par les cités.
+
+Selon elle, les dieux :
+
+- ont façonné ou transformé certaines créatures ;
+- ont créé des lignées de monstres ;
+- ont imposé des frontières entre « créatures civilisées » et « créatures sauvages » ;
+- utilisent les Anthropes comme instruments ;
+- et surtout, **ne sont pas les protecteurs désintéressés que les mortels imaginent**.
+
+Mais elle est évidemment suspecte.
+
+Elle est elle-même mère de créatures monstrueuses.
+
+Elle a donc tout intérêt à présenter les choses ainsi.
+
+### Le choix du joueur
+
+Le joueur peut :
+
+**La combattre.**
+
+Il refuse son discours et considère qu'il s'agit d'une créature dangereuse manipulant les humains.
+
+Ou :
+
+**Échanger avec elle.**
+
+Le joueur accepte de discuter.
+
+Elle donne alors quelques informations concrètes, mais jamais la totalité de son histoire.
+
+Par exemple :
+
+> « Cherche les dieux derrière leurs portes. »
+
+Puis :
+
+> « Lorsque tu les rencontreras, demande-leur qui a créé les monstres. »
+
+Et enfin :
+
+> « Observe bien leur réponse. »
+
+La quête ne permet donc pas de savoir si Lilith/Echidna est :
+
+- une ennemie ;
+- une victime ;
+- une manipulatrice ;
+- une ancienne alliée des dieux ;
+- ou quelqu'un qui dit effectivement une vérité que les Anthropes ont oubliée.
+
+C'est **la première fois que le joueur possède une théorie crédible selon laquelle les dieux pourraient être à l'origine du problème**.
+
+---
+
+### S — « La porte des dieux »
+
+Cette quête peut être directement construite sur ce que Lilith/Echidna a dit.
+
+Le joueur apprend qu'une cité-État possède un ancien portail dont la destination est considérée comme sacrée.
+
+Et ici, je profiterais vraiment des **cités-États déjà établies dans Telluris**.
+
+Par exemple, une cité fortement romanisée peut avoir développé autour de son portail une institution religieuse et politique extrêmement puissante.
+
+Le portail n'est pas simplement une porte vers un donjon.
+
+Il mène vers un lieu que les habitants considèrent comme :
+
+> **le domaine des dieux.**
+
+Les Templiers veulent contrôler l'expédition.
+
+Les autorités religieuses veulent empêcher l'ouverture.
+
+La Guilde veut savoir ce qui se trouve réellement derrière.
+
+Le joueur peut donc être pris entre plusieurs interprétations.
+
+---
+
+### S — Rome → le Paradis
+
+C'est probablement l'un des meilleurs endroits pour introduire progressivement la cosmologie chrétienne.
+
+Le portail situé dans la cité inspirée de **Rome** ne conduit pas simplement à une zone de monstres.
+
+Il conduit vers une succession de territoires correspondant progressivement à des représentations du **Paradis**.
+
+Mais surtout :
+
+**les habitants de Telluris ne savent pas si c'est réellement le Paradis.**
+
+Ils l'appellent ainsi parce que c'est le seul concept dont ils disposent.
+
+Le joueur traverse :
+
+- un lieu d'une beauté surnaturelle ;
+- des êtres ressemblant à des anges ;
+- des gardiens ;
+- des paysages impossibles ;
+- éventuellement une cité céleste.
+
+Mais personne ne répond clairement à la question :
+
+> « Êtes-vous les serviteurs du Dieu créateur ? »
+
+Les réponses sont ambiguës.
+
+Un être peut répondre :
+
+> « Nous servons celui qui nous a donné notre existence. »
+
+Ce qui ne répond pas à la question.
+
+Un autre :
+
+> « Votre monde n'est pas notre monde. »
+
+Ce qui est intéressant sans être une révélation.
+
+Et un troisième peut même affirmer :
+
+> « Vos dieux vous ont menti. »
+
+Mais est-ce vrai ?
+
+---
+
+### La confrontation avec Lilith devient alors intéressante
+
+Si le joueur a parlé avec elle auparavant, il commence à voir des correspondances.
+
+Lilith disait :
+
+> « Les dieux sont responsables. »
+
+Le Paradis semble effectivement être un monde organisé par des puissances supérieures.
+
+Mais le joueur peut également constater que **ces êtres semblent sincèrement protéger leur propre monde**.
+
+Alors une nouvelle hypothèse apparaît :
+
+> Les dieux sont-ils réellement responsables des souffrances de Telluris ?
+
+Ou bien :
+
+> les habitants de Telluris accusent-ils simplement leurs dieux parce qu'ils sont incapables de comprendre ce qui se trouve au-dessus d'eux ?
+
+---
+
+### S — « Yggdrasil »
+
+Je ferais ensuite une rupture assez nette.
+
+La quête S ne serait plus centrée sur Rome.
+
+Elle emmènerait le joueur vers une cité-État nordique dont le réseau de portails permet d'accéder à un lieu appelé **Yggdrasil**.
+
+Là encore, les habitants ne savent pas si Yggdrasil est réellement :
+
+- un arbre ;
+- un monde ;
+- un portail gigantesque ;
+- ou une représentation mythologique d'autre chose.
+
+Le joueur découvre cependant que **plusieurs portails sont reliés entre eux par Yggdrasil**.
+
+Chaque branche mène vers un monde différent.
+
+On peut alors visiter plusieurs mondes inspirés de la mythologie nordique :
+
+- Asgard ;
+- Midgard ;
+- Jötunheim ;
+- Hel ;
+- etc.
+
+Mais je conserverais volontairement une ambiguïté essentielle :
+
+> **Est-ce que ces mondes existaient avant que les Nordiques les racontent, ou les croyances des Nordiques ont-elles donné leur forme à quelque chose qui existait déjà ?**
+
+---
+
+## Et là, les versions commencent à se contredire
+
+C'est précisément ce que je trouve intéressant pour Telluris.
+
+Lilith/Echidna affirme :
+
+> **« Les dieux ont créé les monstres. »**
+
+Les habitants de Rome peuvent affirmer :
+
+> **« Les monstres sont la conséquence de la corruption du monde. »**
+
+Les habitants du Nord peuvent raconter :
+
+> **« Les monstres existaient avant les dieux. »**
+
+Et dans un autre monde, quelqu'un pourrait encore dire :
+
+> **« Les dieux sont eux-mêmes des créatures. »**
+
+Aucune de ces versions n'est confirmée.
+
+---
+
+### S+ — « Celui qui était avant »
+
+La quête S+ pourrait enfin réunir toutes ces pistes sans les résoudre.
+
+Le joueur a suffisamment voyagé pour constater que plusieurs mythologies décrivent des structures étonnamment similaires :
+
+- un monde des mortels ;
+- des mondes divins ;
+- des créatures primordiales ;
+- des êtres créateurs ;
+- des mondes souterrains ;
+- des passages entre les mondes ;
+- des récits de destruction et de renaissance.
+
+Il entreprend alors une expédition dont le but n'est plus :
+
+> « trouver un trésor »
+
+ou
+
+> « tuer un monstre ».
+
+Son objectif devient :
+
+> **trouver l'origine commune de ces récits.**
+
+Il découvre un lieu qui ne correspond **à aucune mythologie connue**.
+
+Et là, plusieurs interprétations restent possibles.
+
+### Hypothèse 1 — Lilith disait vrai
+
+Les dieux sont responsables.
+
+Ils ont créé les monstres et les mondes, puis ont laissé les Anthropes subir les conséquences de leurs expériences.
+
+### Hypothèse 2 — Les dieux sont eux-mêmes des victimes
+
+Ils ont reçu Telluris et leurs propres mondes d'une puissance antérieure.
+
+Ils ne sont donc pas les créateurs ultimes.
+
+### Hypothèse 3 — Les mythologies sont des traductions
+
+Les Anthropes ont rencontré des réalités qu'ils ne pouvaient pas comprendre.
+
+Ils les ont transformées en :
+
+- dieux ;
+- démons ;
+- anges ;
+- dragons ;
+- monstres ;
+- paradis ;
+- enfers.
+
+### Hypothèse 4 — Lilith ment
+
+Elle connaît effectivement des choses que les Anthropes ignorent, mais son interprétation est volontairement biaisée.
+
+Et surtout, le jeu ne tranche pas.
+
+---
+
+## Une règle narrative que je trouve particulièrement adaptée à Telluris
+
+Chaque nouvelle mythologie devrait **répondre à une question mais en créer deux nouvelles**.
+
+Par exemple :
+
+**Lilith/Echidna :**
+
+> « Les dieux ont créé les monstres. »
+
+Le joueur pense avoir une réponse.
+
+Puis il rencontre les dieux.
+
+**Les dieux :**
+
+> « Nous n'avons pas créé les monstres. Nous les avons hérités. »
+
+Nouvelle question :
+
+> **De qui ?**
+
+Puis Yggdrasil.
+
+Les Nordiques affirment :
+
+> « Les géants existaient avant les dieux. »
+
+Nouvelle question :
+
+> **Qui a créé les géants ?**
+
+Puis un autre monde :
+
+> « Personne ne les a créés. Ils ont toujours existé. »
+
+Nouvelle question :
+
+> **Que signifie "toujours" ?**
+
+Et progressivement, le joueur réalise que **la quête de l'origine est peut-être elle-même une erreur anthropique**.
+
+C'est là que le niveau méta de Telluris peut devenir beaucoup plus intéressant : même lorsqu'il découvre les dieux, le joueur ne découvre pas nécessairement **la vérité**. Il découvre seulement des êtres qui, eux aussi, ont une histoire, des croyances et peut-être leurs propres ignorances.
+
+Cela permettrait de conserver jusqu'au bout le principe que **le joueur doit construire sa propre compréhension**, plutôt que de recevoir une encyclopédie cosmologique à la fin.
+
+---

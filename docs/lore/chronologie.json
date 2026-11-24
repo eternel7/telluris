@@ -1562,7 +1562,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["lutecia"], "themes": ["portails"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Les rats de la crypte"}]
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Les rats de la crypte"}]
 		},
 		{
 			"id": "trame_c",
@@ -1574,7 +1574,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["lutecia"], "institutions": ["paladins"], "themes": ["donjons"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "La route de Saint-Denis"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "La route de Saint-Denis"}],
 			"apres": ["trame_d"]
 		},
 		{
@@ -1586,7 +1586,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["lutecia"], "institutions": ["templiers"], "themes": ["donjons", "cristaux"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "La porte qui ne devait pas s'ouvrir"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "La porte qui ne devait pas s'ouvrir"}],
 			"apres": ["trame_c"]
 		},
 		{
@@ -1610,7 +1610,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["mu"],
 			"tags": {"lieux": ["mu"], "themes": ["mythes", "mystere", "meta"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Le serpent sous la cité"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Le serpent sous la cité"}],
 			"apres": ["trame_b"]
 		},
 		{
@@ -1634,7 +1634,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["italie", "au_dela"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["rome", "paradis"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Paradis"}, {"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Viennent ensuite"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Paradis"}, {"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Viennent ensuite"}],
 			"apres": ["trame_hekla"],
 			"liens": ["portail_saint_pierre"]
 		},
@@ -1646,7 +1646,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["au_dela"],
 			"tags": {"lieux": ["yggdrasil"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Yggdrasil"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Yggdrasil"}],
 			"apres": ["trame_paradis"]
 		},
 		{
@@ -1658,7 +1658,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["monde"],
 			"tags": {"themes": ["meta", "mystere"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Celui qui était avant"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Celui qui était avant"}],
 			"apres": ["trame_s"]
 		}
 	]

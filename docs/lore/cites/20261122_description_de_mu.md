@@ -743,7 +743,7 @@ Echidna ne meurt pas des suites du choix du combat. C'est une créature immortel
 
 ## Quatrième arbitrage de l'Auteur (24/11/2026)
 
-Consigné dans [les sept affaires du séjour](20261124_affaires_du_sejour_a_mu.md).
+Consigné dans [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md).
 
 | Point | Décision |
 |---|---|

@@ -8,7 +8,7 @@ Le séjour à Mu se fait avec Aélis, venue apprendre auprès des grands Archite
 
 **Échidna.** Face à elle, l'aventurier choisit de combattre ou de parler, et ce choix est définitif. Elle n'a rien d'une prisonnière haineuse : prise sous le continent quand la porte fut scellée, elle est restée par choix, près de Cerbère, pour protéger le sacrifice de Mu et garder la cité des monstres des grands fonds. Celui qui parle apprend d'elle, et d'elle seule, la vérité de la fermeture et du sacrifice organisé du continent, qu'elle respecte sans en vouloir au peuple de Mu ; puis il entend sa demande : être réunie à Cerbère. Au bout de cette voie, un passage étroit et bref, tenu avec les Architectes de Mu, laisse **Cerbère** rejoindre sa mère sous la cité, puis la porte se referme. Ce qu'il en coûte, et ce qui suivra, nul ne le sait encore. Celui qui la combat ne la tue pas, car elle est immortelle : vaincue, elle s'enfuit, et nul ne la retrouve. Elle ne défend plus Mu, mais demeure quelque part non loin, dans l'espoir de retrouver un jour Cerbère. À terme, les créatures des grands fonds pressent davantage la bulle, et la cité ne comprend pas pourquoi.
 
-Autour de ce fil, d'autres affaires attendent qui veut s'y attarder ; elles sont racontées dans [les sept affaires du séjour](20261124_affaires_du_sejour_a_mu.md) :
+Autour de ce fil, d'autres affaires attendent qui veut s'y attarder ; elles sont racontées dans [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md) :
 
 - **Les cartographes qui ne dessinent plus** : des quartiers qui changent de place quand on les cartographie, un cartographe disparu.
 - **Le chant sous les ruines** : un chant venu d'une ruine noyée, et le rêve partagé d'une ville sous un soleil impossible.
@@ -24,7 +24,7 @@ Autour de ce fil, d'autres affaires attendent qui veut s'y attarder ; elles sont
 
 - **Source :** séance ChatGPT « Quêtes de Mu avec Aélis » (https://chatgpt.com/c/6afff2c2-fccc-83ed-9a63-7290c05b7e29), fichier `docs/a trier/quetes-de-mu-avec-aelis.md`. Contenu brut conservé tel quel ; seuls les intitulés « David » / « ChatGPT » sont devenus ✍️ Auteur / 🤖 ChatGPT.
 - **Créée :** 20/11/2026
-- **Statut :** versée telle quelle le 22/11/2026 puis **arbitrée par l'Auteur** le même jour (cinq questionnaires) : l'arbitrage, consigné à la fin de [Mu — vivre sous la mer](20261122_description_de_mu.md), l'emporte sur les réponses de ChatGPT ; il met aussi à jour le récit de [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md). Architecture de l'arc et quêtes facultatives développées : [les sept affaires du séjour](20261124_affaires_du_sejour_a_mu.md) (24/11/2026), qui l'emportent sur la « huitaine de quêtes ».
+- **Statut :** versée telle quelle le 22/11/2026 puis **arbitrée par l'Auteur** le même jour (cinq questionnaires) : l'arbitrage, consigné à la fin de [Mu — vivre sous la mer](20261122_description_de_mu.md), l'emporte sur les réponses de ChatGPT ; il met aussi à jour le récit de [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md). Architecture de l'arc et quêtes facultatives développées : [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md) (24/11/2026), qui l'emportent sur la « huitaine de quêtes ».
 
 ---
 

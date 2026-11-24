@@ -26,7 +26,7 @@ Le premier seuil visé est l'**Hekla**, au sud de l'Islande, dont l'accès est g
 - **Source :** demande de l'Auteur et questionnaires (Claude Code, 24/11/2026). Aucune séance ChatGPT.
 - **Créée :** 24/11/2026
 - **Statut :** **tranchée par l'Auteur** (quatre questionnaires, seize questions, 24/11/2026). Tous les détails du récit sont retenus ; il ne reste aucune proposition ouverte.
-- **S'appuie sur :** [Mu — vivre sous la mer](20261122_description_de_mu.md) (arc de ≈ 8 quêtes, deux voies, Cerbère passe la porte close, Échidna immortelle qui s'enfuit), [le mythe de Mu](20261122_mythe_de_mu.md) (sacrifice, Vague), [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md) (Sept Sages, Tables de Pierre, Tangaroa), [la Tour de Babel](20261123_tour_de_babel.md) (Uanna, seuils naturels), [idées de quêtes à Lutecia](../personnages/20260924_idees_de_quetes_a_lutecia.md) (trame A → S+).
+- **S'appuie sur :** [Mu — vivre sous la mer](20261122_description_de_mu.md) (arc de ≈ 8 quêtes, deux voies, Cerbère passe la porte close, Échidna immortelle qui s'enfuit), [le mythe de Mu](20261122_mythe_de_mu.md) (sacrifice, Vague), [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md) (Sept Sages, Tables de Pierre, Tangaroa), [la Tour de Babel](20261123_tour_de_babel.md) (Uanna, seuils naturels), [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) (trame A → S+).
 
 ---
 

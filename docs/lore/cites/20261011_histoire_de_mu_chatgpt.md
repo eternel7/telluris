@@ -565,7 +565,7 @@ Explicite la problématique Ra-Mu et Empereur.
 
 > Corrigé par le second arbitrage (§ 6) : à Mu, **Échidna seule**, jamais Lilith. Puis par le troisième (§ 7) : les **Naga** sont les fils de **Kadru**, pas d'Échidna ; Échidna, prisonnière sous Mu depuis que la porte des Enfers a été scellée, est pour les Naga de Mu une **figure de mère**. Les quatre lectures ci-dessous sont **remplacées** par § 7.
 
-- La trame du rang A ([idées de quêtes](../personnages/20260924_idees_de_quetes_a_lutecia.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
+- La trame du rang A ([De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
 - Les traditions de Mu parlent depuis toujours de **Naga**, de **Maîtres-serpents** et de grandes créatures gardiennes, sans les ranger parmi les dieux ni parmi les monstres. Elles parlent aussi d'une **mère des serpents** : c'est elle que la surface nomme Échidna — la mère des monstres des Grecs, mi-femme mi-serpent. Les **Naga** sont ses fils (§ 6).
 - Elle se trouve **sous Mu-la-Centrale**, au plus près de la porte que Mu a fermée. Ce qu'elle est pour cette porte, nul ne le sait ; les habitants de Mu en débattent (*théories, aucune n'est vraie par décision*) :
 	- elle est ce qui a voulu passer, et qu'on a arrêté au seuil ;

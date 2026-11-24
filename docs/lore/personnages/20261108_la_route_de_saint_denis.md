@@ -28,7 +28,7 @@ De retour à Montmartre, Bouchard a fait demander aux Templiers : pas un donjon 
 
 ## 🗂 Échanges de travail
 
-- **Source :** séance Claude Code du 08/11/2026, d'après la trame retenue des quêtes par rang (`personnages/20260924_idees_de_quetes_a_lutecia.md`, rang C : « La route de Saint-Denis », avec un paladin du Sacré-Cœur).
+- **Source :** séance Claude Code du 08/11/2026, d'après la trame retenue des quêtes par rang (`cites/20261124_de_mu_aux_mondes_divins.md`, rang C : « La route de Saint-Denis », avec un paladin du Sacré-Cœur).
 - **Créée :** 08/11/2026
 - **Statut :** le § 1 **fait foi** (arbitrage de l'Auteur, 08/11, questionnaire : les neuf recommandations retenues) ; les textes de dialogue restent **proposés**. Contenu importable : § 6.
 
