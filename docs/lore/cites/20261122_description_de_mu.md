@@ -741,3 +741,13 @@ Echidna ne meurt pas des suites du choix du combat. C'est une créature immortel
 | Issue du combat | Échidna, **immortelle**, ne meurt pas : vaincue, elle **s'enfuit** ; on ne la retrouve plus. |
 | Après sa fuite | Elle **ne défend plus Mu** (d'où le prix payé à terme par la cité), mais **reste proche**, dans l'espoir de retrouver un jour **Cerbère**. |
 
+## Quatrième arbitrage de l'Auteur (24/11/2026)
+
+Consigné dans [les sept affaires du séjour](20261124_affaires_du_sejour_a_mu.md).
+
+| Point | Décision |
+|---|---|
+| Taille de l'arc | **Arc court** : phase I = **3 quêtes** (« Les eaux troubles de Mu », puis deux de confiance) ; phase II = **enquête modulaire, sans nombre fixe** ; phase III = 2-3 quêtes. Remplace « ≈ 8 quêtes : 2 de confiance, 3-4 souterraines ». |
+| Phase III | Échidna **avertit clairement** avant le combat, qui est **très difficile** ; voies **asymétriques**. |
+| Quêtes facultatives | Les sept, **développées** : ordre libre, indices indépendants, conclusion locale, aucune conséquence sur la trame, accessibles au retour à Mu. |
+
