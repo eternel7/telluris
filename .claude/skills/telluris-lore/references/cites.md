@@ -35,7 +35,7 @@ Devise (Auteur, 11/10) : **« Toute porte s'ouvre. Toute route a son prix. »**,
 ## Auxerre — `lieu:auxerre` · [personnages/20260821_quetes_d_auxerre_a_lutecia.md]
 **Auteur**
 - Ville de départ, **sans portail transversal**.
-- Son plus grand monument est le **temple** des paladins : ils y stockent les marchandises et organisent les **départs groupés vers Lutecia** (convois de cristaux par voie terrestre).
+- Son plus grand monument est le **temple** : les **Templiers** gardent le portail de la mine, les **Paladins** y stockent les marchandises et organisent les **départs groupés vers Lutecia** (convois de cristaux par voie terrestre) — **arbitré 24/11** (le « ce sont les Paladins qui gardent le temple » du 21/08 précédait le partage des ordres).
 - Le portail du temple mène à un **donjon-mine** de cristaux et minéraux rares, **réinitialisé périodiquement**. Les aventuriers le « nettoient » en premier (araignées géantes, rats géants, gobelins chamaniques).
 - Guilde : le **Bastion de l'Yonne**.
 	- Maître : **Gautier de Valcroix**.
@@ -147,7 +147,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 ## Akureyri — `lieu:akureyri` · [cites/20260820_decrire_akureyri_fortifiee.md], [monde/20260821_portail_des_profondeurs.md]
 **Auteur**
 - Cité fortifiée qui commerce avec Reykjavik.
-- Le gouffre de l'**Hekla**, dans les grottes profondes, est le **pendant** de Saint-Pierre : une porte ouverte vers l'**Enfer de Lucifer**, l'ange de lumière.
+- Le gouffre de l'**Hekla**, dans les grottes profondes **sous le volcan, au sud de l'île** (géographie réelle, arbitré 24/11), est le **pendant** de Saint-Pierre : une porte ouverte vers l'**Enfer de Lucifer**, l'ange de lumière. Akureyri n'est pas bâtie dessus : ses **Templiers en gardent l'accès** (24/11).
 
 **Tableau de l'Auteur (26/08)** : Akureyri → Reykjavik, forteresse-portail des Templiers, active mais altérée, passages instables scellés.
 
@@ -174,7 +174,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 ## Constantinople — [cites/20260824_decrit_constantinople_telluris.md]
 **Auteur**
-- « La Reine des Villes », la plus grande et la plus riche d'Europe.
+- « La Reine des Villes », la plus grande et la plus riche cité **du monde connu**, à la jonction de l'Europe et de l'Orient (arbitré 24/11).
 - **Sainte-Sophie** : portail **stable depuis des millénaires** vers Rome.
 - **Grand Palais** : un portail par église, dont **plus de la moitié sont devenus donjons** à la Vague.
 - **Hippodrome** : Bleus et Verts, il fait la valeur des coursiers des routes.
@@ -186,7 +186,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 ## Cordoue — [cites/20260824_decrire_l_histoire_de_cordoue.md]
 **Auteur**
-- Capitale d'Al-Andalus, la plus grande métropole d'Occident (≈ 500 000 habitants, contre quelques dizaines de milliers à Lutecia).
+- Capitale d'Al-Andalus, la plus grande métropole de l'**Occident latin** et la première par le savoir (arbitré 24/11 ; ≈ 500 000 habitants, contre quelques dizaines de milliers à Lutecia).
 - Bibliothèque de 400 000 volumes ; **Averroès**, **Maïmonide**, **Al-Zahrawi**.
 - **Mezquita**, le « **Nœud des Mille Portails** » :
 	- ses arches bicolores sont des résonateurs vers d'autres cités ;

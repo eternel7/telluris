@@ -6,7 +6,7 @@ Pendant des âges, on ne se déplaçait que par la route. Puis vinrent **trois f
 
 Leur portail avait une particularité : on en déplaçait la destination en faisant tourner une **bolas**. Ces premières portes étaient stables, prévisibles, fiables. Elles fonctionnaient presque toujours **sans cristaux**, peut-être parce que la magie était alors plus intense, peut-être parce que sa maîtrise était plus innée. Et elles ne reliaient que des lieux de Telluris : aucune ne menait à un autre monde.
 
-Les frères ont parcouru le monde et laissé leur œuvre derrière eux. Le **portail de Notre-Dame**, à Lutecia, en est le vestige le mieux préservé : un portail programmable qui peut mener à n'importe quel lieu du monde connu. Les cinq portes de la **Chapelle Palatine** d'Aix-la-Chapelle, disposées en pentagramme, en sont une autre trace : leurs destinations sont fixes, et lointaines, jusqu'à Sydney, Tokyo, Teotihuacan, Machu Picchu et Abou Simbel.
+Les frères ont parcouru le monde et laissé leur œuvre derrière eux. Le **portail de Notre-Dame**, à Lutecia, en est le vestige le mieux préservé : un portail programmable sans liens propres, qui **court-circuite** un portail du monde et emprunte son point d'arrivée tant que son seuil reste chaud ; chaque passage se paie d'un cristal jaune. Les cinq portes de la **Chapelle Palatine** d'Aix-la-Chapelle, disposées en pentagramme, en sont une autre trace : leurs destinations sont fixes, et lointaines, jusqu'à Sydney, Tokyo, Teotihuacan, Pichao et Abou Simbel.
 
 ## Des portails plus anciens que les frères
 

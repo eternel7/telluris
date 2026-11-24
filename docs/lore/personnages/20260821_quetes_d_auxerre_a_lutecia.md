@@ -6,7 +6,7 @@ L'aventurier commence sa vie à **Auxerre**, une ville moyenne derrière ses rem
 
 Ses premières missions se déroulent à l'intérieur des murs : porter des marchandises d'une boutique à l'autre. Puis il ose franchir les remparts, sans jamais trop s'en éloigner. Ses premières proies sont des écureuils agressifs, puis des renards, des cerfs, des sangliers, des loups, des sangliers géants, et enfin des gobelins. Devenu le chasseur de la guilde, il aide à retrouver les enfants égarés des commerçants.
 
-Un jour, le maître de la guilde demande à le voir, et l'envoie dans le **portail du temple d'Auxerre**. Ce donjon est une **mine** de cristaux et de minéraux rares, qui se réinitialise périodiquement ; à chaque fois, il faut la nettoyer de ses araignées géantes, de ses rats géants et de ses gobelins chamanes. Ce sont les Paladins qui gardent le temple, le plus grand monument de la ville : ils y entreposent les marchandises et organisent les départs groupés vers Lutecia. Auxerre n'a pas de portail transversal.
+Un jour, le maître de la guilde demande à le voir, et l'envoie dans le **portail du temple d'Auxerre**. Ce donjon est une **mine** de cristaux et de minéraux rares, qui se réinitialise périodiquement ; à chaque fois, il faut la nettoyer de ses araignées géantes, de ses rats géants et de ses gobelins chamanes. Le temple est le plus grand monument de la ville : les Templiers y gardent le portail, et les Paladins y entreposent les marchandises et organisent les départs groupés vers Lutecia. Auxerre n'a pas de portail transversal.
 
 ## La dernière quête d'Auxerre
 

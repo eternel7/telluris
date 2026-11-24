@@ -8,7 +8,7 @@ Akureyri est reliée à Reykjavik par une **forteresse-portail des Templiers**. 
 
 ## Le gouffre de l'Hekla
 
-Dans les grottes profondes de l'Hekla s'ouvre un gouffre qui est le **pendant du portail de Saint-Pierre**. Saint-Pierre mène à la porte d'un Paradis ; l'Hekla est une porte ouverte sur les entrailles de l'**Enfer de Lucifer**, l'ange de lumière. Personne ne sait s'il est plus ancien ou plus jeune que les portails des trois frères. (Ce gouffre a sa propre séance : [Portail des profondeurs](../monde/20260821_portail_des_profondeurs.md).)
+Au sud de l'île, loin d'Akureyri, sous le volcan, les grottes profondes de l'Hekla cachent un gouffre dont les Templiers d'Akureyri gardent l'accès. C'est le **pendant du portail de Saint-Pierre**. Saint-Pierre mène à la porte d'un Paradis ; l'Hekla est une porte ouverte sur les entrailles de l'**Enfer de Lucifer**, l'ange de lumière. Personne ne sait s'il est plus ancien ou plus jeune que les portails des trois frères. (Ce gouffre a sa propre séance : [Portail des profondeurs](../monde/20260821_portail_des_profondeurs.md).)
 
 ## La cité du fjord
 

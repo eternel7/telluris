@@ -1,6 +1,6 @@
 # Décrit Constantinople Telluris
 
-*La Reine des Villes.* Sur la péninsule qui domine le Bosphore, entre la Corne d'Or et la mer de Marmara, s'élève Constantinople, la plus grande et la plus riche métropole d'Europe. Elle tient le passage obligé entre la Méditerranée et la mer Noire.
+*La Reine des Villes.* Sur la péninsule qui domine le Bosphore, entre la Corne d'Or et la mer de Marmara, s'élève Constantinople, la plus grande et la plus riche métropole du monde connu, à la jonction de l'Europe et de l'Orient. Elle tient le passage obligé entre la Méditerranée et la mer Noire.
 
 ## La cité du passage
 
