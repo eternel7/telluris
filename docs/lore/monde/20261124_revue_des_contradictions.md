@@ -20,13 +20,19 @@ Dans toutes les maisons de guilde, capitales comprises, le bureau du maître s'o
 
 À Sydney, les deux portes, celle d'Aix et celle de Melbourne, s'ouvrent au Sanctuaire de Baiame. Le temple blanc élevé à la gloire des trois frères reste un mémorial, et nul ne sait s'il garde un portail. Tokyo, elle, a deux portes : Aix et Pékin.
 
+Avant que Rome ne prenne forme, la Louve gardait seule la grotte du Vatican ; c'est Rémus qui fonda le groupe de Templiers qui la garde depuis.
+
+La Hanse a deux Kontors hors du monde germanique et scandinave : Bruges à l'ouest, Novgorod à l'est, reliés par le portail de Notre-Dame de Bruges.
+
+Les portails n'ouvrent le monde à l'aventurier qu'au rang A. Ce que la route ou la mer atteignent, comme l'île de Camelot par Douvres, s'ouvre plus tôt.
+
 Les Anthropes sont de cinq Lignées. ?{Les Félins seraient une sixième Lignée, née dans l'archipel qui correspond au Japon puis dispersée.}?
 
 ## 🗂 Échanges de travail
 
 - **Source :** séance Claude Code du 24/11/2026. Demande de l'Auteur : « Revois l'ensemble du lore validé et passe par des questionnaires interactifs pour lever les contradictions. »
 - **Créée :** 24/11/2026
-- **Statut :** **arbitrage par deux questionnaires, puis deux autres en seconde passe** (§ ✍️ ci-dessous), qui **fait foi** (niveau 2).
+- **Statut :** **arbitrage par deux questionnaires, puis deux autres en seconde passe, et un dernier pour août et septembre** (§ ✍️ ci-dessous), qui **fait foi** (niveau 2).
 - **Reporté dans :** `redige/01`, `redige/03`, `redige/05` ; les récits de [Mu](../cites/20261011_histoire_de_mu_chatgpt.md), d'[Atlantis](../cites/20261012_histoire_d_atlantis.md), d'[Auxerre](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), d'[Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md), de [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) et de [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) ; seconde passe : `redige/01`, `redige/05`, [Lutecia](../cites/20260820_decrire_l_histoire_de_lutecia.md), [maisons de guilde](../cites/20261029_maisons_de_guilde_des_cites.md), [portes d'Aix](../cites/20261025_portails_d_aix_la_chapelle.md), [réseau des portails](20261120_reseau_des_portails.md), `chronologie.json` (`lamia_reine`, `dragons_de_sang`) ; `entites.json` (Akureyri) ; la compétence `telluris-lore`.
 
 ---
@@ -73,3 +79,19 @@ Récits relus : toutes les séances d'octobre et de novembre de `cites/`, `perso
 11. **Néfertiti et Lamia** : question des Grigori (Âge des Remparts) contre une quête antédiluvienne → **lignée avant le Déluge, quête après** ; Lamia et Néfertiti à l'Âge des Remparts.
 12. **Revenir à Lutecia** : on n'arrive presque jamais à Notre-Dame → **par le réseau, puis la route** (voyage asymétrique).
 13. **Porte de Sydney vers Melbourne** : temple blanc (proposé) contre « on ne sait s'il garde un portail » (29/10) → **au Sanctuaire de Baiame** ; le temple blanc reste un mémorial.
+
+---
+
+## 🤖 Claude Code — troisième passe : août et septembre (24/11/2026)
+
+Récits relus : toutes les séances d'août et de septembre de `cites/`, `monde/` et `personnages/` (Alexandrie, Babylone, Akureyri, Lutecia, Reykjavik, Rome, Abou Simbel, Gênes, Venise, Bruges, Aix, Cordoue, Constantinople, Bastion paladin, la séance fondatrice, les deux frises, portail des profondeurs, chronologie des cités, système de portails, monothéisme, Auxerre, bûcherons, Aélis, catacombes, idées de quêtes, revirements).
+
+**Corrigé sans question** : le récit de Lutecia disait encore que Notre-Dame « peut relier n'importe quel lieu du monde connu pour un prix dérisoire » ; il est aligné sur la décision de l'Auteur du 25/10 (un cristal jaune par passage, vers les lieux reliés par un portail).
+
+**Écarté comme non contradictoire** : la trame du 24/09 (rang C « La route de Saint-Denis ») et l'épreuve du rang C (Jumièges) ne se contredisent pas, puisque la trame donne la grande quête de chaque rang et Jumièges l'épreuve. Les remparts de Théodose « imprenables » renvoient aux assauts de monstres.
+
+## ✍️ Auteur — réponses de la troisième passe (24/11/2026)
+
+14. **Gardiens de Saint-Pierre** : un groupe « bien avant la cité » contre Rémus fondateur de la garde → **Rémus fonde la garde**, avant que Rome ne prenne forme.
+15. **Kontor de la Hanse** : Bruges « seule hors du monde germanique » contre le lien Bruges ↔ Novgorod → **deux Kontors, Bruges et Novgorod**.
+16. **Le monde au rang A** contre Camelot dès les rangs E et D → **le rang A ouvre le monde par les portails** ; la route et la mer peuvent l'ouvrir plus tôt.

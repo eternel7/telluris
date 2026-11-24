@@ -88,7 +88,7 @@ La rivalité avec Venise est purement commerciale, et elle est rude : le Conseil
 
 ### Bruges, la Venise du Nord
 
-Le chenal du **Zwin** est piégé, protégé et balisé par la magie, et seuls les navigateurs de Bruges savent y guider les navires. La cité est la capitale de la draperie : la laine d'Angleterre et les **cuirs de monstres** y deviennent des vêtements imprégnés de magie. Elle abrite le seul comptoir de la Hanse hors du monde germanique et scandinave, et sa **Bourse** fait battre le commerce du Nord.
+Le chenal du **Zwin** est piégé, protégé et balisé par la magie, et seuls les navigateurs de Bruges savent y guider les navires. La cité est la capitale de la draperie : la laine d'Angleterre et les **cuirs de monstres** y deviennent des vêtements imprégnés de magie. Elle abrite le seul comptoir de la Hanse de l'Occident hors du monde germanique et scandinave (Novgorod tient celui de l'Est, au bout de son portail), et sa **Bourse** fait battre le commerce du Nord.
 
 Du haut du **Beffroi**, les cloches sonnent l'alerte contre les attaques aériennes. La **Notre-Dame de Bruges** abrite un portail commercial qui a résisté à la Vague. Les Paladins tiennent l'Hôpital Saint-Jean, et le **Béguinage** réunit un ordre commun aux Templiers et aux Paladins : les sœurs du Calvaire, qui soignent, et les sœurs de Bataille, qui combattent. On passe de l'un à l'autre sans qu'on vous pose de question.
 

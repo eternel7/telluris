@@ -6,7 +6,7 @@ Sur les hauteurs du nord de Lutecia, la basilique du Sacré-Cœur n'a de sanctua
 
 ## Le départ des escortes
 
-Le Sacré-Cœur est aussi le point de départ des **missions d'escorte** : les Paladins y engagent leurs services pour conduire les gens de la capitale jusqu'aux lieux éloignés de France. C'est par ces escortes que l'aventurier découvre le pays avant que le monde ne s'ouvre à lui, au rang A.
+Le Sacré-Cœur est aussi le point de départ des **missions d'escorte** : les Paladins y engagent leurs services pour conduire les gens de la capitale jusqu'aux lieux éloignés de France. C'est par ces escortes que l'aventurier découvre le pays avant que les portails ne lui ouvrent le monde, au rang A ; ce que la route ou la mer atteignent, comme l'île de Camelot par Douvres, s'ouvre plus tôt.
 
 ?{Marchands, érudits et messagers, pèlerins, familles qui quittent la capitale, représentants de cités étrangères : tous peuvent demander une escorte. Sur les longues distances, le voyage se fait par étapes, d'une cité, d'un monastère fortifié ou d'une auberge-relais à l'autre, où une autre escorte prend le relais.}?
 

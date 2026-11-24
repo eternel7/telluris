@@ -113,7 +113,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Auteur**
 - « Venise du Nord ». Le chenal du **Zwin** est piégé, protégé et balisé magiquement ; les navigateurs de Bruges guident les navires.
 - **Capitale de la draperie** : laine d'Angleterre et **cuirs monstrueux** transformés en vêtements imprégnés de magie.
-- Seul **Kontor** hanséatique hors du monde germanique et scandinave.
+- Seul **Kontor** hanséatique de l'Occident hors du monde germanique et scandinave ; **Novgorod** tient celui de l'Est, au bout du portail de Notre-Dame de Bruges (arbitré 24/11).
 - **Bourse** sur la place Van der Buerse.
 - Canaux logistiques et défensifs.
 - **Beffroi** : cloches d'alerte contre les attaques aériennes.

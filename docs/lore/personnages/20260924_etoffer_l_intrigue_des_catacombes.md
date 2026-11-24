@@ -4,7 +4,7 @@ Sous Lutecia, les catacombes sont un donjon où l'on chasse les goules et les sq
 
 ## La France d'abord, le monde ensuite
 
-L'aventurier parcourt d'abord la **France**, en escortant des voyageurs depuis Montmartre. Le monde ne s'ouvre à lui qu'au **rang A** : Notre-Dame lui ouvre alors ses portes. Chaque passage se paie d'un **cristal jaune**, et les cristaux jaunes se trouvent tout au fond des catacombes. ?{Les catacombes prennent ainsi après coup une autre importance : on y descendait pour survivre, on y redescend pour voyager. Le rang A devient un vrai changement d'échelle.}?
+L'aventurier parcourt d'abord la **France**, en escortant des voyageurs depuis Montmartre. Les portails ne lui ouvrent le monde qu'au **rang A** : Notre-Dame lui ouvre alors ses portes. Ce que la route ou la mer atteignent, comme l'île de Camelot par Douvres, s'ouvre plus tôt. Chaque passage se paie d'un **cristal jaune**, et les cristaux jaunes se trouvent tout au fond des catacombes. ?{Les catacombes prennent ainsi après coup une autre importance : on y descendait pour survivre, on y redescend pour voyager. Le rang A devient un vrai changement d'échelle.}?
 
 ## Les monstres précèdent les donjons
 
