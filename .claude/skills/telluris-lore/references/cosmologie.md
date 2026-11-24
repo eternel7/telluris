@@ -1,6 +1,6 @@
 # Cosmologie, mythologies et Grand Mystère
 
-Sources principales : [monde/20260812_monde_medieval_fantastique.md] (séance fondatrice, 4 850 lignes), [monde/20261004_introduit_les_grigori.md], [cites/20260819_histoire_de_babylone.md] (fin : Hārūt et Mārūt), [monde/20260821_portail_des_profondeurs.md], [monde/20260831_reformulation_monotheiste.md].
+Sources principales : [monde/20260812_monde_medieval_fantastique.md] (séance fondatrice, 4 850 lignes), [monde/20261004_introduit_les_grigori.md], [cites/20260819_histoire_de_babylone.md] (fin : Hārūt et Mārūt), [cites/20260820_decrire_akureyri_fortifiee.md], [monde/20260831_reformulation_monotheiste.md].
 
 ## Ce que l'Auteur a décidé
 

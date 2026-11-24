@@ -196,29 +196,29 @@
 		}
 	},
 	"entites": [
-		{"id": "paladins", "libelle": "Paladins", "famille": "ordre", "couleur": "#b8901f", "evenement": "paladins", "rattache": {"institutions": ["paladins"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : les Paladins rouvrent les routes"}], "image": "towns/pnj_paladins_cathedrale_saint_etienne_auxerre.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "dont la magie Sainte soigne, pour garder les routes"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque"}]},
-		{"id": "templiers", "libelle": "Templiers", "famille": "ordre", "couleur": "#8b1e1e", "evenement": "templiers", "rattache": {"institutions": ["templiers", "papaute"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : recentrage sur les temples-forteresses"}], "image": "towns/portail_de_temple_albi.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Naissance des Templiers, pour garder les remparts et ce qu'ils enferment"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque"}]},
-		{"id": "architectes", "libelle": "Architectes", "famille": "ordre", "couleur": "#5b3f8c", "evenement": "architectes", "rattache": {"institutions": ["architectes"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "portails", "entre": [2600, 2000]}, "l": 2, "note": "dégradation du savoir : science → artisanat → tradition"}], "image": "towns/institut_des_architectes_lutecia01.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le savoir se transmet aux Architectes"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "science → artisanat → tradition"}]},
-		{"id": "guilde", "libelle": "Guilde des Aventuriers", "famille": "ordre", "couleur": "#b0602a", "evenement": "guildes", "rattache": {"institutions": ["guilde"]}, "largeur": [{"l": 2}], "image": "towns/pnj_maitresse_de_guilde_Maelys_naine_f_grand_relais_bureau.jpg", "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "L'exploration des donjons s'organise : naissent les Guildes"}]},
-		{"id": "atlantis", "libelle": "Atlantis", "famille": "cite", "couleur": "#1f6f8b", "evenement": "atlantis", "rattache": {"lieux": ["atlantis"], "peuples": ["atlantes"]}, "largeur": [{"l": 1, "note": "isolement volontaire"}], "image": "towns/atlantis_capital.jpg", "autorite": "auteur", "note": "Jamais Cité-État du réseau : un filet.", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jamais devenue un centre du réseau, par isolement volontaire"}]},
-		{"id": "cordoue", "libelle": "Cordoue", "famille": "cite", "couleur": "#c2571a", "evenement": "cite_cordoue", "rattache": {"lieux": ["cordoue"], "peuples": ["andalous"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Brèche originelle non datée"}]},
-		{"id": "reykjavik", "libelle": "Reykjavik", "famille": "cite", "couleur": "#3a5a8c", "evenement": "cite_reykjavik", "rattache": {"lieux": ["reykjavik"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reykjavík_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le dragon guide les lignées islandaises « depuis des millénaires »"}]},
-		{"id": "akureyri", "libelle": "Akureyri", "famille": "cite", "couleur": "#6c8ebf", "evenement": "cite_akureyri", "rattache": {"lieux": ["akureyri"], "peuples": ["islandais"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/akureyri_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Portail vers Reykjavik altéré par la Vague"}]},
-		{"id": "bruges", "libelle": "Bruges", "famille": "cite", "couleur": "#7a5c2e", "evenement": "cite_bruges", "rattache": {"lieux": ["bruges"], "peuples": ["flamands"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/bruges_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Notre-Dame de Bruges a résisté à la Vague"}]},
-		{"id": "aix", "libelle": "Aix-la-Chapelle", "famille": "cite", "couleur": "#2e6b3a", "evenement": "cite_aix", "rattache": {"lieux": ["aix"], "peuples": ["carolingiens"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [700, 600]}, "l": 3, "note": "avènement : Charlemagne"}], "image": "towns/aix_la_chapelle_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Charlemagne transforme la cité un siècle après la Vague"}]},
-		{"id": "chartres", "libelle": "Chartres", "famille": "cite", "couleur": "#9a7b2f", "evenement": "cite_chartres", "rattache": {"lieux": ["chartres"], "peuples": ["carnutes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [500, 400]}, "l": 3, "note": "avènement : son école"}], "image": "towns/chartres_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "avènement avec son école, après Charlemagne"}]},
-		{"id": "lutecia", "libelle": "Lutecia", "famille": "cite", "couleur": "#2f4f9f", "evenement": "cite_lutecia", "rattache": {"lieux": ["lutecia"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement, en dernier"}], "image": "towns/lutecia_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "prend son nom en dernier"}]},
-		{"id": "rhemi", "libelle": "Rhemi", "famille": "cite", "couleur": "#a3476b", "evenement": "cite_rhemi", "rattache": {"lieux": ["rhemi"], "peuples": ["remes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reims_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "épargnée par la Vague"}]},
-		{"id": "auxerre", "libelle": "Auxerre", "famille": "cite", "couleur": "#5f7f2a", "evenement": "cite_auxerre", "rattache": {"lieux": ["auxerre"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/auxerre_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Temple-mine bâti sur un portail devenu donjon"}]},
-		{"id": "venise", "libelle": "Venise", "famille": "cite", "couleur": "#b23a48", "evenement": "cite_venise", "rattache": {"lieux": ["venise"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "rivalité « de plusieurs siècles » avec Gênes"}]},
-		{"id": "genes", "libelle": "Gênes", "famille": "cite", "couleur": "#d08c2c", "evenement": "cite_genes", "rattache": {"lieux": ["genes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Banque de Saint-Georges naît du commerce des cristaux"}]},
-		{"id": "rome", "libelle": "Rome", "famille": "cite", "couleur": "#9a3b22", "evenement": "cite_rome", "rattache": {"lieux": ["rome"], "peuples": ["romains"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "remparts", "rang": "murailles"}, "l": 3, "note": "avènement : Romulus trace l'enceinte"}], "image": "towns/rome_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus trace l'enceinte à l'Âge des Remparts"}]},
-		{"id": "constantinople", "libelle": "Constantinople", "famille": "cite", "couleur": "#6a2c70", "evenement": "cite_constantinople", "rattache": {"lieux": ["constantinople"], "peuples": ["byzantins"]}, "largeur": [{"l": 3, "note": "établissement et avènement avant la Vague"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grand Palais antérieur à la Vague"}]},
-		{"id": "jerusalem", "libelle": "Jérusalem", "famille": "cite", "couleur": "#a8790c", "evenement": "cite_jerusalem", "rattache": {"lieux": ["jerusalem"], "peuples": ["hebreux"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement avant la Vague"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David reconnu roi par la cité"}]},
-		{"id": "petra", "libelle": "Petra", "famille": "cite", "couleur": "#b5543a", "evenement": "cite_petra", "rattache": {"lieux": ["petra"], "peuples": ["nabateens"]}, "largeur": [{"l": 1, "note": "établissement : halte de caravanes"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement : les rois Arétas et Obodas"}], "image": "towns/petra_city.jpg", "autorite": "auteur", "sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts. Rois : Âge des Portails."}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Aucun déclin"}]},
-		{"id": "babylone", "libelle": "Babylone", "famille": "cite", "couleur": "#2a7f75", "evenement": "cite_babylone", "rattache": {"lieux": ["babylone"], "peuples": ["babyloniens"]}, "largeur": [{"l": 2, "note": "avènement non daté"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Absentes, faute de séance qui les date : Alexandrie, Babylone"}]},
-		{"id": "abou_simbel", "libelle": "Abou Simbel", "famille": "cite", "couleur": "#c98b2b", "evenement": "cite_abou_simbel", "rattache": {"lieux": ["abou_simbel", "alexandrie"], "peuples": ["egyptiens"]}, "largeur": [{"l": 3, "note": "établissement et avènement antédiluviens"}], "image": "towns/abou_simbel_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Royaume de Néfertiti, « avant les pyramides et avant les frères »"}]},
-		{"id": "mu", "libelle": "Mu", "famille": "cite", "couleur": "#138a72", "evenement": "mu", "rattache": {"lieux": ["mu"], "peuples": ["mu"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "donjons", "entre": [800, 700]}, "l": 1, "note": "Mu sombre ; sa cité survit sous la mer"}], "image": "towns/mu_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "sombre au moment de la Vague"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Ce n'est pas une Cité-État"}]}
+		{"id": "paladins", "libelle": "Paladins", "famille": "ordre", "couleur": "#b8901f", "evenement": "paladins", "rattache": {"institutions": ["paladins"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : les Paladins rouvrent les routes"}], "image": "towns/pnj_paladins_cathedrale_saint_etienne_auxerre.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "dont la magie Sainte soigne, pour garder les routes", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "templiers", "libelle": "Templiers", "famille": "ordre", "couleur": "#8b1e1e", "evenement": "templiers", "rattache": {"institutions": ["templiers", "papaute"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : recentrage sur les temples-forteresses"}], "image": "towns/portail_de_temple_albi.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Naissance des Templiers, pour garder les remparts et ce qu'ils enferment", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "architectes", "libelle": "Architectes", "famille": "ordre", "couleur": "#5b3f8c", "evenement": "architectes", "rattache": {"institutions": ["architectes"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "portails", "entre": [2600, 2000]}, "l": 2, "note": "dégradation du savoir : science → artisanat → tradition"}], "image": "towns/institut_des_architectes_lutecia01.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le savoir se transmet aux Architectes", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "science → artisanat → tradition", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "guilde", "libelle": "Guilde des Aventuriers", "famille": "ordre", "couleur": "#b0602a", "evenement": "guildes", "rattache": {"institutions": ["guilde"]}, "largeur": [{"l": 2}], "image": "towns/pnj_maitresse_de_guilde_Maelys_naine_f_grand_relais_bureau.jpg", "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "L'exploration des donjons s'organise : naissent les Guildes", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "atlantis", "libelle": "Atlantis", "famille": "cite", "couleur": "#1f6f8b", "evenement": "atlantis", "rattache": {"lieux": ["atlantis"], "peuples": ["atlantes"]}, "largeur": [{"l": 1, "note": "isolement volontaire"}], "image": "towns/atlantis_capital.jpg", "autorite": "auteur", "note": "Jamais Cité-État du réseau : un filet.", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jamais devenue un centre du réseau, par isolement volontaire", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "cordoue", "libelle": "Cordoue", "famille": "cite", "couleur": "#c2571a", "evenement": "cite_cordoue", "rattache": {"lieux": ["cordoue"], "peuples": ["andalous"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Brèche originelle non datée", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "reykjavik", "libelle": "Reykjavik", "famille": "cite", "couleur": "#3a5a8c", "evenement": "cite_reykjavik", "rattache": {"lieux": ["reykjavik"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reykjavík_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le dragon guide les lignées islandaises « depuis des millénaires »", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "akureyri", "libelle": "Akureyri", "famille": "cite", "couleur": "#6c8ebf", "evenement": "cite_akureyri", "rattache": {"lieux": ["akureyri"], "peuples": ["islandais"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/akureyri_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Portail vers Reykjavik altéré par la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "bruges", "libelle": "Bruges", "famille": "cite", "couleur": "#7a5c2e", "evenement": "cite_bruges", "rattache": {"lieux": ["bruges"], "peuples": ["flamands"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/bruges_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Notre-Dame de Bruges a résisté à la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "aix", "libelle": "Aix-la-Chapelle", "famille": "cite", "couleur": "#2e6b3a", "evenement": "cite_aix", "rattache": {"lieux": ["aix"], "peuples": ["carolingiens"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [700, 600]}, "l": 3, "note": "avènement : Charlemagne"}], "image": "towns/aix_la_chapelle_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Charlemagne transforme la cité un siècle après la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "chartres", "libelle": "Chartres", "famille": "cite", "couleur": "#9a7b2f", "evenement": "cite_chartres", "rattache": {"lieux": ["chartres"], "peuples": ["carnutes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [500, 400]}, "l": 3, "note": "avènement : son école"}], "image": "towns/chartres_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "avènement avec son école, après Charlemagne", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "lutecia", "libelle": "Lutecia", "famille": "cite", "couleur": "#2f4f9f", "evenement": "cite_lutecia", "rattache": {"lieux": ["lutecia"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement, en dernier"}], "image": "towns/lutecia_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "prend son nom en dernier", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "rhemi", "libelle": "Rhemi", "famille": "cite", "couleur": "#a3476b", "evenement": "cite_rhemi", "rattache": {"lieux": ["rhemi"], "peuples": ["remes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reims_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "épargnée par la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "auxerre", "libelle": "Auxerre", "famille": "cite", "couleur": "#5f7f2a", "evenement": "cite_auxerre", "rattache": {"lieux": ["auxerre"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/auxerre_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Temple-mine bâti sur un portail devenu donjon", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "venise", "libelle": "Venise", "famille": "cite", "couleur": "#b23a48", "evenement": "cite_venise", "rattache": {"lieux": ["venise"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "rivalité « de plusieurs siècles » avec Gênes", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "genes", "libelle": "Gênes", "famille": "cite", "couleur": "#d08c2c", "evenement": "cite_genes", "rattache": {"lieux": ["genes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Banque de Saint-Georges naît du commerce des cristaux", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "rome", "libelle": "Rome", "famille": "cite", "couleur": "#9a3b22", "evenement": "cite_rome", "rattache": {"lieux": ["rome"], "peuples": ["romains"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "remparts", "rang": "murailles"}, "l": 3, "note": "avènement : Romulus trace l'enceinte"}], "image": "towns/rome_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus trace l'enceinte à l'Âge des Remparts", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "constantinople", "libelle": "Constantinople", "famille": "cite", "couleur": "#6a2c70", "evenement": "cite_constantinople", "rattache": {"lieux": ["constantinople"], "peuples": ["byzantins"]}, "largeur": [{"l": 3, "note": "établissement et avènement avant la Vague"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grand Palais antérieur à la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "jerusalem", "libelle": "Jérusalem", "famille": "cite", "couleur": "#a8790c", "evenement": "cite_jerusalem", "rattache": {"lieux": ["jerusalem"], "peuples": ["hebreux"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement avant la Vague"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David reconnu roi par la cité", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "petra", "libelle": "Petra", "famille": "cite", "couleur": "#b5543a", "evenement": "cite_petra", "rattache": {"lieux": ["petra"], "peuples": ["nabateens"]}, "largeur": [{"l": 1, "note": "établissement : halte de caravanes"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement : les rois Arétas et Obodas"}], "image": "towns/petra_city.jpg", "autorite": "auteur", "sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts. Rois : Âge des Portails.", "archive": "cites/20261024_histoire_de_petra.md"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Aucun déclin", "archive": "cites/20261024_histoire_de_petra.md"}]},
+		{"id": "babylone", "libelle": "Babylone", "famille": "cite", "couleur": "#2a7f75", "evenement": "cite_babylone", "rattache": {"lieux": ["babylone"], "peuples": ["babyloniens"]}, "largeur": [{"l": 2, "note": "avènement non daté"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Absentes, faute de séance qui les date : Alexandrie, Babylone", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "abou_simbel", "libelle": "Abou Simbel", "famille": "cite", "couleur": "#c98b2b", "evenement": "cite_abou_simbel", "rattache": {"lieux": ["abou_simbel", "alexandrie"], "peuples": ["egyptiens"]}, "largeur": [{"l": 3, "note": "établissement et avènement antédiluviens"}], "image": "towns/abou_simbel_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Royaume de Néfertiti, « avant les pyramides et avant les frères »", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]},
+		{"id": "mu", "libelle": "Mu", "famille": "cite", "couleur": "#138a72", "evenement": "mu", "rattache": {"lieux": ["mu"], "peuples": ["mu"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "donjons", "entre": [800, 700]}, "l": 1, "note": "Mu sombre ; sa cité survit sous la mer"}], "image": "towns/mu_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "sombre au moment de la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Ce n'est pas une Cité-État", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]}
 	],
 	"bandeaux": [
 		{"evenement": "deluge", "libelle": "Le Déluge"},
@@ -236,7 +236,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"themes": ["mystere"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Décrit celle de Telluris où depuis les origines, les flux magiques baignent le monde et les monstres rôdent."}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Décrit celle de Telluris où depuis les origines, les flux magiques baignent le monde et les monstres rôdent.", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}]
 		},
 		{
 			"id": "dragon_empereur",
@@ -247,7 +247,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["scandinavie"],
 			"tags": {"peuples": ["dragons", "islandais"], "lieux": ["reykjavik"], "themes": ["mystere"]},
-			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_reykjavik.md", "date": "2026-08-20", "citation": "La ville guidé en secret par un dragon empereur antérieur aux premiers anthropes."}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "un dragon empereur qui depuis des millénaires tente d'orienter les lignées Islandaises vers le bonheur."}],
+			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_reykjavik.md", "date": "2026-08-20", "citation": "La ville guidé en secret par un dragon empereur antérieur aux premiers anthropes.", "archive": "cites/20260820_decrire_l_histoire_de_reykjavik.md"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "un dragon empereur qui depuis des millénaires tente d'orienter les lignées Islandaises vers le bonheur.", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"liens": ["cite_reykjavik"]
 		},
 		{
@@ -259,7 +259,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "synthese", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les cinq Lignées — Humains, Elfes, Nains, Ogres et Hobbits — se dispersent dans un monde où les flux de mana sont omniprésents."}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Les cinq Lignées — Humains, Elfes, Nains, Ogres et Hobbits — se dispersent dans un monde où les flux de mana sont omniprésents.", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}]
 		},
 		{
 			"id": "mu",
@@ -270,7 +270,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["mu"],
 			"tags": {"peuples": ["mu"], "lieux": ["mu"], "institutions": ["architectes"], "themes": ["portails", "savoir", "mystere"]},
-			"sources": [{"fichier": "cites/20261010_mu_civilisation_engloutie.md", "date": "2026-10-10", "citation": "Mu pourrait être liée à une civilisation ayant maîtrisé une forme de magie aujourd'hui oubliée, antérieure même au savoir transmis par les trois frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Mu est placée avant les trois frères."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu est en avance sur son temps."}],
+			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-10", "citation": "Mu pourrait être liée à une civilisation ayant maîtrisé une forme de magie aujourd'hui oubliée, antérieure même au savoir transmis par les trois frères aborigènes.", "archive": "cites/20261010_mu_civilisation_engloutie.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Mu est placée avant les trois frères.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu est en avance sur son temps.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}],
 			"liens": ["notre_dame", "aelis_mu", "mu_portails", "mu_engloutie", "trame_a"]
 		},
 		{
@@ -284,7 +284,7 @@
 			"visibilite": "public",
 			"origine": ["atlantis"],
 			"tags": {"peuples": ["atlantes"], "lieux": ["atlantis"], "themes": ["mythes", "commerce", "mystere"]},
-			"sources": [{"fichier": "monde/20260826_chronologie_des_cites_telluris.md", "date": "2026-08-26", "citation": "Grande civilisation insulaire mythique, postérieure ou contemporaine de Mu selon la tradition tellurienne."}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "jamais devenue un centre du réseau"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Atlantis existe encore, isolée"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Elle est l'une des premières cités qu'ont colonisé les lignées lors de leur conquête du monde de l'Ouest."}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Le temple central est le temple de Poséidon."}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Je retiens l'orichalque comme première source de puissance et d'échange avec l'extérieur."}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Les remparts sont d'orichalque."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-26", "citation": "Grande civilisation insulaire mythique, postérieure ou contemporaine de Mu selon la tradition tellurienne.", "archive": "monde/20260826_chronologie_des_cites_telluris.md"}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "jamais devenue un centre du réseau"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Atlantis existe encore, isolée", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Elle est l'une des premières cités qu'ont colonisé les lignées lors de leur conquête du monde de l'Ouest.", "archive": "cites/20261012_histoire_d_atlantis.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Le temple central est le temple de Poséidon.", "archive": "cites/20261012_histoire_d_atlantis.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Je retiens l'orichalque comme première source de puissance et d'échange avec l'extérieur.", "archive": "cites/20261012_histoire_d_atlantis.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Les remparts sont d'orichalque.", "archive": "cites/20261012_histoire_d_atlantis.md"}],
 			"liens": ["atlantis_refus_frere", "atlantis_dirigeant_sans_nom", "atlantis_ceto"]
 		},
 		{
@@ -299,7 +299,7 @@
 			"visibilite": "public",
 			"origine": ["atlantis"],
 			"tags": {"peuples": ["atlantes", "aborigenes"], "lieux": ["atlantis"], "themes": ["portails", "mythes"]},
-			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "ce sont les premiers, et sûrement les seuls à avoir refusé la visite d'un des frères qui, en fait, allait à l'encontre de leurs croyances d'alors."}],
+			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "ce sont les premiers, et sûrement les seuls à avoir refusé la visite d'un des frères qui, en fait, allait à l'encontre de leurs croyances d'alors.", "archive": "cites/20261012_histoire_d_atlantis.md"}],
 			"apres": ["trois_freres"],
 			"liens": ["atlantis", "atlantis_dirigeant_sans_nom"]
 		},
@@ -315,7 +315,7 @@
 			"visibilite": "public",
 			"origine": ["atlantis"],
 			"tags": {"peuples": ["atlantes"], "lieux": ["atlantis"], "themes": ["mythes", "mystere"]},
-			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Le dirigeant dont le nom a été raillé de l'histoire a tenté d'ouvrir la ville d'Atlantis. Une épidémie s'en suivit."}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "l'histoire, la science, a retenu les règles d'isolement drastiques."}],
+			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Le dirigeant dont le nom a été raillé de l'histoire a tenté d'ouvrir la ville d'Atlantis. Une épidémie s'en suivit.", "archive": "cites/20261012_histoire_d_atlantis.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "l'histoire, la science, a retenu les règles d'isolement drastiques.", "archive": "cites/20261012_histoire_d_atlantis.md"}],
 			"apres": ["atlantis_refus_frere"],
 			"liens": ["atlantis", "atlantis_refus_frere"]
 		},
@@ -331,7 +331,7 @@
 			"visibilite": "public",
 			"origine": ["atlantis"],
 			"tags": {"peuples": ["atlantes"], "lieux": ["atlantis"], "institutions": ["guilde"], "themes": ["mythes", "remparts"]},
-			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Elle s'est depuis installée et elle protège sa progéniture tout en protégeant la cité"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Une guilde d'aventuriers a élu domicile dans le port extérieur. Les aventuriers ont pour mission principale de sécuriser les remparts extérieur."}],
+			"sources": [{"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Elle s'est depuis installée et elle protège sa progéniture tout en protégeant la cité", "archive": "cites/20261012_histoire_d_atlantis.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Une guilde d'aventuriers a élu domicile dans le port extérieur. Les aventuriers ont pour mission principale de sécuriser les remparts extérieur.", "archive": "cites/20261012_histoire_d_atlantis.md"}],
 			"liens": ["atlantis"]
 		},
 		{
@@ -343,7 +343,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie", "europe_est"],
 			"tags": {"lieux": ["novgorod"], "themes": ["vampires", "immortalite", "mythes"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Donc Lamia était une reine dans un pays proche de la Mésopotamie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est pendant cette période où elle est enfermée vivante que Néfertiti va découvrir à une autre méthode pour devenir immortel"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "elle règne aujourd'hui depuis Novgorod"}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Donc Lamia était une reine dans un pays proche de la Mésopotamie", "archive": "monde/20261012_les_vampires_de_telluris.md"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est pendant cette période où elle est enfermée vivante que Néfertiti va découvrir à une autre méthode pour devenir immortel", "archive": "monde/20261012_les_vampires_de_telluris.md"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie", "archive": "monde/20261012_les_vampires_de_telluris.md"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "elle règne aujourd'hui depuis Novgorod", "archive": "monde/20261012_les_vampires_de_telluris.md"}],
 			"liens": ["dynastie_nefertiti", "dragons_de_sang"]
 		},
 		{
@@ -355,7 +355,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["egypte"],
 			"tags": {"peuples": ["egyptiens"], "lieux": ["abou_simbel", "alexandrie"], "themes": ["immortalite", "mythes"]},
-			"sources": [{"fichier": "cites/20260821_decrire_abou_simbel_fantastique.md", "date": "2026-08-21", "citation": "Elle était présente avant que le pyramides ne futent érigées et avant que les frères aborigènes ne parcours le Monde."}],
+			"sources": [{"fichier": "cites/20260821_decrire_abou_simbel_fantastique.md", "date": "2026-08-21", "citation": "Elle était présente avant que le pyramides ne futent érigées et avant que les frères aborigènes ne parcours le Monde.", "archive": "cites/20260821_decrire_abou_simbel_fantastique.md"}],
 			"liens": ["grigori", "cite_abou_simbel", "lamia_reine"]
 		},
 		{
@@ -367,7 +367,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"peuples": ["sumeriens"], "themes": ["mythes", "mystere"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le Déluge clôt l'antédiluvien."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "le déluge n'a pas enseveli Mu"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le Déluge clôt l'antédiluvien.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "le déluge n'a pas enseveli Mu", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}],
 			"liens": ["gilgamesh", "vague"]
 		},
 		{
@@ -379,7 +379,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["sumeriens"], "lieux": ["uruk"], "themes": ["mythes", "remparts", "immortalite"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Les points clés étant Gilgamesh, les trois frères et la grande vague."}, {"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les récits les plus anciens évoquent des figures comme Gilgamesh"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Les points clés étant Gilgamesh, les trois frères et la grande vague.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Les récits les plus anciens évoquent des figures comme Gilgamesh", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}],
 			"liens": ["deluge", "dynastie_nefertiti", "grigori"]
 		},
 		{
@@ -391,7 +391,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["italie"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["rome", "paradis"], "institutions": ["templiers", "papaute"], "themes": ["portails", "mondes_divins"]},
-			"sources": [{"fichier": "cites/20260820_decrire_rome_dans_telluris.md", "date": "2026-08-20", "citation": "Le portail de Saint Pierre existait avant l'arrivée d'un des frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rome date d'avant les trois frères, et Saint-Pierre existe avant même Rome."}],
+			"sources": [{"fichier": "cites/20260820_decrire_rome_dans_telluris.md", "date": "2026-08-20", "citation": "Le portail de Saint Pierre existait avant l'arrivée d'un des frères aborigènes.", "archive": "cites/20260820_decrire_rome_dans_telluris.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rome date d'avant les trois frères, et Saint-Pierre existe avant même Rome.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["romulus_remus", "groupe_saint_pierre"]
 		},
 		{
@@ -403,7 +403,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["scandinavie"],
 			"tags": {"peuples": ["islandais", "anges_demons"], "lieux": ["akureyri", "reykjavik", "enfer"], "themes": ["portails", "mondes_divins", "mystere"]},
-			"sources": [{"fichier": "monde/20260821_portail_des_profondeurs.md", "date": "2026-08-21", "citation": "Le portail des grottes de Helka est un gouffre ouvert vers les entrailles de l'Enfer de l'ange de lumière, Lucifer."}]
+			"sources": [{"fichier": "cites/20260820_decrire_akureyri_fortifiee.md", "date": "2026-08-21", "citation": "Le portail des grottes de Helka est un gouffre ouvert vers les entrailles de l'Enfer de l'ange de lumière, Lucifer.", "archive": "monde/20260821_portail_des_profondeurs.md"}]
 		},
 		{
 			"id": "breche_cordoue",
@@ -414,7 +414,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["iberie"],
 			"tags": {"peuples": ["andalous"], "lieux": ["cordoue"], "themes": ["portails", "donjons", "mystere"]},
-			"sources": [{"fichier": "cites/20260824_decrire_l_histoire_de_cordoue.md", "date": "2026-08-24", "citation": "une barrière magique scellant une brèche originelle : un donjon abyssal en descente constante sous la cité"}]
+			"sources": [{"fichier": "cites/20260824_decrire_l_histoire_de_cordoue.md", "date": "2026-08-24", "citation": "une barrière magique scellant une brèche originelle : un donjon abyssal en descente constante sous la cité", "archive": "cites/20260824_decrire_l_histoire_de_cordoue.md"}]
 		},
 		{
 			"id": "remparts",
@@ -425,7 +425,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"themes": ["remparts"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "depuis que les anthropes se sont réfugiés derrière des remparts"}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "depuis que les anthropes se sont réfugiés derrière des remparts", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}]
 		},
 		{
 			"id": "paladins",
@@ -436,7 +436,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["paladins"], "themes": ["remparts"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "L'ordre des Paladins date d'avant l'apparition des portails."}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "l'autre rouvrant les routes redevenues nécessaires"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "L'ordre des Paladins date d'avant l'apparition des portails.", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "l'autre rouvrant les routes redevenues nécessaires", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"liens": ["templiers", "auberges_relais"]
 		},
 		{
@@ -448,7 +448,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["templiers"], "themes": ["remparts"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "À l'origine, les Templiers gardent les remparts et les lieux derrière le rempart"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "À l'origine, les Templiers gardent les remparts et les lieux derrière le rempart", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["paladins", "groupe_saint_pierre", "templiers_temples"]
 		},
 		{
@@ -460,7 +460,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["paladins"], "themes": ["remparts"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "« Auberge-relais » est le terme employé avant les monothéismes."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "« Auberge-relais » est le terme employé avant les monothéismes.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["monasteres_relais"]
 		},
 		{
@@ -472,7 +472,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"lieux": ["hermon"], "themes": ["mythes", "savoir", "immortalite", "mystere"]},
-			"sources": [{"fichier": "monde/20261004_introduit_les_grigori.md", "date": "2026-10-04", "citation": "Pour moi ce sont les éveillés de bien avant JC."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grigori : proposition du § 9 validée."}],
+			"sources": [{"fichier": "monde/20261004_introduit_les_grigori.md", "date": "2026-10-04", "citation": "Pour moi ce sont les éveillés de bien avant JC.", "archive": "monde/20261004_introduit_les_grigori.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grigori : proposition du § 9 validée.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["dynastie_nefertiti"]
 		},
 		{
@@ -484,7 +484,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["italie"],
 			"tags": {"peuples": ["romains"], "lieux": ["rome"], "institutions": ["templiers"], "themes": ["mythes", "portails"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus : proposition du § 10 validée. L'inversion avec l'ordre réel n'est pas gênante"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus : proposition du § 10 validée. L'inversion avec l'ordre réel n'est pas gênante", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["portail_saint_pierre", "groupe_saint_pierre", "cite_rome"],
 			"apres": ["remparts"]
 		},
@@ -497,7 +497,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["italie"],
 			"tags": {"peuples": ["romains"], "lieux": ["rome", "paradis"], "institutions": ["templiers", "papaute"], "themes": ["portails", "mondes_divins"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "un groupe spécialisé pour Saint-Pierre. Il est présent sur le site avant la venue de Jésus"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "un groupe spécialisé pour Saint-Pierre. Il est présent sur le site avant la venue de Jésus", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["romulus_remus", "jesus"],
 			"apres": ["romulus_remus"]
 		},
@@ -510,7 +510,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "proposition", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["paladins"], "themes": ["remparts"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les grandes routes sont balisées, entretenues et protégées."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Les grandes routes sont balisées, entretenues et protégées.", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}],
 			"apres": ["paladins"]
 		},
 		{
@@ -522,7 +522,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["australie"],
 			"tags": {"peuples": ["aborigenes"], "themes": ["portails", "savoir"]},
-			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Les portails n'existaient pas avant leur création par les trois frères aborigènes."}, {"fichier": "Telluris_Document_Maitre.md", "citation": "Leur technique utilise notamment une bolas"}],
+			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Les portails n'existaient pas avant leur création par les trois frères aborigènes.", "archive": "monde/20260812_monde_medieval_fantastique.md"}, {"fichier": "Telluris_Document_Maitre.md", "citation": "Leur technique utilise notamment une bolas"}],
 			"liens": ["notre_dame", "chapelle_palatine", "sainte_sophie"]
 		},
 		{
@@ -535,7 +535,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["aborigenes"], "lieux": ["lutecia", "mu"], "institutions": ["architectes", "templiers"], "themes": ["portails", "cristaux"]},
-			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_lutecia.md", "date": "2026-08-20", "citation": "Lutecia est une ville ayant pour source le portail de Notre-Dame. Il a été fait par l'un des frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jaune pour Mu, violet pour le reste du monde."}],
+			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_lutecia.md", "date": "2026-08-20", "citation": "Lutecia est une ville ayant pour source le portail de Notre-Dame. Il a été fait par l'un des frères aborigènes.", "archive": "cites/20260820_decrire_l_histoire_de_lutecia.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jaune pour Mu, violet pour le reste du monde.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"apres": ["trois_freres"],
 			"liens": ["cite_lutecia", "mu"]
 		},
@@ -548,7 +548,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["mu"],
 			"tags": {"peuples": ["mu", "aborigenes"], "lieux": ["mu"], "institutions": ["architectes"], "themes": ["portails", "savoir", "cristaux"]},
-			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu a appris les portails d'un des trois frères."}],
+			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu a appris les portails d'un des trois frères.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}],
 			"apres": ["trois_freres"],
 			"liens": ["mu", "mu_engloutie"]
 		},
@@ -561,7 +561,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["rhenanie"],
 			"tags": {"peuples": ["aborigenes", "carolingiens"], "lieux": ["aix", "abou_simbel"], "themes": ["portails"]},
-			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "5 portails vers le monde créé par un des frères aborigènes avant l'avènement de Charlemagne"}],
+			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "5 portails vers le monde créé par un des frères aborigènes avant l'avènement de Charlemagne", "archive": "cites/20260824_decrire_aix_la_chapelle.md"}],
 			"apres": ["trois_freres"],
 			"liens": ["cite_aix"]
 		},
@@ -574,7 +574,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["byzance", "italie"],
 			"tags": {"peuples": ["byzantins", "romains"], "lieux": ["constantinople", "rome"], "themes": ["portails"]},
-			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "Son portail transversal actif la relie à Rome de manière stable depuis des millénaires."}],
+			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "Son portail transversal actif la relie à Rome de manière stable depuis des millénaires.", "archive": "cites/20260824_decrit_constantinople_telluris.md"}],
 			"apres": ["trois_freres"],
 			"liens": ["justinien"]
 		},
@@ -610,7 +610,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["hebreux"], "lieux": ["jerusalem"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David est reconnu par Jérusalem comme son roi."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Colonne Jérusalem (§ 6) et correction de Hārūt et Mārūt (§ 7) validées"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David est reconnu par Jérusalem comme son roi.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Colonne Jérusalem (§ 6) et correction de Hārūt et Mārūt (§ 7) validées", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"apres": ["trois_freres"]
 		},
 		{
@@ -622,7 +622,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["hebreux"], "lieux": ["jerusalem"], "themes": ["portails"]},
-			"sources": [{"fichier": "monde/20260819_frise_chronologique_de_telluris.md", "date": "2026-08-19", "citation": "Salomon a existé après les 3 frères aborigènes et le début de l'aire des portails"}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "Héritage de Salomon"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-19", "citation": "Salomon a existé après les 3 frères aborigènes et le début de l'aire des portails", "archive": "monde/20260819_frise_chronologique_de_telluris.md"}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "Héritage de Salomon"}],
 			"apres": ["trois_freres", "david"],
 			"liens": ["harut_marut", "cite_jerusalem"]
 		},
@@ -635,7 +635,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "proposition", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens", "anges_demons"], "lieux": ["babylone"], "themes": ["mythes", "savoir"]},
-			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-09-10", "citation": "C'est également l'époque de Salomon."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La découverte des portails est antérieure à Salomon"}],
+			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-09-10", "citation": "C'est également l'époque de Salomon.", "archive": "cites/20260819_histoire_de_babylone.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La découverte des portails est antérieure à Salomon", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"apres": ["trois_freres"]
 		},
 		{
@@ -647,7 +647,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["vampires", "immortalite", "savoir"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Ne peuvent pas passer pour des humains."}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "élèves de Hārūt et Mārūt"}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Ne peuvent pas passer pour des humains.", "archive": "monde/20261012_les_vampires_de_telluris.md"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "élèves de Hārūt et Mārūt"}],
 			"apres": ["harut_marut"],
 			"liens": ["harut_marut", "grigori"]
 		},
@@ -660,7 +660,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["europe_est"],
 			"tags": {"institutions": ["paladins", "ordre_dragon"], "themes": ["vampires", "remparts"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "des paladins qui étaient dans une auberge relais ont vu un soir arriver un carrosse au rideau baissé"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "le sang de la lamia a été répandu sur leurs cadavres frais et a contaminé leur corps"}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "des paladins qui étaient dans une auberge relais ont vu un soir arriver un carrosse au rideau baissé", "archive": "monde/20261012_les_vampires_de_telluris.md"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "le sang de la lamia a été répandu sur leurs cadavres frais et a contaminé leur corps", "archive": "monde/20261012_les_vampires_de_telluris.md"}],
 			"apres": ["paladins"],
 			"liens": ["lamia_reine", "auberges_relais", "dracula"]
 		},
@@ -673,7 +673,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "proposition", "visibilite": "public",
 			"origine": ["grece"],
 			"tags": {"peuples": ["grecs"], "institutions": ["architectes"], "themes": ["mythes", "portails", "savoir"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Dédale, dont la légende est adaptée à Telluris comme celle d'un Architecte"}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Dédale, dont la légende est adaptée à Telluris comme celle d'un Architecte", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}],
 			"apres": ["architectes"]
 		},
 		{
@@ -685,7 +685,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["architectes"], "themes": ["portails", "savoir"]},
-			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "La transmission de leur maîtrise à entraîner une dégradation de leur création puis de leur entretien."}],
+			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "La transmission de leur maîtrise à entraîner une dégradation de leur création puis de leur entretien.", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"apres": ["architectes"]
 		},
 		{
@@ -710,7 +710,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["paladins"], "themes": ["monotheisme"]},
-			"sources": [{"fichier": "monde/20260831_reformulation_monotheiste.md", "date": "2026-08-31", "citation": "Le monothéisme n'est pas la majorité dans le monde de Telluris et s'intègre sans tentative de conversion par la force."}],
+			"sources": [{"fichier": "monde/20260831_reformulation_monotheiste.md", "date": "2026-08-31", "citation": "Le monothéisme n'est pas la majorité dans le monde de Telluris et s'intègre sans tentative de conversion par la force.", "archive": "monde/20260831_reformulation_monotheiste.md"}],
 			"apres": ["jesus", "auberges_relais"],
 			"liens": ["monasteres_relais"]
 		},
@@ -723,7 +723,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["paladins"], "themes": ["monotheisme", "remparts"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Depuis que ceux-ci se sont mis en place, une bonne partie des auberges-relais sont devenues des monastères-relais."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Depuis que ceux-ci se sont mis en place, une bonne partie des auberges-relais sont devenues des monastères-relais.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"apres": ["monotheismes"]
 		},
 		{
@@ -735,7 +735,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["byzance"],
 			"tags": {"peuples": ["byzantins"], "lieux": ["constantinople"], "themes": ["portails", "monotheisme"]},
-			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "Chef-d'œuvre d'architecture consacré en sous Justinien."}],
+			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "Chef-d'œuvre d'architecture consacré en sous Justinien.", "archive": "cites/20260824_decrit_constantinople_telluris.md"}],
 			"apres": ["sainte_sophie", "jesus"]
 		},
 		{
@@ -747,7 +747,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"lieux": ["lutecia", "constantinople", "bruges", "aix", "akureyri"], "themes": ["vague", "portails", "mystere"]},
-			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Il y a quelques siècles, une vague de mana a balayée Telluris."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Date de la Vague : sept à huit siècles, retenu."}],
+			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Il y a quelques siècles, une vague de mana a balayée Telluris.", "archive": "monde/20260812_monde_medieval_fantastique.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Date de la Vague : sept à huit siècles, retenu.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"apres": ["justinien"]
 		},
 		{
@@ -759,7 +759,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["mu"],
 			"tags": {"peuples": ["mu"], "lieux": ["mu"], "institutions": ["architectes", "templiers"], "themes": ["vague", "portails", "mystere"]},
-			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Elle a sombré au moment de la grande vague."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "La vérité et que Mu a sauvé Telluris en sacrifiant un continent pour fermer un portail naturel dont la voracité menacé le monde."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Echidna a été bloquée sous le continent de Mu lorsque la porte des enfers à été célée."}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Les régnants de Mu d'alors ont eux même caché les vraies raisons à leur population"}],
+			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Elle a sombré au moment de la grande vague.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "La vérité et que Mu a sauvé Telluris en sacrifiant un continent pour fermer un portail naturel dont la voracité menacé le monde.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Echidna a été bloquée sous le continent de Mu lorsque la porte des enfers à été célée.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}, {"fichier": "cites/20261012_histoire_d_atlantis.md", "date": "2026-10-12", "citation": "Les régnants de Mu d'alors ont eux même caché les vraies raisons à leur population", "archive": "cites/20261012_histoire_d_atlantis.md"}],
 			"liens": ["mu", "vague", "trame_a"]
 		},
 		{
@@ -771,7 +771,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["mu"],
 			"tags": {"peuples": ["mu"], "lieux": ["mu"], "themes": ["vague", "mystere", "savoir"]},
-			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Le sacrifice change les sept derniers Sages en sept ancrages qui maintiennent la bulle de Mu et le sceau du portail"}],
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Le sacrifice change les sept derniers Sages en sept ancrages qui maintiennent la bulle de Mu et le sceau du portail", "archive": "cites/20261123_tour_de_babel.md"}],
 			"liens": ["mu_engloutie"]
 		},
 		{
@@ -783,7 +783,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["savoir", "mythes", "mystere"]},
-			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Des êtres sortent du golfe, enseignent le jour, regagnent la mer le soir."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-11-24", "citation": "Les sages n'arrivent qu'après la grande vague, non?"}],
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Des êtres sortent du golfe, enseignent le jour, regagnent la mer le soir.", "archive": "cites/20261123_tour_de_babel.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-11-24", "citation": "Les sages n'arrivent qu'après la grande vague, non?", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}],
 			"apres": ["vague"],
 			"liens": ["sept_sages_ancrages", "tour_de_babel"]
 		},
@@ -796,7 +796,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "institutions": ["guilde"], "themes": ["donjons", "savoir", "mystere"]},
-			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Construction un à deux siècles après la Vague, sur des générations ; éveil il y a environ cinq siècles."}, {"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Un point d'ancrage tous les sept étages"}],
+			"sources": [{"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Construction un à deux siècles après la Vague, sur des générations ; éveil il y a environ cinq siècles.", "archive": "cites/20261123_tour_de_babel.md"}, {"fichier": "cites/20261123_tour_de_babel.md", "date": "2026-11-23", "citation": "Un point d'ancrage tous les sept étages", "archive": "cites/20261123_tour_de_babel.md"}],
 			"apres": ["vague"],
 			"liens": ["apkallu_revenus", "cite_babylone", "harut_marut"]
 		},
@@ -809,7 +809,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"themes": ["donjons", "portails", "cristaux", "mondes_divins"]},
-			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Les premiers voyageurs ont alors pénétrés dans les premiers donjons."}],
+			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Les premiers voyageurs ont alors pénétrés dans les premiers donjons.", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -821,7 +821,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["architectes"], "themes": ["cristaux", "portails", "commerce"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le violet est un cristal de puissance pure de mana. Le jaune est un cristal de stabilisation des effets des portails."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "les portails créé par les héritiers des trois frères demandent des cristaux. Rarement les portails originaux."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le violet est un cristal de puissance pure de mana. Le jaune est un cristal de stabilisation des effets des portails.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "les portails créé par les héritiers des trois frères demandent des cristaux. Rarement les portails originaux.", "archive": "cites/20261011_histoire_de_mu_chatgpt.md"}],
 			"apres": ["architectes"]
 		},
 		{
@@ -833,7 +833,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["templiers"], "themes": ["donjons", "portails"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Après la Vague, l'ordre se recentre sur les temples"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "Une garde extérieure. Une garde intérieure."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Après la Vague, l'ordre se recentre sur les temples", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "Une garde extérieure. Une garde intérieure.", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"apres": ["vague", "templiers"]
 		},
 		{
@@ -845,7 +845,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["rhenanie"],
 			"tags": {"peuples": ["carolingiens"], "lieux": ["aix"], "themes": ["portails"]},
-			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "Charlemagne qui transformala cité un siècle après la grande vague."}],
+			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "Charlemagne qui transformala cité un siècle après la grande vague.", "archive": "cites/20260824_decrire_aix_la_chapelle.md"}],
 			"apres": ["vague"],
 			"liens": ["cite_aix", "chapelle_palatine"]
 		},
@@ -858,7 +858,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["europe_est"],
 			"tags": {"lieux": ["valachie"], "institutions": ["ordre_dragon"], "themes": ["vampires", "deuil", "donjons"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Cette malédiction est punie par les dieux, par le vampirisme."}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Cette malédiction est punie par les dieux, par le vampirisme.", "archive": "monde/20261012_les_vampires_de_telluris.md"}],
 			"apres": ["dragons_de_sang"],
 			"liens": ["dragons_de_sang", "strigoi_radu"]
 		},
@@ -871,7 +871,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["europe_est"],
 			"tags": {"lieux": ["valachie"], "themes": ["vampires", "mystere"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est un proche de Dracula qui a tenté, on va dire, de le renverser"}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est un proche de Dracula qui a tenté, on va dire, de le renverser", "archive": "monde/20261012_les_vampires_de_telluris.md"}],
 			"apres": ["dracula"],
 			"liens": ["dracula"]
 		},
@@ -884,7 +884,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["irlande"],
 			"tags": {"lieux": ["ossory"], "themes": ["lycanthropes", "mythes"]},
-			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "don puis malédiction"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "le faoladh protège enfants, blessés et égarés"}]
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "don puis malédiction", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "le faoladh protège enfants, blessés et égarés", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}]
 		},
 		{
 			"id": "premier_nahual",
@@ -896,7 +896,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["amerique_nord", "amerique_sud"],
 			"tags": {"lieux": ["teotihuacan"], "themes": ["lycanthropes", "mythes", "mystere"]},
-			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Tepeyollotl**, en **théorie**"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "des **gardiens de la forêt**, pendant américain des Paladins"}]
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Tepeyollotl**, en **théorie**", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "des **gardiens de la forêt**, pendant américain des Paladins", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}]
 		},
 		{
 			"id": "lycaon",
@@ -907,7 +907,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["grece"],
 			"tags": {"peuples": ["grecs"], "themes": ["lycanthropes", "mythes"]},
-			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Lycaon d'Arcadie**"}]
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Lycaon d'Arcadie**", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}]
 		},
 		{
 			"id": "chiens_des_dieux",
@@ -918,7 +918,7 @@
 			"couche": "present", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["europe_est"],
 			"tags": {"lieux": ["livonie"], "themes": ["lycanthropes", "portails", "mystere"]},
-			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "franchissent **trois nuits par an** un **portail naturel** vers un monde souterrain"}]
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "franchissent **trois nuits par an** un **portail naturel** vers un monde souterrain", "archive": "monde/20261014_les_loups_garous_de_telluris.md"}]
 		},
 		{
 			"id": "guildes",
@@ -929,7 +929,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "synthese", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["guilde"], "themes": ["donjons", "cristaux"]},
-			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les Guildes apparaissent pour financer les expéditions"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "La Guilde est le seul chemin légal vers la fortune pour les non-nobles."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-21", "citation": "Les Guildes apparaissent pour financer les expéditions", "archive": "monde/20260821_frise_chronologique_de_telluris.md"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "La Guilde est le seul chemin légal vers la fortune pour les non-nobles.", "archive": "monde/20260812_monde_medieval_fantastique.md"}],
 			"apres": ["premiers_donjons"]
 		},
 		{
@@ -965,7 +965,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["italie"],
 			"tags": {"peuples": ["italiens"], "lieux": ["genes", "venise"], "themes": ["commerce"]},
-			"sources": [{"fichier": "cites/20260822_decrire_l_histoire_de_genes.md", "date": "2026-08-22", "citation": "Marco Polo y fut emprisonné. Capturé après une débâcle navale contre un dragon des mers dont Gênes le sauva."}],
+			"sources": [{"fichier": "cites/20260822_decrire_l_histoire_de_genes.md", "date": "2026-08-22", "citation": "Marco Polo y fut emprisonné. Capturé après une débâcle navale contre un dragon des mers dont Gênes le sauva.", "archive": "cites/20260822_decrire_l_histoire_de_genes.md"}],
 			"apres": ["averroes"]
 		},
 		{
@@ -977,7 +977,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["rhenanie"],
 			"tags": {"peuples": ["carolingiens"], "lieux": ["aix"], "themes": ["monotheisme"]},
-			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "la ville devient l'un des pèlerinages les plus fréquentés d'Occident il y a quelques siècles."}],
+			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "la ville devient l'un des pèlerinages les plus fréquentés d'Occident il y a quelques siècles.", "archive": "cites/20260824_decrire_aix_la_chapelle.md"}],
 			"apres": ["charlemagne"]
 		},
 		{
@@ -989,7 +989,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["flandres"],
 			"tags": {"peuples": ["flamands"], "lieux": ["bruges"], "themes": ["commerce"]},
-			"sources": [{"fichier": "cites/20260823_decrire_bruges_telluris.md", "date": "2026-08-23", "citation": "le patrimoine des ducs de Bourgogne, qui feront de Bruges leur résidence privilégiée"}],
+			"sources": [{"fichier": "cites/20260823_decrire_bruges_telluris.md", "date": "2026-08-23", "citation": "le patrimoine des ducs de Bourgogne, qui feront de Bruges leur résidence privilégiée", "archive": "cites/20260823_decrire_bruges_telluris.md"}],
 			"apres": ["marco_polo"]
 		},
 		{
@@ -1002,7 +1002,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["egypte"],
 			"tags": {"peuples": ["egyptiens"], "lieux": ["abou_simbel"], "themes": ["immortalite"]},
-			"sources": [{"fichier": "cites/20260821_decrire_abou_simbel_fantastique.md", "date": "2026-08-21", "citation": "Elle était présente avant que le pyramides ne futent érigées"}]
+			"sources": [{"fichier": "cites/20260821_decrire_abou_simbel_fantastique.md", "date": "2026-08-21", "citation": "Elle était présente avant que le pyramides ne futent érigées", "archive": "cites/20260821_decrire_abou_simbel_fantastique.md"}]
 		},
 		{
 			"id": "cite_rome",
@@ -1014,7 +1014,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["italie"],
 			"tags": {"peuples": ["romains"], "lieux": ["rome"], "institutions": ["papaute", "templiers"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rome date d'avant les trois frères"}, {"fichier": "cites/20260820_decrire_rome_dans_telluris.md", "date": "2026-08-20", "citation": "La ville aux deux visages."}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rome date d'avant les trois frères", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}, {"fichier": "cites/20260820_decrire_rome_dans_telluris.md", "date": "2026-08-20", "citation": "La ville aux deux visages.", "archive": "cites/20260820_decrire_rome_dans_telluris.md"}]
 		},
 		{
 			"id": "cite_jerusalem",
@@ -1025,7 +1025,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "synthese", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["hebreux"], "lieux": ["jerusalem"], "themes": ["monotheisme"]},
-			"sources": [{"fichier": "monde/20260819_frise_chronologique_de_telluris.md", "date": "2026-08-19", "citation": "Jérusalem existe déjà comme cité ancienne"}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-08-19", "citation": "Jérusalem existe déjà comme cité ancienne", "archive": "monde/20260819_frise_chronologique_de_telluris.md"}]
 		},
 		{
 			"id": "cite_babylone",
@@ -1036,7 +1036,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie"],
 			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["savoir"]},
-			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-08-19", "citation": "Babylone — La Porte des Dieux"}]
+			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-08-19", "citation": "Babylone — La Porte des Dieux", "archive": "cites/20260819_histoire_de_babylone.md"}]
 		},
 		{
 			"id": "cite_constantinople",
@@ -1048,7 +1048,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["byzance"],
 			"tags": {"peuples": ["byzantins"], "lieux": ["constantinople"], "themes": ["portails"]},
-			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "la plus grande et la plus riche métropole d'Europe"}]
+			"sources": [{"fichier": "cites/20260824_decrit_constantinople_telluris.md", "date": "2026-08-24", "citation": "la plus grande et la plus riche métropole d'Europe", "archive": "cites/20260824_decrit_constantinople_telluris.md"}]
 		},
 		{
 			"id": "cite_aix",
@@ -1059,7 +1059,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["rhenanie"],
 			"tags": {"peuples": ["carolingiens"], "lieux": ["aix"]},
-			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "un siècle après la grande vague"}]
+			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "un siècle après la grande vague", "archive": "cites/20260824_decrire_aix_la_chapelle.md"}]
 		},
 		{
 			"id": "cite_venise",
@@ -1071,7 +1071,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "synthese", "visibilite": "public",
 			"origine": ["italie"],
 			"tags": {"peuples": ["italiens"], "lieux": ["venise"], "institutions": ["paladins"], "themes": ["commerce"]},
-			"sources": [{"fichier": "cites/20260822_decrire_venise_dans_telluris.md", "date": "2026-08-22", "citation": "la « Sérénissime »"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Quasiment toutes les villes ont dû exister avant la Vague"}]
+			"sources": [{"fichier": "cites/20260822_decrire_venise_dans_telluris.md", "date": "2026-08-22", "citation": "la « Sérénissime »", "archive": "cites/20260822_decrire_venise_dans_telluris.md"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Quasiment toutes les villes ont dû exister avant la Vague", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]
 		},
 		{
 			"id": "cite_cordoue",
@@ -1094,7 +1094,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "synthese", "visibilite": "public",
 			"origine": ["scandinavie"],
 			"tags": {"peuples": ["islandais"], "lieux": ["reykjavik"], "institutions": ["templiers", "paladins"]},
-			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_reykjavik.md", "date": "2026-08-20", "citation": "Décrit son histoire depuis sa création à son état actuel"}]
+			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_reykjavik.md", "date": "2026-08-20", "citation": "Décrit son histoire depuis sa création à son état actuel", "archive": "cites/20260820_decrire_l_histoire_de_reykjavik.md"}]
 		},
 		{
 			"id": "cite_genes",
@@ -1118,7 +1118,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["flandres"],
 			"tags": {"peuples": ["flamands"], "lieux": ["bruges"], "institutions": ["templiers", "paladins"], "themes": ["commerce"]},
-			"sources": [{"fichier": "cites/20260823_decrire_bruges_telluris.md", "date": "2026-08-23", "citation": "Elle héberge un portail transverse ayant résisté à la vague"}]
+			"sources": [{"fichier": "cites/20260823_decrire_bruges_telluris.md", "date": "2026-08-23", "citation": "Elle héberge un portail transverse ayant résisté à la vague", "archive": "cites/20260823_decrire_bruges_telluris.md"}]
 		},
 		{
 			"id": "cite_akureyri",
@@ -1154,7 +1154,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["lutecia"], "institutions": ["architectes", "paladins", "guilde"], "themes": ["portails"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Elle prend son nom de Lutecia en dernier."}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Elle prend son nom de Lutecia en dernier.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}]
 		},
 		{
 			"id": "cite_rhemi",
@@ -1166,7 +1166,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["remes", "carolingiens"], "lieux": ["rhemi"], "institutions": ["paladins"], "themes": ["remparts"]},
-			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Rhemi sacre, Chartres juge et enseigne"}, {"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Ok pour tout le reste pour Rhemi."}],
+			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Rhemi sacre, Chartres juge et enseigne"}, {"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Ok pour tout le reste pour Rhemi.", "archive": "cites/20261011_rhemi_et_chartres.md"}],
 			"liens": ["porte_de_mars", "sacre_rhemi", "charlemagne"]
 		},
 		{
@@ -1178,7 +1178,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["romains", "remes"], "lieux": ["rhemi", "rome"], "institutions": ["architectes"], "themes": ["portails", "mystere"]},
-			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Le monument reste un « portail mort-né »."}],
+			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Le monument reste un « portail mort-né ».", "archive": "cites/20261011_rhemi_et_chartres.md"}],
 			"liens": ["cite_rhemi"]
 		},
 		{
@@ -1203,7 +1203,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["carnutes"], "lieux": ["chartres", "lutecia"], "institutions": ["templiers"], "themes": ["savoir", "commerce"]},
-			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Chaque année, les sages des cités s'y réunissent pour arbitrer leurs différends."}, {"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Ok pour le reste pour chartres."}],
+			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Chaque année, les sages des cités s'y réunissent pour arbitrer leurs différends.", "archive": "cites/20261011_rhemi_et_chartres.md"}, {"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "Ok pour le reste pour chartres.", "archive": "cites/20261011_rhemi_et_chartres.md"}],
 			"liens": ["labyrinthe_chartres", "puits_minotaure", "ecole_chartres"]
 		},
 		{
@@ -1227,7 +1227,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["chartres"], "institutions": ["templiers"], "themes": ["donjons", "portails", "mythes"]},
-			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "le puits est un portail horizontal vers ce monstre"}],
+			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "le puits est un portail horizontal vers ce monstre", "archive": "cites/20261011_rhemi_et_chartres.md"}],
 			"liens": ["vague", "labyrinthe_chartres", "cite_chartres"]
 		},
 		{
@@ -1252,9 +1252,9 @@
 			"origine": ["ile_bretagne"],
 			"tags": {"peuples": ["bretons"], "lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons", "mythes"]},
 			"sources": [
-				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "je suis d'accord avec Winchester, c'est un endroit pour mettre le rôle et mettre Camelot"},
-				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "C'est fondé par Arthur c'est à la croisée de nombreux donjons qui ont été perturbés"},
-				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Excalibur est à Camelot**"}
+				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "je suis d'accord avec Winchester, c'est un endroit pour mettre le rôle et mettre Camelot", "archive": "cites/20261021_camelot_winchester.md"},
+				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "C'est fondé par Arthur c'est à la croisée de nombreux donjons qui ont été perturbés", "archive": "cites/20261021_camelot_winchester.md"},
+				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Excalibur est à Camelot**", "archive": "cites/20261021_camelot_winchester.md"}
 			],
 			"liens": ["arthur", "table_ronde"]
 		},
@@ -1267,7 +1267,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"peuples": ["bretons"], "lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons", "mythes"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Arthur devient l'homme des **premiers donjons**"}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Arthur devient l'homme des **premiers donjons**", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["vague"],
 			"liens": ["douze_debordements", "camlann"]
 		},
@@ -1280,7 +1280,7 @@
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"lieux": ["camelot"], "institutions": ["table_ronde", "guilde", "paladins", "templiers"], "themes": ["donjons"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un héritage que la **Guilde de Londres revendique**"}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un héritage que la **Guilde de Londres revendique**", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -1292,7 +1292,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Dans Telluris cela reste un évènement  de débordements de donjons sans avoir été altéré par le temps."}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Dans Telluris cela reste un évènement  de débordements de donjons sans avoir été altéré par le temps.", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -1304,7 +1304,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"peuples": ["bretons"], "lieux": ["camelot", "avalon"], "institutions": ["table_ronde"], "themes": ["donjons", "mystere", "deuil"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Camlann** est un **débordement fatal**"}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Camlann** est un **débordement fatal**", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["douze_debordements"]
 		},
 		{
@@ -1316,7 +1316,7 @@
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne", "au_dela"],
 			"tags": {"lieux": ["annwn", "glastonbury"], "themes": ["mondes_divins", "mythes", "mystere"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "On garde la version galloise plus ancienne : le **chaudron d'Annwn**"}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "On garde la version galloise plus ancienne : le **chaudron d'Annwn**", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -1328,7 +1328,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"lieux": ["stonehenge"], "institutions": ["architectes"], "themes": ["portails", "mystere"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Stonehenge** est un cercle-portail, non daté"}]
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Stonehenge** est un cercle-portail, non daté", "archive": "cites/20261021_camelot_winchester.md"}]
 		},
 		{
 			"id": "glastonbury_annwn",
@@ -1350,7 +1350,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["ile_bretagne"],
 			"tags": {"peuples": ["dragons"], "lieux": ["dinas_emrys"], "themes": ["donjons", "mythes"]},
-			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un **donjon sous la tour** de Vortigern"}],
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un **donjon sous la tour** de Vortigern", "archive": "cites/20261021_camelot_winchester.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -1362,7 +1362,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["nabateens"], "lieux": ["petra"], "institutions": ["templiers", "architectes", "paladins"], "themes": ["commerce", "remparts"]},
-			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "les **gardiens des sources ont un droit de veto**"}],
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts", "archive": "cites/20261024_histoire_de_petra.md"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "les **gardiens des sources ont un droit de veto**"}],
 			"liens": ["petra_rois", "petra_seisme"]
 		},
 		{
@@ -1374,7 +1374,7 @@
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["nabateens"], "lieux": ["petra", "alexandrie"], "institutions": ["architectes"], "themes": ["portails", "commerce"]},
-			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Rois : Âge des Portails"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Portails : des héritiers"}],
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Rois : Âge des Portails", "archive": "cites/20261024_histoire_de_petra.md"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Portails : des héritiers", "archive": "cites/20261024_histoire_de_petra.md"}],
 			"apres": ["trois_freres"]
 		},
 		{
@@ -1386,7 +1386,7 @@
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["levant"],
 			"tags": {"peuples": ["nabateens"], "lieux": ["petra"], "institutions": ["templiers", "paladins"], "themes": ["vague", "donjons", "portails"]},
-			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "La vague et les séismes ont lieux en même temps et les canaux d'irriguation sont rapidement réparés"}],
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "La vague et les séismes ont lieux en même temps et les canaux d'irriguation sont rapidement réparés", "archive": "cites/20261024_histoire_de_petra.md"}],
 			"apres": ["vague"]
 		},
 		{
@@ -1398,7 +1398,7 @@
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["carnutes"], "lieux": ["orleans"], "themes": ["commerce", "remparts"]},
-			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "**Genabum**, comptoir carnute de l'Âge des Remparts, port des sages de Chartres"}],
+			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "**Genabum**, comptoir carnute de l'Âge des Remparts, port des sages de Chartres", "archive": "cites/20261111_histoire_d_orleans.md"}],
 			"liens": ["jeanne_arc", "cathedrale_sainte_croix"]
 		},
 		{
@@ -1411,8 +1411,8 @@
 			"origine": ["gaule"],
 			"tags": {"lieux": ["orleans", "lutecia"], "institutions": ["paladins", "architectes"], "themes": ["donjons", "portails", "mythes"]},
 			"sources": [
-				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Pour moi Jeanne d'Arc est une paladinne sortie de nulle part ayant sauvé Orléans de vagues successives d'attaques de monstres terrestres, volants et aquatiques."},
-				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Elle a apporté à Lutecia la maîtrise de l'évolution du rayon de lumière, protection anti aérienne ultime."}
+				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Pour moi Jeanne d'Arc est une paladinne sortie de nulle part ayant sauvé Orléans de vagues successives d'attaques de monstres terrestres, volants et aquatiques.", "archive": "cites/20261111_histoire_d_orleans.md"},
+				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Elle a apporté à Lutecia la maîtrise de l'évolution du rayon de lumière, protection anti aérienne ultime.", "archive": "cites/20261111_histoire_d_orleans.md"}
 			],
 			"apres": ["vague"],
 			"liens": ["cite_orleans", "cathedrale_sainte_croix", "paladins"]
@@ -1438,7 +1438,7 @@
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule", "levant"],
 			"tags": {"lieux": ["orleans", "petra"], "institutions": ["templiers"], "themes": ["portails", "donjons", "vague"]},
-			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "depuis, les deux seuils ouvrent sur **la même Crue**"}],
+			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "depuis, les deux seuils ouvrent sur **la même Crue**", "archive": "cites/20261111_histoire_d_orleans.md"}],
 			"liens": ["cite_orleans", "cite_petra", "petra_seisme"]
 		},
 		{
@@ -1462,7 +1462,7 @@
 			"couche": "present", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["jumieges"], "institutions": ["architectes"], "themes": ["portails", "mystere"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jumièges est très récent : dans la quête, on va voir un portail qui s'est manifesté."}],
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jumièges est très récent : dans la quête, on va voir un portail qui s'est manifesté.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["jumieges_rang_c"]
 		},
 		{
@@ -1474,7 +1474,7 @@
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["auxerre"], "institutions": ["guilde"]},
-			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "Pour commencer, tout personnage fuit son petit village (pillage, famine,...)"}]
+			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "Pour commencer, tout personnage fuit son petit village (pillage, famine,...)", "archive": "monde/20260812_monde_medieval_fantastique.md"}]
 		},
 		{
 			"id": "milo",
@@ -1524,7 +1524,7 @@
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule"],
 			"tags": {"lieux": ["lutecia"], "institutions": ["guilde"]},
-			"sources": [{"fichier": "personnages/20261011_maelys_maitresse_de_guilde.md", "date": "2026-10-11", "citation": "La première rencontre a lieu au bureau, au rang D"}],
+			"sources": [{"fichier": "personnages/20261011_maelys_maitresse_de_guilde.md", "date": "2026-10-11", "citation": "La première rencontre a lieu au bureau, au rang D", "archive": "personnages/20261011_maelys_maitresse_de_guilde.md"}],
 			"apres": ["bucherons"]
 		},
 		{
@@ -1598,7 +1598,7 @@
 			"couche": "trame", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["gaule", "mu"],
 			"tags": {"lieux": ["lutecia", "mu"], "themes": ["portails", "cristaux"]},
-			"sources": [{"fichier": "personnages/20260924_etoffer_l_intrigue_des_catacombes.md", "date": "2026-09-24", "citation": "rang A"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jaune pour Mu, violet pour le reste du monde."}],
+			"sources": [{"fichier": "personnages/20260924_etoffer_l_intrigue_des_catacombes.md", "date": "2026-09-24", "citation": "rang A"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jaune pour Mu, violet pour le reste du monde.", "archive": "monde/20261011_frise_chronologique_fusionnee.md"}],
 			"liens": ["notre_dame"]
 		},
 		{
@@ -1622,7 +1622,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["scandinavie", "au_dela"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["akureyri", "enfer"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Enfer de Lucifer, un monde infernal"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Enfer de Lucifer, un monde infernal", "archive": "cites/20261124_mu_colere_contre_les_dieux.md"}],
 			"apres": ["trame_a"]
 		},
 		{
@@ -1634,7 +1634,7 @@
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["italie", "au_dela"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["rome", "paradis"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Paradis"}, {"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Viennent ensuite"}],
+			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Paradis"}, {"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Viennent ensuite", "archive": "cites/20261124_mu_colere_contre_les_dieux.md"}],
 			"apres": ["trame_hekla"],
 			"liens": ["portail_saint_pierre"]
 		},

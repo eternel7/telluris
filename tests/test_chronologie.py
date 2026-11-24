@@ -276,16 +276,22 @@ def test_vraie_source_valide():
 
 @pytest.mark.lent
 def test_citations_presentes_dans_leur_source():
-	"""Chaque citation se retrouve dans le fichier cité (espaces et emphases ignorés)."""
+	"""Chaque citation se retrouve dans le fichier cité (espaces et emphases ignorés) ; une
+	source dont la citation est sortie du lore (échanges archivés) porte `archive`, chemin
+	relatif à docs/archives/lore/ où la citation doit se trouver."""
 	norm = lambda s: re.sub(r"\s+", " ", s.replace("*", "")).strip().lower()  # noqa: E731
 	data = chrono.charger()
 	for ev in data["evenements"] + data.get("entites", []):
 		for s in ev["sources"]:
 			if not s.get("citation"):
 				continue
-			chemin = lore.chemin_de(s["fichier"])
+			if s.get("archive"):
+				assert ".." not in s["archive"], (ev["id"], s["archive"])
+				chemin = os.path.join("archives", "lore", s["archive"])
+			else:
+				chemin = lore.chemin_de(s["fichier"])
 			with open(os.path.join(RACINE, "docs", chemin), encoding="utf-8") as f:
-				assert norm(s["citation"]) in norm(f.read()), (ev["id"], s["fichier"], s["citation"])
+				assert norm(s["citation"]) in norm(f.read()), (ev["id"], s.get("archive") or s["fichier"], s["citation"])
 
 
 @pytest.mark.lent

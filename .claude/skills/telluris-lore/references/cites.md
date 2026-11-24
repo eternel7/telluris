@@ -66,7 +66,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - **Aujourd'hui** : le **bleu de Chartres**, verre teinté de poudre de cristal au secret perdu ; les **deux flèches** servent de vigies ; la **Beauce** nourrit Lutecia (convois de grain escortés par la porte de Lutecia) ; pèlerins de toutes croyances sur le labyrinthe ; tanneurs de la Basse-Ville au bord de l'Eure. Pistes : grain vers Lutecia, pèlerins, secret du bleu.
 - Écartés : le Voile de la Vierge et le baptême de Clovis comme tel (christianisme).
 
-## Rome — `lieu:rome` · [cites/20260820_decrire_rome_dans_telluris.md], [monde/20260821_portail_des_profondeurs.md]
+## Rome — `lieu:rome` · [cites/20260820_decrire_rome_dans_telluris.md], [cites/20260820_decrire_akureyri_fortifiee.md]
 **Auteur**
 - **Avant les trois frères** ; le portail de Saint-Pierre existe **avant Rome**, au fond d'une grotte sur une butte (11/10). Un groupe spécialisé de Templiers le garde avant Jésus. **Adopté (11/10)** : Romulus, Rémus et la Louve — la Louve garde la grotte du Vatican, les jumeaux ne franchissent pas la porte, Rémus et les Luperques fondent la garde de la porte, Romulus et ses Celeres celle du rempart ; le chef de l'ordre devient **pontife** (frise fusionnée § 10).
 - **La ville aux deux visages.**
@@ -134,7 +134,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- **Abou Simbel**.
 - **Hôtel de Ville** : réseau de portails vers les cités sœurs, **postérieurs** à la Vague (Charlemagne, un siècle après). **Aucun** ne mène à un donjon : ce rôle revient aux autres cités germaniques.
 - **Granusturm** : défense aérienne. Double rempart, Ponttor et Marschiertor.
-- **En jeu (25/10, proposé, à arbitrer)** [cites/20261025_portails_d_aix_la_chapelle.md] : un temple et un Templier à chaque sortie — Sanctuaire de Baiame (Barangaroo), Sensō-ji (Haji no Nakatomo), Serpent à plumes (Ocelotl), temple du Soleil de Pichao (Cusi Coyllur, sans cité : cul-de-sac), Petit Temple d'Abou Simbel (Nakhtmin, mort-vivant) ; rang A de Lutecia ; `dev/gen_portails_aix.py`.
+- **En jeu (25/10, proposé, à arbitrer)** [cites/20260824_decrire_aix_la_chapelle.md] : un temple et un Templier à chaque sortie — Sanctuaire de Baiame (Barangaroo), Sensō-ji (Haji no Nakatomo), Serpent à plumes (Ocelotl), temple du Soleil de Pichao (Cusi Coyllur, sans cité : cul-de-sac), Petit Temple d'Abou Simbel (Nakhtmin, mort-vivant) ; rang A de Lutecia ; `dev/gen_portails_aix.py`.
 
 ## Reykjavik — `lieu:reykjavik` · [cites/20260820_decrire_l_histoire_de_reykjavik.md]
 **Auteur**
@@ -144,7 +144,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - Mythes islandais de fondation réels, mais **déformés**.
 - **Hallgrímskirkja** : portail vers le reste du monde, bâtiment **partagé** par les Templiers (accès au monde) et les Paladins (voies terrestres de l'Islande).
 
-## Akureyri — `lieu:akureyri` · [cites/20260820_decrire_akureyri_fortifiee.md], [monde/20260821_portail_des_profondeurs.md]
+## Akureyri — `lieu:akureyri` · [cites/20260820_decrire_akureyri_fortifiee.md], [cites/20260820_decrire_akureyri_fortifiee.md]
 **Auteur**
 - Cité fortifiée qui commerce avec Reykjavik.
 - Le gouffre de l'**Hekla**, dans les grottes profondes **sous le volcan, au sud de l'île** (géographie réelle, arbitré 24/11), est le **pendant** de Saint-Pierre : une porte ouverte vers l'**Enfer de Lucifer**, l'ange de lumière. Akureyri n'est pas bâtie dessus : ses **Templiers en gardent l'accès** (24/11).
@@ -226,7 +226,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 **Proposé** : guilde « La Maison des Deux Rives » sur le quai (29/10).
 
-## Sydney — `lieu:sydney` · [cites/20261029_maisons_de_guilde_des_cites.md], [cites/20261025_portails_d_aix_la_chapelle.md]
+## Sydney — `lieu:sydney` · [cites/20261029_maisons_de_guilde_des_cites.md], [cites/20260824_decrire_aix_la_chapelle.md]
 **Auteur**
 - Une des cinq destinations fixes de la Chapelle Palatine d'Aix (24/08, 26/08).
 - Le grand édifice blanc aux voûtes en coquilles sur une pointe de la baie (silhouette de l'opéra) est un **temple à la gloire des trois frères** (29/10) ; rien d'autre n'est fixé (nom, date, bâtisseurs, portail).
@@ -245,7 +245,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 **Proposé** : Hārūt et Mārūt, deux anges venus au temps de **Salomon**, enseignant une magie dangereuse comme une épreuve (« Le sort n'est pas coupable. Celui qui le lance répond de son intention. »). Voir cosmologie. Inspirations de la tour (DanMachi, Gloutons & Dragons…) : séance.
 
-## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
+## Jérusalem — [monde/20261011_frise_chronologique_fusionnee.md]
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
@@ -281,7 +281,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - **Exactement 4 donjons**, un temple-forteresse chacun, dans les tombeaux royaux, forme différente : Urne = crue (réinfestation, marids, faune des oueds, 51-55) · Soie = refuge des djinns (salle à pièges, boss ifrit, 55-60 ; djinns sur Telluris depuis toujours) · Corinthien = trésor du Pharaon (étages + coffres piégés, mimiques, scarabées, sphinx, 58-65) · Palais = cités anéanties (2 étages : Iram et géants de ʿĀd, Hégra et Qudar, 61-70).
 - Conseil à six institutions, **veto des gardiens des sources** sur l'eau. Guilde : **Le Caravansérail des Seuils**, dans les coursives du bâtiment à cour ; maîtresse **Shaqilath la Caravanière** (ogresse, `pnj:shaqilath`, mandate les 4 donjons), réceptionniste **Zaydu** (hobbit, fils de gardien, reconnaît le rang de Lutecia). Templiers : Natiru (Urne), Abd-Obodas (Soie), Wa'ilu (Corinthien), Aslah (Palais). Accès : Notre-Dame, **rang A** ; rangs des donjons : crue et djinns A, trésor S, cités S+. Enceinte bâtie complète ; Petite Petra hors de la ville. En jeu : `dev/gen_petra.py` (`lieu:levant`, `lieu:petra`).
 
-## Mu et Atlantis — [monde/20260826_chronologie_des_cites_telluris.md]
+## Mu et Atlantis — [monde/20261011_frise_chronologique_fusionnee.md]
 **Auteur**
 - À inclure dans la chronologie.
 - Aélis se voit offrir d'approfondir sa **formation à Mu**, et le rang A peut emmener l'aventurier à Mu.
@@ -298,8 +298,8 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- **Guilde du port extérieur** : seule présence étrangère tolérée ; mission principale, **sécuriser les remparts extérieurs** ; l'aventurier y va **par la mer, dès le rang A**, jamais par portail. Gouvernement : **ouvert**. Pas de `lieu:*`.
 	- **Récits mêlés** avec Mu (« Atlantis a sombré ») ; Lutecia et les ports en contact **en rient**. **Pas de guerre** (celle de Platon est écartée).
 - **Mu — l'oubli des causes** (Auteur, 12/10) [cites/20261012_histoire_d_atlantis.md § 1.12] : nul au dehors ne connaît le sort de Mu, et Mu a oublié les vraies raisons de son engloutissement — **ses dirigeants d'alors les ont cachées**, en invoquant la **tectonique des plaques et les volcans** du continent.
-- **Mu — vivre sous la mer** (Auteur, 22/11, cinq questionnaires) [cites/20261122_description_de_mu.md § Arbitrage] : fermeture du portail = cause de la **Vague** (vérité cachée, disputée) ; **corail de mana abyssal** au-dessus du cristal jaune, non consommé vivant, vasque hors de Mu ; accueil selon l'interlocuteur ; noms polynésiens, Sept Sages = apkallu.
-- **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261010_mu_civilisation_engloutie.md] :
+- **Mu — vivre sous la mer** (Auteur, 22/11, cinq questionnaires) [cites/20261011_histoire_de_mu_chatgpt.md § Arbitrage] : fermeture du portail = cause de la **Vague** (vérité cachée, disputée) ; **corail de mana abyssal** au-dessus du cristal jaune, non consommé vivant, vasque hors de Mu ; accueil selon l'interlocuteur ; noms polynésiens, Sept Sages = apkallu.
+- **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261011_histoire_de_mu_chatgpt.md] :
 	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue** (précisé le 11/10 : à la Vague, cf. ci-dessous).
 	- Magie **oubliée, antérieure** au savoir des trois frères ; ruines sous les océans ou derrière des **portails altérés par la Vague** ; technologie magique dépassant celle des Architectes. Piste majeure sur l'origine de la magie : les Anthropes **ne sont pas les premiers** à avoir tenté de maîtriser les frontières du monde, la Vague n'est **peut-être pas le premier** bouleversement cosmique (mystère à garder ouvert).
 	- **Lutecia ↔ Mu** : lien assuré par le **portail programmable de Notre-Dame** (vestige préservé de l'un des trois frères) ; Lutecia y envoie ses Architectes les plus prometteurs, **aboutissement de leur formation** (stabilisation oubliée, manipulation du mana inconnue des écoles de Lutecia). Rentrés, ils sont recherchés (portails anciens, anomalies, passages très stables).
@@ -321,7 +321,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 Deux moments (Auteur, 11/10) : **établissement** (le site prend racine et ne bouge plus ; avant, campements temporaires, passages, nomades saisonniers) ; **avènement** (la cité prend son essor, son nom, son rang de Cité-État, et devient connue des autres) ; tableau révisé avec Rome : `monde/20261011_frise_chronologique_fusionnee.md` § 5. (L'ordre de fondation du 26/08 en périodes terrestres est abandonné.)
 
-## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20260826_creer_un_systeme_de_portails.md], [monde/20261120_reseau_des_portails.md]
+## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20261120_reseau_des_portails.md], [monde/20261120_reseau_des_portails.md]
 **Auteur** : tableau du 26/08 (repris ci-dessus cité par cité). Lutecia relie par Notre-Dame **toutes** les cités munies d'un portail transversal.
 
 **Auteur (20/11, cinq questionnaires)** — réseau complet [monde/20261120_reseau_des_portails.md] :
