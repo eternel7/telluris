@@ -59,8 +59,8 @@ NOUVELLES = {
 		"son": "dragon",
 		"visuel": "serpent colossal à sept têtes cornues sur sept longs cous dressés en éventail, "
 				  "écailles vert sombre et or, cornes recourbées jaune pâle, gueules rouges ouvertes sur "
-				  "des crochets et des langues fourchues, corps massif lové dans l'eau d'un marais, "
-				  "gerbes d'eau autour de ses anneaux",
+				  "des crochets et des langues fourchues, corps massif lové en anneaux luisants, "
+				  "eau ruisselant de ses écailles",
 		"fond": "magenta",
 	},
 	"songomby": {
@@ -130,7 +130,7 @@ NOUVELLES = {
 				  "hirsutes en mèches épaisses, collier de grosses perles de bois et de dents, pagne de "
 				  "fibres végétales et de feuilles, cordes de raphia nouées autour du torse, une longue "
 				  "queue épaisse, mains immenses aux doigts crochus tendues en avant, bouche ouverte sur "
-				  "un rugissement ; il se penche par-dessus de gros rochers",
+				  "un rugissement ; il se penche en avant, menaçant",
 		"fond": "magenta",
 	},
 }
