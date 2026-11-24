@@ -28,7 +28,7 @@ Le temps de Telluris ne se découpe pas en antiquité ou en moyen âge. Il se di
 
 C'est tout ce qui précède le Déluge. Personne n'en connaît la durée.
 
-Avant même les premiers Anthropes, un **dragon empereur** veille déjà sur l'Islande. Puis les cinq Lignées se dispersent dans un monde sauvage, en petits établissements reliés par des pistes dangereuses. Loin de tous, **Mu** prospère, en avance sur son temps : elle a déjà ses murailles et ses gardiens des routes, mais personne ailleurs ne connaît son histoire. **Atlantis** vit déjà, à l'écart, derrière ses remparts d'orichalque ; comme Mu, nul ne la cite en exemple, et c'est Gilgamesh qui ouvre l'Âge des Remparts pour le reste du monde. Au sud de l'Égypte commence la dynastie dont émergera **Néfertiti**, qui consacrera des siècles à la recherche de l'immortalité.
+Avant même les premiers Anthropes, un **dragon empereur** veille déjà sur l'Islande. Puis les cinq Lignées se dispersent dans un monde sauvage, en petits établissements reliés par des pistes dangereuses. Loin de tous, **Mu** prospère, en avance sur son temps : elle a déjà ses murailles et ses gardiens des routes, mais personne ailleurs ne connaît son histoire. **Atlantis** vit déjà, à l'écart, derrière ses remparts d'orichalque ; comme Mu, nul ne la cite en exemple, et c'est Gilgamesh qui ouvre l'Âge des Remparts pour le reste du monde. Au sud de l'Égypte commence la dynastie dont émergera **Néfertiti**.
 
 Quelques portails existent déjà, sans que personne les ait bâtis. Le plus connu des Occidentaux est celui de **Saint-Pierre**, au fond d'une grotte, sur une butte au bord du Tibre, avant même que Rome existe. D'autres, comme le gouffre de l'Hekla en Islande ou la brèche de Cordoue, n'ont pas d'âge connu.
 
@@ -38,7 +38,7 @@ L'ère se ferme sur le **Déluge**. Nul ne sait ce qu'il fut. Un homme, **Utnapi
 
 Après le Déluge, **Gilgamesh** élève les remparts d'**Uruk**. Il est le premier roi à comprendre qu'une cité ne survit qu'en tenant son territoire. Puis il cherche l'immortalité, la trouve presque, et la perd : un serpent lui vole la plante de jouvence pendant qu'il se baigne.
 
-Partout, les Anthropes se réfugient derrière des murailles, et naissent les Cités-États. Les **auberges-relais** fortifiées jalonnent les routes. Pour les garder naît l'ordre des **Paladins**, dont la magie sainte soigne les voyageurs. Pour garder les remparts et ce qu'ils enferment naît celui des **Templiers** : le Paladin dehors, le Templier dedans. Romulus trace l'enceinte de Rome, et sur le mont Hermon s'éveillent les **Grigori**, qui posent aux cités la question que Gilgamesh n'a pas résolue : qu'est-ce qui dure au-delà de la mort ?
+Partout, les Anthropes se réfugient derrière des murailles, et naissent les Cités-États. Les **auberges-relais** fortifiées jalonnent les routes. Pour les garder naît l'ordre des **Paladins**, dont la magie sainte soigne les voyageurs. Pour garder les remparts et ce qu'ils enferment naît celui des **Templiers** : le Paladin dehors, le Templier dedans. Romulus trace l'enceinte de Rome, et sur le mont Hermon s'éveillent les **Grigori**, qui posent aux cités la question que Gilgamesh n'a pas résolue : qu'est-ce qui dure au-delà de la mort ? Sur le Nil, la lignée de **Néfertiti** y consacre des siècles, jusqu'à trouver la non-vie sans le sang, pendant que la reine **Lamia**, première des lamies, reste emmurée vivante.
 
 ### L'Âge des Portails
 

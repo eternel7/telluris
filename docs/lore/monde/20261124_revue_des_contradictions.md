@@ -10,14 +10,24 @@ En Islande, le gouffre de l'Hekla s'ouvre sous le volcan, au sud de l'île, loin
 
 Constantinople est la plus grande et la plus riche cité du monde connu, à la jonction de l'Europe et de l'Orient. Cordoue est la plus grande de l'Occident latin, et la première par le savoir.
 
+Sur le Nil, la lignée de Néfertiti remonte aux temps d'avant le Déluge ; mais c'est la question des Grigori, à l'Âge des Remparts, qui la lance dans sa quête d'immortalité. Néfertiti trouve la non-vie sans le sang pendant que la reine Lamia reste emmurée vivante : toutes deux appartiennent à l'Âge des Remparts.
+
+La nuit du carrosse, où naquirent les dragons de sang, eut lieu après la Vague, dans l'une des auberges-relais que les monothéismes n'avaient pas changées en monastères, autour de la naissance de Dracula. Vlad II, son père, en fut.
+
+Qui part de Lutecia par Notre-Dame ne revient pas par elle : on n'y arrive presque jamais, et seul Mu y mène. On rentre par le réseau des portails jusqu'à Orléans, Bruges ou Aix, puis par la route ou la Loire, sous escorte paladine.
+
+Dans toutes les maisons de guilde, capitales comprises, le bureau du maître s'ouvre au rang D. Les guildes des capitales délivrent les rangs jusqu'au S+.
+
+À Sydney, les deux portes, celle d'Aix et celle de Melbourne, s'ouvrent au Sanctuaire de Baiame. Le temple blanc élevé à la gloire des trois frères reste un mémorial, et nul ne sait s'il garde un portail. Tokyo, elle, a deux portes : Aix et Pékin.
+
 Les Anthropes sont de cinq Lignées. ?{Les Félins seraient une sixième Lignée, née dans l'archipel qui correspond au Japon puis dispersée.}?
 
 ## 🗂 Échanges de travail
 
 - **Source :** séance Claude Code du 24/11/2026. Demande de l'Auteur : « Revois l'ensemble du lore validé et passe par des questionnaires interactifs pour lever les contradictions. »
 - **Créée :** 24/11/2026
-- **Statut :** **arbitrage par deux questionnaires** (§ ✍️ ci-dessous), qui **fait foi** (niveau 2).
-- **Reporté dans :** `redige/01`, `redige/03`, `redige/05` ; les récits de [Mu](../cites/20261011_histoire_de_mu_chatgpt.md), d'[Atlantis](../cites/20261012_histoire_d_atlantis.md), d'[Auxerre](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), d'[Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md), de [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) et de [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) ; `entites.json` (Akureyri) ; la compétence `telluris-lore`.
+- **Statut :** **arbitrage par deux questionnaires, puis deux autres en seconde passe** (§ ✍️ ci-dessous), qui **fait foi** (niveau 2).
+- **Reporté dans :** `redige/01`, `redige/03`, `redige/05` ; les récits de [Mu](../cites/20261011_histoire_de_mu_chatgpt.md), d'[Atlantis](../cites/20261012_histoire_d_atlantis.md), d'[Auxerre](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), d'[Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md), de [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) et de [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) ; seconde passe : `redige/01`, `redige/05`, [Lutecia](../cites/20260820_decrire_l_histoire_de_lutecia.md), [maisons de guilde](../cites/20261029_maisons_de_guilde_des_cites.md), [portes d'Aix](../cites/20261025_portails_d_aix_la_chapelle.md), [réseau des portails](20261120_reseau_des_portails.md), `chronologie.json` (`lamia_reine`, `dragons_de_sang`) ; `entites.json` (Akureyri) ; la compétence `telluris-lore`.
 
 ---
 
@@ -45,3 +55,21 @@ Sources lues : les dix pages de `redige/`, `chronologie.json` (aucune `contradic
 6. **Remparts d'orichalque d'Atlantis**, antédiluviens, contre les premières murailles de Gilgamesh, et le mot « conquête » → **exception comme Mu** ; « peuplement » remplace « conquête ».
 7. **« Depuis peu, les monstres marins l'assaillent »** contre des mers dangereuses depuis les origines → **pire depuis peu**.
 8. **Superlatifs** : Constantinople, « la plus grande d'Europe », contre Cordoue, « la plus grande d'Occident » → **les deux, précisés** : Constantinople pour le monde connu, Cordoue pour l'Occident latin et le savoir.
+
+---
+
+## 🤖 Claude Code — seconde passe (24/11/2026)
+
+Récits relus : toutes les séances d'octobre et de novembre de `cites/`, `personnages/` et `monde/` (Camelot, Petra, portes d'Aix, maisons de guilde, Aksoum, Orléans, Mu ×4, Tour de Babel, Cour des Arches, Rhemi et Chartres, Maëlys, Escolives, rangs B et A, Saint-Denis, la pièce derrière le mur, Élise, Grigori, vampires, dragons, licornes, contenants).
+
+**Corrigé sans question** : « Tokyo et Teotihuacan n'ont aucun autre lien » (25/10) contredit le lien Tokyo ↔ Pékin (20/11) : la décision la plus récente l'emporte, et seule Teotihuacan reste un cul-de-sac.
+
+**Note** : le « bureau ouvert au rang S+ dans les capitales » (récit du 29/10) avait mal reformulé la demande du 31/10. En jeu, `dev/gen_guildes_pnj.py` donne `rang_max: "S+"` au comptoir des capitales (le plafond des rangs délivrés), et le bureau s'ouvre au rang D partout. Ni le jeu ni le code ne changent.
+
+## ✍️ Auteur — réponses de la seconde passe (24/11/2026)
+
+9. **Bureau du maître** : rang D à la séance Maëlys contre rang S+ dans les capitales → **rang D partout**.
+10. **Vlad II et Dracula** : nuit du carrosse « avant les monothéismes » contre Dracula mortel après la Vague → **nuit du carrosse après la Vague**, dans une auberge-relais restée telle.
+11. **Néfertiti et Lamia** : question des Grigori (Âge des Remparts) contre une quête antédiluvienne → **lignée avant le Déluge, quête après** ; Lamia et Néfertiti à l'Âge des Remparts.
+12. **Revenir à Lutecia** : on n'arrive presque jamais à Notre-Dame → **par le réseau, puis la route** (voyage asymétrique).
+13. **Porte de Sydney vers Melbourne** : temple blanc (proposé) contre « on ne sait s'il garde un portail » (29/10) → **au Sanctuaire de Baiame** ; le temple blanc reste un mémorial.

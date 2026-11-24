@@ -15,7 +15,7 @@ Que tel portail ait traversé la Vague sans devenir un donjon, c'est un fait. Po
 
 **Notre-Dame**, à Lutecia, et les **cinq portes de la Chapelle Palatine** d'Aix-la-Chapelle (Sydney, Tokyo, Teotihuacan, Pichao, Abou Simbel) sont l'œuvre des frères, et ont tenu grâce à elle ; le mana faible de Lutecia a fait le reste. ?{Certains Architectes pensent que Notre-Dame a pris à la Vague ce que les autres ont perdu, et que sa faculté de court-circuit en est née.}?
 
-Entre **Sydney et Melbourne** s'ouvre le **premier portail des frères**. ?{Leur propre terre raconte qu'ils l'ont ouvert entre deux camps de leur peuple, avant de partir vers le reste du monde : un cercle de pierres sur la colline qui domine la baie de Melbourne, et à Sydney le temple blanc élevé ensuite à leur gloire. À Melbourne, on dit que Bunjil, l'aigle qui façonna le pays, avait préparé la porte.}?
+Entre **Sydney et Melbourne** s'ouvre le **premier portail des frères**. ?{Leur propre terre raconte qu'ils l'ont ouvert entre deux camps de leur peuple, avant de partir vers le reste du monde : un cercle de pierres sur la colline qui domine la baie de Melbourne.}? À Sydney, la porte s'ouvre au **Sanctuaire de Baiame**, comme celle d'Aix ; le temple blanc élevé à la gloire des frères reste un mémorial, dont nul ne sait s'il garde un portail. ?{À Melbourne, on dit que Bunjil, l'aigle qui façonna le pays, avait préparé la porte.}?
 
 **Sainte-Sophie** relie Constantinople et Rome depuis des millénaires. ?{Un frère ou ses tout premiers élèves l'ont bâtie ; il y a toujours eu des Templiers à chaque bout. D'autres disent que la porte naturelle de Saint-Pierre, toute proche, l'a tenue pendant la Vague.}?
 

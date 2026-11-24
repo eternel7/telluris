@@ -14,7 +14,7 @@ Abou Simbel est **deux villes**. La **ville extérieure**, au jour, au bord du N
 
 ?{Lyon : La Maison des Deux Fleuves · Calais : Le Fanal du Détroit · Chartres : Le Relais de la Beauce · Reims : Le Carrefour des Rèmes · Douvres : La Tour des Falaises · Londres : La Salle Ronde · Camelot : La Halle des Brèches · Bruges : La Maison du Zwin · Aix-la-Chapelle : Le Relais Palatin · Reykjavík : La Halle des Fumées · Abou Simbel : La Maison des Deux Rives · Sydney : La Maison de la Grande Baie, et les autres cités listées dans les échanges.}? Orléans a déjà la sienne : **le Relais de la Loire**, où Perrine Boucher tient la réception et Agnan le Gabarrier le bureau. Aucune guilde ne siège à Mu : on s'y intéresse du dehors.
 
-Dans les capitales, le bureau du maître de guilde ne s'ouvre qu'au rang S+.
+Partout, capitales comprises, le bureau du maître de guilde s'ouvre au rang D. Les guildes des capitales délivrent les rangs jusqu'au S+.
 
 ## 🗂 Échanges de travail
 

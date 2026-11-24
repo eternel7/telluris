@@ -12,7 +12,7 @@ C'est sa limite, parce que les grandes écoles de magie ne s'y sont jamais insta
 
 ## Notre-Dame aujourd'hui
 
-On n'arrive presque jamais à Notre-Dame. Le portail n'a pas de liens fixes : il **court-circuite** un portail du monde et prend son point d'arrivée le temps que son seuil reste chaud. Seule Mu y mène. La gemme violette posée sur l'autel tient l'ancrage, et chaque passage se paie d'**un cristal jaune**, celui qui stabilise les effets des portails ; on en trouve au fond des catacombes de la cité et dans le coffre du puits de Chartres. La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, une elfe magicienne. La cathédrale n'ouvre ses portes aux aventuriers qu'au **rang A**.
+On n'arrive presque jamais à Notre-Dame. Le portail n'a pas de liens fixes : il **court-circuite** un portail du monde et prend son point d'arrivée le temps que son seuil reste chaud. Seule Mu y mène : qui part par Notre-Dame revient par le réseau des portails jusqu'à Orléans, Bruges ou Aix, puis par la route ou la Loire, sous escorte paladine. La gemme violette posée sur l'autel tient l'ancrage, et chaque passage se paie d'**un cristal jaune**, celui qui stabilise les effets des portails ; on en trouve au fond des catacombes de la cité et dans le coffre du puits de Chartres. La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, une elfe magicienne. La cathédrale n'ouvre ses portes aux aventuriers qu'au **rang A**.
 
 ## Les murailles et le ciel
 
