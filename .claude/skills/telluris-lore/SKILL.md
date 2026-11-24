@@ -89,7 +89,7 @@ Répétées en tête de presque chaque séance : elles valent pour **tout** text
 | Orichalque | S | 61 – 80 |
 | Adamantite | S+ | 81 + |
 
-Les quêtes SSS+ engagent la survie d'une cité-État. **A+** (trame des quêtes) = palier de **fin du rang A**, sans nouveau métal (Auteur, 11/10).
+Les quêtes SSS+ engagent la survie d'une cité-État. **Le palier A+ n'existe pas** (Auteur, 24/11 ; remplace la décision du 11/10).
 
 - Formule de l'univers (synthèse adoptée) : *les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières.*
 - Vocations citées par l'Auteur : guerrier, magicien, ménestrel (magie de support), paladin, répurgateur (≈ inquisiteur), lettré, forestier (distance + pistage), nécromancien, chaman — **transitions entre classes** possibles. Liste réelle en jeu : le dump (`rules:*`), pas le lore.
@@ -100,7 +100,7 @@ Fuit son village (pillage, famine, monstres…) → refuge derrière les rempart
 
 **Trois fins** (Auteur) : devenir **maître d'une guilde** · **découvrir le pot aux roses** sur l'origine des monstres · devenir **une armée à soi tout seul**.
 
-Échelle (Auteur, 24/09) : France d'abord (escortes depuis Montmartre), le **monde après le rang A** par les **portails** (ce que la route ou la mer atteignent s'ouvre plus tôt : Camelot par Douvres — arbitré 24/11) — Notre-Dame lui ouvre alors ses portes, voyages par Notre-Dame : **gemme violette** (puissance) vers le reste du monde, **cristal jaune** (stabilisation) vers **Mu** — cristaux jaunes trouvés au fond des catacombes (Auteur, 11/10). **Révisé (Auteur, 25/10)** : chaque passage par Notre-Dame se paie d'**un cristal jaune** (la gemme violette de l'autel tient l'ancrage) ; Notre-Dame n'a pas de liens, elle **court-circuite** un portail du monde (X ↔ Y) et prend son point d'arrivée le temps que son seuil reste chaud — on n'arrive presque jamais à Notre-Dame (seul Mu y mène). La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, elfe magicienne. **Après Mu** (Auteur, 24/11) : l'arc de Mu nourrit la colère contre les dieux, puis le relevé des seuils « demeure » d'Uanna fait partir vers l'**Hekla d'abord**, puis Rome → Paradis. Second gisement de cristaux jaunes : le coffre du **puits de Chartres** (labyrinthe du Minotaure). Trame des quêtes par rang, Échidna, mondes divins : [references/personnages_quetes.md](references/personnages_quetes.md).
+Échelle (Auteur, 24/09) : France d'abord (escortes depuis Montmartre), le **monde après le rang A** par les **portails** (ce que la route ou la mer atteignent s'ouvre plus tôt : Camelot par Douvres — arbitré 24/11) — Notre-Dame lui ouvre alors ses portes, voyages par Notre-Dame : **gemme violette** (puissance) vers le reste du monde, **cristal jaune** (stabilisation) vers **Mu** — cristaux jaunes trouvés au fond des catacombes (Auteur, 11/10). **Révisé (Auteur, 25/10)** : chaque passage par Notre-Dame se paie d'**un cristal jaune** (la gemme violette de l'autel tient l'ancrage) ; Notre-Dame n'a pas de liens, elle **court-circuite** un portail du monde (X ↔ Y) et prend son point d'arrivée le temps que son seuil reste chaud — on n'arrive presque jamais à Notre-Dame (seul Mu y mène). La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, elfe magicienne. **Après Mu** (Auteur, 24/11) : l'arc de Mu nourrit la colère contre les dieux, puis la copie du relevé des seuils « demeure » d'Uanna fait partir vers l'**Hekla** (rang A, par Notre-Dame, Reykjavik puis Akureyri ; l'Enfer de Lucifer = une prison, pas une demeure), puis Rome → Paradis (rang S). Second gisement de cristaux jaunes : le coffre du **puits de Chartres** (labyrinthe du Minotaure). Trame des quêtes par rang, Échidna, mondes divins : [references/personnages_quetes.md](references/personnages_quetes.md).
 
 Le joueur ne doit pas apprendre tôt la vérité méta : **Jésus était un joueur** ayant fini le jeu en **Révélateur**, et qui a dû **vulgariser** une vérité inconcevable pour un Anthrope (Platon). Au bout de la route : dieux et aventuriers sont les marionnettes des **joueurs** et des êtres qui ont fait de Telluris leur terrain de jeu. Détail et propositions (Grigori, Hārūt et Mārūt, Hekla) : [references/cosmologie.md](references/cosmologie.md).
 
@@ -181,7 +181,7 @@ Arbitrage de l'Auteur (02/11, huit questionnaires) — `docs/lore/monde/20261102
 
 - ~~Auberge d'Élise~~ : tranché — le dump la place au **Coq de Lutèce**, dans les **faubourgs** de Lutecia (et pas sur la route d'Auxerre).
 - **Origine des Paladins** : nés après la Vague (19/08) vs **antérieurs aux portails** (21/08) — retenir le 21/08.
-- ~~Rang A+~~ : tranché — palier de fin du rang A (Auteur, 11/10).
+- ~~Rang A+~~ : tranché — **n'existe pas** (Auteur, 24/11).
 - ~~Atlantis~~ : tranché — antédiluvienne, **existe encore** ; l'isolement « choisi » vient du **refus d'un des frères** puis du **dirigeant sacrifié** (Auteur, 11 et 12/10).
 - Points ouverts listés par l'Auteur ou le document maître : nature de la Vague, origine ultime des monstres, limites des Révélateurs, sens de « finir le jeu », règles de stabilisation des portails, taxonomie des écoles de magie, organisation politique de chaque cité, statut juridique des Lignées.
 

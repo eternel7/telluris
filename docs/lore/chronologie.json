@@ -61,7 +61,6 @@
 				{"id": "C", "libelle": "Or · C"},
 				{"id": "B", "libelle": "Platine · B"},
 				{"id": "A", "libelle": "Mythril · A"},
-				{"id": "A+", "libelle": "Mythril · A+ (fin de A)"},
 				{"id": "S", "libelle": "Orichalque · S"},
 				{"id": "S+", "libelle": "Adamantite · S+"}
 			]
@@ -1615,16 +1614,28 @@
 			"apres": ["trame_b"]
 		},
 		{
-			"id": "trame_a_plus",
+			"id": "trame_hekla",
+			"titre": "L'Hekla → l'Enfer de Lucifer",
+			"titre_court": "L'Hekla",
+			"resume": "Après Mu, le relevé des seuils « demeure » du siège d'Uanna mène à l'Hekla, par Notre-Dame, le réseau jusqu'à Reykjavik puis la route jusqu'à Akureyri. Derrière, l'Enfer de Lucifer est habité, en contrepoint des Enfers vides d'Hadès : une prison, pas une demeure. Pourquoi certains partent-ils quand d'autres restent ? Et qui jette ?",
+			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "auteur"},
+			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
+			"origine": ["scandinavie", "au_dela"],
+			"tags": {"peuples": ["anges_demons"], "lieux": ["akureyri", "enfer"], "themes": ["mondes_divins", "mythes"]},
+			"sources": [{"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Enfer de Lucifer, un monde infernal"}],
+			"apres": ["trame_a"]
+		},
+		{
+			"id": "trame_paradis",
 			"titre": "Rome → le Paradis",
 			"titre_court": "Le Paradis",
 			"resume": "Par Saint-Pierre, des anges aux réponses ambiguës : « Vos dieux vous ont menti. » — est-ce vrai ?",
-			"quand": {"moment": {"ere": "jeu", "rang": "A+"}, "autorite": "auteur"},
+			"quand": {"moment": {"ere": "jeu", "rang": "S"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["italie", "au_dela"],
 			"tags": {"peuples": ["anges_demons"], "lieux": ["rome", "paradis"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Paradis"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rang A+ = palier dans le rang A"}],
-			"apres": ["trame_a"],
+			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Paradis"}, {"fichier": "cites/20261124_mu_colere_contre_les_dieux.md", "date": "2026-11-24", "citation": "Viennent ensuite"}],
+			"apres": ["trame_hekla"],
 			"liens": ["portail_saint_pierre"]
 		},
 		{
@@ -1636,7 +1647,7 @@
 			"origine": ["au_dela"],
 			"tags": {"lieux": ["yggdrasil"], "themes": ["mondes_divins", "mythes"]},
 			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Yggdrasil"}],
-			"apres": ["trame_a_plus"]
+			"apres": ["trame_paradis"]
 		},
 		{
 			"id": "trame_s_plus",
