@@ -81,10 +81,10 @@ Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont 
 
 ## 🗂 Échanges de travail
 
-- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé ci-dessous, mis à jour des décisions prises depuis.
+- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé ci-dessous, mis à jour des décisions prises depuis ; l'original est archivé dans `docs/archives/lore/cites/20261124_de_mu_aux_mondes_divins_source.md`.
 - **Créée :** 24/11/2026
 - **Statut :** **adoptée par l'Auteur**, qui l'a remise à intégrer au lore. Elle a d'abord été relue contre le canon. Cinq points ont été soumis à l'Auteur par questionnaire (deux appels, 24/11), et le récit ci-dessus applique ses réponses. Le reste est reporté tel quel.
-- **Trame des rangs :** tirée de la séance ChatGPT « Idées de quêtes à Lutecia » (24/09/2026) ; les quêtes D, C et B ont leurs propres séances : [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), [La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md), [Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md).
+- **Trame des rangs :** tirée de la séance ChatGPT « Idées de quêtes à Lutecia » (24/09/2026), archivée dans `docs/archives/lore/personnages/20260924_idees_de_quetes_a_lutecia.md` ; les quêtes D, C et B ont leurs propres séances : [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), [La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md), [Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md).
 - **Met à jour :** [Mu — les quêtes du séjour avec Aélis](20261120_quetes_de_mu_avec_aelis.md) et [Mu — vivre sous la mer](20261122_description_de_mu.md) (architecture de l'arc) ; s'appuie sur [Mu — la colère contre les dieux](20261124_mu_colere_contre_les_dieux.md).
 
 ## Relecture et arbitrage de l'Auteur (24/11/2026)
