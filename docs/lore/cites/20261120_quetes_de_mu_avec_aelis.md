@@ -24,7 +24,7 @@ Autour de ce fil, d'autres affaires attendent qui veut s'y attarder ; elles sont
 
 - **Source :** séance ChatGPT « Quêtes de Mu avec Aélis » (https://chatgpt.com/c/6afff2c2-fccc-83ed-9a63-7290c05b7e29), fichier `docs/a trier/quetes-de-mu-avec-aelis.md`. Contenu brut conservé tel quel ; seuls les intitulés « David » / « ChatGPT » sont devenus ✍️ Auteur / 🤖 ChatGPT.
 - **Créée :** 20/11/2026
-- **Statut :** versée telle quelle le 22/11/2026 puis **arbitrée par l'Auteur** le même jour (cinq questionnaires) : l'arbitrage, consigné à la fin de [Mu — vivre sous la mer](20261122_description_de_mu.md), l'emporte sur les réponses de ChatGPT ; il met aussi à jour le récit de [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md). Architecture de l'arc et quêtes facultatives développées : [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md) (24/11/2026), qui l'emportent sur la « huitaine de quêtes ».
+- **Statut :** versée telle quelle le 22/11/2026 puis **arbitrée par l'Auteur** le même jour (cinq questionnaires) : l'arbitrage, consigné à la fin de [Mu — vivre sous la mer](20261122_description_de_mu.md), l'emporte sur les réponses de ChatGPT ; il met aussi à jour le récit de [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md). Architecture de l'arc et quêtes facultatives développées : [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md) (24/11/2026).
 
 ---
 

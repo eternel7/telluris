@@ -81,17 +81,17 @@ Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont 
 
 ## 🗂 Échanges de travail
 
-- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé ci-dessous ; ses tableaux ont été remis au format Markdown et l'encadré « Documents en retard », devenu sans objet, retiré (Auteur, 24/11). Suit la séance du 24/09/2026 « Idées de quêtes à Lutecia », reprise ici sans ses parties écartées.
+- **Source :** document « De Mu aux mondes divins — l'ensemble des quêtes envisagées », synthèse du 24/11/2026 (Claude Code) enrichie par l'Auteur d'un complément issu de ses questionnaires (architecture de l'arc, sept quêtes facultatives développées), remis à Claude Code le 24/11/2026. Il est conservé ci-dessous, mis à jour des décisions prises depuis.
 - **Créée :** 24/11/2026
 - **Statut :** **adoptée par l'Auteur**, qui l'a remise à intégrer au lore. Elle a d'abord été relue contre le canon. Cinq points ont été soumis à l'Auteur par questionnaire (deux appels, 24/11), et le récit ci-dessus applique ses réponses. Le reste est reporté tel quel.
-- **Remplace :** `personnages/20260924_idees_de_quetes_a_lutecia.md` (trame des quêtes par rang, 24/09/2026), retiré le 24/11/2026 : son récit portait l'ancienne trame (palier A+, Paradis en fin de rang A) ; ce qui n'était pas écarté est repris dans le récit ci-dessus et à la fin de ces échanges. Les quêtes D, C et B ont leurs propres séances : [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), [La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md), [Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md).
+- **Trame des rangs :** tirée de la séance ChatGPT « Idées de quêtes à Lutecia » (24/09/2026) ; les quêtes D, C et B ont leurs propres séances : [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md), [La route de Saint-Denis](../personnages/20261108_la_route_de_saint_denis.md), [Les épreuves des rangs B et A](../personnages/20261025_missions_rang_b_a_lutecia.md).
 - **Met à jour :** [Mu — les quêtes du séjour avec Aélis](20261120_quetes_de_mu_avec_aelis.md) et [Mu — vivre sous la mer](20261122_description_de_mu.md) (architecture de l'arc) ; s'appuie sur [Mu — la colère contre les dieux](20261124_mu_colere_contre_les_dieux.md).
 
 ## Relecture et arbitrage de l'Auteur (24/11/2026)
 
 | Point | Décision |
 |---|---|
-| Architecture de l'arc | **Adoptée** : arc court ; phase I = **3 quêtes** (une épreuve, deux de confiance) ; phase II = **enquête modulaire, sans nombre fixe** ; phase III = 2-3 quêtes, choix définitif, voies asymétriques. Remplace « ≈ 8 quêtes : 2 de confiance, 3-4 souterraines » (22/11). |
+| Architecture de l'arc | **Adoptée** : arc court ; phase I = **3 quêtes** (une épreuve, deux de confiance) ; phase II = **enquête modulaire, sans nombre fixe** ; phase III = 2-3 quêtes, choix définitif, voies asymétriques. |
 | Pêcheur des « eaux sans poissons » | La pénurie date du sacrifice (sept à huit siècles) : il porte **le deuil d'une lignée**, et les noms des disparus se transmettent dans sa famille (au lieu de « proches perdus »). |
 | Vocabulaire du « dernier gardien » | **Passé au mana** : sentinelle tenue par un flux de mana, rite de reconnaissance, gestes et marques, appel répété ; le technicien veut **tarir son mana** (au lieu de « système d'accès », « commandes », « signal », « protocole », « couper son alimentation » — règle « ni électricité »). |
 | Rêveurs du « chant » | **Des habitants de tous âges**, dont un jeune rêveur ; les enfants restent le cœur des « enfants de la marée » (évite le doublon de deux affaires d'enfants rêveurs). |
@@ -115,8 +115,8 @@ Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont 
 | Rang | Étape | Lieu | Statut |
 |---|---|---|---|
 | A | Arrivée à Mu avec Aélis | Lutecia → Notre-Dame → Mu | ✅ |
-| A | Phase I --- Gagner sa place (≈ 2 quêtes) | Mu-la-Centrale, lisière de la bulle | ✅ structure · 💭 détail |
-| A | Phase II --- Descendre (3-4 quêtes) | réseau d'eau et galeries sous la cité | ✅ structure · 💭 détail |
+| A | Phase I --- Gagner sa place (3 quêtes) | Mu-la-Centrale, lisière de la bulle | ✅ structure · 💭 détail |
+| A | Phase II --- Descendre (enquête modulaire) | réseau d'eau et galeries sous la cité | ✅ structure · 💭 détail |
 | A | Phase III --- Échidna (2-3 quêtes) : parler **ou** combattre | la porte scellée sous Mu | ✅ |
 | A | Quêtes facultatives (7) | Mu et ses eaux | ✅ liste · 💭 fonds |
 | A | Quitter Mu --- le relevé des seuils naturels | siège d'Uanna | ✅ |
@@ -125,7 +125,7 @@ Au bout de la route, l'aventurier peut découvrir que dieux et aventuriers sont 
 | S | **Yggdrasil** | une cité du Nord | ✅ rang · 💭 contenu |
 | S+ | **Celui qui était avant** | hors de toute mythologie | ✅ rang · 💭 contenu |
 
-Arc de Mu : **≈ 8 quêtes obligatoires** + facultatives ✅. Fil rouge :
+Arc de Mu : **arc court** + facultatives ✅. Fil rouge :
 **Échidna et Cerbère**, séparés de part et d'autre du portail scellé
 sous la cité ; fil secondaire voulu par l'Auteur (24/11) : une
 **animosité croissante envers les dieux**, qui fait des dieux la
@@ -211,11 +211,6 @@ Mission plus délicate d'un interlocuteur local (objet à récupérer,
 fraude, affaire de voisinage à intérêts institutionnels, ruine
 accessible). *Objectif : prouver qu'on respecte les consignes et garde
 les secrets ; premier accès à des secteurs fermés.*
-
-> 💭 ChatGPT proposait aussi « Un étranger dans la cité » (contrôle
-> d'accès par les Templiers de Mu, autorisation de séjour). L'Auteur a
-> fixé **2 quêtes de confiance** : la quête 1 en est une ; la seconde
-> reste à choisir.
 
 ------------------------------------------------------------------------
 
@@ -382,8 +377,7 @@ Anthropes des pions. **Elle seule** connaît la vérité du sacrifice ; le
 ## Les quêtes divines
 
 *Règle de la trame : chaque mythologie **répond à une question et en
-ouvre deux**. Les réponses ne sont jamais définitives.* *✅ Le palier A+
-**n'existe pas** (24/11) : la trame va de A à S+.*
+ouvre deux**. Les réponses ne sont jamais définitives.*
 
 ### Rang A --- L'Hekla, l'Enfer de Lucifer ✅
 
@@ -489,8 +483,8 @@ ouvre deux**. Les réponses ne sont jamais définitives.* *✅ Le palier A+
 
 ### Points restant ouverts
 
--   La seconde quête de confiance, et le choix exact des 3-4 quêtes
-    souterraines.
+-   Les scènes des deux quêtes de confiance, et le découpage des modules
+    de la descente.
 -   Le prix et les suites du passage de Cerbère.
 -   Le fond de chaque quête facultative.
 -   Tout le contenu jouable de l'Hekla, du Paradis, d'Yggdrasil et de «
@@ -506,8 +500,6 @@ ouvre deux**. Les réponses ne sont jamais définitives.* *✅ Le palier A+
     contre les dieux, départ de Mu, Hekla (arbitrages du 24/11)
 -   `docs/lore/cites/20261011_histoire_de_mu_chatgpt.md` --- Sept Sages,
     sacrifice, accès par Notre-Dame
--   `docs/lore/personnages/20260924_idees_de_quetes_a_lutecia.md` ---
-    trame A → S+ (séance reprise ci-dessous, fichier retiré)
 -   `docs/lore/redige/06_personnages_et_trame.md`,
     `docs/lore/monde/20261124_revue_des_contradictions.md`,
     `docs/lore/monde/20260821_portail_des_profondeurs.md`,
@@ -906,386 +898,3 @@ divines sans en conditionner l'accès ni l'issue.
 Ces points restent ouverts parce qu'ils demandent une conception
 ultérieure ; ils ne remettent pas en cause les arbitrages déjà pris.
 
-------------------------------------------------------------------------
-
-## Séance reprise — Idées de quêtes à Lutecia (24/09/2026)
-
-- **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6ab5526c-3eb8-83ed-ad2d-d76f7e39c627), six messages.
-- **Reprise sans ses parties écartées :** les deux premières propositions de ChatGPT (quêtes D → S+ autour de Lutecia, puis « Le bélier de Mu », « Le dernier voyage d'Orphée », « Le crépuscule des dieux », « Le jardin derrière le ciel ») ont été remplacées par la troisième (« On va garder ta dernière version »), seule gardée. Les intitulés « A+ » y deviennent « S » (Auteur, 24/11). **Lilith** n'est pas retenue : à Mu, c'est Échidna, jamais Lilith.
-
-## ✍️ Auteur — 24/09/2026
-
-Donne moi des idées de quêtes à Lutecia. Une par passage de rang à partir de D jusqu'à S+.
-
-
-*[Première proposition de ChatGPT écartée.]*
-
----
-
-J'aimerais des quêtes moins centrées sur Lutecia à partir du rang A. Il est probable que l'aventurier parte à Mu ou ailleurs. Le but reste de parler/ faire miroir des mythologies du monde plus que de parler uniquement de portail et de leurs malfaçons.
-
----
-
-*[Seconde proposition de ChatGPT écartée.]*
-
-## ✍️ Auteur — 24/09/2026
-
-Cela aurait été bien de plus encore baser tes propositions sur les descriptions des cités état que l'on a déjà faites. On va garder ta dernière version. Comment introduire Lilith ou Echidna que l'aventurier doit choisir de combattre ou d'échanger avec elle pour comprendre / croire que les Dieux sont la source de tous les problèmes. Puis passer à une aventure impliquant un monde divin derrière un portail (ou plusieurs portails); Rome -> Paradis ou Yggdrasil -> les mondes de la mythologie nordique, ....
-Et toujours des réponses non définitives.
-
----
-
-## 🤖 ChatGPT — 24/09/2026
-
-Oui. Je pense que la bonne structure est de faire de **Lilith/Echidna un moment charnière** : jusqu'à elle, le joueur rencontre surtout des légendes et des êtres extraordinaires. Avec elle, il rencontre pour la première fois une créature capable de lui proposer **une interprétation cohérente de l'histoire du monde** — mais sans lui donner la certitude qu'elle dit vrai.
-
-Je garderais donc la dernière progression, mais en la réorientant ainsi.
-
-### A — Mu : « Le serpent sous la cité »
-
-L'aventure à Mu peut introduire **Lilith ou Echidna** selon la région mythologique que tu veux privilégier.
-
-Je ne ferais pas d'elle immédiatement une antagoniste.
-
-L'aventurier arrive dans une cité-État lointaine confrontée à une série de disparitions. Les autorités locales accusent une créature vivant dans une région interdite.
-
-Les récits populaires la décrivent comme :
-
-- une mère de monstres ;
-- une séductrice ;
-- une femme-serpent ;
-- une ancienne épouse ou compagne d'un dieu ;
-- une créature qui aurait refusé de se soumettre aux dieux.
-
-Mais les témoignages sont contradictoires.
-
-L'expédition finit par rencontrer **Lilith/Echidna elle-même**.
-
-Et elle ne cherche pas nécessairement à tuer le joueur.
-
-Elle lui propose de parler.
-
-Elle affirme quelque chose de très simple :
-
-> **« Vous appelez monstres mes enfants. Qui vous a dit qu'ils étaient nés pour être vos ennemis ? »**
-
-Elle raconte alors une histoire radicalement différente de celle enseignée par les cités.
-
-Selon elle, les dieux :
-
-- ont façonné ou transformé certaines créatures ;
-- ont créé des lignées de monstres ;
-- ont imposé des frontières entre « créatures civilisées » et « créatures sauvages » ;
-- utilisent les Anthropes comme instruments ;
-- et surtout, **ne sont pas les protecteurs désintéressés que les mortels imaginent**.
-
-Mais elle est évidemment suspecte.
-
-Elle est elle-même mère de créatures monstrueuses.
-
-Elle a donc tout intérêt à présenter les choses ainsi.
-
-### Le choix du joueur
-
-Le joueur peut :
-
-**La combattre.**
-
-Il refuse son discours et considère qu'il s'agit d'une créature dangereuse manipulant les humains.
-
-Ou :
-
-**Échanger avec elle.**
-
-Le joueur accepte de discuter.
-
-Elle donne alors quelques informations concrètes, mais jamais la totalité de son histoire.
-
-Par exemple :
-
-> « Cherche les dieux derrière leurs portes. »
-
-Puis :
-
-> « Lorsque tu les rencontreras, demande-leur qui a créé les monstres. »
-
-Et enfin :
-
-> « Observe bien leur réponse. »
-
-La quête ne permet donc pas de savoir si Lilith/Echidna est :
-
-- une ennemie ;
-- une victime ;
-- une manipulatrice ;
-- une ancienne alliée des dieux ;
-- ou quelqu'un qui dit effectivement une vérité que les Anthropes ont oubliée.
-
-C'est **la première fois que le joueur possède une théorie crédible selon laquelle les dieux pourraient être à l'origine du problème**.
-
----
-
-### S — « La porte des dieux »
-
-Cette quête peut être directement construite sur ce que Lilith/Echidna a dit.
-
-Le joueur apprend qu'une cité-État possède un ancien portail dont la destination est considérée comme sacrée.
-
-Et ici, je profiterais vraiment des **cités-États déjà établies dans Telluris**.
-
-Par exemple, une cité fortement romanisée peut avoir développé autour de son portail une institution religieuse et politique extrêmement puissante.
-
-Le portail n'est pas simplement une porte vers un donjon.
-
-Il mène vers un lieu que les habitants considèrent comme :
-
-> **le domaine des dieux.**
-
-Les Templiers veulent contrôler l'expédition.
-
-Les autorités religieuses veulent empêcher l'ouverture.
-
-La Guilde veut savoir ce qui se trouve réellement derrière.
-
-Le joueur peut donc être pris entre plusieurs interprétations.
-
----
-
-### S — Rome → le Paradis
-
-C'est probablement l'un des meilleurs endroits pour introduire progressivement la cosmologie chrétienne.
-
-Le portail situé dans la cité inspirée de **Rome** ne conduit pas simplement à une zone de monstres.
-
-Il conduit vers une succession de territoires correspondant progressivement à des représentations du **Paradis**.
-
-Mais surtout :
-
-**les habitants de Telluris ne savent pas si c'est réellement le Paradis.**
-
-Ils l'appellent ainsi parce que c'est le seul concept dont ils disposent.
-
-Le joueur traverse :
-
-- un lieu d'une beauté surnaturelle ;
-- des êtres ressemblant à des anges ;
-- des gardiens ;
-- des paysages impossibles ;
-- éventuellement une cité céleste.
-
-Mais personne ne répond clairement à la question :
-
-> « Êtes-vous les serviteurs du Dieu créateur ? »
-
-Les réponses sont ambiguës.
-
-Un être peut répondre :
-
-> « Nous servons celui qui nous a donné notre existence. »
-
-Ce qui ne répond pas à la question.
-
-Un autre :
-
-> « Votre monde n'est pas notre monde. »
-
-Ce qui est intéressant sans être une révélation.
-
-Et un troisième peut même affirmer :
-
-> « Vos dieux vous ont menti. »
-
-Mais est-ce vrai ?
-
----
-
-### La confrontation avec Lilith devient alors intéressante
-
-Si le joueur a parlé avec elle auparavant, il commence à voir des correspondances.
-
-Lilith disait :
-
-> « Les dieux sont responsables. »
-
-Le Paradis semble effectivement être un monde organisé par des puissances supérieures.
-
-Mais le joueur peut également constater que **ces êtres semblent sincèrement protéger leur propre monde**.
-
-Alors une nouvelle hypothèse apparaît :
-
-> Les dieux sont-ils réellement responsables des souffrances de Telluris ?
-
-Ou bien :
-
-> les habitants de Telluris accusent-ils simplement leurs dieux parce qu'ils sont incapables de comprendre ce qui se trouve au-dessus d'eux ?
-
----
-
-### S — « Yggdrasil »
-
-Je ferais ensuite une rupture assez nette.
-
-La quête S ne serait plus centrée sur Rome.
-
-Elle emmènerait le joueur vers une cité-État nordique dont le réseau de portails permet d'accéder à un lieu appelé **Yggdrasil**.
-
-Là encore, les habitants ne savent pas si Yggdrasil est réellement :
-
-- un arbre ;
-- un monde ;
-- un portail gigantesque ;
-- ou une représentation mythologique d'autre chose.
-
-Le joueur découvre cependant que **plusieurs portails sont reliés entre eux par Yggdrasil**.
-
-Chaque branche mène vers un monde différent.
-
-On peut alors visiter plusieurs mondes inspirés de la mythologie nordique :
-
-- Asgard ;
-- Midgard ;
-- Jötunheim ;
-- Hel ;
-- etc.
-
-Mais je conserverais volontairement une ambiguïté essentielle :
-
-> **Est-ce que ces mondes existaient avant que les Nordiques les racontent, ou les croyances des Nordiques ont-elles donné leur forme à quelque chose qui existait déjà ?**
-
----
-
-## Et là, les versions commencent à se contredire
-
-C'est précisément ce que je trouve intéressant pour Telluris.
-
-Lilith/Echidna affirme :
-
-> **« Les dieux ont créé les monstres. »**
-
-Les habitants de Rome peuvent affirmer :
-
-> **« Les monstres sont la conséquence de la corruption du monde. »**
-
-Les habitants du Nord peuvent raconter :
-
-> **« Les monstres existaient avant les dieux. »**
-
-Et dans un autre monde, quelqu'un pourrait encore dire :
-
-> **« Les dieux sont eux-mêmes des créatures. »**
-
-Aucune de ces versions n'est confirmée.
-
----
-
-### S+ — « Celui qui était avant »
-
-La quête S+ pourrait enfin réunir toutes ces pistes sans les résoudre.
-
-Le joueur a suffisamment voyagé pour constater que plusieurs mythologies décrivent des structures étonnamment similaires :
-
-- un monde des mortels ;
-- des mondes divins ;
-- des créatures primordiales ;
-- des êtres créateurs ;
-- des mondes souterrains ;
-- des passages entre les mondes ;
-- des récits de destruction et de renaissance.
-
-Il entreprend alors une expédition dont le but n'est plus :
-
-> « trouver un trésor »
-
-ou
-
-> « tuer un monstre ».
-
-Son objectif devient :
-
-> **trouver l'origine commune de ces récits.**
-
-Il découvre un lieu qui ne correspond **à aucune mythologie connue**.
-
-Et là, plusieurs interprétations restent possibles.
-
-### Hypothèse 1 — Lilith disait vrai
-
-Les dieux sont responsables.
-
-Ils ont créé les monstres et les mondes, puis ont laissé les Anthropes subir les conséquences de leurs expériences.
-
-### Hypothèse 2 — Les dieux sont eux-mêmes des victimes
-
-Ils ont reçu Telluris et leurs propres mondes d'une puissance antérieure.
-
-Ils ne sont donc pas les créateurs ultimes.
-
-### Hypothèse 3 — Les mythologies sont des traductions
-
-Les Anthropes ont rencontré des réalités qu'ils ne pouvaient pas comprendre.
-
-Ils les ont transformées en :
-
-- dieux ;
-- démons ;
-- anges ;
-- dragons ;
-- monstres ;
-- paradis ;
-- enfers.
-
-### Hypothèse 4 — Lilith ment
-
-Elle connaît effectivement des choses que les Anthropes ignorent, mais son interprétation est volontairement biaisée.
-
-Et surtout, le jeu ne tranche pas.
-
----
-
-## Une règle narrative que je trouve particulièrement adaptée à Telluris
-
-Chaque nouvelle mythologie devrait **répondre à une question mais en créer deux nouvelles**.
-
-Par exemple :
-
-**Lilith/Echidna :**
-
-> « Les dieux ont créé les monstres. »
-
-Le joueur pense avoir une réponse.
-
-Puis il rencontre les dieux.
-
-**Les dieux :**
-
-> « Nous n'avons pas créé les monstres. Nous les avons hérités. »
-
-Nouvelle question :
-
-> **De qui ?**
-
-Puis Yggdrasil.
-
-Les Nordiques affirment :
-
-> « Les géants existaient avant les dieux. »
-
-Nouvelle question :
-
-> **Qui a créé les géants ?**
-
-Puis un autre monde :
-
-> « Personne ne les a créés. Ils ont toujours existé. »
-
-Nouvelle question :
-
-> **Que signifie "toujours" ?**
-
-Et progressivement, le joueur réalise que **la quête de l'origine est peut-être elle-même une erreur anthropique**.
-
-C'est là que le niveau méta de Telluris peut devenir beaucoup plus intéressant : même lorsqu'il découvre les dieux, le joueur ne découvre pas nécessairement **la vérité**. Il découvre seulement des êtres qui, eux aussi, ont une histoire, des croyances et peut-être leurs propres ignorances.
-
-Cela permettrait de conserver jusqu'au bout le principe que **le joueur doit construire sa propre compréhension**, plutôt que de recevoir une encyclopédie cosmologique à la fin.
-
----

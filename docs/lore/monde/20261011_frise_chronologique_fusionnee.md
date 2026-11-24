@@ -126,7 +126,6 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 ### ✍️ Auteur — 11/10/2026 (sixième arbitrage)
 
 27. **Atlantis existe encore, isolée** : civilisation antédiluvienne toujours debout aujourd'hui, restée à l'écart du réseau des portails par choix.
-28. ~~Rang A+ = palier dans le rang A~~ — *remplacé (Auteur, 24/11/2026) : le palier A+ n'existe pas ; voir [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md).*
 
 ### ✍️ Auteur — 11/10/2026 (septième arbitrage)
 

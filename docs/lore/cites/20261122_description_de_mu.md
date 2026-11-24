@@ -706,7 +706,7 @@ Arbitrage par cinq questionnaires (Claude Code, 22/11/2026), sur les trois séan
 | Vague déclenchée par la fermeture du portail de Mu | **Vérité du monde cachée et disputée**, comme le sacrifice du continent : en jeu, une théorie parmi d'autres, même à Mu ; le mystère reste ouvert pour les personnages. |
 | Ressource de Mu | **Corail de mana abyssal** = le **niveau au-dessus du cristal jaune**. **Vivant, il n'est pas consommé** ; mort, il n'est qu'un cristal jaune supérieur, consommé. Vivant : aisé dans Mu, très rare dehors. Hors de Mu il meurt ; une **vasque** d'eau des abysses le garde vivant et utilisable sans usure, **même pour un passage**, mais son entretien est **très complexe**. |
 | Intrus de la quête 1 | **Naga** du dehors qui veulent **rejoindre Échidna**, sans hostilité envers les habitants (motif découvert plus tard). |
-| Taille de l'arc | **≈ 8 quêtes obligatoires** (2 de confiance, 3-4 souterraines, 2-3 Échidna/Cerbère) + facultatives. |
+| Taille de l'arc | **Arc court** : phase I = **3 quêtes** (« Les eaux troubles de Mu », puis deux de confiance) ; phase II = **enquête modulaire, sans nombre fixe** ; phase III = 2-3 quêtes Échidna/Cerbère ; + facultatives (arbitrage du 24/11, consigné dans [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md)). |
 | Demande de réunion avec Cerbère | **Au bout de la voie de la parole** (choix combattre/parler du 21/11) : la phase III n'existe que dans cette voie. |
 | Réunion | **Cerbère passe, la porte reste close** : passage étroit et bref tenu avec les Architectes de Mu ; prix et suites ouverts. |
 | Éléments du second arc versés | Pression **de l'autre côté** du portail scellé ; **empreintes à trois têtes** et témoignages contradictoires ; **fragments de la serrure** retirés volontairement ; **Templiers de Mu contre Aélis** (renforcer le scellement au prix d'une destruction partielle). |
@@ -740,14 +740,4 @@ Echidna ne meurt pas des suites du choix du combat. C'est une créature immortel
 |---|---|
 | Issue du combat | Échidna, **immortelle**, ne meurt pas : vaincue, elle **s'enfuit** ; on ne la retrouve plus. |
 | Après sa fuite | Elle **ne défend plus Mu** (d'où le prix payé à terme par la cité), mais **reste proche**, dans l'espoir de retrouver un jour **Cerbère**. |
-
-## Quatrième arbitrage de l'Auteur (24/11/2026)
-
-Consigné dans [De Mu aux mondes divins](20261124_de_mu_aux_mondes_divins.md).
-
-| Point | Décision |
-|---|---|
-| Taille de l'arc | **Arc court** : phase I = **3 quêtes** (« Les eaux troubles de Mu », puis deux de confiance) ; phase II = **enquête modulaire, sans nombre fixe** ; phase III = 2-3 quêtes. Remplace « ≈ 8 quêtes : 2 de confiance, 3-4 souterraines ». |
-| Phase III | Échidna **avertit clairement** avant le combat, qui est **très difficile** ; voies **asymétriques**. |
-| Quêtes facultatives | Les sept, **développées** : ordre libre, indices indépendants, conclusion locale, aucune conséquence sur la trame, accessibles au retour à Mu. |
 

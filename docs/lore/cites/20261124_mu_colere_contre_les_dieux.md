@@ -26,7 +26,7 @@ Le premier seuil visé est l'**Hekla**, au sud de l'Islande, dont l'accès est g
 - **Source :** demande de l'Auteur et questionnaires (Claude Code, 24/11/2026). Aucune séance ChatGPT.
 - **Créée :** 24/11/2026
 - **Statut :** **tranchée par l'Auteur** (quatre questionnaires, seize questions, 24/11/2026). Tous les détails du récit sont retenus ; il ne reste aucune proposition ouverte.
-- **S'appuie sur :** [Mu — vivre sous la mer](20261122_description_de_mu.md) (arc de ≈ 8 quêtes, deux voies, Cerbère passe la porte close, Échidna immortelle qui s'enfuit), [le mythe de Mu](20261122_mythe_de_mu.md) (sacrifice, Vague), [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md) (Sept Sages, Tables de Pierre, Tangaroa), [la Tour de Babel](20261123_tour_de_babel.md) (Uanna, seuils naturels), [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) (trame A → S+).
+- **S'appuie sur :** [Mu — vivre sous la mer](20261122_description_de_mu.md) (arc du séjour, deux voies, Cerbère passe la porte close, Échidna immortelle qui s'enfuit), [le mythe de Mu](20261122_mythe_de_mu.md) (sacrifice, Vague), [l'histoire de Mu](20261011_histoire_de_mu_chatgpt.md) (Sept Sages, Tables de Pierre, Tangaroa), [la Tour de Babel](20261123_tour_de_babel.md) (Uanna, seuils naturels), [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) (trame A → S+).
 
 ---
 
@@ -43,25 +43,24 @@ Sur ce qui est prévu comme quêtes menant à Echidna, j'aimerais que l'on intro
 | Voie du combat | **Antre abandonné** : la réplique d'Échidna dans sa fuite, les reliques de ses enfants, le souvenir d'Héraclès. On apprend que les dieux jouent par la **culpabilité**. Écartés : le témoignage des Naga, une vérité seulement partielle. |
 | Voie de la parole | **Des Enfers vides** : par le passage de Cerbère, une prairie d'asphodèles sans ombres et un trône désert. « Où sont partis les dieux ? » Écartés : un collier marqué de seuils, le départ d'Échidna avec Cerbère. |
 | Départ de Mu | **Relevé des seuils divins** tenu par le siège d'Uanna (entrées « demeure »), refusé par les Sages et obtenu selon la voie choisie. Écartés : l'aventurier chassé par les Templiers de Mu, Aélis qui part la première. |
-| Premier monde divin | **L'Hekla d'abord** (Enfer de Lucifer, habité, en contrepoint des Enfers vides d'Hadès), **puis** Rome → Paradis. La trame retenue (A+ Rome → Paradis) est modifiée d'autant. Écartés : le Paradis d'abord, l'ordre laissé au joueur. |
+| Premier monde divin | **L'Hekla d'abord** (Enfer de Lucifer, habité, en contrepoint des Enfers vides d'Hadès), **puis** Rome → Paradis. Écartés : le Paradis d'abord, l'ordre laissé au joueur. |
 | Garder le mystère | **Voix contradictoires** (Aélis : des dieux absents ; un Sage : des dieux enfuis ; un Templier de Mu : un sacrifice juste) · **Héraclès pas si pion** (il demande la permission, épargne Cerbère, le ramène) · **Tangaroa a-t-il répondu ?** (la bulle dorée serait sa réponse). Écarté : l'avertissement de Vlad. |
 
 ### Propositions soumises au second arbitrage
 
-- Rang des mondes : l'Hekla et le Paradis partagent le palier A+, l'Hekla d'abord ; Yggdrasil reste au rang S.
+- Rang des mondes : l'Hekla d'abord, puis le Paradis ; Yggdrasil au rang S.
 - Trajet vers l'Hekla : retour à Notre-Dame (seule sortie de Mu), puis le réseau jusqu'à Reykjavik et la route jusqu'à Akureyri.
 - Le Sage qui défend les dieux enfuis est Uannedugga (confinement).
 - Le relevé d'Uanna devient un objet de quête.
 
 ## ✍️ Auteur
 
-A+ n'existe pas. Pose les questions complémentaires.
+Pose les questions complémentaires.
 
 ## Second arbitrage de l'Auteur (24/11/2026)
 
 | Point | Décision |
 |---|---|
-| Palier A+ | **N'existe pas** (remplace la décision du 11/10 qui en faisait la fin du rang A). La trame va de A à S+ sans palier intermédiaire. |
 | Rangs | **Hekla au rang A**, dans la foulée de Mu ; **Paradis au rang S**, avec Yggdrasil ; « Celui qui était avant » reste au rang S+. Écartés : les deux au rang S, les deux au rang A. |
 | Trajet vers l'Hekla | **Notre-Dame, le réseau jusqu'à Reykjavik, puis la route jusqu'à Akureyri** (la règle du retour). Écartés : Notre-Dame directement, la mer. |
 | Sage des « dieux enfuis » | **Uannedugga** (confinement). Écartés : Uanna, Utuabzu, un Sage sans siège. |
