@@ -4,9 +4,11 @@ Mu était un continent du Grand Océan, et une cité de routes qui ne conquit ja
 
 ## Le temps des Tables de Pierre
 
-Mu ne parle pas d'« âges » : elle a ses propres époques. La plus ancienne est le **temps des Tables de Pierre**, celui des **Sept Sages de Mu**. Ce sont les sept *apkallu* que la Mésopotamie se rappelle comme des sages venus des eaux avant le Déluge pour enseigner les arts aux hommes. Le Déluge, lui, n'a pas englouti Mu.
+Mu ne parle pas d'« âges » : elle a ses propres époques. La plus ancienne est le **temps des Tables de Pierre**, celui des premiers **Sept Sages de Mu**. Le Déluge, qui clôt ailleurs l'ère antédiluvienne, n'a pas englouti Mu : elle n'a sombré que bien plus tard, au moment de la Vague.
 
-« Les Sept Sages » n'est pas le nom de sept personnes, mais un titre : sept sièges, chacun avec son nom et sa spécialité, qui se transmettent de maître en maître. **Uanna** tient la cosmologie et les seuils naturels, **Uannedugga** les structures et le confinement, **Enmedugga** le mana et ses flux, **Enmegalamma** le vivant, **Enmebulugga** la matière et la cristallisation, **An-Enlilda** la protection et la magie, **Utuabzu** le temps et l'observation. Les premiers à les occuper sont ceux dont la Mésopotamie garde le souvenir ; les derniers ont vu la Vague.
+« Les Sept Sages » n'est pas le nom de sept personnes, mais un titre : sept sièges, chacun avec son nom et sa spécialité, qui se transmettent de maître en maître. **Uanna** tient la cosmologie et les seuils naturels, **Uannedugga** les structures et le confinement, **Enmedugga** le mana et ses flux, **Enmegalamma** le vivant, **Enmebulugga** la matière et la cristallisation, **An-Enlilda** la protection et la magie, **Utuabzu** le temps et l'observation. Les premiers les occupent dès les Tables de Pierre ; les derniers ont vu la Vague. Pendant tout ce temps, les Sages ne quittent pas Mu, et le reste du monde ignore jusqu'à leur existence.
+
+C'est seulement **après la Vague** que des êtres sortis du golfe viennent enseigner à Babylone, à la manière de l'Oannès des vieux récits. Babylone les appelle les sept *apkallu*, les Sept Sages. Au fil des siècles, elle a confondu le Déluge et la Vague, et elle se les rappelle aujourd'hui comme des sages venus des eaux **avant le Déluge** pour enseigner les arts aux hommes, ceux-là mêmes qui auraient posé les fondations d'Uruk. Le souvenir se trompe de date ; sur les eaux, il dit vrai. Ce qu'étaient ces êtres, et ce qui les liait aux Sages de Mu, nul ne le sait.
 
 Mu n'a jamais eu d'empereur. Elle se gouvernait par des assemblées (lignées, temples, guildes, maîtres Architectes), et celui qui tenait l'équilibre entre elles portait un titre : **Ra-Mu**. La surface, qui ne concevait pas une puissance sans empire, en a fait l'« Empereur du Soleil levant ». Le mythe a eu lieu ; il est seulement arrivé déformé. Que ce nom ressemble à celui du Ra d'Égypte, emprunt, coïncidence ou trace d'un ancien contact, personne ne le sait.
 
@@ -543,7 +545,7 @@ Explicite la problématique Ra-Mu et Empereur.
 | Nom de ChatGPT | Retenu | Pourquoi |
 |---|---|---|
 | Âge des Tables de Pierre | **le temps des Tables de Pierre** | « Âge » est réservé aux quatre ères de Telluris (Remparts, Portails, Donjons) ; c'est une époque propre à Mu. |
-| Sept Sages | **les Sept Sages de Mu** | distingue des sept sages de la Grèce ; ce sont les sept **apkallu** de Mésopotamie, sages antédiluviens venus des eaux (adopté par l'Auteur, § 6 ; origine du mythe en note du texte rédigé). |
+| Sept Sages | **les Sept Sages de Mu** | distingue des sept sages de la Grèce ; ce sont les sept **apkallu** de Mésopotamie, ~~sages antédiluviens venus des eaux~~ — que la Mésopotamie croit antédiluviens, mais qui n'en sortent qu'après la Vague (§ 11) (adopté par l'Auteur, § 6 ; origine du mythe en note du texte rédigé). |
 | Mu-la-Centrale | **Mu-la-Centrale** | la cité, quand il faut la distinguer du continent ; « Mu » seul désigne l'un ou l'autre. |
 | Couronne de Mu | **la Couronne de Mu** | aucun homonyme (l'auberge « La Couronne de la Cité » est à Lutèce, sans lien). |
 | les Retours | **les Retours** (donjons) | les Architectes « de retour » du second texte deviennent **ceux qui reviennent**, pour ne pas confondre. |
@@ -654,9 +656,35 @@ Les deux enfers peuvent jouer ce rôle. Et plusieurs portes peuvent mener au mê
 
 Tranché avec la séance [la Tour de Babel](20261123_tour_de_babel.md) (trois questionnaires), où sont versées la synthèse brute de ChatGPT et la relecture critique.
 
-1. **Sept sièges transmis.** « Les Sept Sages » est un **titre**, comme Ra-Mu : sept sièges qui se transmettent avec leur nom et leur spécialité. Les premiers titulaires sont les **apkallu** antédiluviens (temps des Tables de Pierre, fondations d'Uruk) ; les **derniers** se sacrifient au moment de la Vague. Cela réconcilie l'ancienneté des Sages et le sacrifice.
+1. **Sept sièges transmis.** « Les Sept Sages » est un **titre**, comme Ra-Mu : sept sièges qui se transmettent avec leur nom et leur spécialité. Les premiers titulaires sont ~~les **apkallu** antédiluviens (temps des Tables de Pierre, fondations d'Uruk)~~ ceux du temps des Tables de Pierre, à Mu seulement (corrigé au § 11) ; les **derniers** se sacrifient au moment de la Vague. Cela réconcilie l'ancienneté des Sages et le sacrifice.
 2. **Spécialités** : Uanna, cosmologie et **seuils naturels** (et non « portails » : Mu a appris à bâtir des portails auprès d'un des frères) · Uannedugga, structures et confinement · Enmedugga, mana et flux · Enmegalamma, biologie et vivant · Enmebulugga, matière et cristallisation · An-Enlilda, protection et magie · Utuabzu, temps et observation.
 3. **Les Sages-ancrages, vérité cachée.** Le sacrifice change les sept derniers Sages en **sept ancrages** qui maintiennent la bulle de Mu et le sceau de la porte : vérité du monde aussi cachée et disputée que le sacrifice. Si un ancrage faiblit, la bulle ou le sceau faiblit aussi.
 4. **Version officielle à Mu** : les Sages ont péri avec le continent. Les **Retours** nourrissent le doute.
 5. **Mu et Babylone.** Après la Vague, Babylone ne reçoit que des **fragments** du savoir des Sages, apportés par des êtres sortis du golfe à la manière d'**Oannès** (ils enseignent le jour et regagnent la mer le soir). Babylone les prend pour les apkallu revenus et ne sait pas d'où ils viennent ; leur nature (projections des ancrages, gens de Mu, autre chose) reste un **mystère**. Ils ne reparaissent plus après l'éveil de la Tour de Babel. Cela ne contredit pas « nul au-dehors ne sait ce que Mu est devenue ».
 6. Les points d'ancrage de la Tour de Babel font **écho** au principe des Sages-ancrages, copié sans être bien compris par les savants babyloniens.
+
+---
+
+## 🤖 Claude Code — relecture (24/11/2026)
+
+Question de l'Auteur : la phrase du récit « Ce sont les sept *apkallu* que la Mésopotamie se rappelle comme des sages venus des eaux avant le Déluge pour enseigner les arts aux hommes. Le Déluge, lui, n'a pas englouti Mu. » est-elle toujours vraie après les derniers échanges ? Est-ce une erreur des Mésopotamiens ?
+
+- « Le Déluge n'a pas englouti Mu » reste vrai (§ 1, arbitrage du 11/10, jamais remis en cause).
+- Le reste posait quatre questions : comment des sages venus d'un continent émergé du Grand Océan arrivaient-ils « des eaux » avant le Déluge ? Pourquoi cessent-ils de venir ? Depuis le § 10, « Sept Sages » est un titre transmis, et les apkallu n'en sont plus que les premiers titulaires. Enfin, les sept sièges portent des noms akkadiens alors que les noms de Mu sont polynésiens (22/11).
+
+## ✍️ Auteur — 24/11/2026
+
+Le déluge est avant le sacrifice. Les sages n'arrivent qu'après la grande vague, non?
+
+---
+
+## 11. Arbitrage de l'Auteur (24/11/2026) — les apkallu ne viennent qu'après la Vague
+
+Deux questionnaires.
+
+1. **Aucun Sage n'est venu en Mésopotamie avant le Déluge.** Les êtres du golfe n'arrivent qu'**après la Vague**, et ce sont eux que la Mésopotamie appelle *apkallu*. Corrige le § 10.1 : les apkallu ne sont plus les premiers titulaires des sièges.
+2. **L'erreur des Mésopotamiens.** Au fil des siècles, Babylone a **confondu le Déluge et la Vague** et elle a vieilli son souvenir : elle se rappelle des sages venus des eaux « avant le Déluge », fondateurs d'Uruk. C'est faux par la date. « Venus des eaux » est vrai : ils sortaient du golfe. Les fondations d'Uruk posées par les Sept Sages sont une **légende** de la surface.
+3. **À Mu, le temps des Tables de Pierre reste antédiluvien.** Les sièges des Sages existent dès cette époque, mais les Sages ne quittent pas Mu ; le dehors ignore leur existence jusqu'après la Vague.
+4. **Ce qu'étaient les êtres du golfe reste un mystère** (§ 10.5 inchangé : projections des ancrages, gens de Mu, autre chose).
+5. **Noms akkadiens des sièges : exception assumée.** Uanna, Uannedugga, Enmedugga, Enmegalamma, Enmebulugga, An-Enlilda et Utuabzu sont les noms des sièges à Mu, plus anciens que les noms polynésiens de la cité.
+6. **Formulation du récit précisée** : la phrase d'origine est remplacée en tête de séance.
