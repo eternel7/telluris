@@ -6,13 +6,13 @@ Lutecia est née d'un portail. Sur l'île de la Seine, dans un pays où le mana 
 
 Ce mana faible est à la fois la chance et la limite de la cité.
 
-C'est sa chance, parce que la Vague l'a presque épargnée. Ailleurs, les portails ont changé de couleur, se sont déréglés, sont devenus des donjons ; celui de Notre-Dame est resté tel que le frère l'avait voulu. C'est une œuvre que tous les maîtres des portails viennent étudier, et qui peut relier n'importe quel lieu du monde connu pour un prix dérisoire. Autour d'elle, Lutecia est devenue, presque malgré elle, la cité des Architectes : elle forme les maîtres des portails à l'**Institut des Architectes**, à la Cour des Arches, et ses meilleurs élèves vont parachever leur formation à Mu.
+C'est sa chance, parce que la Vague l'a presque épargnée. Ailleurs, les portails ont changé de couleur, se sont déréglés, sont devenus des donjons ; celui de Notre-Dame est resté tel que le frère l'avait voulu. C'est une œuvre que tous les maîtres des portails viennent étudier, et qui peut conduire vers tout lieu du monde connu relié par un portail, au prix d'un cristal jaune. Autour d'elle, Lutecia est devenue, presque malgré elle, la cité des Architectes : elle forme les maîtres des portails à l'**Institut des Architectes**, à la Cour des Arches, et ses meilleurs élèves vont parachever leur formation à Mu.
 
 C'est sa limite, parce que les grandes écoles de magie ne s'y sont jamais installées : elles sont parties vers d'autres cités d'Europe, là où le mana est plus fort. Lutecia n'a que des instituts d'Architectes.
 
 ## Notre-Dame aujourd'hui
 
-On n'arrive presque jamais à Notre-Dame. Le portail n'a pas de liens fixes : il **court-circuite** un portail du monde et prend son point d'arrivée le temps que son seuil reste chaud. Seule Mu y mène. La gemme violette posée sur l'autel tient l'ancrage, et chaque passage se paie d'**un cristal jaune**, celui qui stabilise les effets des portails ; on en trouve au fond des catacombes de la cité et dans le coffre du puits de Chartres. La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, une elfe magicienne. La cathédrale n'ouvre ses portes aux aventuriers qu'au **rang A**.
+On n'arrive presque jamais à Notre-Dame. Le portail n'a pas de liens fixes : il **court-circuite** un portail du monde et prend son point d'arrivée le temps que son seuil reste chaud. Seule Mu y mène : qui part par Notre-Dame revient par le réseau des portails jusqu'à Orléans, Bruges ou Aix, puis par la route ou la Loire, sous escorte paladine. La gemme violette posée sur l'autel tient l'ancrage, et chaque passage se paie d'**un cristal jaune**, celui qui stabilise les effets des portails ; on en trouve au fond des catacombes de la cité et dans le coffre du puits de Chartres. La commanderesse des Templiers de Notre-Dame est **Aénor de Sully**, une elfe magicienne. La cathédrale n'ouvre ses portes aux aventuriers qu'au **rang A**.
 
 ## Les murailles et le ciel
 

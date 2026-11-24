@@ -1,6 +1,6 @@
 # Mu — histoire de la Cité du Continent englouti
 
-Mu était un continent du Grand Océan, et une cité de routes qui ne conquit jamais rien. Elle était **en avance sur son temps** : ses refuges fortifiés, ses chaussées et ses gardiens des routes existaient avant même que Gilgamesh ouvre l'Âge des Remparts pour le reste du monde. Mais son histoire est si mal connue qu'aucune autre cité ne la cite en exemple.
+Mu était un continent du Grand Océan, et une cité de routes qui ne conquit jamais rien. Elle était **en avance sur son temps** : ses refuges fortifiés, ses chaussées et ses gardiens des routes existaient avant même que Gilgamesh ouvre l'Âge des Remparts pour le reste du monde. Mais son histoire est si mal connue qu'aucune autre cité ne la cite en exemple. Ses gardiens des routes et de ses portes, que l'on nomme par analogie ses Paladins et ses Templiers, sont des ordres propres à Mu, sans lien avec ceux du reste du monde, nés plus tard sans la connaître.
 
 ## Le temps des Tables de Pierre
 
@@ -14,7 +14,7 @@ Mu n'a jamais eu d'empereur. Elle se gouvernait par des assemblées (lignées, t
 
 ## Les portails et le lent dérèglement
 
-Mu a appris l'art des portails de **l'un des trois frères**. Ses propres portails, œuvres d'héritiers, demandaient des cristaux, comme tous ceux qui ne sont pas de la main des frères. La **Couronne de Mu** servait à les stabiliser. Puis vint un lent dérèglement : les structures de Mu, on le comprit trop tard, « retenaient quelque chose ».
+Mu a appris l'art des portails de **l'un des trois frères**. Ses propres portails, œuvres d'héritiers, demandaient des cristaux, comme tous ceux qui ne sont pas de la main des frères. Mu devint un nœud du réseau ; tous ses liens sont morts avec le continent, à la Vague, et le monde les a oubliés : il ne reste que le seuil de Notre-Dame. La **Couronne de Mu** servait à les stabiliser. Puis vint un lent dérèglement : les structures de Mu, on le comprit trop tard, « retenaient quelque chose ».
 
 ## La Vague et la cité sous la mer
 

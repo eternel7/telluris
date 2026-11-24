@@ -14,7 +14,7 @@ Bruges est la **capitale de la draperie**. Elle importe la laine brute d'Anglete
 
 ## Le comptoir du Nord
 
-Bruges abrite le seul **Kontor** de la Hanse situé hors du monde germanique et scandinave. Le bois, la fourrure et le grain du Nord y passent contre le vin, les épices et la soie de Méditerranée. ?{Sur Telluris, éviter un voyage peut valoir une fortune : Bruges prospère parce qu'elle rend inutiles bien des expéditions.}?
+Bruges abrite le seul **Kontor** de la Hanse de l'Occident situé hors du monde germanique et scandinave ; à l'autre bout de la route, **Novgorod** tient celui de l'Est. Le bois, la fourrure et le grain du Nord y passent contre le vin, les épices et la soie de Méditerranée. ?{Sur Telluris, éviter un voyage peut valoir une fortune : Bruges prospère parce qu'elle rend inutiles bien des expéditions.}?
 
 Sur la place Van der Buerse, devant la demeure de la famille d'entrepreneurs **Van der Buerse**, s'est concentrée l'activité financière de tous ces marchands : de là est née la **Bourse**.
 

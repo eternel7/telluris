@@ -4,7 +4,7 @@ Rome a deux visages. La cité pieuse prie devant Saint-Pierre ; la cité pécher
 
 ## Avant Rome, la grotte
 
-Rome est plus ancienne que les trois frères, et son portail est plus ancien qu'elle. Au fond d'une grotte, sur une butte, s'ouvrait un **portail naturel** que personne n'avait bâti : la seule exception connue des Occidentaux aux portails des frères. Un groupe spécialisé de Templiers le gardait déjà, bien avant que la cité ne prenne forme.
+Rome est plus ancienne que les trois frères, et son portail est plus ancien qu'elle. Au fond d'une grotte, sur une butte, s'ouvrait un **portail naturel** que personne n'avait bâti : la seule exception connue des Occidentaux aux portails des frères. Avant même que la cité ne prenne forme, un groupe spécialisé de Templiers en prit la garde ; c'est Rémus qui le fonda.
 
 La Louve gardait la grotte du Vatican quand vinrent **Romulus et Rémus**. Les jumeaux ne franchirent pas la porte. **Rémus** et ses Luperques fondèrent la garde de la porte ; **Romulus** et ses Celeres, celle du rempart. Le chef de l'ordre devint le **pontife**. Le groupe de la grotte vit, bien plus tard, venir Jésus.
 

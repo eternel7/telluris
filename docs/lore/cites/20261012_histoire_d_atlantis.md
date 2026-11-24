@@ -4,7 +4,7 @@ Au-delà de Gibraltar, une île d'anneaux d'eau et de terre se tient à l'écart
 
 ## L'île des anneaux
 
-Atlantis est l'une des **premières cités** que les Lignées ont colonisées lors de leur conquête du monde de l'Ouest. Ses habitants croient que **Poséidon a tracé les anneaux** de leur île, et que **la mer est le seul chemin**. Des familles se réclament d'Atlas et des dix rois ; ce sont des légendes, que chacune revendique pour elle.
+Atlantis est l'une des **premières cités** que les Lignées ont fondées lors du peuplement du monde de l'Ouest. Comme Mu, elle eut ses remparts avant que Gilgamesh n'ouvre l'Âge des Remparts, mais aucune cité ne la cite en exemple. Ses habitants croient que **Poséidon a tracé les anneaux** de leur île, et que **la mer est le seul chemin**. Des familles se réclament d'Atlas et des dix rois ; ce sont des légendes, que chacune revendique pour elle.
 
 Le volcan et les montagnes des anneaux donnent l'**orichalque**. Il fut la première puissance d'Atlantis et sa première monnaie d'échange avec le reste du monde. **Tous ses remparts sont d'orichalque.** Les Atlantes ne laissent personne venir le chercher : ils l'apportent eux-mêmes, par leurs navires, à Cordoue, Bruges, Gênes, Venise, et jusqu'à Lutecia en remontant la Seine. Les insignes du rang S de la Guilde, ceux d'Orichalque, viennent tous de leurs cales. Au centre de l'île se dresse le **temple de Poséidon**.
 
@@ -18,7 +18,7 @@ Quand l'un des trois frères vint offrir un portail à Atlantis, les Atlantes re
 
 ## La Vague et le temps présent
 
-Sans portail, Atlantis n'avait rien que la Vague pût pervertir : elle n'a **aucun donjon de portail**. Mais depuis quelque temps, les monstres marins s'en prennent à ses remparts. **Évenor**, prêtre de Poséidon et chaman d'une puissance hors du commun, a dompté l'une d'eux, **Cétô**, une femelle. Elle s'est installée près de l'île ; elle y protège sa progéniture, et avec elle la cité. L'enceinte extérieure se délabre pourtant, année après année. Des érudits murmurent que Cétô serait la mère d'Échidna ; d'autres, qu'elle est celle de Méduse et que la mort de sa fille sous la main de Persée expliquerait la colère de la mer. Rien de tout cela n'est tranché.
+Sans portail, Atlantis n'avait rien que la Vague pût pervertir : elle n'a **aucun donjon de portail**. La mer a toujours été dangereuse ; mais depuis quelque temps, les monstres marins s'acharnent sur ses remparts, plus nombreux et plus audacieux. **Évenor**, prêtre de Poséidon et chaman d'une puissance hors du commun, a dompté l'une d'eux, **Cétô**, une femelle. Elle s'est installée près de l'île ; elle y protège sa progéniture, et avec elle la cité. L'enceinte extérieure se délabre pourtant, année après année. Des érudits murmurent que Cétô serait la mère d'Échidna ; d'autres, qu'elle est celle de Méduse et que la mort de sa fille sous la main de Persée expliquerait la colère de la mer. Rien de tout cela n'est tranché.
 
 ## Atlantis aujourd'hui
 

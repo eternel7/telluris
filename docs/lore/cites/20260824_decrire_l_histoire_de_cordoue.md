@@ -1,6 +1,6 @@
 # Décrire l’histoire de Cordoue
 
-Cordoue, capitale d'Al-Andalus, est la plus grande métropole d'Occident : près de cinq cent mille habitants, quand Lutecia ou Londres n'en comptent que quelques dizaines de milliers. C'est un phare du savoir et une mégapole-bastion, à la fois sacrée et arcanique, au cœur du réseau des portails.
+Cordoue, capitale d'Al-Andalus, est la plus grande métropole de l'Occident latin, et la première par le savoir : près de cinq cent mille habitants, quand Lutecia ou Londres n'en comptent que quelques dizaines de milliers. C'est un phare du savoir et une mégapole-bastion, à la fois sacrée et arcanique, au cœur du réseau des portails.
 
 ## De Corduba à Al-Andalus
 
