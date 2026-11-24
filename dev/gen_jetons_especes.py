@@ -315,6 +315,13 @@ TABLE = {
 	"asag": ("2x2", "rectangle"),
 	"labbu": ("4x3", "capsule"),
 	"mushmahhu": ("4x3", "capsule"),
+	# Madagascar (dev/gen_monstres_madagascar.py, 24/11).
+	"kalanoro": None,
+	"fanany": ("3x2", "capsule"),
+	"songomby": ("1x2", "ellipse"),
+	"lalomena": ("1x2", "ellipse"),
+	"tokantongotra": None,
+	"trimobe": ("2x2", "rectangle"),
 }
 
 
