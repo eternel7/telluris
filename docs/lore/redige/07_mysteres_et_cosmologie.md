@@ -54,4 +54,4 @@ Certaines questions restent volontairement ouvertes. On peut les placer dans la 
 
 ---
 
-Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Introduit les Grigori](../monde/20261004_introduit_les_grigori.md) · [Portail des profondeurs](../monde/20260821_portail_des_profondeurs.md) · [Histoire de Babylone](../cites/20260819_histoire_de_babylone.md) · [Idées de quêtes à Lutecia](../personnages/20260924_idees_de_quetes_a_lutecia.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Document maître](../../Telluris_Document_Maitre.md)
+Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Introduit les Grigori](../monde/20261004_introduit_les_grigori.md) · [Portail des profondeurs](../cites/20260820_decrire_akureyri_fortifiee.md) · [Histoire de Babylone](../cites/20260819_histoire_de_babylone.md) · [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Document maître](../../Telluris_Document_Maitre.md)

@@ -52,4 +52,4 @@ Nul ne sait ce qu'est vraiment la Vague, ni si elle était la première. Nul ne 
 
 ---
 
-Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Créer un système de portails](../monde/20260826_creer_un_systeme_de_portails.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Décrire Aix-la-Chapelle](../cites/20260824_decrire_aix_la_chapelle.md) · [Document maître](../../Telluris_Document_Maitre.md)
+Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Créer un système de portails](../monde/20261120_reseau_des_portails.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Décrire Aix-la-Chapelle](../cites/20260824_decrire_aix_la_chapelle.md) · [Document maître](../../Telluris_Document_Maitre.md)
