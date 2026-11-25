@@ -227,7 +227,8 @@ def test_maelys_ne_solde_le_temple_qu_apres_l_ossuaire():
 
 def test_le_cristal_jaune_ne_vient_que_des_coffres_de_donjon():
 	"""La preuve de la descente ne vaut que si le cristal n'a d'autre source qu'un coffre de
-	donjon — l'ossuaire des catacombes, et le coffre du Minotaure de Chartres (Auteur, 25/10) :
+	donjon — l'ossuaire des catacombes, et le coffre du Minotaure de Chartres (Auteur, 25/10),
+	hors le marché de Mu, au-delà d'un passage qui en coûte déjà un (Auteur, 25/11) :
 	ni boutique, ni recette (personnages, propriétés et combats du dump exclus : c'est l'état
 	d'un joueur — le coffre d'un domaine garde ce que son propriétaire y a rangé, un combat en
 	cours le coffre d'étage déjà tiré). Le
@@ -237,14 +238,22 @@ def test_le_cristal_jaune_ne_vient_que_des_coffres_de_donjon():
 		commandeur = copy.deepcopy(DUMP[GEN.COMMANDEUR])
 		assert commandeur["services"]["apport"]["offre"].pop("item") == GEN.CRISTAL_JAUNE
 		assert f'"{GEN.CRISTAL_JAUNE}"' not in json.dumps(commandeur, ensure_ascii=False)
+	def _sans_peage(d):
+		# Un gardien de portail (Notre-Dame, seuil de Mu) DEMANDE le cristal pour le passage, il
+		# n'en donne pas : son péage ne compte pas comme une source.
+		portail = (d.get("services") or {}).get("portail") or {}
+		if (portail.get("cout") or {}).get("item") == GEN.CRISTAL_JAUNE:
+			d = copy.deepcopy(d)
+			del d["services"]["portail"]["cout"]["item"]
+		return d
 	sources = [d["_id"] for d in DUMP.values()
 			   if d["_id"] not in (GEN.CRISTAL_JAUNE, GEN.COMMANDEUR) and d.get("type") not in ("character", "propriete", "combat")
-			   and f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(d, ensure_ascii=False)]
-	# Le Notre-Dame de dev/gen_portail_notre_dame.py le DEMANDE (prix du passage), il n'en
-	# donne pas : écarté s'il est déjà importé.
-	sources = [i for i in sources if i != "pnj:aenor_de_sully"]
+			   and f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(_sans_peage(d), ensure_ascii=False)]
+	# Seule exception, voulue (Auteur, 25/11) : le marché de Mu VEND le cristal du retour
+	# (dev/gen_partir_pour_mu.py) — on n'y arrive qu'en en ayant déjà dépensé un, la preuve tient.
+	marche_mu = "pnj:kahu_rehua"
 	assert "donjon:catacombes_de_lutecia" in sources
-	assert set(sources) <= {"donjon:catacombes_de_lutecia", GEN.DONJON_PUITS}, sources
+	assert set(sources) <= {"donjon:catacombes_de_lutecia", GEN.DONJON_PUITS, marche_mu}, sources
 	salle = next(b for b in DUMP["donjon:catacombes_de_lutecia"]["battle_maps"]
 				 if f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(b))
 	assert salle["lieu"] == GEN.OSSUAIRE

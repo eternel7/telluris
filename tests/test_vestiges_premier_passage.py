@@ -90,7 +90,9 @@ def test_l_offre_de_la_piece_ne_s_affiche_plus_pour_celle_des_vestiges():
 
 def test_l_escorte_d_aelis_porte_les_deux_offres():
 	offres = DOCS[G.AELIS_ARCHIVES]["services"]["escorte"]["offres"]
-	assert [o["offre"]["id"] for o in offres] == [G.PIECE, G.QUETE]
+	# La pièce puis les vestiges, une fois chacune ; une offre ajoutée depuis (Mu) vient après.
+	ids = [o["offre"]["id"] for o in offres]
+	assert ids[:2] == [G.PIECE, G.QUETE] and ids.count(G.QUETE) == 1
 	assert "offre" not in DOCS[G.AELIS_ARCHIVES]["services"]["escorte"]
 
 
@@ -172,8 +174,9 @@ def _etape(passages=None, resolues=()):
 
 def test_la_voix_d_aelis_est_celle_de_l_escortee_des_vestiges():
 	v = DOCS[G.AELIS_ESCORTE]["voix_protege"]
-	offre = DOCS[G.AELIS_ARCHIVES]["services"]["escorte"]["offres"][-1]["offre"]
-	assert v["quete"] == offre["id"] == G.QUETE
+	offre = next(o["offre"] for o in DOCS[G.AELIS_ARCHIVES]["services"]["escorte"]["offres"]
+				 if o["offre"]["id"] == G.QUETE)
+	assert v["quete"] == G.QUETE
 	assert v["prenom"] == offre["proteges"][0]["prenom"]
 	assert set(v["sauf_lieux"]) == {G.GALERIE, G.ANTICHAMBRE}
 
