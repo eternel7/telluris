@@ -11672,7 +11672,7 @@
     "_id": "lieu:reykjavik",
     "type": "lieu",
     "label": "Reykjavík",
-    "image": "reykjavík_capital.png",
+    "image": "reykjavík_capital.webp",
     "categorie": "ville",
     "sous_categorie": "capitale",
     "dimensions": {

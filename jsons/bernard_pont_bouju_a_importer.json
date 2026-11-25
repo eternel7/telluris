@@ -3,7 +3,7 @@
     "_id": "lieu:chartres",
     "type": "lieu",
     "label": "Chartres",
-    "image": "chartres_city.png",
+    "image": "chartres_city.webp",
     "categorie": "ville",
     "sous_categorie": "ville",
     "dimensions": {

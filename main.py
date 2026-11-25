@@ -312,7 +312,7 @@ def manifest():
 			"screenshots": [
 				{"src": "/towns/auberge_europe03.png", "sizes": "1408x768", "type": "image/png",
 					"form_factor": "wide", "label": "Telluris — une auberge"},
-				{"src": "/towns/portail_de_temple_notre_dame.png", "sizes": "896x1193", "type": "image/png",
+				{"src": "/towns/portail_de_temple_notre_dame.webp", "sizes": "896x1193", "type": "image/png",
 					"label": "Telluris — un portail de temple"},
 			],
 		},

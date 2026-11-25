@@ -26,7 +26,7 @@ def _grille(cols=88, rows=48, valeur=1):
 def _france():
 	cells = _grille()
 	cells[0] = [0] * 88  # le nord hors de la terre : la rangée 1 est la frontière
-	return {"_id": gpe.FRANCE, "type": "lieu", "label": "France", "categorie": "pays", "image": "france.png",
+	return {"_id": gpe.FRANCE, "type": "lieu", "label": "France", "categorie": "pays", "image": "france.webp",
 		"dimensions": {"x": 88, "y": 48}, "cells": cells, "nav": {}}
 
 

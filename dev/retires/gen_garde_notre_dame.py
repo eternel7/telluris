@@ -54,7 +54,7 @@ GEORGE = "pnj:templier_nain_m_01"
 CARTE = "item:carte_aventurier"
 
 PORTRAIT_FLORIAN = "templier_ogre_m_garde_temple02.jpg"
-IMAGE_NEF = "portail_de_temple_notre_dame.png"
+IMAGE_NEF = "portail_de_temple_notre_dame.webp"
 
 
 # ---------------------------------------------------------------------------

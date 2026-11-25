@@ -17,7 +17,7 @@ Ce que ces tests verrouillent, dans l'ordre d'importance :
 
 from utils import grille_image as gi
 
-# Trois teintes du parchemin des cartes de cité, mesurées sur `auxerre_start_city.png` sous les
+# Trois teintes du parchemin des cartes de cité, mesurées sur `auxerre_start_city.webp` sous les
 # cases que l'auteur a peintes 0, 1 et 5.
 BATI = (140, 118, 92)      # terracotta des toits — le rouge domine
 CHAMP = (118, 130, 85)     # campagne — le vert domine
@@ -936,7 +936,7 @@ def test_un_cote_trop_petit_emprunte_le_seuil_commun():
 
 
 # ── Profil pays : murs nav seuls ─────────────────────────────────────────────────────────
-# Teintes mesurées sur `france.png` : la terre du parchemin, la mer, l'eau d'un fleuve (froide
+# Teintes mesurées sur `france.webp` : la terre du parchemin, la mer, l'eau d'un fleuve (froide
 # ET sombre, plus fine qu'une case).
 TERRE = (216, 202, 155)
 MER = (40, 90, 110)

@@ -65,7 +65,7 @@ SORTIES_CITES = {
 # Le NORD DE LA FRANCE sur la plaine, mis à 0 : (x_min, x_max, y) ⇒ cases y ≥ `y` à 0.
 # CALÉE SUR LA CARTE DE FRANCE (`dev/superposer_cartes.py`, plaine ×1,08 posée en (419, −522)
 # px de la France) : sont à 0 les cases de la plaine qui tombent dans la terre de la France.
-# Le bord nord de `france.png` (sa rangée 1, d'où partent les passages) tombe sur la rangée 31
+# Le bord nord de `france.webp` (sa rangée 1, d'où partent les passages) tombe sur la rangée 31
 # de la plaine, ses colonnes 45…87 sur les colonnes 18…55 ; à l'ouest, la côte picarde et
 # normande. Au-delà (x ≥ 56) le bas de la carte est l'Empire, hors du cadre de la France.
 FRONTIERE_PLAINE = ((0, 11, 38), (12, 13, 37), (14, 15, 33), (16, 18, 32), (19, 55, 31))
@@ -80,7 +80,7 @@ DEPART_FRANCE_NORD = (45, 2)
 DEPART_PLAINE = (17, 31)
 
 # Noms, un par poste de la France (57 cases ⇒ 29), dans l'ordre de sa ligne. D'ouest en est le
-# long du bord nord de `france.png` (vers le 51e parallèle : Flandre, Brabant, pays de Liège,
+# long du bord nord de `france.webp` (vers le 51e parallèle : Flandre, Brabant, pays de Liège,
 # Rhénanie, Hesse, Thuringe), puis du nord au sud le long de son bord droit (vers le 11e
 # méridien : Thuringe, Franconie, Souabe). La côte picarde est en France : aucun passage à
 # l'ouest du pas de Calais. Un `_id` au-delà du compte, encore en base, part en suppression

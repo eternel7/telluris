@@ -9,7 +9,7 @@ Rien d'autre (ni zones d'influence, ni rencontres, ni ressources) : c'est du con
 
 LISTE BLANCHE (`CARTES`) : `maps/` mêle des cartes de pays, des vues de globe
 (`world_globe*`), un hameau et des fortifications — ces derniers ne sont pas des pays.
-`france.png` y est : déjà citée par `lieu:france`, elle est ignorée (sa grille est peinte à la
+`france.webp` y est : déjà citée par `lieu:france`, elle est ignorée (sa grille est peinte à la
 main et sert de référence au profil), mais un dump sans elle la recréerait.
 
 REJOUABLE : une carte déjà citée par un lieu du dump est ignorée ; une fois le fichier importé
@@ -48,13 +48,13 @@ CARTES = {
 	"egypte.png": ("Égypte", "pays"),
 	"espagne.png": ("Espagne", "pays"),
 	"europe.png": ("Europe", "continent"),
-	"france.png": ("France", "pays"),
+	"france.webp": ("France", "pays"),
 	"islande.png": ("Islande", "pays"),
 	"italie.png": ("Italie", "pays"),
 	"pannonie.jpg": ("Pannonie", "region"),
 	"plaine_europeenne.jpg": ("Plaine européenne", "region"),
 	"roumanie.png": ("Roumanie", "pays"),
-	"world.png": ("Monde", "monde"),
+	"world.webp": ("Monde", "monde"),
 	# Europe jusqu'à l'Oural (découpage du 02/11/2026, docs/prompts_cartes_europe_afrique.md).
 	"scandinavie_meridionale.jpg": ("Scandinavie méridionale", "region"),
 	"laponie.jpg": ("Laponie", "region"),

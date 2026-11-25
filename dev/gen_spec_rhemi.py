@@ -65,7 +65,7 @@ VILLES = {
 			("La Halte des Pèlerins", "auberge_europe07.jpg"),
 		],
 		"graine": 20261009,
-		# Remparts de chartres_city.png (1408×768, cases de 16 px), relevés tour par tour le 09/10 :
+		# Remparts de chartres_city.webp (1408×768, cases de 16 px), relevés tour par tour le 09/10 :
 		# porte ouest, nord-ouest, front nord sous la cathédrale, angle nord-est, front est,
 		# pointe sud-est, front sud au-dessus de l'Eure, sud-ouest, ouest.
 		"enceinte": [(26.5, 20.6), (34.7, 14.4), (52.5, 12.2), (60, 13), (66, 18.7), (66, 26),
