@@ -135,8 +135,12 @@ def aelis_archives(doc):
 	doc = sans_rev(doc)
 	n = doc["dialogue"]["noeuds"]
 	esc = doc.setdefault("services", {}).setdefault("escorte", {})
-	offres = [o for o in esc.get("offres") or [] if (o.get("offre") or {}).get("id") != QUETE]
-	offres.append({"offre": offre_escorte(), "noeuds": {"accepte": "mu_accepte"}})
+	# Remplacée À SA PLACE (régénération idempotente), sinon ajoutée en dernier.
+	offres = list(esc.get("offres") or [])
+	entree = {"offre": offre_escorte(), "noeuds": {"accepte": "mu_accepte"}}
+	rang = next((i for i, o in enumerate(offres) if (o.get("offre") or {}).get("id") == QUETE), None)
+	offres = [o for o in offres if (o.get("offre") or {}).get("id") != QUETE]
+	offres.insert(len(offres) if rang is None else rang, entree)
 	doc["services"]["escorte"] = {"offres": offres}
 	ajouter_choix(doc, "accueil", [
 		choix("mu_offre", "« Une lettre de la coupole ? »", "mu_01",

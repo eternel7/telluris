@@ -3,7 +3,7 @@
     "_id": "lieu:france",
     "type": "lieu",
     "label": "France",
-    "image": "france.png",
+    "image": "france.webp",
     "categorie": "pays",
     "dimensions": {
       "x": 88,

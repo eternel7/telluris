@@ -16,19 +16,19 @@ from dev.gen_villes_images import (COTE_CASE_DEFAUT, PAYS_FRANCE, cote_case, pos
 
 # Les tailles réelles des cartes (en pixels) ; la base a deux villes à cases de 16 px.
 TAILLES = {
-	"auxerre_start_city.png": (1376, 768),
+	"auxerre_start_city.webp": (1376, 768),
 	"paris_capital.png": (1408, 768),
-	"chartres_city.png": (1408, 768),
-	"lutecia_capital.png": (1408, 768),
-	"akureyri_start_city.png": (1024, 1024),
-	"rome_capital.png": (1408, 768),
-	"reykjavík_capital.png": (1408, 768),
+	"chartres_city.webp": (1408, 768),
+	"lutecia_capital.webp": (1408, 768),
+	"akureyri_start_city.webp": (1024, 1024),
+	"rome_capital.webp": (1408, 768),
+	"reykjavík_capital.webp": (1408, 768),
 	"auberge_europe01.png": (1408, 768),
 }
 COTE = 16
 BASE = [
 	{"_id": "lieu:france", "type": "lieu", "categorie": "pays"},
-	{"_id": "lieu:auxerre", "categorie": "ville", "image": "auxerre_start_city.png",
+	{"_id": "lieu:auxerre", "categorie": "ville", "image": "auxerre_start_city.webp",
 		"dimensions": {"x": 1376 // COTE, "y": 768 // COTE}},
 	{"_id": "lieu:lutecia", "categorie": "ville", "image": "paris_capital.png",
 		"dimensions": {"x": 1408 // COTE, "y": 768 // COTE}},
@@ -76,16 +76,16 @@ def test_forme_du_doc():
 
 
 def test_slug_pris_retombe_sur_le_nom_complet():
-	"""`lieu:lutecia` existe (sur paris_capital.png) : lutecia_capital.png devient un lieu
+	"""`lieu:lutecia` existe (sur paris_capital.png) : lutecia_capital.webp devient un lieu
 	DISTINCT plutôt que de l'écraser."""
 	doc = _par_id(villes_a_creer(list(TAILLES), BASE, TAILLES.get)[0])["lieu:lutecia_capital"]
-	assert doc["image"] == "lutecia_capital.png" and doc["lieu_parent"] == PAYS_FRANCE
+	assert doc["image"] == "lutecia_capital.webp" and doc["lieu_parent"] == PAYS_FRANCE
 
 
 def test_id_entierement_pris_refuse_le_lot():
 	base = BASE + [{"_id": "lieu:rome"}, {"_id": "lieu:rome_capital"}]
 	docs, refus = villes_a_creer(list(TAILLES), base, TAILLES.get)
-	assert refus and "rome_capital.png" in refus[0]
+	assert refus and "rome_capital.webp" in refus[0]
 
 
 def test_sans_pays_pas_de_parent():
@@ -105,7 +105,7 @@ def test_image_illisible_refusee():
 
 
 def test_grille_posee_apres_dimensions():
-	doc = villes_a_creer(["rome_capital.png"], BASE, TAILLES.get)[0][0]
+	doc = villes_a_creer(["rome_capital.webp"], BASE, TAILLES.get)[0][0]
 	sortant = poser_grille(doc, {"cells": [[1]], "nav": {"0,0": 1}})
 	cles = list(sortant)
 	assert cles[cles.index("dimensions") + 1: cles.index("dimensions") + 3] == ["cells", "nav"]

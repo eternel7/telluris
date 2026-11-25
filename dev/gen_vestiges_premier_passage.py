@@ -197,8 +197,11 @@ def aelis_archives(doc):
 	offres = list(esc.get("offres") or [])
 	if esc.get("offre"):
 		offres.append({"offre": esc["offre"], "noeuds": esc.get("noeuds") or {"accepte": "piece_accepte"}})
+	# Remplacée À SA PLACE (régénération idempotente) : une offre ajoutée depuis (Mu) reste après.
+	entree = {"offre": offre_escorte(), "noeuds": {"accepte": "vestiges_accepte"}}
+	rang = next((i for i, o in enumerate(offres) if (o.get("offre") or {}).get("id") == QUETE), None)
 	offres = [o for o in offres if (o.get("offre") or {}).get("id") != QUETE]
-	offres.append({"offre": offre_escorte(), "noeuds": {"accepte": "vestiges_accepte"}})
+	offres.insert(len(offres) if rang is None else rang, entree)
 	doc["services"]["escorte"] = {"offres": offres}
 	# Le choix d'offre de la pièce porte désormais `offre` : `escorte_offerte` vaut pour les deux.
 	for c in n["accueil"]["choix"]:

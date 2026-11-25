@@ -24,10 +24,10 @@ FICHIER_PARCOURS = "lore/parcours.json"
 MOTS_PAR_MINUTE = 230  # vitesse de lecture silencieuse courante d'un adulte (français)
 LONGUEUR_EXTRAIT = 90   # caractères de contexte de part et d'autre d'un résultat
 
-# Carte du monde de /admin/lore/carte : `templates/resources/maps/world.png` (1408 × 768),
+# Carte du monde de /admin/lore/carte : `templates/resources/maps/world.webp` (1408 × 768),
 # peinte, proche d'une projection équirectangulaire. Constantes CALIBRÉES à l'œil sur
 # Paris (690, 190) et Sydney (1225, 555), vérifiées sur Tokyo, Teotihuacan et Le Caire.
-CARTE_IMAGE = "world.png"
+CARTE_IMAGE = "world.webp"
 CARTE_L, CARTE_H = 1408, 768
 CARTE_X0, CARTE_KX = 682.0, 3.6     # x = X0 + KX × longitude
 CARTE_Y0, CARTE_KY = 405.6, -4.41   # y = Y0 + KY × latitude

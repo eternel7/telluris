@@ -249,7 +249,7 @@ PROFILS_GRILLE = {
 		# (`concordance_nav`, tolérance 1 case) : cf. `dev/gen_grille_image.py --profil=pays`.
 		"nav_seul": True,
 		# ── Mer et lacs ──────────────────────────────────────────────────────────────
-		# Mesuré sur `france.png` (88×48) : froideur des cases bimodale, la mer à +0 / +30,
+		# Mesuré sur `france.webp` (88×48) : froideur des cases bimodale, la mer à +0 / +30,
 		# la terre à -60 / -10, rien entre -10 et 0. La coupure est l'Otsu de l'image (−8 sur
 		# la France), jamais sous le garde-fou ABSOLU : sur une carte sans mer, Otsu couperait
 		# la terre en deux ; -10 est le haut de la terre de la France.
@@ -260,7 +260,7 @@ PROFILS_GRILLE = {
 		# Terre plus petite, cernée d'eau : un navire ou un monstre marin dessiné, pas une
 		# île — rendue à la mer. La Corse (≈ 25 cases) reste une île.
 		"ile_min": 4,
-		# Cadre du parchemin (`masque_eau`) : une case sur `france.png`, tout autour.
+		# Cadre du parchemin (`masque_eau`) : une case sur `france.webp`, tout autour.
 		"cadre_profondeur": 1,
 		# Cadre décoratif → cases à 0 : cf. `CADRE_ENLUMINE`.
 		**CADRE_ENLUMINE,

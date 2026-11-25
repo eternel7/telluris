@@ -74,7 +74,7 @@ CITES = {
 		"parent": "lieu:france",
 		# Pas de Calais, au plus près du Kent : sur la carte de France, au sud-ouest du départ de
 		# sa frontière nord (45, 2) — la case (15, 34) de la plaine européenne, où la cité était
-		# d'abord posée, projetée sur `france.png` (`dev/superposer_cartes.py`).
+		# d'abord posée, projetée sur `france.webp` (`dev/superposer_cartes.py`).
 		"pays": (42, 4),
 		"dedans": (52, 20),
 		"dehors": (80, 44),

@@ -16,18 +16,18 @@ from dev.gen_cartes_pays import CARTES, CATEGORIE, cartes_a_creer  # noqa: E402
 from dev.gen_villes_images import COTE_CASE_DEFAUT  # noqa: E402
 
 TAILLES = {
-	"france.png": (1408, 768),
+	"france.webp": (1408, 768),
 	"angleterre.png": (1408, 768),
 	"islande.png": (1264, 848),
-	"world.png": (1408, 768),
-	"world_globe1.png": (757, 735),
+	"world.webp": (1408, 768),
+	"world_globe1.webp": (757, 735),
 	"hameau.png": (1264, 848),
 }
 COTE = 16
 BASE = [
-	{"_id": "lieu:france", "type": "lieu", "categorie": "pays", "image": "france.png",
+	{"_id": "lieu:france", "type": "lieu", "categorie": "pays", "image": "france.webp",
 		"dimensions": {"x": 1408 // COTE, "y": 768 // COTE}},
-	{"_id": "lieu:auxerre", "categorie": "ville", "image": "auxerre_start_city.png",
+	{"_id": "lieu:auxerre", "categorie": "ville", "image": "auxerre_start_city.webp",
 		"dimensions": {"x": 1376 // (COTE * 2), "y": 768 // (COTE * 2)}},
 ]
 
@@ -41,7 +41,7 @@ def test_seules_les_cartes_de_la_liste_blanche_non_citees():
 	assert not refus
 	# france : déjà citée ; globe et hameau : hors liste blanche.
 	assert set(_par_id(docs)) == {"lieu:angleterre", "lieu:islande", "lieu:world"}
-	assert "world_globe1.png" not in CARTES and "hameau.png" not in CARTES
+	assert "world_globe1.webp" not in CARTES and "hameau.png" not in CARTES
 
 
 def test_cote_relu_sur_les_pays_pas_sur_les_villes():
@@ -57,10 +57,10 @@ def test_cote_relu_sur_les_pays_pas_sur_les_villes():
 
 def test_forme_du_doc():
 	doc = _par_id(cartes_a_creer(list(TAILLES), BASE, TAILLES.get)[0])["lieu:world"]
-	label, sous_categorie = CARTES["world.png"]
+	label, sous_categorie = CARTES["world.webp"]
 	assert doc["type"] == "lieu" and doc["categorie"] == CATEGORIE and doc["tags"] == []
 	assert doc["label"] == label and doc["sous_categorie"] == sous_categorie
-	assert doc["image"] == "world.png" and "lieu_parent" not in doc
+	assert doc["image"] == "world.webp" and "lieu_parent" not in doc
 
 
 def test_id_pris_refuse_le_lot():

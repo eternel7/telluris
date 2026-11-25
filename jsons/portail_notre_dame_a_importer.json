@@ -161,7 +161,7 @@
     "_id": "lieu:notre_dame_portail",
     "type": "lieu",
     "label": "Le portail de Notre-Dame",
-    "image": "portail_de_temple_notre_dame.png",
+    "image": "portail_de_temple_notre_dame.webp",
     "categorie": "portail",
     "sous_categorie": "temple",
     "lieu_parent": "lieu:lutecia",

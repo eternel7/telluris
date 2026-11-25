@@ -113,7 +113,7 @@ def test_quete_detail_carte_d_un_apport_situe(monkeypatch):
 	docs = {"lieu:france": {"_id": "lieu:france", "label": "France", "dimensions": {"x": 88, "y": 48}},
 			COQ: {"_id": COQ, "label": "Le Coq de Lutèce", "lieu_parent": "lieu:lutecia"},
 			"lieu:lutecia": {"_id": "lieu:lutecia", "label": "Lutecia"}}
-	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("france.png", "maps"))
+	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("france.webp", "maps"))
 	monkeypatch.setattr(focalisation, "charger_graphe", lambda fd: {})
 	monkeypatch.setattr(focalisation, "prochaine_etape", lambda g, d, v: {"porte": (44, 12)})
 	monkeypatch.setattr(quetes, "find_docs", lambda *a, **k: [])
@@ -121,7 +121,7 @@ def test_quete_detail_carte_d_un_apport_situe(monkeypatch):
 	q = apport.accepter(c, _donneur(localisation=LOC), COQ)
 	detail = quetes.quete_detail(c, q, docs.get)
 	assert detail["carte"]["position"] == LOC["position"]
-	assert detail["carte"]["image"] == "france.png" and detail["carte"]["lieu_nom"] == "France"
+	assert detail["carte"]["image"] == "france.webp" and detail["carte"]["lieu_nom"] == "France"
 	assert detail["carte"]["direction_texte"] == "Au sud-est de Lutecia"
 	assert detail["progress_txt"].endswith("· Au sud-est de Lutecia")
 	assert quetes._ancre_de({"label": "Le Coq de Lutèce"}) == "du Coq de Lutèce"
