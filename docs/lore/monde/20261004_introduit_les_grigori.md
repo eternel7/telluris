@@ -6,7 +6,7 @@ Les **Grigori**, du grec *egrḗgoroi*, sont « les Veilleurs », ceux qui sont 
 
 Les Grigori ne sont pas une Lignée. Ce sont des Anthropes de toutes les Lignées qui se sont « éveillés » : ils ont perçu la structure du monde sous les flux de mana. Ils se retrouvaient sur une montagne, l'**Hermon**, hors de toute cité, qu'aucun monstre n'approchait, sans qu'on sache pourquoi.
 
-Ils ont enseigné aux cités ce qui leur permettait de tenir derrière leurs murs : lire le ciel pour connaître les saisons, travailler le métal, écrire, soigner par les racines. C'étaient des observateurs plus que des créateurs : ils n'ont ouvert aucun portail. Leur langue, l'**hénochien**, est celle de quelques inscriptions que personne ne lit plus ; l'une d'elles mène l'aventurier vers eux.
+Ils ont enseigné aux cités ce qui leur permettait de tenir derrière leurs murs : lire le ciel pour connaître les saisons, travailler le métal, écrire, soigner par les racines. C'étaient des observateurs plus que des créateurs : ils n'ont ouvert aucun portail. Cette structure, d'autres l'appelleront Tablette des destins ou Archives akashiques : la mémoire du monde, qu'ils ne nommèrent jamais (voir [Les Archives akashiques](20261125_archives_akashiques.md)). Leur langue, l'**hénochien**, est celle de quelques inscriptions que personne ne lit plus ; l'une d'elles mène l'aventurier vers eux.
 
 L'un de leurs enseignements était une question : qu'est-ce qui dure au-delà de la mort ? Elle parvint sur le Nil, à une lignée pharaonique qui y consacra des siècles, jusqu'au don que porte Néfertiti. Les Grigori n'ont rien donné de tel : ils ont posé une question, et la lignée a trouvé sa propre réponse. C'est la question que Gilgamesh n'avait pas résolue.
 

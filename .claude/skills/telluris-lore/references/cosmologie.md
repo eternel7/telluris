@@ -35,6 +35,15 @@ Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres. **
 - **Le Déluge** (11/10, adopté) : clôt l'antédiluvien ; nature **inconnue**, comme la Vague. **Utnapishtim** y survit (où il vit, s'il vit encore : nul ne sait). Théories portées par des personnages : le Déluge était déjà une vague de mana, la Grande Vague en serait la seconde — d'autres le nient. **Gilgamesh**, premier roi d'après le Déluge, bâtit les remparts d'**Uruk** et ouvre l'Âge des Remparts ; sa quête d'immortalité échoue (le serpent), en écho à la dynastie du Nil et à la question des Grigori (frise fusionnée § 11). Le Déluge **n'a pas** englouti Mu, qui sombre à la Vague (Auteur, 11/10).
 - **Grigori** (« les Veilleurs », *egrḗgoroi*) : « les éveillés de **bien avant JC** » (04/10), placés à l'**Âge des Remparts**, peut-être à l'époque de la dynastie dont émergera Néfertiti (11/10). Proposition **adoptée** le 11/10 (Hermon, hénochien, question de l'immortalité transmise au Nil, fin ouverte) : `docs/lore/monde/20261011_frise_chronologique_fusionnee.md` § 9.
 
+### Archives akashiques (Auteur, 25/11, questionnaire)
+Séance `docs/lore/monde/20261125_archives_akashiques.md`.
+- **Une mémoire, mille noms** : mémoire du monde sous Telluris et les mondes divins, **pas un monde de plus** ; chaque culture l'a entrevue : **Tablette des destins** (Babylone), **puits d'Urd** et Nornes (Yggdrasil), **Livre de Thot** (Alexandrie), **Tables de Pierre** (Mu, « reflet » selon certains). « Archives akashiques » = nom **savant et tardif** d'érudits (*ākāśa*), jamais un nom ancien.
+- **Faillible** : traces, pas vérité (incomplètes, fausses, alternatives, modifiées par des interventions extérieures).
+- **Grigori** : la « structure du monde » qu'ils percevaient = cette mémoire. **Jésus** l'atteint en joueur (les dieux ne sont pas l'origine dernière) ; chaque **Révélateur** la lit selon sa culture. Sept Sages de Mu : non retenus.
+- **Joueurs observateurs ou auteurs : jamais tranché** (mystère ouvert par décision, pas une proposition).
+- **Accès** : fragments au **rang S+, après le Paradis** (bibliothèques impossibles, salles de souvenirs) ; avant, rumeurs et copies déformées.
+- Propositions : inaccessibles aux dieux ; coût de consultation (mana, souvenirs, raison, sacrifices) — aucune mécanique.
+
 ### Monothéisme (31/08, reformulation de l'Auteur)
 « Les monothéismes s'intègrent plus tard à ces structures existantes, transformant certaines auberges-relais en monastères fortifiés et donnant naissance aux paladins chrétiens ou autres groupes protecteurs alliés à une religion monothéiste. Le monothéisme n'est pas la majorité dans le monde de Telluris et s'intègre sans tentative de conversion par la force. Trop de combats à mener dans Telluris pour en rajouter un de plus et plus de difficulté à justifier tout miracle face à la réalité de la magie. »
 

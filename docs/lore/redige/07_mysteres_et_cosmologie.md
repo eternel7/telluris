@@ -22,6 +22,10 @@ Ils ont enseigné aux cités ce qui leur permettait de tenir derrière leurs mur
 
 Leur fin reste ouverte. Les uns disent qu'ils se sont dispersés et que leurs leçons sont devenues des mythes. D'autres, qu'ils sont enchaînés sous la terre. D'autres encore, qu'ils veillent toujours. Il reste d'eux des inscriptions dans une langue que l'on dit celle des anges, l'**hénochien**, que plus personne ne lit. On en retrouve dans certains donjons.
 
+## Les Archives akashiques
+
+Sous Telluris et sous les mondes divins existe une mémoire qui n'est pas un monde de plus : elle retient la trace de tout ce qui existe, a existé ou aurait pu exister, jusqu'aux interventions venues d'ailleurs. Chaque culture l'a entrevue et nommée à sa façon : la **Tablette des destins** à Babylone, le **puits d'Urd** où les Nornes gravent les destins au pied d'Yggdrasil, le **Livre de Thot** en Égypte, les **Tables de Pierre** à Mu ; « Archives akashiques » est le nom savant que lui donnent quelques érudits. Elle garde des traces, pas une vérité : souvenirs incomplets, interprétations fausses, réalités qui n'ont pas eu lieu. Les Grigori l'ont entrevue ; Jésus l'a atteinte en joueur et y a compris que les dieux n'étaient pas l'origine dernière ; chaque Révélateur l'a lue selon sa culture. Elle porte des marques d'êtres venus d'ailleurs : observateurs ou auteurs du monde, nul ne le tranche. L'aventurier n'en atteint des fragments qu'au rang S+, après le Paradis.
+
 ## Hārūt et Mārūt *(proposé, non tranché)*
 
 Les séances proposent deux anges venus à Babylone à l'époque de Salomon, après l'œuvre des trois frères. Ils auraient enseigné une magie dangereuse comme une épreuve : « Le sort n'est pas coupable. Celui qui le lance répond de son intention. » Les tablettes de Babylone auraient gardé une part de leur savoir. Qui les a envoyés reste une question ouverte.
@@ -50,8 +54,9 @@ Certaines questions restent volontairement ouvertes. On peut les placer dans la 
 - le lien entre le mana, les cristaux et la magie de chacun ;
 - le père des jumeaux de Rome, la nature de la Louve, la fin de Romulus ;
 - la fin des Grigori ;
+- si les êtres dont les Archives gardent la trace observent le monde ou l'écrivent ;
 - qui, ou quoi, a ouvert le portail de Jumièges.
 
 ---
 
-Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Introduit les Grigori](../monde/20261004_introduit_les_grigori.md) · [Portail des profondeurs](../cites/20260820_decrire_akureyri_fortifiee.md) · [Histoire de Babylone](../cites/20260819_histoire_de_babylone.md) · [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Document maître](../../Telluris_Document_Maitre.md)
+Sources : [Monde médiéval fantastique](../monde/20260812_monde_medieval_fantastique.md) · [Introduit les Grigori](../monde/20261004_introduit_les_grigori.md) · [Les Archives akashiques](../monde/20261125_archives_akashiques.md) · [Portail des profondeurs](../cites/20260820_decrire_akureyri_fortifiee.md) · [Histoire de Babylone](../cites/20260819_histoire_de_babylone.md) · [De Mu aux mondes divins](../cites/20261124_de_mu_aux_mondes_divins.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) · [Document maître](../../Telluris_Document_Maitre.md)
