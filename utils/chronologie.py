@@ -24,7 +24,7 @@ Vue en FLEUVES (affiches « Time Chart ») :
   « Telluris entier » ; les autres fleuves touchés deviennent des `echos` ;
 - un fleuve « jusqu'à aujourd'hui » se prolonge à travers le temps du joueur (jusqu'au futur) ;
 - `bandeaux` = grands événements qui barrent toutes les colonnes ; ères `carte`, entités et
-  événements `image` = cartouches et médaillons (vignettes : `dev/gen_vignettes_chronologie.py`).
+  événements `image` = cartouches et médaillons (toujours l'image d'origine, jamais de copie).
 """
 
 import json
@@ -37,8 +37,6 @@ CHEMIN = lore.RACINE / "lore" / "chronologie.json"
 # Images des cartouches et médaillons : préfixe = mount statique de main.py.
 RESSOURCES = Path(__file__).resolve().parent.parent / "templates" / "resources"
 PREFIXES_IMAGE = ("maps", "towns", "pnj")
-DOSSIER_VIGNETTES = RESSOURCES / "icons" / "chronologie"
-URL_VIGNETTES = "/icons/chronologie/"
 FAMILLES = {"ordre": "Ordre", "cite": "Cité"}
 ORDRE_RATTACHE = ("lieux", "peuples", "institutions", "origine")
 LARGEURS = (1, 2, 3)
@@ -238,16 +236,10 @@ def image_existe(rel) -> bool:
 	return (RESSOURCES / rel).is_file()
 
 
-def nom_vignette(rel: str) -> str:
-	"""Nom ASCII stable de la vignette d'une image (`towns/rome_capital.png` → `towns_rome_capital.jpg`)."""
-	return re.sub(r"[^0-9A-Za-z_-]+", "_", rel.rsplit(".", 1)[0]) + ".jpg"
-
-
-def url_image(rel: str, vignettes: Path = DOSSIER_VIGNETTES) -> str:
-	"""La vignette si elle a été générée, sinon l'image d'origine (lourde, mais juste)."""
+def url_image(rel: str) -> str:
+	"""URL de l'image d'origine (mount statique de main.py) — aucune vignette dérivée."""
 	from urllib.parse import quote
-	nom = nom_vignette(rel)
-	return URL_VIGNETTES + nom if (Path(vignettes) / nom).is_file() else "/" + quote(rel)
+	return "/" + quote(rel)
 
 
 def t_present(eres: _Eres) -> float:
@@ -507,7 +499,7 @@ def _eres_touchees(c: dict, eres: _Eres) -> list:
 	return [eres.liste[k]["id"] for k in range(lo, min(hi, len(eres.liste) - 1) + 1)]
 
 
-def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe, vignettes: Path = DOSSIER_VIGNETTES) -> dict:
+def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe) -> dict:
 	"""Ce que lit la page : ères, vocabulaire, facettes (avec comptes), événements enrichis
 	(temps normalisé, notation, URL des sources, fleuve de rattachement, erreurs propres),
 	fleuves, bandeaux, cartes d'ères et l'en-tête brut de la source pour l'export du
@@ -560,7 +552,7 @@ def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe, vignett
 			"eres": _eres_touchees(c, eres),
 			"calc": c,
 			"sources": sources,
-			"image": url_image(ev["image"], vignettes) if ev.get("image") and image_ok(ev["image"]) else None,
+			"image": url_image(ev["image"]) if ev.get("image") and image_ok(ev["image"]) else None,
 			"brut": ev,
 		})
 	calc = {e["id"]: e["calc"] for e in evenements}
@@ -578,7 +570,7 @@ def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe, vignett
 			"rattache": {f: list(v) for f, v in (ent.get("rattache") or {}).items()},
 			"issu_de": ent.get("issu_de"), "absorbe_par": ent.get("absorbe_par"),
 			"autorite": ent.get("autorite", "auteur"), "note": ent.get("note", ""),
-			"image": url_image(ent["image"], vignettes) if ent.get("image") and image_ok(ent["image"]) else None,
+			"image": url_image(ent["image"]) if ent.get("image") and image_ok(ent["image"]) else None,
 			"calc": vie, "largeurs": paliers,
 		})
 	liens = rattacher(evenements, entites)
@@ -587,7 +579,7 @@ def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe, vignett
 	ids_ev = {e["id"] for e in evenements}
 	bandeaux = [{"evenement": b["evenement"], "libelle": b["libelle"]} for b in data.get("bandeaux") or []
 				if isinstance(b, dict) and b.get("evenement") in ids_ev and b.get("libelle")]
-	cartes = {e["id"]: url_image(e["carte"], vignettes) for e in eres.liste if e.get("carte") and image_ok(e["carte"])}
+	cartes = {e["id"]: url_image(e["carte"]) for e in eres.liste if e.get("carte") and image_ok(e["carte"])}
 	facettes = {
 		"couche": COUCHES, "autorite": AUTORITES, "categorie": CATEGORIES, "visibilite": VISIBILITES,
 		"ere": {e["id"]: e.get("libelle", e["id"]) for e in eres.liste},

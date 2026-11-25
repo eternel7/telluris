@@ -248,26 +248,12 @@ def test_rattacher_ordre_de_l_evenement_vie_et_echos():
 	assert r["avant_tout"] == (None, []) and r["ailleurs"] == (None, [])
 
 
-def test_vignette_servie_si_generee(tmp_path):
-	assert chrono.nom_vignette("pnj/architecte_Aélis de Montfaucon.jpg") == "pnj_architecte_A_lis_de_Montfaucon.jpg"
-	assert chrono.url_image("towns/rome capital.png", tmp_path) == "/towns/rome%20capital.png"
-	(tmp_path / chrono.nom_vignette("towns/rome capital.png")).write_bytes(b"x")
-	assert chrono.url_image("towns/rome capital.png", tmp_path) == chrono.URL_VIGNETTES + "towns_rome_capital.jpg"
+def test_url_image_originale():
+	assert chrono.url_image("towns/rome capital.png") == "/towns/rome%20capital.png"
 	assert not chrono.image_existe("../main.py") and not chrono.image_existe("towns/../main.py") and not chrono.image_existe("polices/x.css")
 
 
 # ── Vraie source ───────────────────────────────────────────────────────────────
-
-@pytest.mark.lent
-def test_vraie_source_vignettes_generees():
-	"""Chaque image citée a sa vignette (`python dev/gen_vignettes_chronologie.py`)."""
-	data = chrono.charger()
-	citees = [e["carte"] for e in data["eres"] if e.get("carte")]
-	citees += [x["image"] for x in data.get("entites", []) + data["evenements"] if x.get("image")]
-	assert citees
-	manquantes = [r for r in citees if not (chrono.DOSSIER_VIGNETTES / chrono.nom_vignette(r)).is_file()]
-	assert manquantes == []
-
 
 @pytest.mark.lent
 def test_vraie_source_valide():
