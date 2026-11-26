@@ -33,7 +33,7 @@
 #   les éligibles (utils/offres.py) sans voir les prérequis écrits dans le dialogue — d'où un donneur par quête.
 #
 #   Images : cartes de combat PROVISOIRES (grille et image recopiées d'une salle existante, CARTES_PROVISOIRES),
-#   lieux et portraits À LIVRER par l'Auteur (noms ci-dessous, prompts dans la séance du lore).
+#   lieux et portraits À LIVRER par l'Auteur (noms ci-dessous ; prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER : jsons/quetes_de_mu_a_importer.json, DELTA seul (CLAUDE.md §18) : espèces
 # (dev/gen_monstres_mu.py), PNJ et lieux de Mu RELUS du dump (choix, nœuds, services, présences ajoutés :
@@ -181,7 +181,7 @@ E_REGISTRES = "enigme:registres_grattes"
 E_NAGA, E_MURENE, E_ECHIDNA = "espece:naga", "espece:murene_geante", "espece:echidna"
 D_CONDUITES, D_LISIERE, D_ANTRE = "donjon:conduites_de_la_lisiere", "donjon:lisiere_des_jardins", "donjon:antre_d_echidna"
 # Cartes de combat PROVISOIRES : image, dimensions, cases et murs d'une salle existante, en attendant
-# celles de l'Auteur (prompts dans la séance) — couloirs humides, eau courante, salle qui sent la mer.
+# celles de l'Auteur (prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md) — couloirs humides, eau courante, salle qui sent la mer.
 CARTES_PROVISOIRES = {CONDUITES: "lieu:catacombes0001", LISIERE: "lieu:petra_donjon_crue",
 					  COMBAT_ANTRE: "lieu:salle_de_l_arche_eteinte"}
 
