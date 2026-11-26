@@ -5734,22 +5734,12 @@
           ]
         },
         "remis": {
-          "texte": "Hine suit les signes du doigt, et ses lèvres bougent. « Là. C'est là que ma mère disait autre chose. » Elle chante, doucement, la version entière. Au milieu, un merci : à Tangaroa, père des poissons, pour la coque d'or. Elle s'arrête. « La coque d'or. C'est la bulle. Nous remercions Tangaroa pour la bulle. » Elle vous regarde. « Où voulez-vous qu'on le chante ? »",
+          "texte": "Hine suit les signes du doigt, et ses lèvres bougent. « Là. C'est là que ma mère disait autre chose. » Elle chante, doucement, la version entière. Au milieu, un merci : à Tangaroa, père des poissons, pour la coque d'or. Elle s'arrête. « La coque d'or. C'est la bulle. Nous remercions Tangaroa pour la bulle. » Elle se lève. « On le chantera là où il est né. »",
           "choix": [
             {
               "id": "sanctuaire",
-              "label": "« Dans le sanctuaire, d'une seule voix. »",
+              "label": "Descendre avec elle au sanctuaire.",
               "next": "issue_sanctuaire"
-            },
-            {
-              "id": "fare",
-              "label": "« Ici, au fare, pour qui veut l'entendre. »",
-              "next": "issue_fare"
-            },
-            {
-              "id": "archive",
-              "label": "« Que Rawiri l'écrive d'abord. »",
-              "next": "issue_archive"
             }
           ]
         },
@@ -5764,27 +5754,7 @@
           ]
         },
         "issue_sanctuaire": {
-          "texte": "« Avec les rêveurs, et tous ceux qui le voudront. » Ses yeux brillent. « Les murs sont faits pour ça. On le chantera là où il est né. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_fare": {
-          "texte": "« Ici. Où on le chantait sans savoir. » Elle hoche la tête. « Moana râlera. Elle chantera aussi. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_archive": {
-          "texte": "« Écrit. » Elle fait la moue. « Un chant écrit, c'est un poisson sec. Mais il ne se perdra plus. »",
+          "texte": "Au sanctuaire noyé, Hine chante la version entière, et les rêveurs avec elle, Tama le premier, et tous ceux qui l'ont voulu. Les murs portent les voix comme une seule. Rawiri, à l'écart, recopie : le chant ne tiendra plus à la seule mémoire d'une vieille femme. Il dit que Mu a remercié Tangaroa pour la bulle. Il ne dit pas que Tangaroa l'a faite, ni qu'il a entendu.",
           "choix": [
             {
               "id": "fin",
@@ -6766,22 +6736,12 @@
           ]
         },
         "remis": {
-          "texte": "Ataahua lit la traduction de Mahina, épinglée à la tablette, à mi-voix : « Pose la main sur l'eau. Attends. Si l'eau répond, ne descends pas. » Elle relève la tête. « Une formule de prudence. On apprenait ça aux petits de Mu, pour les bassins. » Elle rit, nerveusement. « Que leur dit-on, aux enfants ? »",
+          "texte": "Ataahua lit la traduction de Mahina, épinglée à la tablette, à mi-voix : « Pose la main sur l'eau. Attends. Si l'eau répond, ne descends pas. » Elle relève la tête. « Une formule de prudence. On apprenait ça aux petits de Mu, pour les bassins. » Elle rit, nerveusement. « Mahina voudra en faire une leçon. »",
           "choix": [
             {
               "id": "lecon",
-              "label": "« Qu'on leur apprenne la formule, comme autrefois. »",
+              "label": "« Qu'elle en fasse une leçon. »",
               "next": "issue_lecon"
-            },
-            {
-              "id": "verite",
-              "label": "« Dites-leur la vérité : personne ne sait qui est cette femme. »",
-              "next": "issue_verite"
-            },
-            {
-              "id": "rassurer",
-              "label": "« Dites-leur que c'est une vieille gardienne des bassins, et qu'elle veille. »",
-              "next": "issue_rassurer"
             }
           ]
         },
@@ -6796,27 +6756,7 @@
           ]
         },
         "issue_lecon": {
-          "texte": "« Une leçon. » Elle hoche la tête. « Ça, je sais faire. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_verite": {
-          "texte": "« Personne. » Elle soupire. « Les enfants préfèrent ça à un mensonge, souvent. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_rassurer": {
-          "texte": "Elle hésite. « Une gardienne. » Elle repose sa tasse. « Ça les fera dormir. Je ne sais pas si c'est vrai. »",
+          "texte": "« Une leçon, comme autrefois. » Ataahua hoche la tête. « Les petits la réciteront au bord des bassins. » Elle repose sa tasse. « Certains cesseront de rêver. D'autres, non. Et la femme, personne ne saura qui c'est. »",
           "choix": [
             {
               "id": "fin",
@@ -7911,22 +7851,12 @@
           ]
         },
         "remis": {
-          "texte": "Kauri déroule la carte. Les rues y sont tracées d'un trait sûr, et des zones entières sont hachurées en gris : incertaines. Il les regarde longtemps. « Il ne promet plus une ville fidèle. » Il soupire. « Que fait-on des anciennes cartes ? »",
+          "texte": "Kauri déroule la carte. Les rues y sont tracées d'un trait sûr, et des zones entières sont hachurées en gris : incertaines. Il les regarde longtemps. « Il ne promet plus une ville fidèle. » Il soupire. « Et Roimata qui le traitait de faussaire. »",
           "choix": [
             {
               "id": "temoins",
-              "label": "« Gardez les anciennes cartes comme témoins. »",
+              "label": "« Et les anciennes cartes ? »",
               "next": "issue_temoins"
-            },
-            {
-              "id": "archives",
-              "label": "« Confiez-les aux archives. »",
-              "next": "issue_archives"
-            },
-            {
-              "id": "brouillon",
-              "label": "« Servez-vous-en pour marquer les zones incertaines. »",
-              "next": "issue_brouillon"
             }
           ]
         },
@@ -7941,27 +7871,7 @@
           ]
         },
         "issue_temoins": {
-          "texte": "« Comme témoins de ce que Mu croyait savoir. » Il sourit. « Roimata en sera ravie. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_archives": {
-          "texte": "« Aux archives. » Il hoche la tête. « Rawiri les rangera mieux que nous. »",
-          "choix": [
-            {
-              "id": "fin",
-              "label": "(Prendre congé.)",
-              "next": "fin"
-            }
-          ]
-        },
-        "issue_brouillon": {
-          "texte": "« Les vieilles et les neuves, l'une sur l'autre. » Il rit. « On ne dessinera plus jamais un quartier en un seul trait. »",
+          "texte": "« Roimata les garde. Comme témoins de ce que Mu croyait savoir. » Il sourit. « Wiremu reprend son travail. Il marquera les zones incertaines, et il ne promettra plus une ville fidèle. »",
           "choix": [
             {
               "id": "fin",

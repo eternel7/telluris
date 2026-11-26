@@ -156,9 +156,12 @@ def test_donneur_trois_etats(donneur, q, item, prerequis):
 
 
 @pytest.mark.parametrize("donneur, q, item, prerequis", APPORTS)
-def test_trois_issues_parlees_a_la_remise(donneur, q, item, prerequis):
+def test_issues_parlees_a_la_remise(donneur, q, item, prerequis):
+	"""Trois issues là où le lore en donne trois ; une seule fin pour le chant, les enfants et les
+	cartographes, dont le récit arbitré fixe la conclusion."""
 	remis = DOCS[donneur]["dialogue"]["noeuds"]["remis"]
-	assert len(remis["choix"]) == 3 and all(c["next"].startswith("issue_") for c in remis["choix"])
+	attendu = 1 if q in (G.Q_CHANT, G.Q_ENFANTS, G.Q_CARTOGRAPHES) else 3
+	assert len(remis["choix"]) == attendu and all(c["next"].startswith("issue_") for c in remis["choix"])
 
 
 # ── Lieux d'affaire et preuves ─────────────────────────────────────────────────

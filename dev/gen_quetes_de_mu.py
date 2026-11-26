@@ -23,7 +23,8 @@
 #     le chant sous les ruines · le marchand qui vend le passé · les enfants de la marée · les eaux sans
 #     poissons · les cartographes qui ne dessinent plus · le dernier gardien de Mu · le nom effacé.
 #     Une affaire = un donneur en ville, un lieu gardé par la quête, une énigme, un PNJ du lieu qui remet
-#     la preuve (`don` unique, revenu s'il est perdu), la remise chez le donneur et trois issues PARLÉES.
+#     la preuve (`don` unique, revenu s'il est perdu), la remise chez le donneur et ses issues PARLÉES
+#     (trois là où le lore en donne trois, la seule fin du récit sinon : chant, enfants, cartographes).
 #
 #   ⚠️ Les issues à trois branches (condamner / sécuriser / signaler…) sont des répliques, pas un état :
 #   aucune n'est mémorisée, comme le veut le lore (« aucune n'est mauvaise », sans suite sur la trame).
@@ -1192,19 +1193,17 @@ def affaire_chant():
 		 "remis": "Hine suit les signes du doigt, et ses lèvres bougent. « Là. C'est là que ma mère disait "
 				  "autre chose. » Elle chante, doucement, la version entière. Au milieu, un merci : à "
 				  "Tangaroa, père des poissons, pour la coque d'or. Elle s'arrête. « La coque d'or. C'est "
-				  "la bulle. Nous remercions Tangaroa pour la bulle. » Elle vous regarde. « Où voulez-vous "
-				  "qu'on le chante ? »",
+				  "la bulle. Nous remercions Tangaroa pour la bulle. » Elle se lève. « On le chantera là où il "
+				  "est né. »",
 		 "souvenir": "« On le chante en entier, maintenant. » Elle rit. « Rawiri en a gardé une copie, pour "
 					 "que le chant ne tienne plus à ma seule mémoire. Il dit que ça ne prouve pas que "
 					 "Tangaroa l'a faite, ni qu'il a entendu. Il a raison. Et d'où viennent les rêves, nul "
 					 "ne le sait. »"},
-		[("sanctuaire", "« Dans le sanctuaire, d'une seule voix. »",
-		  "« Avec les rêveurs, et tous ceux qui le voudront. » Ses yeux brillent. « Les murs sont faits "
-		  "pour ça. On le chantera là où il est né. »"),
-		 ("fare", "« Ici, au fare, pour qui veut l'entendre. »",
-		  "« Ici. Où on le chantait sans savoir. » Elle hoche la tête. « Moana râlera. Elle chantera aussi. »"),
-		 ("archive", "« Que Rawiri l'écrive d'abord. »",
-		  "« Écrit. » Elle fait la moue. « Un chant écrit, c'est un poisson sec. Mais il ne se perdra plus. »")])
+		[("sanctuaire", "Descendre avec elle au sanctuaire.",
+		  "Au sanctuaire noyé, Hine chante la version entière, et les rêveurs avec elle, Tama le premier, "
+		  "et tous ceux qui l'ont voulu. Les murs portent les voix comme une seule. Rawiri, à l'écart, "
+		  "recopie : le chant ne tiendra plus à la seule mémoire d'une vieille femme. Il dit que Mu a "
+		  "remercié Tangaroa pour la bulle. Il ne dit pas que Tangaroa l'a faite, ni qu'il a entendu.")])
 	rawiri_s = remettant(RAWIRI_SANCTUAIRE, "Rawiri Tane", "hobbit", "Archiviste de l'Institut, au sanctuaire noyé.",
 		"lettre", Q_CHANT, FRAGMENTS_CHANT, E_CHANT,
 		{"accueil": "Un hobbit trempé jusqu'aux genoux, une lanterne dans chaque main, devant des murs couverts "
@@ -1357,17 +1356,14 @@ def affaire_enfants():
 		 "remis": "Ataahua lit la traduction de Mahina, épinglée à la tablette, à mi-voix : « Pose la main "
 				  "sur l'eau. Attends. Si l'eau répond, ne descends pas. » Elle relève la tête. « Une "
 				  "formule de prudence. On apprenait ça aux petits de Mu, pour les bassins. » Elle rit, "
-				  "nerveusement. « Que leur dit-on, aux enfants ? »",
+				  "nerveusement. « Mahina voudra en faire une leçon. »",
 		 "souvenir": "« Mahina en a fait une leçon. Les petits la récitent en jouant au bord des bassins. » "
 					 "Elle sourit, puis plus du tout. « Certains ne rêvent plus. D'autres, si. La femme, "
 					 "personne ne sait qui c'est. »"},
-		[("lecon", "« Qu'on leur apprenne la formule, comme autrefois. »",
-		  "« Une leçon. » Elle hoche la tête. « Ça, je sais faire. »"),
-		 ("verite", "« Dites-leur la vérité : personne ne sait qui est cette femme. »",
-		  "« Personne. » Elle soupire. « Les enfants préfèrent ça à un mensonge, souvent. »"),
-		 ("rassurer", "« Dites-leur que c'est une vieille gardienne des bassins, et qu'elle veille. »",
-		  "Elle hésite. « Une gardienne. » Elle repose sa tasse. « Ça les fera dormir. Je ne sais pas si "
-		  "c'est vrai. »")])
+		[("lecon", "« Qu'elle en fasse une leçon. »",
+		  "« Une leçon, comme autrefois. » Ataahua hoche la tête. « Les petits la réciteront au bord des "
+		  "bassins. » Elle repose sa tasse. « Certains cesseront de rêver. D'autres, non. Et la femme, "
+		  "personne ne saura qui c'est. »")])
 	mahina_b = remettant(MAHINA_BASSIN, "Mahina Rehu", "humain", "Vieille linguiste de l'Institut, dans la chambre hydraulique.",
 		"lettre", Q_ENFANTS, TABLETTE, E_BASSIN,
 		{"accueil": "Une vieille femme assise sur une margelle, les pieds dans l'eau qui monte, un carnet sur "
@@ -1549,17 +1545,13 @@ def affaire_cartographes():
 		 "remettre_label": "Lui remettre la carte de Wiremu.",
 		 "remis": "Kauri déroule la carte. Les rues y sont tracées d'un trait sûr, et des zones entières "
 				  "sont hachurées en gris : incertaines. Il les regarde longtemps. « Il ne promet plus une "
-				  "ville fidèle. » Il soupire. « Que fait-on des anciennes cartes ? »",
+				  "ville fidèle. » Il soupire. « Et Roimata qui le traitait de faussaire. »",
 		 "souvenir": "« Wiremu a repris son travail. » Kauri désigne une table où le nain trace, en jurant. "
 					 "« Le phénomène revient, par moments. Ça ne prouve pas que les quartiers bougent. Ça "
 					 "prouve que nos instruments écoutent le mana autant que la pierre. »"},
-		[("temoins", "« Gardez les anciennes cartes comme témoins. »",
-		  "« Comme témoins de ce que Mu croyait savoir. » Il sourit. « Roimata en sera ravie. »"),
-		 ("archives", "« Confiez-les aux archives. »",
-		  "« Aux archives. » Il hoche la tête. « Rawiri les rangera mieux que nous. »"),
-		 ("brouillon", "« Servez-vous-en pour marquer les zones incertaines. »",
-		  "« Les vieilles et les neuves, l'une sur l'autre. » Il rit. « On ne dessinera plus jamais un "
-		  "quartier en un seul trait. »")])
+		[("temoins", "« Et les anciennes cartes ? »",
+		  "« Roimata les garde. Comme témoins de ce que Mu croyait savoir. » Il sourit. « Wiremu reprend "
+		  "son travail. Il marquera les zones incertaines, et il ne promettra plus une ville fidèle. »")])
 	roimata = temoin(ROIMATA, "Roimata", "hobbit", "Apprentie cartographe, à la salle des cartes.", "lettre",
 		"Une jeune hobbit qui recopie une carte trop vieille pour elle, la langue entre les dents.",
 		[("faussaire", "« Wiremu, un faussaire ? »", pendant(Q_CARTOGRAPHES),
