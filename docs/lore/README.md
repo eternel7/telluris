@@ -8,6 +8,7 @@ Le monde de Telluris, une séance par sujet, rangées par thème.
 
 Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; un point non tranché y est marqué *(proposé, non tranché)*. Ces textes ne font pas foi contre la parole de l'Auteur.
 
+- [Le cahier des règles du monde](redige/00_cahier_des_regles.md) — 26/11/2026 — La référence de toute création : trois niveaux (monde, jeu, technique), règles immuables, règles qui peuvent évoluer, libertés des concepteurs ; mort, temps, créatures, ressources, persistance.
 - [Le monde de Telluris et ses quatre ères](redige/01_le_monde_et_ses_eres.md) — 11/10/2026 — Géographie réelle, Cités-États et remparts, absence de guerre, mythes déformés ; l'antédiluvien jusqu'au Déluge, l'Âge des Remparts (Gilgamesh), l'Âge des Portails, l'Âge des Donjons.
 - [Les Anthropes et leurs cinq Lignées](redige/02_anthropes_et_lignees.md) — 11/10/2026 — Un seul sang, cinq Lignées interfécondes, leurs tendances ; la Lignée est secondaire.
 - [Les portails, la Vague et les donjons](redige/03_portails_vague_donjons.md) — 11/10/2026 — Les trois frères, les portails plus anciens qu'eux, la dégradation du savoir, la Vague, les donjons, les cristaux violet et jaune.
