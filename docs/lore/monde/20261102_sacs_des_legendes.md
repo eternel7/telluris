@@ -18,7 +18,7 @@ Promise contre son gré à Gwawl, **Rhiannon** choisit Pwyll. Quand Gwawl revint
 - Dans les **zones blanches** d'Afrique, au-delà de la carte connue, attendent au **rang S** la **coquille d'Oduduwa**, de laquelle le dieu versa assez de terre pour faire toute la terre ferme, relique unique et la plus vaste de toutes (**deux mille kilos**), et les **pots d'Anansi**, où l'araignée voulut enfermer toute la sagesse du monde ; il y en a plusieurs, de **trois cents kilos** chacun.
 - Le **grenier céleste** des Dogon, l'Igbá Odù, les nkisi et le navire pliable Skíðblaðnir n'existent que dans les récits.
 
-Une relique pèse ce que pèse l'objet ordinaire qu'elle imite, et peut contenir n'importe quel objet. Chacun ne peut en porter qu'**une**.
+Une relique pèse ce que pèse l'objet ordinaire qu'elle imite, et peut contenir n'importe quel objet. Chacun ne peut en porter qu'**une**. Les **reliques interdites** (Necronomicon, Table d'émeraude…) sont une autre famille, qui ne se compte pas avec celle-ci (voir [Les reliques interdites](20261126_reliques_interdites.md)).
 
 ## Les copies des Architectes
 

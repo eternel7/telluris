@@ -109,7 +109,8 @@
 		{"id": "lignees", "nom": "Les cinq Lignées", "variantes": ["cinq Lignées", "Lignées"], "type": "notion", "page": "redige/02_anthropes_et_lignees.md", "resume": "Humains, elfes, nains, ogres, hobbits : un même sang façonné par la magie, interféconde."},
 		{"id": "revelateurs", "nom": "Révélateurs", "variantes": ["Révélateurs", "Révélateur"], "type": "notion", "page": "redige/07_mysteres_et_cosmologie.md", "resume": "Ceux qui ont fini le jeu et doivent vulgariser une vérité inconcevable."},
 		{"id": "grigori", "nom": "Grigori", "variantes": ["Grigori"], "type": "notion", "page": "monde/20261004_introduit_les_grigori.md", "resume": "Les Veilleurs, venus à l'Âge des Remparts selon le lore."},
-		{"id": "archives_akashiques", "nom": "Archives akashiques", "variantes": ["Archives akashiques"], "type": "notion", "page": "monde/20261125_archives_akashiques.md", "resume": "La mémoire faillible du monde, sous Telluris et les mondes divins ; mille noms selon les cultures."}
+		{"id": "archives_akashiques", "nom": "Archives akashiques", "variantes": ["Archives akashiques"], "type": "notion", "page": "monde/20261125_archives_akashiques.md", "resume": "La mémoire faillible du monde, sous Telluris et les mondes divins ; mille noms selon les cultures."},
+		{"id": "reliques_interdites", "nom": "Reliques interdites", "variantes": ["reliques interdites", "Reliques interdites", "Necronomicon"], "type": "notion", "page": "monde/20261126_reliques_interdites.md", "resume": "Livres et objets trop grands pour l'esprit d'un Anthrope ; ils se rassemblent, du rang B au rang S+."}
 	],
 	"portails": [
 		["constantinople", "rome"],

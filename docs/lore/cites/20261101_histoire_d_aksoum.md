@@ -10,7 +10,7 @@ Le monstre d'Andromède venait de la mer. **Arwé**, lui, était le roi-serpent 
 
 ## Le sanctuaire et l'Arche
 
-Le seul portail de donjon d'Aksoum s'ouvre dans le **sanctuaire de la reine**, Sainte-Marie-de-Sion, un temple-forteresse bâti autour du portail et gardé par les Templiers. Au sein du donjon repose l'**Arche d'alliance**, veillée par un gardien unique : un être du donjon, pas un Anthrope. À quoi sert l'Arche, sur quel monde s'ouvre ce donjon, personne ne le sait encore.
+Le seul portail de donjon d'Aksoum s'ouvre dans le **sanctuaire de la reine**, Sainte-Marie-de-Sion, un temple-forteresse bâti autour du portail et gardé par les Templiers. Au sein du donjon repose l'**Arche d'alliance**, veillée par un gardien unique : un être du donjon, pas un Anthrope. À quoi sert l'Arche, sur quel monde s'ouvre ce donjon, personne ne le sait encore. Elle compte parmi les **reliques interdites**, mais ne quitte pas le donjon : on vient la consulter auprès de son gardien, on ne l'emporte pas (voir [Les reliques interdites](../monde/20261126_reliques_interdites.md)).
 
 ## Deux portails vers le monde
 
