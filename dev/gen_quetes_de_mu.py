@@ -197,7 +197,7 @@ IMG = {
 	RESERVE: "reserve_des_registres01.jpg",
 }
 PORTRAITS = {
-	RANGI: "technicien_nain_m_ouvrages_de_mu01.webp", NGAIO: "jardiniere_hobbit_f_jardins_de_mu01.jpg",
+	RANGI: "technicien_nain_m_ouvrages_de_mu01.webp", NGAIO: "jardiniere_hobbit_f_jardins_de_mu01.webp",
 	TAMA: "jardinier_nain_m_tama01.webp", ANA: "architecte_elfe_f_institut_de_mu01.webp",
 	KORO: "souffleur_ogre_m_atelier_de_mu01.webp", MAHINA: "linguiste_humain_f_institut_de_mu_anime01.webp",
 	RAWIRI: "archiviste_hobbit_m_institut_de_mu01.webp", MERE: "restauratrice_ogre_f_institut_de_mu01.webp",
@@ -209,7 +209,7 @@ PORTRAITS = {
 	SENTINELLE: "sentinelle_porte_condamnee01.jpg", HUIA: "descendante_elfe_f_reserve_de_mu01.jpg",
 	ECHIDNA: "echidna_antre01.jpg",
 }
-# Images livrées par l'Auteur le 26/11 (WebP quand il est plus léger que le JPEG d'origine). Mahina : la
+# Images livrées par l'Auteur le 26/11, toutes en WebP (la donnée attend du WebP). Mahina : la
 # version ANIMÉE pour son dialogue à l'Institut, la fixe dans la chambre hydraulique. Versions écartées
 # gardées dans pnj/ sans usage : soigneuse_elfe_f_fare_des_marees02.webp (ogre au teint vert, contraire
 # à la règle des prompts), marchand_nain_m_marche_du_dome02.webp (étal sans la toile noire).

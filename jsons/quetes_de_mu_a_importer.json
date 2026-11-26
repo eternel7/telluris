@@ -3014,7 +3014,7 @@
     "type": "pnj",
     "nom": "Ngaio",
     "race": "hobbit",
-    "portrait": "jardiniere_hobbit_f_jardins_de_mu01.jpg",
+    "portrait": "jardiniere_hobbit_f_jardins_de_mu01.webp",
     "description": "Jardinière de la lisière, à Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -3823,7 +3823,7 @@
       {
         "character": "pnj:ngaio_jardiniere",
         "nom": "Ngaio",
-        "portrait": "jardiniere_hobbit_f_jardins_de_mu01.jpg",
+        "portrait": "jardiniere_hobbit_f_jardins_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une hobbit agenouillée dans les fougères d'eau, qui ne lève pas la tête au bruit."
