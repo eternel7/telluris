@@ -452,6 +452,80 @@ MATIERES = {
 	# Le seul +2 sans chasse : concentré de Tisane du marcheur (apothicairerie). Palier 2 :
 	# même gain que l'aile d'aigle, aucun +3 hors des grandes bêtes.
 	"item:Elixir_du_coureur": _matiere("du Coureur", 2, {"bonus_pv": 2, "bonus": {"V": 2}}, [TAG_ARMURE]),
+
+	# ── Nouvelles dépouilles (lots mésopotamiens, Japon, Afrique, Celtes, Madagascar ; dump 25/11) ──
+	# Sélection de l'Auteur (26/11) : une partie typée par espèce hors boss, sans V. Palier =
+	# dangerosité : < 240 → 2, 240-330 → 3, dès 330 → 4 (Ušumgallu, Fanany, Lamassu, Teryel).
+	# Morceau = un palier de moins. Boss : plus bas, `NOUVEAUX_BOSS`.
+	# Palier 2 : Bašmu (≈231).
+	"item:bashmu_tete": _partie("du Serpent cornu", 2, "tete", {"bonus_degats": 1, "bonus": {"Ag": 1},
+																"effets": _poison(2, 2)}, [TAG_ARME]),
+	"item:bashmu_queue": _partie("du Bašmu", 2, "queue", {"bonus_degats": 2, "bonus_cd": 1,
+														  "effets": _deb("V", 1, 2)}),
+	"item:lalomena_tete_morceau": _partie("à l’Éclat de défense", 2, "tete", {"bonus_degats": 1, "bonus_pv": 4,
+																				"bonus": {"R": 1}}),
+	# Palier 3 : Nue ≈246, Kelpie ≈257, Oni / Urmaḫlullu ≈266, Songomby ≈274, Lalomena ≈276,
+	# Each-Uisge ≈281, Kusarikku ≈282, Ugallu ≈288, Wendigo ≈317, Anzû ≈318 ; morceaux des têtes
+	# venimeuses de palier 4.
+	"item:nue_queue": _partie("de la Nue", 3, "queue", {"bonus_degats": 2, "effets": _poison(3, 3)}),
+	"item:nue_tete": _partie("du Cri nocturne", 3, "tete", {"bonus_degats": 3, "bonus": {"Vol": 2},
+															"effets": _deb("Vol", 1, 2)}),
+	"item:kelpie_queue": _partie("au Crin noyé", 3, "queue", {"bonus_degats": 3, "bonus_cd": 1, "bonus": {"Ag": 1},
+															  "effets": _deb("Ag", 1, 2)}),
+	"item:oni_bras": _partie("de l’Oni", 3, "bras", {"bonus_degats": 4, "bonus_cc": 1, "bonus": {"F": 2}}),
+	"item:oni_tete": _partie("Cornu", 3, "tete", {"bonus_degats": 3, "bonus_pv": 4, "bonus": {"F": 1, "R": 1}}),
+	"item:urmahlullu_patte": _partie("de l’Homme-lion", 3, "patte", {"bonus_degats": 3, "bonus_cc": 1,
+																	 "bonus": {"F": 1, "Ag": 1}}),
+	"item:songomby_patte": _partie("du Songomby", 3, "patte", {"bonus_degats": 2, "bonus_initiative": 2,
+															   "bonus": {"Ag": 2}}),
+	"item:lalomena_tete": _partie("aux Défenses", 3, "tete", {"bonus_degats": 2, "bonus_pa": 1, "bonus_pv": 6,
+															  "bonus": {"R": 2}}),
+	"item:each_uisge_tete": _partie("du Cheval des eaux", 3, "tete", {"bonus_degats": 3, "bonus_pv": 2,
+																	  "bonus": {"F": 1, "R": 1}}),
+	"item:each_uisge_queue": _partie("de l’Each-Uisge", 3, "queue", {"bonus_degats": 3, "bonus": {"R": 1},
+																	 "effets": _deb("Ag", 2, 2)}),
+	"item:kusarikku_tete": _partie("du Bison", 3, "tete", {"bonus_degats": 3, "bonus_pv": 4, "bonus": {"R": 2}}),
+	"item:ugallu_bras": _partie("du Lion-démon", 3, "bras", {"bonus_degats": 3, "bonus_cc": 1,
+															 "bonus": {"F": 1, "Vol": 1}}),
+	"item:wendigo_bras": _partie("du Froid affamé", 3, "bras", {"bonus_degats": 3, "bonus": {"F": 1},
+																"effets": _deb("V", 1, 4)}),
+	"item:anzu_aile": _partie("de l’Anzû", 3, "aile", {"bonus_pm": 4, "bonus": {"Vol": 2, "Ag": 1},
+													   "effets": {"esquive": 1}}),
+	"item:anzu_patte": _partie("aux Serres d’Anzû", 3, "patte", {"bonus_degats": 3, "bonus_cc": 1, "bonus_cd": 1,
+																 "bonus": {"F": 1}}),
+	"item:ushumgallu_tete_morceau": _partie("au Croc du Dragon furieux", 3, "tete",
+											{"bonus_degats": 1, "effets": _poison(4, 3)}, [TAG_ARME]),
+	"item:fanany_tete_morceau": _partie("au Croc du Fanany", 3, "tete",
+										{"bonus_degats": 1, "effets": _poison(3, 4)}, [TAG_ARME]),
+	# Palier 4 : Teryel ≈335, Ušumgallu / Fanany ≈336, Lamassu ≈344, Baku ≈362, Jorōgumo ≈375,
+	# Mapinguari ≈385, Qilin ≈388. Têtes magiques (Teryel, Baku, Qilin) : armure + catalyseur.
+	"item:teryel_tete": _partie("du Teryel", 4, "tete", {"bonus_pm": 6, "bonus": {"Cha": 3, "Int": 2},
+														 "effets": {"canalisation": 2, "esquive": 1}},
+								[TAG_ARMURE, TAG_CATALYSEUR]),
+	"item:ushumgallu_tete": _partie("au Venin du Dragon furieux", 4, "tete",
+									{"bonus_degats": 2, "effets": _poison(4, 4)}, [TAG_ARME]),
+	"item:ushumgallu_queue": _partie("de l’Ušumgallu", 4, "queue", {"bonus_degats": 4, "bonus_cc": 1, "bonus_cd": 2,
+																	"bonus": {"F": 2, "R": 1}}),
+	"item:fanany_tete": _partie("du Fanany", 4, "tete", {"bonus_degats": 1, "bonus": {"Vol": 1},
+														 "effets": {**_deb("Vol", 1, 4), **_poison(4, 4)}},
+								[TAG_ARME]),
+	"item:lamassu_aile": _partie("du Gardien ailé", 4, "aile", {"bonus_pa": 3, "bonus_pv": 4,
+																"bonus": {"Vol": 3, "R": 1}, "effets": {"esquive": 1}}),
+	"item:lamassu_tete": _partie("du Lamassu", 4, "tete", {"bonus_degats": 3, "bonus_pv": 4,
+														   "bonus": {"Vol": 3, "Int": 1}, "effets": _deb("Vol", 1, 2)}),
+	"item:baku_tete": _partie("du Mangeur de rêves", 4, "tete", {"bonus_pm": 6, "bonus": {"Int": 3, "Vol": 2},
+																  "effets": {"canalisation": 2, "regen_pm": 1}},
+							  [TAG_ARMURE, TAG_CATALYSEUR]),
+	"item:jorogumo_tete": _partie("de la Fileuse", 4, "tete", {"bonus_degats": 2, "bonus": {"Ag": 2},
+															   "effets": {**_deb("V", 1, 3), **_poison(3, 3)}},
+								  [TAG_ARME]),
+	"item:jorogumo_patte": _partie("de la Jorōgumo", 4, "patte", {"bonus_degats": 4, "bonus_cc": 2,
+																  "bonus": {"Ag": 3}}),
+	"item:mapinguari_bras": _partie("du Géant des forêts", 4, "bras", {"bonus_degats": 6, "bonus_cc": 1,
+																	   "bonus": {"F": 3}}),
+	"item:qilin_tete": _partie("à la Corne pure", 4, "tete", {"bonus_pm": 6, "bonus": {"Vol": 3, "Cha": 2},
+															  "effets": {"regen_pm": 1, "canalisation": 1}},
+							   [TAG_ARMURE, TAG_CATALYSEUR]),
 }
 
 
@@ -464,6 +538,46 @@ import legendaires_table  # noqa: E402
 
 for _id, _entree in legendaires_table.entrees_fabrication(_partie, _matiere).items():
 	MATIERES.setdefault(_id, _entree)
+
+
+# ── Boss des nouveaux lots (dump 25/11, Auteur 26/11) ─────────────────────────────
+# Parties seules : ni matière nommée, ni trophée 🏆 (ce serait une entrée de
+# `legendaires_table.ESPECES`, relue aussi par dev/gen_trophees_legendaires.py). Blocs calculés
+# par le même barème (`mods_partie`) ; un morceau porte le bloc de sa partie, comme pour les
+# chasses légendaires. Palier : dangerosité < 450 → 4, sinon 5.
+# espece → (palier, thème, sorte, « du »-forme, parties ; « * » = morceau)
+NOUVEAUX_BOSS = {
+	"espece:mngwa": (4, "bete", "cuir", "du Mngwa", ["corps", "corps*", "patte", "queue", "tete"]),
+	"espece:nuckelavee": (4, "infernal", "peau", "du Nuckelavee",
+						  ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:roc": (4, "bete", "plumes", "du Roc", ["aile", "aile*", "corps", "corps*", "patte", "patte*",
+												  "queue", "queue*", "tete", "tete*"]),
+	"espece:trimobe": (4, "terre", "cuir", "du Trimobe",
+					   ["corps", "corps*", "patte", "queue", "queue*", "tete", "tete*"]),
+	"espece:mushmahhu": (4, "venin", "ecailles", "du Mušmaḫḫu",
+						 ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:taureau_celeste": (4, "terre", "cuir", "du Taureau céleste",
+							   ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:inkanyamba": (5, "eau", "ecailles", "de l’Inkanyamba",
+						  ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:humbaba": (5, "terre", "peau", "de Humbaba",
+					   ["corps", "corps*", "patte", "queue", "tete", "tete*"]),
+	"espece:asag": (5, "terre", "os", "d’Asag",
+					["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:labbu": (5, "eau", "ecailles", "du Labbu",
+					 ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+	"espece:mokele_mbembe": (5, "eau", "peau", "du Mokele-Mbembe",
+							 ["corps", "corps*", "patte", "patte*", "queue", "queue*", "tete", "tete*"]),
+}
+
+for _esp, (_palier, _theme, _sorte, _du, _parties) in NOUVEAUX_BOSS.items():
+	for _p in _parties:
+		_nom_p = _p.rstrip("*")
+		_mods, _tags = legendaires_table.mods_partie(_nom_p, _theme, _palier, _sorte)
+		_nom = "%s %s" % (legendaires_table.NOM_SORTE[_sorte] if _nom_p == "corps"
+						  else legendaires_table.NOM_PARTIE[_nom_p], _du)
+		MATIERES.setdefault(legendaires_table.item_partie(_esp, _p),
+							_partie(_nom, _palier, "tete", _mods, _tags))
 
 
 # ── Barème ──────────────────────────────────────────────────────────────────────

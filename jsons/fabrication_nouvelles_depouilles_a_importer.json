@@ -1,0 +1,8001 @@
+[
+  {
+    "_id": "item:anzu_aile",
+    "type": "item",
+    "nom": "Aile d'Anzû",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      40.0,
+      60.0
+    ],
+    "description": "Aile d'Anzû, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "terreur",
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:anzu",
+    "portion_de": "item:anzu",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Anzû",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Vol": 2,
+          "Ag": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:anzu_patte",
+    "type": "item",
+    "nom": "Patte d'Anzû",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      28.0,
+      42.0
+    ],
+    "description": "Patte d'Anzû, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "terreur",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:anzu",
+    "portion_de": "item:anzu",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Serres d’Anzû",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cc": 1,
+        "bonus_cd": 1,
+        "bonus": {
+          "F": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_corps",
+    "type": "item",
+    "nom": "Corps d'Asag",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      624.0,
+      936.0
+    ],
+    "description": "Corps d'Asag, débité sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:asag_corps_morceau",
+        "quantite": 10,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Os d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps d'Asag",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      62.4,
+      93.6
+    ],
+    "description": "Morceau de corps d'Asag, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Os d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_patte",
+    "type": "item",
+    "nom": "Patte d'Asag",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      84.0,
+      126.0
+    ],
+    "description": "Patte d'Asag, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:asag_patte_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte d'Asag",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      42.0,
+      63.0
+    ],
+    "description": "Morceau de patte d'Asag, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_queue",
+    "type": "item",
+    "nom": "Queue d'Asag",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      96.0,
+      144.0
+    ],
+    "description": "Queue d'Asag, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:asag_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine d’Asag",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue d'Asag",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      48.0,
+      72.0
+    ],
+    "description": "Morceau de queue d'Asag, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine d’Asag",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_tete",
+    "type": "item",
+    "nom": "Tête d'Asag",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      144.0,
+      216.0
+    ],
+    "description": "Tête d'Asag, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:asag_tete_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "F": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:asag_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Asag",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      48.0,
+      72.0
+    ],
+    "description": "Morceau de tête d'Asag, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:asag",
+    "portion_de": "item:asag_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs d’Asag",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "F": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:baku_tete",
+    "type": "item",
+    "nom": "Tête de Baku",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      60.0
+    ],
+    "description": "Tête de Baku, débitée sur place.",
+    "tags": [
+      "hybride",
+      "magique",
+      "monstre",
+      "nocturne",
+      "partie_tete",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:baku",
+    "portion_de": "item:baku",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Mangeur de rêves",
+      "modificateurs": {
+        "bonus_pm": 6,
+        "bonus": {
+          "Int": 3,
+          "Vol": 2
+        },
+        "effets": {
+          "canalisation": 2,
+          "regen_pm": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bashmu_queue",
+    "type": "item",
+    "nom": "Queue de Bašmu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      12.0,
+      20.0
+    ],
+    "description": "Queue de Bašmu, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:bashmu",
+    "portion_de": "item:bashmu",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Bašmu",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_cd": 1,
+        "effets": {
+          "buffs": {
+            "V": -1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:bashmu_tete",
+    "type": "item",
+    "nom": "Tête de Bašmu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      18.0,
+      30.0
+    ],
+    "description": "Tête de Bašmu, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:bashmu",
+    "portion_de": "item:bashmu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Serpent cornu",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "regen_pv": -2,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:each_uisge_queue",
+    "type": "item",
+    "nom": "Queue d'Each-Uisge",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      32.0,
+      52.0
+    ],
+    "description": "Queue d'Each-Uisge, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "metamorphe",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:each_uisge",
+    "portion_de": "item:each_uisge",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Each-Uisge",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "R": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:each_uisge_tete",
+    "type": "item",
+    "nom": "Tête d'Each-Uisge",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      48.0,
+      78.0
+    ],
+    "description": "Tête d'Each-Uisge, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "metamorphe",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:each_uisge",
+    "portion_de": "item:each_uisge",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Cheval des eaux",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pv": 2,
+        "bonus": {
+          "F": 1,
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:fanany_tete",
+    "type": "item",
+    "nom": "Tête de Fanany",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      84.0,
+      120.0
+    ],
+    "description": "Tête de Fanany, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "terreur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:fanany_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "du Fanany",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 4,
+          "regen_pv": -4
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:fanany_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Fanany",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      42.0,
+      60.0
+    ],
+    "description": "Morceau de tête de Fanany, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "terreur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:fanany",
+    "portion_de": "item:fanany_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Croc du Fanany",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "effets": {
+          "regen_pv": -3,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_corps",
+    "type": "item",
+    "nom": "Corps d'Humbaba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      312.0,
+      468.0
+    ],
+    "description": "Corps d'Humbaba, débité sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:humbaba_corps_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Peau de Humbaba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps d'Humbaba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      62.4,
+      93.6
+    ],
+    "description": "Morceau de corps d'Humbaba, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Peau de Humbaba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_patte",
+    "type": "item",
+    "nom": "Patte d'Humbaba",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      42.0,
+      63.0
+    ],
+    "description": "Patte d'Humbaba, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe de Humbaba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_queue",
+    "type": "item",
+    "nom": "Queue d'Humbaba",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      48.0,
+      72.0
+    ],
+    "description": "Queue d'Humbaba, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine de Humbaba",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_tete",
+    "type": "item",
+    "nom": "Tête d'Humbaba",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      72.0,
+      108.0
+    ],
+    "description": "Tête d'Humbaba, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:humbaba_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs de Humbaba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "F": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:humbaba_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Humbaba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      36.0,
+      54.0
+    ],
+    "description": "Morceau de tête d'Humbaba, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:humbaba",
+    "portion_de": "item:humbaba_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs de Humbaba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "F": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_corps",
+    "type": "item",
+    "nom": "Corps d'Inkanyamba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      2080.0,
+      5200.0
+    ],
+    "description": "Corps d'Inkanyamba, débité sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:inkanyamba_corps_morceau",
+        "quantite": 53,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Écailles de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps d'Inkanyamba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      39.25,
+      98.11
+    ],
+    "description": "Morceau de corps d'Inkanyamba, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Écailles de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_patte",
+    "type": "item",
+    "nom": "Patte d'Inkanyamba",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      280.0,
+      700.0
+    ],
+    "description": "Patte d'Inkanyamba, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:inkanyamba_patte_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte d'Inkanyamba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      35.0,
+      87.5
+    ],
+    "description": "Morceau de patte d'Inkanyamba, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_queue",
+    "type": "item",
+    "nom": "Queue d'Inkanyamba",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      320.0,
+      800.0
+    ],
+    "description": "Queue d'Inkanyamba, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:inkanyamba_queue_morceau",
+        "quantite": 9,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine de l’Inkanyamba",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue d'Inkanyamba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      35.56,
+      88.89
+    ],
+    "description": "Morceau de queue d'Inkanyamba, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine de l’Inkanyamba",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_tete",
+    "type": "item",
+    "nom": "Tête d'Inkanyamba",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      480.0,
+      1200.0
+    ],
+    "description": "Tête d'Inkanyamba, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:inkanyamba_tete_morceau",
+        "quantite": 13,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:inkanyamba_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Inkanyamba",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      36.92,
+      92.31
+    ],
+    "description": "Morceau de tête d'Inkanyamba, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:inkanyamba",
+    "portion_de": "item:inkanyamba_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs de l’Inkanyamba",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:jorogumo_patte",
+    "type": "item",
+    "nom": "Patte de Jorōgumo",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      3.0,
+      6.0
+    ],
+    "description": "Patte de Jorōgumo, débitée sur place.",
+    "tags": [
+      "metamorphe",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "seduction",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:jorogumo",
+    "portion_de": "item:jorogumo",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Jorōgumo",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_cc": 2,
+        "bonus": {
+          "Ag": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:jorogumo_tete",
+    "type": "item",
+    "nom": "Tête de Jorōgumo",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      9.0,
+      18.0
+    ],
+    "description": "Tête de Jorōgumo, débitée sur place.",
+    "tags": [
+      "metamorphe",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "seduction",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:jorogumo",
+    "portion_de": "item:jorogumo",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Fileuse",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "V": -1
+          },
+          "duree": 3,
+          "regen_pv": -3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:kelpie_queue",
+    "type": "item",
+    "nom": "Queue de Kelpie",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      24.0,
+      40.0
+    ],
+    "description": "Queue de Kelpie, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "metamorphe",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:kelpie",
+    "portion_de": "item:kelpie",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Crin noyé",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cd": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:kusarikku_tete",
+    "type": "item",
+    "nom": "Tête de Kusarikku",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      14.4,
+      20.8
+    ],
+    "description": "Tête de Kusarikku, débitée sur place.",
+    "tags": [
+      "gardien",
+      "guerrier",
+      "humanoide",
+      "hybride",
+      "monstre",
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:kusarikku",
+    "portion_de": "item:kusarikku",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Bison",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pv": 4,
+        "bonus": {
+          "R": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_corps",
+    "type": "item",
+    "nom": "Corps de Labbu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      2080.0,
+      3120.0
+    ],
+    "description": "Corps de Labbu, débité sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:labbu_corps_morceau",
+        "quantite": 32,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Écailles du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Labbu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      65.0,
+      97.5
+    ],
+    "description": "Morceau de corps de Labbu, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_patte",
+    "type": "item",
+    "nom": "Patte de Labbu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      280.0,
+      420.0
+    ],
+    "description": "Patte de Labbu, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:labbu_patte_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Labbu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      56.0,
+      84.0
+    ],
+    "description": "Morceau de patte de Labbu, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_queue",
+    "type": "item",
+    "nom": "Queue de Labbu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      320.0,
+      480.0
+    ],
+    "description": "Queue de Labbu, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:labbu_queue_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Labbu",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Labbu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      64.0,
+      96.0
+    ],
+    "description": "Morceau de queue de Labbu, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Labbu",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_tete",
+    "type": "item",
+    "nom": "Tête de Labbu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      480.0,
+      720.0
+    ],
+    "description": "Tête de Labbu, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:labbu_tete_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:labbu_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Labbu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      60.0,
+      90.0
+    ],
+    "description": "Morceau de tête de Labbu, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:labbu",
+    "portion_de": "item:labbu_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Labbu",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:lalomena_tete",
+    "type": "item",
+    "nom": "Tête de Lalomena",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      108.0
+    ],
+    "description": "Tête de Lalomena, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:lalomena_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Défenses",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_pa": 1,
+        "bonus_pv": 6,
+        "bonus": {
+          "R": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:lalomena_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Lalomena",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      36.0,
+      54.0
+    ],
+    "description": "Morceau de tête de Lalomena, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "bestial",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:lalomena",
+    "portion_de": "item:lalomena_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l’Éclat de défense",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus_pv": 4,
+        "bonus": {
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:lamassu_aile",
+    "type": "item",
+    "nom": "Aile de Lamassu",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      60.0,
+      90.0
+    ],
+    "description": "Aile de Lamassu, débitée sur place.",
+    "tags": [
+      "gardien",
+      "hybride",
+      "magique",
+      "monstre",
+      "partie_aile",
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:lamassu",
+    "portion_de": "item:lamassu",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Gardien ailé",
+      "modificateurs": {
+        "bonus_pa": 3,
+        "bonus_pv": 4,
+        "bonus": {
+          "Vol": 3,
+          "R": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:lamassu_tete",
+    "type": "item",
+    "nom": "Tête de Lamassu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      60.0,
+      90.0
+    ],
+    "description": "Tête de Lamassu, débitée sur place.",
+    "tags": [
+      "gardien",
+      "hybride",
+      "magique",
+      "monstre",
+      "partie_tete",
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:lamassu",
+    "portion_de": "item:lamassu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Lamassu",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pv": 4,
+        "bonus": {
+          "Vol": 3,
+          "Int": 1
+        },
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mapinguari_bras",
+    "type": "item",
+    "nom": "Bras de Mapinguari",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      72.0
+    ],
+    "description": "Bras de Mapinguari, débité sur place.",
+    "tags": [
+      "foret",
+      "geant",
+      "monstre",
+      "partie_bras",
+      "predateur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mapinguari",
+    "portion_de": "item:mapinguari",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Géant des forêts",
+      "modificateurs": {
+        "bonus_degats": 6,
+        "bonus_cc": 1,
+        "bonus": {
+          "F": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mngwa_corps",
+    "type": "item",
+    "nom": "Corps de Mngwa",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      130.0,
+      208.0
+    ],
+    "description": "Corps de Mngwa, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "rapide",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mngwa",
+    "portion_de": "item:mngwa",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mngwa_corps_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "au Cuir du Mngwa",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mngwa_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Mngwa",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      43.33,
+      69.33
+    ],
+    "description": "Morceau de corps de Mngwa, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "rapide",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mngwa",
+    "portion_de": "item:mngwa_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Cuir du Mngwa",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mngwa_patte",
+    "type": "item",
+    "nom": "Patte de Mngwa",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      17.5,
+      28.0
+    ],
+    "description": "Patte de Mngwa, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "rapide",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mngwa",
+    "portion_de": "item:mngwa",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Mngwa",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mngwa_queue",
+    "type": "item",
+    "nom": "Queue de Mngwa",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      20.0,
+      32.0
+    ],
+    "description": "Queue de Mngwa, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "rapide",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mngwa",
+    "portion_de": "item:mngwa",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Mngwa",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mngwa_tete",
+    "type": "item",
+    "nom": "Tête de Mngwa",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      48.0
+    ],
+    "description": "Tête de Mngwa, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "rapide",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:mngwa",
+    "portion_de": "item:mngwa",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Mngwa",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Ag": 1
+        },
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_corps",
+    "type": "item",
+    "nom": "Corps de Mokele-Mbembe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      3120.0,
+      7800.0
+    ],
+    "description": "Corps de Mokele-Mbembe, débité sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mokele_mbembe_corps_morceau",
+        "quantite": 79,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Peau du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Mokele-Mbembe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      39.49,
+      98.73
+    ],
+    "description": "Morceau de corps de Mokele-Mbembe, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Peau du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_pv": 10,
+        "effets": {
+          "pv": 25
+        },
+        "bonus_pa": 2,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_patte",
+    "type": "item",
+    "nom": "Patte de Mokele-Mbembe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      420.0,
+      1050.0
+    ],
+    "description": "Patte de Mokele-Mbembe, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mokele_mbembe_patte_morceau",
+        "quantite": 11,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Mokele-Mbembe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      38.18,
+      95.45
+    ],
+    "description": "Morceau de patte de Mokele-Mbembe, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_queue",
+    "type": "item",
+    "nom": "Queue de Mokele-Mbembe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      480.0,
+      1200.0
+    ],
+    "description": "Queue de Mokele-Mbembe, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mokele_mbembe_queue_morceau",
+        "quantite": 13,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Mokele-Mbembe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      36.92,
+      92.31
+    ],
+    "description": "Morceau de queue de Mokele-Mbembe, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 2
+        },
+        "bonus_degats": 10,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_tete",
+    "type": "item",
+    "nom": "Tête de Mokele-Mbembe",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      720.0,
+      1800.0
+    ],
+    "description": "Tête de Mokele-Mbembe, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mokele_mbembe_tete_morceau",
+        "quantite": 19,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mokele_mbembe_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Mokele-Mbembe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "legendaire",
+    "slots": [],
+    "poids": [
+      37.89,
+      94.74
+    ],
+    "description": "Morceau de tête de Mokele-Mbembe, taillé pour être emporté.",
+    "tags": [
+      "aquatique",
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:mokele_mbembe",
+    "portion_de": "item:mokele_mbembe_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Mokele-Mbembe",
+      "modificateurs": {
+        "bonus": {
+          "R": 4,
+          "Ag": 2
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
+        },
+        "bonus_degats": 8,
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_corps",
+    "type": "item",
+    "nom": "Corps de Mušmaḫḫu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      1300.0,
+      1820.0
+    ],
+    "description": "Corps de Mušmaḫḫu, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "venin",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mushmahhu_corps_morceau",
+        "quantite": 19,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Écailles du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Mušmaḫḫu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      68.42,
+      95.79
+    ],
+    "description": "Morceau de corps de Mušmaḫḫu, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "venin",
+      "fabrication_armure_cuir",
+      "fabrication_armure_metal",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Écailles du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_patte",
+    "type": "item",
+    "nom": "Patte de Mušmaḫḫu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      175.0,
+      245.0
+    ],
+    "description": "Patte de Mušmaḫḫu, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mushmahhu_patte_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Mušmaḫḫu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      58.33,
+      81.67
+    ],
+    "description": "Morceau de patte de Mušmaḫḫu, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_queue",
+    "type": "item",
+    "nom": "Queue de Mušmaḫḫu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      200.0,
+      280.0
+    ],
+    "description": "Queue de Mušmaḫḫu, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mushmahhu_queue_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Mušmaḫḫu",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 3
+        },
+        "bonus_degats": 5,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Mušmaḫḫu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      66.67,
+      93.33
+    ],
+    "description": "Morceau de queue de Mušmaḫḫu, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Mušmaḫḫu",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 3
+        },
+        "bonus_degats": 5,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_tete",
+    "type": "item",
+    "nom": "Tête de Mušmaḫḫu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      300.0,
+      420.0
+    ],
+    "description": "Tête de Mušmaḫḫu, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mushmahhu_tete_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3,
+          "R": 1
+        },
+        "effets": {
+          "regen_pv": -3,
+          "duree": 2
+        },
+        "bonus_degats": 4,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:mushmahhu_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Mušmaḫḫu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      60.0,
+      84.0
+    ],
+    "description": "Morceau de tête de Mušmaḫḫu, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:mushmahhu",
+    "portion_de": "item:mushmahhu_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Mušmaḫḫu",
+      "modificateurs": {
+        "bonus": {
+          "Ag": 3,
+          "R": 1
+        },
+        "effets": {
+          "regen_pv": -3,
+          "duree": 2
+        },
+        "bonus_degats": 4,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_corps",
+    "type": "item",
+    "nom": "Corps de Nuckelavee",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      416.0,
+      780.0
+    ],
+    "description": "Corps de Nuckelavee, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:nuckelavee_corps_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Peau du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Nuckelavee",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      52.0,
+      97.5
+    ],
+    "description": "Morceau de corps de Nuckelavee, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Peau du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_patte",
+    "type": "item",
+    "nom": "Patte de Nuckelavee",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      56.0,
+      105.0
+    ],
+    "description": "Patte de Nuckelavee, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:nuckelavee_patte_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Nuckelavee",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      28.0,
+      52.5
+    ],
+    "description": "Morceau de patte de Nuckelavee, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_queue",
+    "type": "item",
+    "nom": "Queue de Nuckelavee",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      64.0,
+      120.0
+    ],
+    "description": "Queue de Nuckelavee, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:nuckelavee_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Nuckelavee",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Vol": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Nuckelavee",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      32.0,
+      60.0
+    ],
+    "description": "Morceau de queue de Nuckelavee, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Nuckelavee",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Vol": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_tete",
+    "type": "item",
+    "nom": "Tête de Nuckelavee",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      96.0,
+      180.0
+    ],
+    "description": "Tête de Nuckelavee, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:nuckelavee_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Vol": 1
+        },
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nuckelavee_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Nuckelavee",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      48.0,
+      90.0
+    ],
+    "description": "Morceau de tête de Nuckelavee, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "maladie",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:nuckelavee",
+    "portion_de": "item:nuckelavee_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Nuckelavee",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Vol": 1
+        },
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nue_queue",
+    "type": "item",
+    "nom": "Queue de Nue",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      12.0,
+      20.0
+    ],
+    "description": "Queue de Nue, débitée sur place.",
+    "tags": [
+      "hybride",
+      "maladie",
+      "monstre",
+      "nocturne",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:nue",
+    "portion_de": "item:nue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Nue",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "effets": {
+          "regen_pv": -3,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:nue_tete",
+    "type": "item",
+    "nom": "Tête de Nue",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      18.0,
+      30.0
+    ],
+    "description": "Tête de Nue, débitée sur place.",
+    "tags": [
+      "hybride",
+      "maladie",
+      "monstre",
+      "nocturne",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:nue",
+    "portion_de": "item:nue",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Cri nocturne",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:oni_bras",
+    "type": "item",
+    "nom": "Bras d'Oni",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      12.0,
+      18.0
+    ],
+    "description": "Bras d'Oni, débité sur place.",
+    "tags": [
+      "guerrier",
+      "humanoide",
+      "monstre",
+      "partie_bras",
+      "predateur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:oni",
+    "portion_de": "item:oni",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Oni",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_cc": 1,
+        "bonus": {
+          "F": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:oni_tete",
+    "type": "item",
+    "nom": "Tête d'Oni",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      16.0,
+      24.0
+    ],
+    "description": "Tête d'Oni, débitée sur place.",
+    "tags": [
+      "guerrier",
+      "humanoide",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:oni",
+    "portion_de": "item:oni",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "Cornu",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pv": 4,
+        "bonus": {
+          "F": 1,
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:qilin_tete",
+    "type": "item",
+    "nom": "Tête de Qilin",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      24.0,
+      42.0
+    ],
+    "description": "Tête de Qilin, débitée sur place.",
+    "tags": [
+      "magique",
+      "monstre",
+      "partie_tete",
+      "pure",
+      "rapide",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:qilin",
+    "portion_de": "item:qilin",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Corne pure",
+      "modificateurs": {
+        "bonus_pm": 6,
+        "bonus": {
+          "Vol": 3,
+          "Cha": 2
+        },
+        "effets": {
+          "regen_pm": 1,
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_aile",
+    "type": "item",
+    "nom": "Aile de Roc",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      300.0,
+      800.0
+    ],
+    "description": "Aile de Roc, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "vol",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:roc_aile_morceau",
+        "quantite": 9,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Aile du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Ag": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pm": 12,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_aile_morceau",
+    "type": "item",
+    "nom": "Morceau de aile de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      33.33,
+      88.89
+    ],
+    "description": "Morceau de aile de Roc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "predateur",
+      "vol",
+      "fabrication_armure_tissu",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Aile du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Ag": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "bonus_pm": 12,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_corps",
+    "type": "item",
+    "nom": "Corps de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      1350.0,
+      3600.0
+    ],
+    "description": "Corps de Roc, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "vol",
+      "fabrication_armure_tissu",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:roc_corps_morceau",
+        "quantite": 37,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Plumes du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      36.49,
+      97.3
+    ],
+    "description": "Morceau de corps de Roc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "vol",
+      "fabrication_armure_tissu",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Plumes du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_patte",
+    "type": "item",
+    "nom": "Patte de Roc",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      210.0,
+      560.0
+    ],
+    "description": "Patte de Roc, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:roc_patte_morceau",
+        "quantite": 6,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      93.33
+    ],
+    "description": "Morceau de patte de Roc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "predateur",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_queue",
+    "type": "item",
+    "nom": "Queue de Roc",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      330.0,
+      880.0
+    ],
+    "description": "Queue de Roc, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:roc_queue_morceau",
+        "quantite": 9,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Roc",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      36.67,
+      97.78
+    ],
+    "description": "Morceau de queue de Roc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Roc",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "Ag": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_tete",
+    "type": "item",
+    "nom": "Tête de Roc",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      300.0,
+      800.0
+    ],
+    "description": "Tête de Roc, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:roc_tete_morceau",
+        "quantite": 9,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Ag": 1
+        },
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:roc_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Roc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      33.33,
+      88.89
+    ],
+    "description": "Morceau de tête de Roc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:roc",
+    "portion_de": "item:roc_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Roc",
+      "modificateurs": {
+        "bonus": {
+          "F": 3,
+          "Ag": 1
+        },
+        "effets": {
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:songomby_patte",
+    "type": "item",
+    "nom": "Patte de Songomby",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      31.5,
+      45.5
+    ],
+    "description": "Patte de Songomby, débitée sur place.",
+    "tags": [
+      "bestial",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "rapide",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:songomby",
+    "portion_de": "item:songomby",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Songomby",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_initiative": 2,
+        "bonus": {
+          "Ag": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_corps",
+    "type": "item",
+    "nom": "Corps de Taureau céleste",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      780.0,
+      1144.0
+    ],
+    "description": "Corps de Taureau céleste, débité sur place.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:taureau_celeste_corps_morceau",
+        "quantite": 12,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "au Cuir du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Taureau céleste",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      65.0,
+      95.33
+    ],
+    "description": "Morceau de corps de Taureau céleste, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Cuir du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_patte",
+    "type": "item",
+    "nom": "Patte de Taureau céleste",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      105.0,
+      154.0
+    ],
+    "description": "Patte de Taureau céleste, débitée sur place.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:taureau_celeste_patte_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à la Griffe du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Taureau céleste",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      52.5,
+      77.0
+    ],
+    "description": "Morceau de patte de Taureau céleste, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_queue",
+    "type": "item",
+    "nom": "Queue de Taureau céleste",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      120.0,
+      176.0
+    ],
+    "description": "Queue de Taureau céleste, débitée sur place.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:taureau_celeste_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Taureau céleste",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Taureau céleste",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      60.0,
+      88.0
+    ],
+    "description": "Morceau de queue de Taureau céleste, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Taureau céleste",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_tete",
+    "type": "item",
+    "nom": "Tête de Taureau céleste",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      180.0,
+      264.0
+    ],
+    "description": "Tête de Taureau céleste, débitée sur place.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:taureau_celeste_tete_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3,
+          "F": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:taureau_celeste_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Taureau céleste",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      60.0,
+      88.0
+    ],
+    "description": "Morceau de tête de Taureau céleste, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "celeste",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:taureau_celeste",
+    "portion_de": "item:taureau_celeste_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Taureau céleste",
+      "modificateurs": {
+        "bonus": {
+          "R": 3,
+          "F": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:teryel_tete",
+    "type": "item",
+    "nom": "Tête de Teryel",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      9.6,
+      16.0
+    ],
+    "description": "Tête de Teryel, débitée sur place.",
+    "tags": [
+      "metamorphe",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "seduction",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "source_espece": "espece:teryel",
+    "portion_de": "item:teryel",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Teryel",
+      "modificateurs": {
+        "bonus_pm": 6,
+        "bonus": {
+          "Cha": 3,
+          "Int": 2
+        },
+        "effets": {
+          "canalisation": 2,
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_corps",
+    "type": "item",
+    "nom": "Corps de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      468.0,
+      676.0
+    ],
+    "description": "Corps de Trimobe, débité sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_corps_morceau",
+        "quantite": 7,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "au Cuir du Trimobe",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      66.86,
+      96.57
+    ],
+    "description": "Morceau de corps de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "terreur",
+      "fabrication_armure_cuir",
+      "fabrication_consommable"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Cuir du Trimobe",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_pv": 8,
+        "effets": {
+          "pv": 20
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_patte",
+    "type": "item",
+    "nom": "Patte de Trimobe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      63.0,
+      91.0
+    ],
+    "description": "Patte de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "à la Griffe du Trimobe",
+      "modificateurs": {
+        "bonus": {
+          "R": 3
+        },
+        "bonus_cc": 2,
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_queue",
+    "type": "item",
+    "nom": "Queue de Trimobe",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      104.0
+    ],
+    "description": "Queue de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "à l'Épine du Trimobe",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      52.0
+    ],
+    "description": "Morceau de queue de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "à l'Épine du Trimobe",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus": {
+          "F": 1
+        },
+        "bonus_degats": 7,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_tete",
+    "type": "item",
+    "nom": "Tête de Trimobe",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      108.0,
+      156.0
+    ],
+    "description": "Tête de Trimobe, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:trimobe_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "aux Crocs du Trimobe",
+      "modificateurs": {
+        "bonus": {
+          "R": 3,
+          "F": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:trimobe_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Trimobe",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      54.0,
+      78.0
+    ],
+    "description": "Morceau de tête de Trimobe, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "terreur",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:trimobe",
+    "portion_de": "item:trimobe_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "aux Crocs du Trimobe",
+      "modificateurs": {
+        "bonus": {
+          "R": 3,
+          "F": 1
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -1
+          },
+          "duree": 2
+        },
+        "bonus_degats": 6,
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ugallu_bras",
+    "type": "item",
+    "nom": "Bras d'Ugallu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6.6,
+      9.6
+    ],
+    "description": "Bras d'Ugallu, débité sur place.",
+    "tags": [
+      "gardien",
+      "guerrier",
+      "humanoide",
+      "hybride",
+      "monstre",
+      "partie_bras",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:ugallu",
+    "portion_de": "item:ugallu",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Lion-démon",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cc": 1,
+        "bonus": {
+          "F": 1,
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:urmahlullu_patte",
+    "type": "item",
+    "nom": "Patte d'Urmaḫlullû",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      10.5,
+      15.4
+    ],
+    "description": "Patte d'Urmaḫlullû, débitée sur place.",
+    "tags": [
+      "gardien",
+      "hybride",
+      "monstre",
+      "partie_patte",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:urmahlullu",
+    "portion_de": "item:urmahlullu",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Homme-lion",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cc": 1,
+        "bonus": {
+          "F": 1,
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ushumgallu_queue",
+    "type": "item",
+    "nom": "Queue d'Ušumgallu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      64.0,
+      96.0
+    ],
+    "description": "Queue d'Ušumgallu, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "terreur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:ushumgallu",
+    "portion_de": "item:ushumgallu",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Ušumgallu",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_cc": 1,
+        "bonus_cd": 2,
+        "bonus": {
+          "F": 2,
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ushumgallu_tete",
+    "type": "item",
+    "nom": "Tête d'Ušumgallu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": [
+      96.0,
+      144.0
+    ],
+    "description": "Tête d'Ušumgallu, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "terreur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:ushumgallu",
+    "portion_de": "item:ushumgallu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:ushumgallu_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "au Venin du Dragon furieux",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "effets": {
+          "regen_pv": -4,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ushumgallu_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Ušumgallu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      48.0,
+      72.0
+    ],
+    "description": "Morceau de tête d'Ušumgallu, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "terreur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:ushumgallu",
+    "portion_de": "item:ushumgallu_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Croc du Dragon furieux",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "effets": {
+          "regen_pv": -4,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:wendigo_bras",
+    "type": "item",
+    "nom": "Bras de Wendigo",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.8,
+      9.0
+    ],
+    "description": "Bras de Wendigo, débité sur place.",
+    "tags": [
+      "froid",
+      "monstre",
+      "nocturne",
+      "partie_bras",
+      "predateur",
+      "terreur",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:wendigo",
+    "portion_de": "item:wendigo",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Froid affamé",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "F": 1
+        },
+        "effets": {
+          "buffs": {
+            "V": -1
+          },
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  }
+]
