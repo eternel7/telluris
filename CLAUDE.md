@@ -88,6 +88,8 @@ utils/
   fiche.py               # source unique du contenu des onglets Stats et ⚡ (bloc_fiche, derived_de, stat_caps, race_de)
   vocations.py           # changement de vocation (pur) : graphe `rules:vocations_transitions` (nouvelles), retour libre,
                          #   prix exponentiel n + k (variables de monde VOC_*), rien ne se perd, on repart aspirant (niv. 0)
+  palier_vocation.py     # palier de la montée de vocation (pur) : n → n+1 exige `VOC_TALENTS_MIN` talents du niveau n
+                         #   appris (compétences + sorts de l'école native), plafonné au contenu du palier
   derniers_joues.py      # /admin/personnages-recents (pur) : tri sur `dernier_jeu`, emplacement (lieu + parents, combat, mer)
   lieux.py               # lieu_router, movement logic, navigation bitmask
   combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)

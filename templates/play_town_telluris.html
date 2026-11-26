@@ -6254,6 +6254,8 @@ function _majPointsCompagnons(groupe) {
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
 const _VOC_NIVEAU_MAX = {{ voc_niveau_max | tojson | safe }};
+// Palier de la montée (utils/palier_vocation.py) : {niveau, requis, maitrises, manque, ok} du PORTEUR affiché.
+let _vocPalier = {{ voc_palier | tojson | safe }};
 const _JET_F_DIV = {{ jet_portee_f_div | tojson | safe }};
 // Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
 let _caractsDetail = {{ caracts_detail | tojson | safe }};
@@ -6388,7 +6390,10 @@ function _refreshStatBoxes() {
 		const cost_vocation = (_vocNiveau + 1) * _VOC_COEFF;
 		// Au plafond (variable de monde VOC_NIVEAU_MAX), le bouton n'existe plus pour le joueur.
 		btn.style.display = (_attributePoints > 0 && _vocNiveau < _VOC_NIVEAU_MAX) ? '' : 'none';
-		btn.disabled = _vocNiveau >= _VOC_NIVEAU_MAX || _attributePoints < cost_vocation;
+		const palierOk = !_vocPalier || _vocPalier.ok;
+		btn.disabled = _vocNiveau >= _VOC_NIVEAU_MAX || _attributePoints < cost_vocation || !palierOk;
+		btn.title = palierOk ? ''
+			: `Maîtrisez encore ${_vocPalier.manque} talent${_vocPalier.manque > 1 ? 's' : ''} de niveau ${_vocPalier.niveau} (${_vocPalier.maitrises}/${_vocPalier.requis})`;
 	}
 }
 
@@ -8720,6 +8725,8 @@ async function apprendreSort(sortId, btn) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		// Palier AVANT `_syncPoints` : c'est lui qui rafraîchit le bouton « Monter ».
+		if (data.voc_palier) _vocPalier = data.voc_palier;
 		_syncPoints(data.attribute_points);
 		_renderSorts(data.sorts);
 		_renderSortsApprenables(data.apprenables);
@@ -8850,6 +8857,8 @@ async function apprendreCompetence(competenceId, btn) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		// Palier AVANT `_syncPoints` : c'est lui qui rafraîchit le bouton « Monter ».
+		if (data.voc_palier) _vocPalier = data.voc_palier;
 		_syncPoints(data.attribute_points);
 		// Compétence de piège : posée d'office dans la première case libre de la barre.
 		if (data.slots) { _barreSlots = data.slots; _renderBarreSlots(); }
@@ -14330,7 +14339,7 @@ function _affecterFiche(f) {
 	// Le dépassement racial appartient au porteur (sa race, son bonus déjà brûlé ou non) :
 	// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
 	_MAX_BONUS = f.max_bonus || {}; _maxBonusUsed = f.max_bonus_used || null;
-	_attributePoints = f.attribute_points; _vocNiveau = f.voc_niveau;
+	_attributePoints = f.attribute_points; _vocNiveau = f.voc_niveau; _vocPalier = f.voc_palier || null;
 	// `voc` n'est porté que par `fiche_resync` (la vocation peut changer) : absent ⇒ inchangée.
 	if (f.voc) _vocId = f.voc;
 	_caractsDetail = f.caracts_detail; _derivedCur = f.derived_stats;
@@ -14355,7 +14364,7 @@ function _appliquerFiche(f) {
 			effetsActifs: f.effets_actifs, chargeMagie: f.charge_magie || null,
 			charStats: f.caracteristiques_current, statCaps: f.stat_caps,
 			maxBonus: f.max_bonus || {}, maxBonusUsed: f.max_bonus_used || null,
-			attributePoints: f.attribute_points, vocNiveau: f.voc_niveau,
+			attributePoints: f.attribute_points, vocNiveau: f.voc_niveau, vocPalier: f.voc_palier || null,
 			vocId: f.voc || _sheetSnap.vocId,
 			caractsDetail: f.caracts_detail, derived: f.derived_stats,
 			xpTotal: f.xp_total, niveau: f.niveau, xpNivPrev: f.xp_niv_prev, xpNivNext: f.xp_niv_next,
@@ -14400,7 +14409,7 @@ async function openCompagnonSheet(avId) {
 			chargeMagie: _chargeMagie,
 			effetsActifs: _effetsActifs, charStats: _charStats, statCaps: _statCaps,
 			maxBonus: _MAX_BONUS, maxBonusUsed: _maxBonusUsed,
-			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
+			attributePoints: _attributePoints, vocNiveau: _vocNiveau, vocPalier: _vocPalier, caractsDetail: _caractsDetail,
 			derived: _derivedCur, raceMin: _RACE_MIN, raceMax: _RACE_MAX,
 			xpTotal: _xpTotal, niveau: _niveau, xpNivPrev: _xpNivPrev, xpNivNext: _xpNivNext,
 			raceNom: _raceNom, vocId: _vocId, sexe: _sexe,
@@ -14464,7 +14473,7 @@ async function closeCompagnonSheet() {
 		_chargeMagie = s.chargeMagie;
 		_charStats = s.charStats; _statCaps = s.statCaps;
 		_MAX_BONUS = s.maxBonus; _maxBonusUsed = s.maxBonusUsed;
-		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau;
+		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau; _vocPalier = s.vocPalier;
 		_caractsDetail = s.caractsDetail; _derivedCur = s.derived;
 		_RACE_MIN = s.raceMin; _RACE_MAX = s.raceMax;
 		_xpTotal = s.xpTotal; _niveau = s.niveau;

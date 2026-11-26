@@ -19,6 +19,7 @@ from utils import consommables
 from utils import charge_magie
 from utils import sorts as sorts_util
 from utils import competences as competences_util
+from utils import palier_vocation
 from utils import slots_actions
 from utils import proprietes
 from utils import combat as combat_util
@@ -134,6 +135,8 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 		"xp_coeff": character_stats.XP_COEFF,
 		"xp_voc_coeff": character_stats.XP_VOC_COEFF,
 		"voc_niveau_max": character_stats.VOC_NIVEAU_MAX,
+		# Palier de la montée (talents du niveau courant appris) : grise « Monter » côté client.
+		"voc_palier": palier_vocation.etat_palier(character, find_docs_fn, vocations),
 		"xp_niv_prev": xp_seuil_niveau(niveau),
 		"xp_niv_next": xp_seuil_niveau(niveau + 1),
 		"effets_actifs": consommables.effets_actifs_payload(character),
