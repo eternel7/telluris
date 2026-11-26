@@ -48,6 +48,8 @@ FEMININS = {
 	"lamashtu",
 	# Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11) : « les tempêtes féroces ».
 	"lilitu", "umu_dabrutu",
+	# Mu (dev/gen_monstres_mu.py, 26/11).
+	"murene_geante", "echidna",
 }
 
 MASCULINS = {
@@ -91,6 +93,8 @@ MASCULINS = {
 	"mushmahhu",
 	# Madagascar (dev/gen_monstres_madagascar.py, 24/11).
 	"kalanoro", "fanany", "songomby", "lalomena", "tokantongotra", "trimobe",
+	# Mu (dev/gen_monstres_mu.py, 26/11).
+	"naga",
 }
 
 PLURIELS = {
@@ -109,7 +113,9 @@ PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupido
 		   # Mésopotamie, second lot (dev/gen_monstres_mesopotamie_2.py, 23/11).
 		   "humbaba", "asag", "labbu", "mushmahhu",
 		   # Madagascar (dev/gen_monstres_madagascar.py, 24/11) : l'ogre des contes.
-		   "trimobe"}
+		   "trimobe",
+		   # Mu (dev/gen_monstres_mu.py, 26/11) : la mère des serpents.
+		   "echidna"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

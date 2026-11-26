@@ -714,8 +714,10 @@ def est_variante(item_doc: dict | None) -> bool:
 
 
 # Objets qu'AUCUN marchand ne rachète, négociant compris : la carte d'aventurier atteste une
-# inscription, elle ne se revend pas (Auteur, 11/11). Absents de tout panneau de vente.
-SOUS_CATEGORIES_INVENDABLES = frozenset({"carte_aventurier"})
+# inscription, elle ne se revend pas (Auteur, 11/11). La copie partielle du relevé des seuils de Mu
+# non plus : c'est elle qui ouvre la route de l'Hekla (lore, « De Mu aux mondes divins »). Absents de
+# tout panneau de vente.
+SOUS_CATEGORIES_INVENDABLES = frozenset({"carte_aventurier", "releve_des_seuils"})
 
 
 def item_invendable(item_doc: dict | None) -> bool:

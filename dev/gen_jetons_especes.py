@@ -322,6 +322,10 @@ TABLE = {
 	"lalomena": ("1x2", "ellipse"),
 	"tokantongotra": None,
 	"trimobe": ("2x2", "rectangle"),
+	# Mu (dev/gen_monstres_mu.py, 26/11).
+	"naga": ("1x2", "ellipse"),
+	"murene_geante": ("1x2", "capsule"),
+	"echidna": ("4x3", "capsule"),
 }
 
 

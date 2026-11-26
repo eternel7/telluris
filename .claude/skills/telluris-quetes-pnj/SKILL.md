@@ -231,6 +231,18 @@ Contenu : `dev/gen_partir_pour_mu.py` → **un seul** `jsons/partir_pour_mu_a_im
 
 Verrouillé par `tests/test_partir_pour_mu.py`.
 
+⚠️ `gen_partir_pour_mu.py` réécrit DE ZÉRO le fare, le marché, Moana, Kahu, Hemi et l'Aélis de Mu : le rejouer après l'import des quêtes de Mu effacerait leurs ajouts (même piège que Jumièges).
+
+#### Les quêtes de Mu — les douze du séjour (rang A)
+Contenu : `dev/gen_quetes_de_mu.py` (+ espèces `dev/gen_monstres_mu.py` : Naga, murène géante, Échidna) → **un seul** `jsons/quetes_de_mu_a_importer.json`. Récit : `docs/lore/cites/20261124_de_mu_aux_mondes_divins.md`.
+- **Un donneur par quête** : un `offres` à plusieurs entrées se tire au hasard parmi les éligibles sans voir les prérequis du dialogue (verrouillé). Gagner sa place : eaux troubles (apport, Rangi, 3 Naga) → service (escorte de Tama, Moana ; sas = faille gagnée + pièce de Kahu) → confiance (apport, Ana). Descente : escorte d'Aélis (fare → réseau ancien, vannes → chambre du sceau) ; la déduction du scellement ouvre l'antre.
+- **Échidna, choix définitif** : parole = transport de son écaille à Ana (`livre` = passage de Cerbère) ; combat = salle (grade 5-6), fermée dès la parole engagée, Échidna absente après la victoire (`combat_gagne`), Aélis la remplace. Copie partielle du relevé = `don` unique (Échidna ou Aélis), sous-catégorie `releve_des_seuils` **invendable** (`marche.SOUS_CATEGORIES_INVENDABLES`).
+- **Sept affaires** (apports ; cartographes, gardien, nom après la confiance) : donneur en ville → lieu ouvert `ou` [apport en cours, réussi] → énigme → `don` de la preuve par le PNJ du lieu (modèle Jacotte) → remise, trois issues **parlées** (aucun état).
+- ⚠️ Barrières, présences ET `conditions` d'énigme = vocabulaire `acces` : `quete_active` n'y connaît pas `id` (sous-filtre ignoré, donc PERMISSIF) → `types` + `cible` (verrouillé sur tous les docs).
+- Cartes de combat **provisoires** (`CARTES_PROVISOIRES` : image et grille recopiées), images de lieux et portraits à livrer.
+
+Verrouillé par `tests/test_quetes_de_mu.py`.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.

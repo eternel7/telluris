@@ -260,6 +260,15 @@ for _c, _especes in {
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
+# Mu (dev/gen_monstres_mu.py, 26/11) : les fils de Kadru, la murène des jardins, la mère des serpents.
+for _c, _especes in {
+	"venin": ["naga", "echidna"],
+	"etreinte": ["murene_geante", "echidna"],
+	"hurlement_terrifiant": ["echidna"],
+	"regeneration": ["echidna"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
 
 # Tags de magie (sorts tirés) — repères : apprenti 2 · mage 5 · héros mage 8 · seigneur mage 10.
 MAGIE = {
@@ -332,6 +341,9 @@ MAGIE = {
 	"asag": ["magie_elementaire_6"],
 	# Madagascar (dev/gen_monstres_madagascar.py, 24/11) : le kalanoro, que les guérisseurs consultent.
 	"kalanoro": ["magie_nature_3", "magie_illusoire_2"],
+	# Mu (dev/gen_monstres_mu.py, 26/11) : les Naga savent l'eau, Échidna la mer entière.
+	"naga": ["magie_elementaire_3"],
+	"echidna": ["magie_elementaire_6"],
 }
 
 # Tags d'IA.
@@ -418,6 +430,15 @@ for _tag, _especes in {
 	"ia_berserker": ["songomby"],
 	"ia_embuscade": ["lalomena"],
 	"ia_hit_and_run": ["tokantongotra"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# Mu (dev/gen_monstres_mu.py, 26/11) : les Naga frappent et se replient dans le courant, la murène
+# attend dans sa faille, Échidna chasse.
+for _tag, _especes in {
+	"ia_hit_and_run": ["naga"],
+	"ia_embuscade": ["murene_geante"],
+	"ia_predateur": ["echidna"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)
