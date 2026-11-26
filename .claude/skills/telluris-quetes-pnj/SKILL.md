@@ -239,7 +239,7 @@ Contenu : `dev/gen_quetes_de_mu.py` (+ espèces `dev/gen_monstres_mu.py` : Naga,
 - **Échidna, choix définitif** : parole = transport de son écaille à Ana (`livre` = passage de Cerbère) ; combat = salle (grade 5-6), fermée dès la parole engagée, Échidna absente après la victoire (`combat_gagne`), Aélis la remplace. Copie partielle du relevé = `don` unique (Échidna ou Aélis), sous-catégorie `releve_des_seuils` **invendable** (`marche.SOUS_CATEGORIES_INVENDABLES`).
 - **Sept affaires** (apports ; cartographes, gardien, nom après la confiance) : donneur en ville → lieu ouvert `ou` [apport en cours, réussi] → énigme → `don` de la preuve par le PNJ du lieu (modèle Jacotte) → remise, trois issues **parlées** (aucun état).
 - ⚠️ Barrières, présences ET `conditions` d'énigme = vocabulaire `acces` : `quete_active` n'y connaît pas `id` (sous-filtre ignoré, donc PERMISSIF) → `types` + `cible` (verrouillé sur tous les docs).
-- Cartes de combat **provisoires** (`CARTES_PROVISOIRES` : image et grille recopiées), images de lieux et portraits à livrer.
+- Cartes de combat de l'Auteur, grilles 30 × 17 **relevées à l'œil** (`CARTES_COMBAT`, la lecture automatique ne les suit pas ; eau profonde de la faille à 0 : on se bat sur les rebords) ; images de lieux à livrer. Images des monstres : variantes tirées au sort (`murene_geante_transparent01.webp`, utils/images_monstres).
 
 Verrouillé par `tests/test_quetes_de_mu.py`.
 

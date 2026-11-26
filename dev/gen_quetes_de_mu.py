@@ -32,7 +32,7 @@
 #   ⚠️ Un PNJ ne tient qu'UNE offre par service : un `offres` à plusieurs entrées tire au hasard parmi
 #   les éligibles (utils/offres.py) sans voir les prérequis écrits dans le dialogue — d'où un donneur par quête.
 #
-#   Images : cartes de combat PROVISOIRES (grille et image recopiées d'une salle existante, CARTES_PROVISOIRES),
+#   Images : cartes de combat de l'Auteur, grilles relevées à l'œil (CARTES_COMBAT),
 #   lieux et portraits À LIVRER par l'Auteur (noms ci-dessous ; prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER : jsons/quetes_de_mu_a_importer.json, DELTA seul (CLAUDE.md §18) : espèces
@@ -41,7 +41,6 @@
 #
 # Usage : python dev/gen_quetes_de_mu.py [jsons/telluris-dump-….json]
 
-import copy
 import importlib.util
 import json
 import os
@@ -180,10 +179,71 @@ E_REGISTRES = "enigme:registres_grattes"
 # ── Espèces, donjons ──
 E_NAGA, E_MURENE, E_ECHIDNA = "espece:naga", "espece:murene_geante", "espece:echidna"
 D_CONDUITES, D_LISIERE, D_ANTRE = "donjon:conduites_de_la_lisiere", "donjon:lisiere_des_jardins", "donjon:antre_d_echidna"
-# Cartes de combat PROVISOIRES : image, dimensions, cases et murs d'une salle existante, en attendant
-# celles de l'Auteur (prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md) — couloirs humides, eau courante, salle qui sent la mer.
-CARTES_PROVISOIRES = {CONDUITES: "lieu:catacombes0001", LISIERE: "lieu:petra_donjon_crue",
-					  COMBAT_ANTRE: "lieu:salle_de_l_arche_eteinte"}
+# Cartes de combat de l'Auteur (26/11), 1376 × 768 px, grilles de 30 × 17 cases (45,9 px) RELEVÉES À L'ŒIL sur
+# l'image (`grille_*` ; la lecture automatique de dev/gen_grille_image.py ne les suit pas) — à retoucher dans
+# l'éditeur. 0 = vide ou eau profonde, 1 = sol, 5 = eau (praticable). Versions animées gardées sans usage :
+# conduites_de_la_lisiere_anime.webp, antre_d_echidna_anime.webp (640 × 360, trop petites pour la grille).
+L_CARTE, H_CARTE = 30, 17
+
+
+def _grille(praticable, eau=lambda x, y: False):
+	return [[(5 if eau(x, y) else 1) if praticable(x, y) else 0 for x in range(L_CARTE)] for y in range(H_CARTE)]
+
+
+def grille_conduites():
+	"""Couloirs et canaux de pierre ; vides noirs du plan à 0 ; canal et bassin du bas en eau."""
+	vides = ({(x, y) for x in range(17, 21) for y in (6, 7)} | {(x, y) for x in (12, 13) for y in (11, 12)}
+			 | {(12, y) for y in (15, 16)} | {(x, y) for x in range(24, 27) for y in (11, 12)}
+			 | {(x, y) for x in (0, 1) for y in (4, 5)} | {(1, y) for y in (10, 11)})
+	bas = {10, 11, 13, 14, 15, 21, 22}
+
+	def praticable(x, y):
+		if y == 0 or x in (0, L_CARTE - 1) or (x, y) in vides:
+			return False
+		return y < 16 or x in bas
+
+	def eau(x, y):
+		return (y == 10 and 16 <= x <= 26) or (17 <= x <= 22 and 12 <= y <= 14) or (x in (21, 22) and y >= 15)
+	return _grille(praticable, eau)
+
+
+def grille_lisiere():
+	"""Jardins à gauche, faille au milieu (eau profonde à 0 : on se bat sur les rebords et le pont), la paroi
+	et la porte de bronze ferment la droite."""
+	bord_droit = {0: 21, 1: 21, 2: 22, 3: 22, 4: 23, 5: 22, 6: 22, 7: 22, 8: 22, 9: 22, 10: 22, 11: 22, 12: 23,
+				  13: 23, 14: 22, 15: 22, 16: 21}
+
+	def profonde(x, y):
+		if y in (12, 13):
+			return False            # le pont
+		if y <= 3:
+			return x in (13, 14)
+		if y <= 6:
+			return 12 <= x <= 14
+		if y <= 11:
+			return 12 <= x <= 16
+		return 13 <= x <= 15
+	return _grille(lambda x, y: x <= bord_droit[y] and not profonde(x, y))
+
+
+def grille_antre():
+	"""Grotte praticable, bassin noir peu profond en eau, ossuaire en haut à droite, passage vers le haut."""
+	rangs = {0: [(13, 15)], 1: [(13, 15)], 2: [(14, 15), (21, 26)], 3: [(3, 10), (14, 16), (21, 27)],
+			 4: [(2, 27)], 14: [(2, 27)], 15: [(3, 26)], 16: [(12, 17)]}
+
+	def praticable(x, y):
+		return any(a <= x <= b for a, b in rangs.get(y, [(1, 27)]))
+
+	def eau(x, y):
+		return (y == 8 and 10 <= x <= 21) or (9 <= y <= 12 and 8 <= x <= 22) or (y == 13 and 11 <= x <= 20)
+	return _grille(praticable, eau)
+
+
+CARTES_COMBAT = {
+	CONDUITES: ("conduites_de_la_lisiere.webp", grille_conduites),
+	LISIERE: ("lisiere_des_jardins.webp", grille_lisiere),
+	COMBAT_ANTRE: ("antre_d_echidna.webp", grille_antre),
+}
 
 # ── Images à livrer (Auteur) ──
 IMG = {
@@ -205,14 +265,15 @@ PORTRAITS = {
 	TANE: "marchand_nain_m_marche_du_dome01.webp", PIRIPI: "intermediaire_humain_m_depot_de_mu01.webp",
 	TAMATOA: "pecheur_ogre_m_quai_de_mu01.webp", NGAIRE: "naturaliste_hobbit_f_quai_de_mu01.webp",
 	TE_RANGI: "officiant_elfe_m_quai_de_mu01.webp", KAURI: "cartographe_humain_m_salle_des_cartes01.webp",
-	ROIMATA: "apprentie_hobbit_f_salle_des_cartes01.webp", WIREMU: "cartographe_nain_m_salle_des_releves01.jpg",
-	SENTINELLE: "sentinelle_porte_condamnee01.jpg", HUIA: "descendante_elfe_f_reserve_de_mu01.jpg",
-	ECHIDNA: "echidna_antre01.jpg",
+	ROIMATA: "apprentie_hobbit_f_salle_des_cartes01.webp", WIREMU: "cartographe_nain_m_salle_des_releves01.webp",
+	SENTINELLE: "sentinelle_porte_condamnee01.webp", HUIA: "descendante_elfe_f_reserve_de_mu01.webp",
+	ECHIDNA: "echidna_antre01.webp",
 }
 # Images livrées par l'Auteur le 26/11, toutes en WebP (la donnée attend du WebP). Mahina : la
 # version ANIMÉE pour son dialogue à l'Institut, la fixe dans la chambre hydraulique. Versions écartées
 # gardées dans pnj/ sans usage : soigneuse_elfe_f_fare_des_marees02.webp (ogre au teint vert, contraire
-# à la règle des prompts), marchand_nain_m_marche_du_dome02.webp (étal sans la toile noire).
+# à la règle des prompts), marchand_nain_m_marche_du_dome02.webp (étal sans la toile noire),
+# technicien_nain_m_ouvrages_de_mu02.webp (seconde version de Rangi).
 PORTRAITS[MAHINA_BASSIN] = "linguiste_humain_f_institut_de_mu01.webp"
 PORTRAITS[RAWIRI_SANCTUAIRE] = PORTRAITS[RAWIRI]
 PORTRAITS[NGAIRE_STRUCTURE] = PORTRAITS[NGAIRE]
@@ -370,14 +431,10 @@ def enigme(id_, nom, famille, lieu_id, texte, elements, solution, reussite, eche
 					prerequis=prerequis, conditions=conditions)
 
 
-def salle(id_, label, source, tags, acces):
-	src = source
-	d = {"_id": id_, "type": "lieu", "label": label, "image": src["image"], "categorie": "battle_map",
-		 "dimensions": copy.deepcopy(src["dimensions"]), "cells": copy.deepcopy(src["cells"]),
-		 "tags": tags, "acces": acces}
-	if src.get("nav"):
-		d["nav"] = copy.deepcopy(src["nav"])
-	return d
+def salle(id_, label, tags, acces):
+	image, grille = CARTES_COMBAT[id_]
+	return {"_id": id_, "type": "lieu", "label": label, "image": image, "categorie": "battle_map",
+			"dimensions": {"x": L_CARTE, "y": H_CARTE}, "cells": grille(), "tags": tags, "acces": acces}
 
 
 def donjon(id_, nom, description, portail, salle_id, compo, nmin, nmax, musique="Ambience_Cave_00.mp3"):
@@ -472,7 +529,7 @@ def quete_eaux(par_id):
 		services={"acces": {"lieu": CONDUITES, "noeuds": {"ouvre": "conduites_ouvertes", "refus": "conduites_closes"}}})
 	# Boucle tant que la preuve n'est pas remise (modèle Morvan) : sans `combat_gagne`, une dépouille
 	# perdue au sol ne bloque pas la quête.
-	conduites = salle(CONDUITES, "Les conduites de la lisière", par_id[CARTES_PROVISOIRES[CONDUITES]],
+	conduites = salle(CONDUITES, "Les conduites de la lisière",
 					  ["sous-terrain", "donjon", "couvert", "humide", "eau"],
 					  {"gardien": RANGI, "cycle": 1, "refus": "Une grille fermée, et l'eau derrière.",
 					   "conditions": [{"quete_active": {"types": ["collect"], "cible": NAGA, "objectif_atteint": False}}]})
@@ -635,7 +692,7 @@ def quete_service(par_id):
 		  "fronce les sourcils. « Une coque d'or. Je ne sais pas ce que c'est. »"),
 		 ("chant_apres", "« Vous avez chanté, au sanctuaire. »", apres(Q_CHANT),
 		  "« Tout le monde a chanté. » Il sourit. « Je rêve encore. Mais maintenant je sais la fin. »")])
-	lisiere = salle(LISIERE, "La lisière des jardins", par_id[CARTES_PROVISOIRES[LISIERE]],
+	lisiere = salle(LISIERE, "La lisière des jardins",
 					["donjon", "eau", "humide", "couvert"],
 					{"gardien": NGAIO, "cycle": 1, "refus": "La faille est calme.",
 					 "conditions": [escorte_active(AUBERGE), {"combat_gagne": {"lieu": LISIERE, "attendu": False}}]})
@@ -1161,7 +1218,7 @@ def quete_echidna(par_id):
 			 present(AELIS_ANTRE, "Aélis", "Aélis, accroupie devant une paroi gravée, dans l'antre déserté.",
 					 [{"combat_gagne": {"lieu": COMBAT_ANTRE}}])])
 	antre["pnj"][1]["portrait"] = PORTRAIT_AELIS_DIALOGUE
-	combat = salle(COMBAT_ANTRE, "L'antre d'Échidna", par_id[CARTES_PROVISOIRES[COMBAT_ANTRE]],
+	combat = salle(COMBAT_ANTRE, "L'antre d'Échidna",
 				   ["sous-terrain", "donjon", "couvert", "humide", "eau"],
 				   {"gardien": ECHIDNA, "cycle": 1, "refus": "Échidna ne se battra plus.",
 					# Le combat n'est plus ouvert dès que la parole est engagée : le choix est définitif.
@@ -1875,7 +1932,7 @@ def _portes_praticables(par_id):
 
 
 REQUIS = (MU, SEUIL, AUBERGE, MARCHE, AELIS_MU, TEMPLIER, AUBERGISTE, MARCHANDE, "link:fare_des_marees_to_mu",
-		  *CARTES_PROVISOIRES.values())
+		  )
 
 
 def generer(par_id, rangs_fn=None):

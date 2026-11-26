@@ -328,3 +328,36 @@ def test_trois_naga_passent_le_rang_a_et_echidna_le_rang_s():
 	naga = _potentiel(G.E_NAGA, "profil:veteran")
 	assert naga < plancher["A"] <= 3 * naga
 	assert _potentiel(G.E_ECHIDNA, "profil:heros") >= plancher["S"]
+
+
+# ── Images livrées (26/11) ──────────────────────────────────────────────────────
+
+RESSOURCES = os.path.join(RACINE, "templates", "resources")
+
+
+def test_portraits_cartes_et_monstres_livres_sont_presents():
+	"""Les lieux restent à livrer ; tout le reste est sur disque sous le nom que porte la donnée."""
+	for d in DOCS.values():
+		if d.get("type") == "pnj" and d["_id"] not in BASE:
+			assert os.path.exists(os.path.join(RESSOURCES, "pnj", d["portrait"])), d["_id"]
+		if d.get("categorie") == "battle_map":
+			assert os.path.exists(os.path.join(RESSOURCES, "battle_maps", d["image"])), d["_id"]
+		if d.get("type") == "espece":
+			assert os.path.exists(os.path.join(RESSOURCES, "monsters", d["image"])), d["_id"]
+
+
+@pytest.mark.parametrize("salle_id", [G.CONDUITES, G.LISIERE, G.COMBAT_ANTRE])
+def test_la_grille_d_une_salle_est_d_un_seul_tenant(salle_id):
+	salle = DOCS[salle_id]
+	assert salle["dimensions"] == {"x": G.L_CARTE, "y": G.H_CARTE}
+	cells = salle["cells"]
+	assert len(cells) == G.H_CARTE and all(len(r) == G.L_CARTE for r in cells)
+	sol = {(x, y) for y, r in enumerate(cells) for x, v in enumerate(r) if v}
+	vus, pile = {min(sol)}, [min(sol)]
+	while pile:
+		x, y = pile.pop()
+		for q in ((x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+			if q in sol and q not in vus:
+				vus.add(q)
+				pile.append(q)
+	assert vus == sol
