@@ -603,11 +603,12 @@ def quete_service(par_id):
 		"equipe": noeud(
 			"« Ils sont au sas, au bout de la faille. Ils ont frappé toute la nuit pour qu'on les entende, "
 			"et ce sont les murènes qui ont entendu. » Elle baisse la voix. « Deux. Elles gardent la faille, "
-			"maintenant. Et le sas est coincé : il faudra une pièce neuve pour le rouvrir. »",
+			"maintenant. Elles sortent de l'eau, vous savez : elles rampent sur la roche mouillée aussi vite "
+			"qu'on y court. Et le sas est coincé : il faudra une pièce neuve pour le rouvrir. »",
 			choix("ok", "Revenir.", "accueil")),
 		"lisiere_ouverte": noeud(
 			"Le sol devient pierre, puis eau. Dans la faille, deux têtes marbrées se tournent vers vous "
-			"ensemble, lentement.",
+			"ensemble, lentement. Puis les corps suivent, et glissent hors de l'eau sur la roche luisante.",
 			choix("arme", "Tirer votre arme.", "fin")),
 		"lisiere_close": noeud("« Plus rien ne bouge dans la faille. Le sas est par là. »",
 							   choix("ok", "Revenir.", "accueil")),

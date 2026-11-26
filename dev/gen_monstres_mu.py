@@ -51,15 +51,18 @@ NOUVELLES = {
 		"description": "Murène longue comme une barque, à la peau marbrée de brun et d'or, qui vit dans "
 					   "les failles de la roche contre la paroi de la bulle. Elle ne sort qu'au bruit : "
 					   "un coup contre la pierre, un outil qui tombe. Les jardiniers de la lisière "
-					   "savent qu'il faut travailler en silence, et qu'elle a la mémoire longue.",
+					   "savent qu'il faut travailler en silence, et qu'elle a la mémoire longue. Elle ne "
+					   "craint pas l'air : comme les murènes des récifs qui chassent le crabe sur les "
+					   "rochers découverts, elle quitte l'eau et rampe sur la pierre mouillée pour "
+					   "atteindre ce qui l'a dérangée.",
 		"base_attributes": _attrs((5, 6), (50, 70), (40, 60), (35, 50), (25, 40), (3, 8), (0, 0), (20, 35)),
 		"tags": ["animal", "aquatique", "predateur"],
 		"butin": ("carcasse", [60, 90], "peu_commun"),
 		"son": None,
 		"visuel": "murène colossale au corps serpentin épais, peau lisse marbrée de brun sombre et d'or, "
 				  "longue nageoire dorsale ondulante, tête massive à la gueule entrouverte sur deux "
-				  "rangées de dents en aiguille, petits yeux ronds et froids, elle surgit d'une faille, "
-				  "le corps à demi enroulé",
+				  "rangées de dents en aiguille, petits yeux ronds et froids, peau ruisselante, elle rampe "
+				  "hors de l'eau, le corps à demi enroulé, dressant la tête",
 		"fond": "magenta",
 	},
 	# ── Être unique : la mère des serpents ──

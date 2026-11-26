@@ -90,7 +90,7 @@
       "forme": "capsule"
     },
     "image": "murene_geante_transparent.webp",
-    "description": "Murène longue comme une barque, à la peau marbrée de brun et d'or, qui vit dans les failles de la roche contre la paroi de la bulle. Elle ne sort qu'au bruit : un coup contre la pierre, un outil qui tombe. Les jardiniers de la lisière savent qu'il faut travailler en silence, et qu'elle a la mémoire longue.",
+    "description": "Murène longue comme une barque, à la peau marbrée de brun et d'or, qui vit dans les failles de la roche contre la paroi de la bulle. Elle ne sort qu'au bruit : un coup contre la pierre, un outil qui tombe. Les jardiniers de la lisière savent qu'il faut travailler en silence, et qu'elle a la mémoire longue. Elle ne craint pas l'air : comme les murènes des récifs qui chassent le crabe sur les rochers découverts, elle quitte l'eau et rampe sur la pierre mouillée pour atteindre ce qui l'a dérangée.",
     "base_attributes": {
       "V": {
         "min": 5,
@@ -3076,7 +3076,7 @@
           ]
         },
         "equipe": {
-          "texte": "« Ils sont au sas, au bout de la faille. Ils ont frappé toute la nuit pour qu'on les entende, et ce sont les murènes qui ont entendu. » Elle baisse la voix. « Deux. Elles gardent la faille, maintenant. Et le sas est coincé : il faudra une pièce neuve pour le rouvrir. »",
+          "texte": "« Ils sont au sas, au bout de la faille. Ils ont frappé toute la nuit pour qu'on les entende, et ce sont les murènes qui ont entendu. » Elle baisse la voix. « Deux. Elles gardent la faille, maintenant. Elles sortent de l'eau, vous savez : elles rampent sur la roche mouillée aussi vite qu'on y court. Et le sas est coincé : il faudra une pièce neuve pour le rouvrir. »",
           "choix": [
             {
               "id": "ok",
@@ -3086,7 +3086,7 @@
           ]
         },
         "lisiere_ouverte": {
-          "texte": "Le sol devient pierre, puis eau. Dans la faille, deux têtes marbrées se tournent vers vous ensemble, lentement.",
+          "texte": "Le sol devient pierre, puis eau. Dans la faille, deux têtes marbrées se tournent vers vous ensemble, lentement. Puis les corps suivent, et glissent hors de l'eau sur la roche luisante.",
           "choix": [
             {
               "id": "arme",
