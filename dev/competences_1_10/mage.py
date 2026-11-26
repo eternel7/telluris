@@ -1,4 +1,4 @@
-"""Magicien de combat 🌀 — la magie au service de la guerre : armes enchantées, boucliers arcaniques."""
+"""Magicien de combat 🌀 — la magie au service du combat : armes enchantées, boucliers arcaniques."""
 from competences_1_10 import A, L
 
 CC = {"jet": "cc", "portee": 1}
@@ -39,7 +39,7 @@ ENTREES = [
 	  remplace="tourbillon_arcanique"),
 	A(6, "Absorption", "🌀", "drain", "drain", "Il absorbe l'énergie vitale de la cible."),
 	# signature recalibrée (~1,15 × l'archétype généré du niveau)
-	L(6, "Lame enchantée", "✨", "aura_bataille", "La magie au service de la guerre, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
+	L(6, "Lame enchantée", "✨", "aura_bataille", "La magie au service du combat, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"F": 16, "Ag": 8}, "duree": 5}},
 	  remplace="lame_enchantee"),
 	# ── Niveau 7 ──

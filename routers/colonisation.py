@@ -131,7 +131,10 @@ def _ici(current_user: dict) -> tuple[dict, dict, dict, str]:
 		raise HTTPException(status_code=403, detail="Vous n'êtes dans aucune implantation.")
 	if colonisation.synchroniser_association(character, get_doc):
 		save_doc(character)
-	return character, imp, colonisation.regles(get_doc), colonisation.role_de(character, imp)
+	reg, role = colonisation.regles(get_doc), colonisation.role_de(character, imp)
+	if colonisation.marquer_presence(imp, role, reg):
+		save_doc(imp)
+	return character, imp, reg, role
 
 
 def _exiger(role: str, *attendus) -> None:
@@ -1202,8 +1205,9 @@ async def rangements_autoriser(current_user: Annotated[dict, Depends(get_current
 
 def _implantations_gerees(character: dict) -> list:
 	ids = list(colonisation.implantations_de(character)) + ([character["association"]] if character.get("association") else [])
+	reg = colonisation.regles(get_doc)
 	return [i for i in (get_doc(x) for x in ids) if i and colonisation.role_de(character, i) in
-			(colonisation.FONDATEUR, colonisation.ASSOCIE)]
+			(colonisation.FONDATEUR, colonisation.ASSOCIE) and not colonisation.en_ruine(i, reg)]
 
 
 def _payload_colons(character: dict, cite: dict, reg: dict, extra=None) -> dict:

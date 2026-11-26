@@ -172,6 +172,7 @@ function colEnteteHtml(d) {
 		<span>🙂 Moral : ${_colE(d.moral.mot)}</span>
 		<span>🔥 ${d.feu === 'grand' ? 'Grand feu' : 'Feu réduit'}</span>
 		<span>🎭 ${COL_ROLES[d.role] || ''}</span>
+		${d.abandon ? `<span title="Sans visite de son fondateur, d'un associé ou d'un soutien, le lieu finira en ruine.">🕸️ Le lieu semble délaissé</span>` : ''}
 		${_colGere(d) ? `<button class="sh-drop-btn" onclick="openColonieRangements()" title="Entrepôt commun${d.role === 'associe' ? ' et votre petit coffre' : ''}">📦 Rangements</button>` : ''}
 	</div></section>`;
 }

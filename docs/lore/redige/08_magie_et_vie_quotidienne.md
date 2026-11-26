@@ -10,7 +10,7 @@ La magie s'apprend dans des **écoles** : sainte, élémentaire, de bataille, il
 
 ## Les vocations
 
-L'aventurier ne naît pas guerrier ou magicien : il fait reconnaître une **vocation** à la Guilde. On peut en changer en cours de route, et passer d'une voie à une autre.
+On ne naît pas guerrier ou magicienne : on fait reconnaître une **vocation** à la Guilde. On peut en changer en cours de route, et passer d'une voie à une autre.
 
 Il y a ceux qui se battent par les armes : le guerrier, pilier de toute troupe ; le barbare, porté par sa rage ; le forestier, éclaireur et chasseur qui connaît les routes que les cartes ignorent ; le duelliste, l'assassin, le voleur. Il y a ceux qui servent un ordre : le **paladin**, qui protège au-delà des remparts, et le **templier**, défenseur de la cité et gardien des temples. Il y a ceux qui soignent ou qui veillent : le prêtre, le moine, le druide, le chaman qui prend la forme d'un esprit totem. Il y a les magiciens : l'élémentaliste, le magicien de combat, l'illusionniste, le lettré qui peut apprendre toutes les magies, le ménestrel dont la musique soutient ses compagnons. Et il y a ceux qui affrontent les ténèbres ou s'en servent : le répurgateur, chasseur de créatures maudites, le démoniste, le nécromancien.
 
@@ -32,7 +32,7 @@ Hors des villes, une autre voie s'ouvre : fonder un **hameau** dans les terres s
 
 ## Les artisans
 
-L'aventurier ne fabrique rien lui-même. Ce sont les marchands et les artisans des cités qui forgent, cousent, brassent et distillent : boulangers, bouchers, alchimistes, bijoutiers, armuriers. Dans les capitales, leurs ateliers sont plus avancés qu'ailleurs, et l'on peut leur passer commande d'une pièce faite sur mesure. Un aventurier fortuné peut aussi employer ses propres artisans, dans un atelier qu'il possède.
+L'aventurier ne fabrique rien qui demande un savoir d'artisan : on écrit, on débite du bois, on pose un piège, mais ce sont les marchands et les artisans des cités qui forgent, cousent, brassent et distillent : boulangers, bouchers, alchimistes, bijoutiers, armuriers. Dans les capitales, leurs ateliers sont plus avancés qu'ailleurs, et l'on peut leur passer commande d'une pièce faite sur mesure. Un aventurier fortuné peut aussi employer ses propres artisans, dans un atelier qu'il possède.
 
 ---
 

@@ -92,8 +92,8 @@ ENTREES = [
 	A(9, "Bond de l'avalanche", "🏔️", "saut", "saut", "Il dévale sur l'ennemi comme la neige des cimes."),
 	A(9, "Berserk", "😡", "posture", "rage", "Il cesse de penser, il ne fait plus que tuer.", stats=("F", "R")),
 	# ── Niveau 10 ──
-	# même F que « Fureur éternelle » (niv 9) : l'esprit de la guerre referme ses plaies
-	L(10, "Avatar de la rage", "👹", None, "Les clans le croient habité par l'esprit de la guerre, qui referme ses plaies.",
+	# même F que « Fureur éternelle » (niv 9) : l'esprit de la bataille referme ses plaies
+	L(10, "Avatar de la rage", "👹", None, "Les clans le croient habité par l'esprit de la bataille, qui referme ses plaies.",
 	  {"effets": {"buffs": {"F": 5}, "regen_pv": 1}},
 	  remplace="avatar_de_la_rage", mode="passive"),
 	A(10, "Coup du fléau des clans", "🪓", "frappe", "coup_lourd", "Le coup dont les chants des steppes se souviendront."),

@@ -169,3 +169,15 @@ Points relevés avant l'arbitrage : « invasion d'une cité » et « conflits en
 | Libertés des concepteurs | **Le menu détail** est libre ; cité-État, portail transversal, Lignée, être unique, trame et mystères passent par l'Auteur |
 | Interdépendance entre joueurs | **Par ce qui existe** : ateliers de PNJ dans les propriétés, compagnons-joueurs, soutien et associés d'une implantation, tables de taverne ; l'artisanat reste aux PNJ |
 | Sections pratiques (erreurs, chaînes, renouvelable) | **Gardées, adaptées** avec des exemples du canon |
+
+## ✍️ Auteur — 26/11/2026 (critique du travail au regard du cahier, deux questionnaires)
+
+Constats présentés : 13 cités sur 28 réduites en jeu aux quatre lieux de guilde ; défaite = 1 PV sur place, sans conséquence ; implantations jamais libérées ; écrit personnel, découpe du bois et pose de pièges faits par le joueur ; synthèses en retard (Document maître, page des Cités-États) ; accord masculin du joueur dans les pages rédigées et dans le cahier ; descriptions de jeu évoquant des armées anthropes.
+
+| Question | Réponse de l'Auteur |
+|---|---|
+| Cités réduites à la guilde | « C'est de la donnée qui arrivera avec le temps. » |
+| Défaite | **Lore** : « Mourir et s'en relever est une chose que le personnage ne vit pas ; c'est comme si son combat n'avait pas eu lieu. Il revoit ces scènes dans ses rêves et ne s'explique pas ces “déjà-vu”. » |
+| Implantation abandonnée | **Déclin paresseux en ruine** après **60 jours** sans présence ; présence = fondateur, associé **ou soutien** ; la ruine **libère le site** |
+| Fabrication par le joueur | **Trois exceptions reformulées** : rien qui demande un savoir d'artisan ; écrire, débiter du bois avec un outil (récolte), poser un piège acheté (combat) |
+| Correctifs | Accord neutre ; rattraper les synthèses ; textes guerriers « à orienter envers les monstres. Une armée de monstres peut exister. » |

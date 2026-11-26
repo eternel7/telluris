@@ -859,6 +859,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	if est_implantation:
 		_reg_col = colonisation_util.regles(get_doc)
 		role_implantation = colonisation_util.role_de(character, grid_doc)
+		# Fondateur, associé ou soutien sur place : l'implantation n'est pas abandonnée.
+		if colonisation_util.marquer_presence(grid_doc, role_implantation, _reg_col):
+			save_doc(grid_doc)
 		# Le lieu modèle a pu être retouché (entrées 🚪, grille) : sortie, bâtiments et portes le suivent.
 		colonisation_routes.suivre_modele_ici(grid_doc, _reg_col)
 		_pos = character.get("position") or {}

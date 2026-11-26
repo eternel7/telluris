@@ -4,6 +4,8 @@
 >
 > **Principe éditorial :** ce document rassemble les éléments disponibles dans les discussions et documents accessibles dans le contexte du projet. Les formulations proposées dans les discussions ne doivent pas être interprétées comme définitivement canoniques lorsqu'une décision explicite n'a pas été prise.
 >
+> **Mise à jour :** 26/11/2026. Règles de toute création : `docs/lore/redige/00_cahier_des_regles.md`. Cités, PNJ et quêtes : `docs/lore/` (section 27).
+>
 > **Légende :**
 > - **Établi / retenu** : élément explicitement adopté dans le projet.
 > - **Proposition / piste** : idée développée mais susceptible d'évoluer.
@@ -39,6 +41,7 @@
 24. Le grand mystère
 25. Le principe directeur
 26. Points encore ouverts
+27. Le monde décrit depuis cette synthèse
 
 ---
 
@@ -86,7 +89,7 @@ Cette absence de séparation raciale stricte est notamment renforcée par la né
 
 # 3. Le monde avant les portails
 
-Les portails **n'existaient pas à l'origine**, à une exception près : le portail de Saint-Pierre, à Rome, est un **portail naturel** antérieur à la venue des frères aborigènes.
+Les **portails transversaux** n'existaient pas avant les trois frères. D'autres portails existaient déjà : le portail **naturel** de Saint-Pierre, à Rome, est la seule exception **connue des Occidentaux** ; l'Hekla, la brèche de Cordoue et les portails de Mu ne sont pas datés.
 
 Les monstres, eux, existaient déjà : ils rendaient les déplacements périlleux bien avant les portails, et tous ne sont pas liés aux donjons.
 
@@ -100,15 +103,9 @@ Elles permettent aux voyageurs de traverser les espaces sauvages en bénéfician
 
 ### Mu, la civilisation engloutie
 
-Mu est une terre légendaire disparue, dont l'existence demeure incertaine dans les archives de Telluris. Cette civilisation aurait prospéré bien avant les grandes Cités-États, avant de sombrer dans une catastrophe dont nul ne connaît la véritable nature.
+Mu est une civilisation **en avance sur son temps**, antérieure aux Cités-États et aux trois frères. Elle apprend les portails d'un des frères et **sombre au moment de la Vague** (pas au Déluge) ; sa cité, **Mu-la-Centrale**, survit sous la mer, sous un dôme doré.
 
-Elle aurait maîtrisé une forme de magie aujourd'hui oubliée, **antérieure même au savoir des trois frères aborigènes**. Ses ruines, enfouies sous les océans ou dissimulées derrière des portails altérés par la Vague de mana, renfermeraient des vestiges d'une technologie magique dépassant les connaissances des Architectes.
-
-Mu est une piste majeure pour comprendre l'origine de la magie : les Anthropes ne sont peut-être pas les premiers à avoir tenté de maîtriser les frontières du monde, et la Vague de mana n'est peut-être pas le premier bouleversement cosmique de Telluris. Ces points restent **volontairement non tranchés**.
-
-**Précisé par l'Auteur (11/10/2026)** : Mu, en avance sur son temps, apprend les portails d'un des trois frères et **sombre au moment de la Vague** (pas au Déluge) ; sa cité survit sous la mer. Vérité du monde, inconnue de presque tous : elle a sacrifié un continent pour fermer un portail naturel vorace. Détail : `docs/lore/cites/20261011_histoire_de_mu_chatgpt.md`.
-
----
+Vérité du monde, inconnue de presque tous et simple hypothèse même à Mu : elle a **sacrifié un continent pour fermer un portail naturel vorace**, la porte des Enfers d'Hadès, et **cette fermeture a déclenché la Vague**. Ses dirigeants d'alors ont caché les vraies raisons à leur peuple ; pour les personnages, l'origine de la Vague reste un mystère. **Échidna**, restée par choix sous la cité, est seule à connaître le sacrifice. Détail : `docs/lore/cites/20261011_histoire_de_mu_chatgpt.md`.
 
 # 4. Les trois frères aborigènes
 
@@ -238,9 +235,9 @@ La trame principale peut n'en exploiter qu'une partie.
 
 La transformation des portails crée également une nouvelle économie.
 
-Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes : le **violet** est un cristal de **puissance pure de mana**, le **jaune** un cristal de **stabilisation des effets des portails**. Par Notre-Dame, on voyage vers le monde connu avec une gemme violette, vers **Mu** avec un cristal jaune.
+Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes : le **violet** est un cristal de **puissance pure de mana**, le **jaune** un cristal de **stabilisation des effets des portails**. Par Notre-Dame, chaque passage se paie d'**un cristal jaune** ; la gemme violette de l'autel tient l'ancrage.
 
-Avant la vague, les portails fonctionnaient **sans cristaux** — la magie était peut-être plus intense, ou sa maîtrise plus innée. Les cristaux sont l'une des choses qui permettent aux Architectes de maîtriser les portails de nos jours.
+Les portails **originaux** des frères s'en passent presque toujours — leur magie était peut-être plus intense, ou leur maîtrise plus innée. Ceux de leurs **héritiers** en demandent dès avant la Vague. Les cristaux sont l'une des choses qui permettent aux Architectes de maîtriser les portails de nos jours.
 
 On peut les trouver :
 
@@ -595,19 +592,17 @@ Elles peuvent être **des tentatives différentes de traduire des réalités qui
 
 Le parcours du personnage commence beaucoup plus modestement.
 
-Il fuit son village à cause de :
+Le personnage quitte son village, chassé par :
 
-- famine ;
-- pillage ;
-- monstres ;
-- catastrophe ;
-- destruction.
+- la famine ;
+- un pillage ;
+- des monstres ;
+- une catastrophe ;
+- une destruction.
 
-Il atteint une ville fortifiée.
+Une ville fortifiée lui sert de refuge, et la **Guilde des Aventuriers** de point de départ.
 
-Il rejoint la **Guilde des Aventuriers**.
-
-Son premier objectif est simplement :
+Le premier objectif est simplement :
 
 > **survivre et faire reconnaître sa vocation.**
 
@@ -627,15 +622,15 @@ Un personnage peut :
 
 ### Devenir maître d'une Guilde
 
-Il abandonne progressivement l'exploration pour devenir une puissance institutionnelle.
+Abandonner progressivement l'exploration pour devenir une puissance institutionnelle.
 
-### Devenir une armée à lui seul
+### Devenir une armée en une seule personne
 
-Il pousse sa vocation et ses capacités jusqu'à devenir une légende capable de résoudre seul des menaces normalement destinées à des groupes entiers.
+Pousser sa vocation et ses capacités jusqu'à devenir une légende capable de résoudre sans aide des menaces normalement destinées à des groupes entiers.
 
 ### Découvrir le pot aux roses
 
-Il remonte l'origine des monstres, des dieux, des portails et finalement de Telluris elle-même.
+Remonter l'origine des monstres, des dieux, des portails et finalement de Telluris elle-même.
 
 Cette dernière voie mène aux Révélateurs et à la découverte du niveau méta du monde.
 
@@ -753,6 +748,24 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 ## 26.6 Personnages et scénarios
 
 Les personnages développés dans les discussions doivent être intégrés progressivement dans une chronologie et une base de données narrative cohérentes, sans écraser leurs versions antérieures tant qu'une version définitive n'a pas été retenue.
+
+---
+
+# 27. Le monde décrit depuis cette synthèse
+
+Ces sujets ont été tranchés après la rédaction de ce document ; leur détail est dans le lore.
+
+- **Quatre ères** : antédiluvien (jusqu'au Déluge), Âge des Remparts (Gilgamesh), Âge des Portails (les trois frères), Âge des Donjons (la Vague) — `docs/lore/monde/20261011_frise_chronologique_fusionnee.md`.
+- **Réseau des portails transversaux** entre les cités — `docs/lore/monde/20261120_reseau_des_portails.md`.
+- **Atlantis**, qui refusa un des frères et vit isolée derrière ses remparts d'orichalque — `docs/lore/cites/20261012_histoire_d_atlantis.md`.
+- **Camelot** et la Table ronde, troisième ordre — `docs/lore/cites/20261021_camelot_winchester.md`.
+- **Petra**, la cité des roches et des sources — `docs/lore/cites/20261024_histoire_de_petra.md`.
+- **Aksoum**, la cité de la reine et des pégases — `docs/lore/cites/20261101_histoire_d_aksoum.md`.
+- **Babylone et la Tour de Babel**, donjon vertical — `docs/lore/cites/20261123_tour_de_babel.md`.
+- **Les Archives akashiques**, mémoire faillible du monde, au rang S+ — `docs/lore/monde/20261125_archives_akashiques.md`.
+- **Les reliques interdites** et les **contenants des légendes** — `docs/lore/monde/20261126_reliques_interdites.md`, `docs/lore/monde/20261102_sacs_des_legendes.md`.
+- **Vampires**, **loups-garous**, **dragons et serpents**, **licornes et Pégase** — `docs/lore/monde/`.
+- **La défaite** : aucun aventurier ne vit sa propre chute ; c'est comme si le combat n'avait pas eu lieu, et il n'en reste que des rêves et des « déjà-vu » — `docs/lore/redige/00_cahier_des_regles.md`.
 
 ---
 

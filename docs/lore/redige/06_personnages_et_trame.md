@@ -2,9 +2,9 @@
 
 ## Le fil rouge
 
-Tout commence modestement. Le personnage fuit son village : la famine, un pillage, des monstres, une catastrophe ont eu raison de ce qu'il connaissait. Il trouve refuge derrière les remparts d'une ville moyenne, **Auxerre**. Il y rejoint la Guilde des Aventuriers, avec un seul objectif : survivre, et faire reconnaître sa vocation.
+Tout commence modestement, par une fuite : la famine, un pillage, des monstres ou une catastrophe chassent le personnage de son village. Le refuge, ce sont les remparts d'une ville moyenne, **Auxerre**. La Guilde des Aventuriers y ouvre ses portes, avec un seul objectif : survivre, et faire reconnaître sa vocation.
 
-Puis la route s'allonge. Survie, compétence, réputation, richesse, exploration, renommée, influence. D'Auxerre, il rejoint la capitale, **Lutecia**. La France d'abord, au fil des escortes qui partent de Montmartre. Le reste du monde ensuite, quand le rang A lui ouvre les portes de Notre-Dame.
+Puis la route s'allonge. Survie, compétence, réputation, richesse, exploration, renommée, influence. D'Auxerre, la route mène à la capitale, **Lutecia**. La France d'abord, au fil des escortes qui partent de Montmartre. Le reste du monde ensuite, quand le rang A lui ouvre les portes de Notre-Dame.
 
 ## Auxerre : les premiers pas
 
@@ -35,7 +35,7 @@ Telluris n'épargne pas ceux que l'on aime, et leurs morts sont banales.
 - **Rang D — Les rats de la crypte.** Dans les catacombes de Lutecia, des ouvriers disparaissent. Une crypte a été rouverte, et l'on y trouve un objet frappé du symbole d'un portail ancien.
 - **Rang C — La route de Saint-Denis.** Sur la route du nord, aux côtés d'un paladin du Sacré-Cœur, l'aventurier comprend que les monstres sont plus anciens que les donjons.
 - **Rang B — La porte qui ne devait pas s'ouvrir.** Dans un temple templier près de Lutecia, l'extraction des cristaux transforme un donjon.
-- **Rang A — Le serpent sous la cité.** Notre-Dame ouvre enfin ses portes. À Mu, l'aventurier rencontre **Échidna**, mère des monstres des Grecs, prise sous Mu, séparée de Cerbère, quand la porte des Enfers d'Hadès fut scellée, puis restée par choix pour veiller la porte et protéger la cité, et que l'on accuse d'être la mère de tous les monstres. Il peut la combattre, ou lui parler ; elle seule révèle la vérité du sacrifice de Mu. « Vous appelez monstres mes enfants. »
+- **Rang A — Le serpent sous la cité.** Notre-Dame ouvre enfin ses portes. À Mu, l'aventurier rencontre **Échidna**, mère des monstres des Grecs, prise sous Mu, séparée de Cerbère, quand la porte des Enfers d'Hadès fut scellée, puis restée par choix pour veiller la porte et protéger la cité, et que l'on accuse d'être la mère de tous les monstres. On peut la combattre, ou lui parler ; elle seule révèle la vérité du sacrifice de Mu. « Vous appelez monstres mes enfants. »
 - **Rang A — L'Hekla.** Une copie du relevé des seuils « demeure » tenu à Mu mène, par Notre-Dame, Reykjavik et Akureyri, au gouffre de l'Hekla. Derrière, l'Enfer de Lucifer est habité : une prison, pas une demeure. Pourquoi certains partent-ils quand d'autres restent ? Et qui jette ?
 - **Rang S — Le Paradis.** Par Rome, l'aventurier franchit la porte de Saint-Pierre. Les anges lui répondent d'une façon ambiguë : « Vos dieux vous ont menti. » Est-ce vrai ?
 - **Rang S — Yggdrasil.** Plus tard, dans une cité nordique, l'arbre-monde ouvre sur Asgard, Midgard, Jötunheim et Hel. Les mondes précèdent-ils les récits qu'on en fait ?
@@ -45,7 +45,7 @@ Telluris n'épargne pas ceux que l'on aime, et leurs morts sont banales.
 
 ## Les trois fins
 
-Le jeu n'impose pas une seule fin. L'aventurier peut devenir **maître d'une guilde** et laisser l'exploration pour le pouvoir. Il peut devenir **une armée à lui seul**, une légende capable de régler seul ce qui demande d'ordinaire une troupe entière. Ou il peut **découvrir le pot aux roses** : remonter jusqu'à l'origine des monstres, des dieux, des portails, et de Telluris elle-même.
+Le jeu n'impose pas une seule fin. On peut devenir **maître d'une guilde** et laisser l'exploration pour le pouvoir. On peut devenir **une armée en une seule personne**, une légende capable de régler sans aide ce qui demande d'ordinaire une troupe entière. Ou l'on peut **découvrir le pot aux roses** : remonter jusqu'à l'origine des monstres, des dieux, des portails, et de Telluris elle-même.
 
 ---
 

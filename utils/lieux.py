@@ -98,6 +98,10 @@ def noeud_ferme(character: dict, lieu_courant: str, noeud_lieu: str, doc, get_do
 		return False
 	if not acces.acces_autorise(character, doc, get_doc_fn)[0]:
 		return True
+	# Implantation abandonnée : la ruine libère son site — ni bouton ni marqueur (garde 403
+	# dans move_character, `colonisation.implantation_ouverte`).
+	if colonisation.est_implantation(doc) and colonisation.en_ruine(doc, colonisation.regles(get_doc_fn)):
+		return True
 	# Propriété de joueur : une chambre LOUÉE n'apparaît qu'à son locataire (les
 	# propriétés achetées, elles, sont visibles de tous). Même idiome d'affichage,
 	# la garde 403 est dans move_character.

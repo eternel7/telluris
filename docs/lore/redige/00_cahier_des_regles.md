@@ -18,7 +18,7 @@ Les trois doivent s'accorder, sans jamais se fondre l'un dans l'autre. Le joueur
 
 - **[Monde]** Telluris repose sur la **géographie réelle** de la Terre. Les grandes cités historiques sont des **Cités-États fortifiées**. Plus on s'éloigne des remparts, plus le danger croît, et les zones blanches de la carte restent le domaine des légendes.
 - **[Monde]** Les flux magiques baignent le monde **depuis les origines**, et les monstres rôdaient déjà quand les trois frères ont inventé les portails. On raconte Telluris, jamais en la comparant à l'histoire de la Terre.
-- **[Monde]** **Aucune guerre.** Faire marcher une armée sur des terres hostiles, c'est perdre d'avance. Les rivalités sont commerciales, politiques, d'influence. L'adversaire est la faune, la flore, la magie, l'inconnu. Une cité menacée l'est par un **donjon qui déborde**, jamais par une autre cité.
+- **[Monde]** **Aucune guerre entre Anthropes.** Faire marcher une armée sur des terres hostiles, c'est perdre d'avance. Les rivalités sont commerciales, politiques, d'influence. L'adversaire est la faune, la flore, la magie, l'inconnu. Une cité menacée l'est par un **donjon qui déborde**, jamais par une autre cité. Une **armée de monstres** peut exister ; les mots de la guerre, dans un texte, visent les monstres.
 - **[Monde]** **Adapter plutôt qu'inventer.** Les mythes et les personnages réels ont existé sur Telluris, mais ils nous sont parvenus déformés par les siècles. On s'appuie sur eux. L'ordre réel des événements peut être inversé.
 - **[Monde]** Ni dates terrestres, ni électricité, ni christianisme dans l'histoire d'une cité. Les édifices gardent leur nom réel, mais leur fonction est tellurienne : un portail, une garnison. On compte par les **quatre ères** (antédiluvien, Âge des Remparts, Âge des Portails, Âge des Donjons).
 - **[Monde]** **La Lignée est secondaire.** On se distingue par la richesse, le rang, la fonction et la réputation. Il n'y a pas de racisme institutionnel, et la foule est mêlée par défaut.
@@ -41,7 +41,8 @@ Les trois doivent s'accorder, sans jamais se fondre l'un dans l'autre. Le joueur
 
 ### Les questions fondamentales
 
-- **[Monde] La mort.** On ne sait pas pourquoi les aventuriers de la Guilde « reviennent ». Chacun a son idée (un don des dieux, le sceau de la Guilde, autre chose) et personne ne tranche. La résurrection par la magie existe, mais elle est rare et chère.
+- **[Monde] La défaite.** Tomber au combat et s'en relever, aucun aventurier ne le vit : c'est comme si le combat n'avait pas eu lieu. Des scènes en reviennent pourtant en rêve, des « déjà-vu » que nul ne s'explique. La résurrection par la magie existe, mais elle est rare et chère.
+- **[Jeu]** Une défaite relève le groupe sur place, à 1 PV.
 - **[Technique] Le retour du joueur.** C'est la réapparition du joueur, que Jésus, Révélateur, a dû vulgariser sous le nom de Résurrection. Cette vérité ne s'écrit jamais au niveau du monde avant la fin de la trame.
 - **[Monde] Le temps** s'écoule partout de la même manière sur Telluris. Derrière un portail de donjon, dans un autre monde, il peut aller autrement : c'est le donjon qui décide. À Mu, ce savoir est celui du siège d'Utuabzu. **[Technique]** Le jeu garde une seule horloge.
 - **[Monde] Les créatures.** Hors des donjons, les monstres sont une **faune** : ils naissent, se reproduisent et tiennent leurs territoires. Les donjons se repeuplent d'eux-mêmes, et ce qui en déborde fait souche dehors. D'où viennent les monstres, au fond ? Cela reste un mystère.
@@ -51,10 +52,10 @@ Les trois doivent s'accorder, sans jamais se fondre l'un dans l'autre. Le joueur
 ### Le joueur et les autres
 
 - **[Monde]** **Le monde est plus grand que le joueur.** Les cités, les ordres et les PNJ ont leur propre histoire et leurs propres buts. Le joueur découvre un monde qui existait avant lui ; ce n'est pas un décor construit pour lui.
-- **[Jeu]** **Le personnage joueur ne fabrique rien.** Ce sont des PNJ, marchands et artisans, qui forgent, cousent et distillent.
+- **[Jeu]** **Le personnage joueur ne fabrique rien qui demande un savoir d'artisan.** Ce sont des PNJ, marchands et artisans, qui forgent, cousent et distillent. Trois gestes restent au joueur, parce qu'ils ne sont pas un artisanat : **écrire** un écrit personnel au scriptorium, **débiter du bois** avec un outil (un geste de récolte), **poser un piège** acheté à un artisan (un geste de combat).
 - **[Jeu]** **Le joueur s'écrit au neutre** et on lui parle en « vous ». On n'impose aucune ambiguïté romantique. Les morts marquantes sont banales.
-- **[Jeu]** **On progresse sur plusieurs plans** : la puissance, le rang à la Guilde, la richesse, les relations avec les lieux, la connaissance (journal, bestiaire, renseignement, lore), un toit, une implantation, une guilde à soi. Trois fins : maître de guilde, découvrir le pot aux roses, devenir une armée à soi tout seul.
-- **[Jeu] La persistance est personnelle pour la trame et collective dans des limites.** Un choix de trame (Échidna, Mu…) ne change que le monde du joueur qui l'a fait. Les actions collectives durent pour tous (implantations, propriétés, échanges des ateliers avec leur cité), mais aucune ne ferme un contenu aux autres.
+- **[Jeu]** **On progresse sur plusieurs plans** : la puissance, le rang à la Guilde, la richesse, les relations avec les lieux, la connaissance (journal, bestiaire, renseignement, lore), un toit, une implantation, une guilde à soi. Trois fins : maître de guilde, découvrir le pot aux roses, devenir une armée en une seule personne.
+- **[Jeu] La persistance est personnelle pour la trame et collective dans des limites.** Un choix de trame (Échidna, Mu…) ne change que le monde du joueur qui l'a fait. Les actions collectives durent pour tous (implantations, propriétés, échanges des ateliers avec leur cité), mais aucune ne ferme un contenu aux autres : une implantation que ni son fondateur, ni un associé, ni un soutien n'a visitée depuis **soixante jours** tombe en ruine et libère son site.
 - **[Jeu] Les joueurs dépendent les uns des autres** par ce que le jeu permet : les ateliers d'une propriété échangent avec les boutiques de la cité, un joueur peut se louer comme compagnon à un autre, une implantation a ses visiteurs, ses soutiens et ses associés, et les tables de taverne servent à se retrouver.
 
 ## Les règles qui peuvent évoluer
@@ -64,6 +65,7 @@ Elles valent tant qu'une décision de l'Auteur ne les change pas. Une décision 
 - **[Monde]** Les points ouverts : la taxonomie des écoles de magie, les règles de stabilisation des portails, l'organisation politique de chaque cité, le statut juridique des Lignées.
 - **[Monde]** Le **réseau des portails transversaux** : des liens s'ajoutent à mesure que des cités sont décrites, toujours avec une utilité qui justifie leur coût (voir [Le réseau des portails](../monde/20261120_reseau_des_portails.md)).
 - **[Monde]** Le **nombre de Lignées** : cinq aujourd'hui. La Lignée féline reste une proposition.
+- **[Jeu]** **Le jeu rattrape le lore avec le temps** : une cité décrite peut n'être encore, en jeu, qu'un comptoir de la Guilde.
 - **[Jeu]** **Les chiffres** : rangs et niveaux, prix, poids, équilibrage. C'est le jeu en cours (le dump) qui fait foi ; ce cahier ne recopie aucun chiffre.
 
 ## Les libertés des concepteurs
@@ -99,9 +101,9 @@ Le contenu qui revient est ancré dans le monde, pas dans une corvée quotidienn
 | Une progression seulement verticale | Rang, richesse, relations, savoir, toit, implantation |
 | Des institutions sans fonction | Chaque ordre répond à un besoin |
 | Une carte vaste et vide | Le danger grandit avec la distance, les routes sont tenues, la carte a des zones blanches |
-| Un secret réservé à un seul joueur | Chaque joueur peut tout découvrir ; ses choix ne ferment rien aux autres |
+| Un secret réservé à un seul joueur | Chaque joueur peut tout découvrir ; ses choix ne ferment rien aux autres, et une implantation abandonnée finit en ruine |
 | Un contenu sans ancrage historique | L'histoire explique le présent ; on adapte des mythes réels |
-| Des guerres entre cités | Rivalités commerciales et d'influence ; débordements de donjons |
+| Des guerres entre cités | Rivalités commerciales et d'influence ; débordements de donjons, armées de monstres |
 
 ---
 
