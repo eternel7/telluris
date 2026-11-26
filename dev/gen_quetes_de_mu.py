@@ -197,19 +197,23 @@ IMG = {
 	RESERVE: "reserve_des_registres01.jpg",
 }
 PORTRAITS = {
-	RANGI: "technicien_nain_m_ouvrages_de_mu01.jpg", NGAIO: "jardiniere_hobbit_f_jardins_de_mu01.jpg",
-	TAMA: "jardinier_nain_m_tama01.jpg", ANA: "architecte_elfe_f_institut_de_mu01.jpg",
-	KORO: "souffleur_ogre_m_atelier_de_mu01.jpg", MAHINA: "linguiste_humain_f_institut_de_mu01.jpg",
-	RAWIRI: "archiviste_hobbit_m_institut_de_mu01.jpg", MERE: "restauratrice_ogre_f_institut_de_mu01.jpg",
-	HINE: "chanteuse_humain_f_fare_des_marees01.jpg", ATAAHUA: "soigneuse_elfe_f_fare_des_marees01.jpg",
-	TANE: "marchand_nain_m_marche_du_dome01.jpg", PIRIPI: "intermediaire_humain_m_depot_de_mu01.jpg",
-	TAMATOA: "pecheur_ogre_m_quai_de_mu01.jpg", NGAIRE: "naturaliste_hobbit_f_quai_de_mu01.jpg",
-	TE_RANGI: "officiant_elfe_m_quai_de_mu01.jpg", KAURI: "cartographe_humain_m_salle_des_cartes01.jpg",
-	ROIMATA: "apprentie_hobbit_f_salle_des_cartes01.jpg", WIREMU: "cartographe_nain_m_salle_des_releves01.jpg",
+	RANGI: "technicien_nain_m_ouvrages_de_mu01.webp", NGAIO: "jardiniere_hobbit_f_jardins_de_mu01.jpg",
+	TAMA: "jardinier_nain_m_tama01.webp", ANA: "architecte_elfe_f_institut_de_mu01.webp",
+	KORO: "souffleur_ogre_m_atelier_de_mu01.webp", MAHINA: "linguiste_humain_f_institut_de_mu_anime01.webp",
+	RAWIRI: "archiviste_hobbit_m_institut_de_mu01.webp", MERE: "restauratrice_ogre_f_institut_de_mu01.webp",
+	HINE: "chanteuse_humain_f_fare_des_marees01.webp", ATAAHUA: "soigneuse_elfe_f_fare_des_marees01.webp",
+	TANE: "marchand_nain_m_marche_du_dome01.webp", PIRIPI: "intermediaire_humain_m_depot_de_mu01.webp",
+	TAMATOA: "pecheur_ogre_m_quai_de_mu01.webp", NGAIRE: "naturaliste_hobbit_f_quai_de_mu01.webp",
+	TE_RANGI: "officiant_elfe_m_quai_de_mu01.webp", KAURI: "cartographe_humain_m_salle_des_cartes01.webp",
+	ROIMATA: "apprentie_hobbit_f_salle_des_cartes01.webp", WIREMU: "cartographe_nain_m_salle_des_releves01.jpg",
 	SENTINELLE: "sentinelle_porte_condamnee01.jpg", HUIA: "descendante_elfe_f_reserve_de_mu01.jpg",
 	ECHIDNA: "echidna_antre01.jpg",
 }
-PORTRAITS[MAHINA_BASSIN] = PORTRAITS[MAHINA]
+# Images livrées par l'Auteur le 26/11 (WebP quand il est plus léger que le JPEG d'origine). Mahina : la
+# version ANIMÉE pour son dialogue à l'Institut, la fixe dans la chambre hydraulique. Versions écartées
+# gardées dans pnj/ sans usage : soigneuse_elfe_f_fare_des_marees02.webp (ogre au teint vert, contraire
+# à la règle des prompts), marchand_nain_m_marche_du_dome02.webp (étal sans la toile noire).
+PORTRAITS[MAHINA_BASSIN] = "linguiste_humain_f_institut_de_mu01.webp"
 PORTRAITS[RAWIRI_SANCTUAIRE] = PORTRAITS[RAWIRI]
 PORTRAITS[NGAIRE_STRUCTURE] = PORTRAITS[NGAIRE]
 

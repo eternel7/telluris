@@ -2,6 +2,8 @@
 
 Images à livrer pour `dev/gen_quetes_de_mu.py` (26/11/2026). Règles : `docs/prompts_images.md` (§ 0.1, 0.1 bis, 0.2, 0.5 quater). Lieux : `templates/resources/towns/`, paysage 16:9. Cartes de combat : `templates/resources/battle_maps/`, paysage 16:9 — ⚠️ elles remplacent des cartes PROVISOIRES (`CARTES_PROVISOIRES`) : la grille de chaque salle est à relire sur la nouvelle image (`cells`, `nav`, `dimensions`), puis le nom de fichier à reporter dans le générateur. Portraits : `templates/resources/pnj/`, paysage 16:9. Monstres : `templates/resources/monsters/`, carré 1:1, fond magenta à détourer (`python dev/detourer_image.py <image> <slug>`), enregistrés en `<slug>_transparent.webp` (déjà au lot `dev/batch/monstres/prompts.json`).
 
+**Livrés (26/11)** : les portraits de Rangi, Ngaio, Tama, Ana, Koro, Mahina (fixe + animé : `linguiste_humain_f_institut_de_mu_anime01.webp` pour son dialogue), Rawiri, Mere, Hine, Ataahua, Tane, Piripi, Tamatoa, Ngaire, Te Rangi, Kauri et Roimata, posés en WebP quand il est plus léger que le JPEG (Ngaio reste en `.jpg`). Doublons gardés sans usage : `soigneuse_elfe_f_fare_des_marees02.webp` (ogre au teint vert), `marchand_nain_m_marche_du_dome02.webp`. Restent : Wiremu, la sentinelle, Huia, Échidna, tous les lieux, les cartes de combat et les monstres.
+
 Mu-la-Centrale est vue de l'intérieur, jamais de l'extérieur : une lumière bleutée qui ondule, tombée d'une voûte dorée lointaine qu'on ne voit pas.
 
 ## Lieux

@@ -451,7 +451,7 @@
               "nom": "Teriitahi",
               "race": "nain",
               "sex": "M",
-              "image": "jardinier_nain_m_tama01.jpg",
+              "image": "jardinier_nain_m_tama01.webp",
               "description": "Jardinier de la lisière, neveu de Moana. Il rêve d'une ville sous un soleil impossible, et ne s'en vante pas. Il ne sait pas se battre."
             }
           ],
@@ -1192,7 +1192,7 @@
       {
         "character": "pnj:hine_matarau",
         "nom": "Hine Matarau",
-        "portrait": "chanteuse_humain_f_fare_des_marees01.jpg",
+        "portrait": "chanteuse_humain_f_fare_des_marees01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une vieille femme assise près du bassin, qui fredonne sans s'en rendre compte."
@@ -1200,7 +1200,7 @@
       {
         "character": "pnj:ataahua_paora",
         "nom": "Ataahua Paora",
-        "portrait": "soigneuse_elfe_f_fare_des_marees01.jpg",
+        "portrait": "soigneuse_elfe_f_fare_des_marees01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une elfe en tablier de soigneuse, qui boit une infusion en surveillant la porte."
@@ -1208,7 +1208,7 @@
       {
         "character": "pnj:tama_teriitahi",
         "nom": "Tama Teriitahi",
-        "portrait": "jardinier_nain_m_tama01.jpg",
+        "portrait": "jardinier_nain_m_tama01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -1239,7 +1239,7 @@
       {
         "character": "pnj:tane_moerai",
         "nom": "Tane Moerai",
-        "portrait": "marchand_nain_m_marche_du_dome01.jpg",
+        "portrait": "marchand_nain_m_marche_du_dome01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un nain derrière un étal tendu de toile noire, où brillent des objets plus vieux que la cité."
@@ -1284,7 +1284,7 @@
       {
         "character": "pnj:rangi_waiora",
         "nom": "Rangi Waiora",
-        "portrait": "technicien_nain_m_ouvrages_de_mu01.jpg",
+        "portrait": "technicien_nain_m_ouvrages_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un nain trapu penché sur un plan de conduites épinglé à la pierre."
@@ -1303,7 +1303,7 @@
       {
         "character": "pnj:ana_hereheretue",
         "nom": "Ana Hereheretue",
-        "portrait": "architecte_elfe_f_institut_de_mu01.jpg",
+        "portrait": "architecte_elfe_f_institut_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une elfe aux tresses de nacre, devant une vasque de corail jaune."
@@ -1311,7 +1311,7 @@
       {
         "character": "pnj:mahina_rehu",
         "nom": "Mahina Rehu",
-        "portrait": "linguiste_humain_f_institut_de_mu01.jpg",
+        "portrait": "linguiste_humain_f_institut_de_mu_anime01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une vieille femme qui lit des plaques de pierre du bout des doigts."
@@ -1319,7 +1319,7 @@
       {
         "character": "pnj:rawiri_tane",
         "nom": "Rawiri Tane",
-        "portrait": "archiviste_hobbit_m_institut_de_mu01.jpg",
+        "portrait": "archiviste_hobbit_m_institut_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un hobbit à lunettes de nacre, au milieu de registres."
@@ -1327,7 +1327,7 @@
       {
         "character": "pnj:mere_tapuni",
         "nom": "Mere Tapuni",
-        "portrait": "restauratrice_ogre_f_institut_de_mu01.jpg",
+        "portrait": "restauratrice_ogre_f_institut_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une ogresse aux mains fines, qui recolle un tesson au pinceau."
@@ -1918,7 +1918,7 @@
     "type": "pnj",
     "nom": "Rangi Waiora",
     "race": "nain",
-    "portrait": "technicien_nain_m_ouvrages_de_mu01.jpg",
+    "portrait": "technicien_nain_m_ouvrages_de_mu01.webp",
     "description": "Responsable des ouvrages hydrauliques de la périphérie de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -3133,7 +3133,7 @@
     "type": "pnj",
     "nom": "Tama Teriitahi",
     "race": "nain",
-    "portrait": "jardinier_nain_m_tama01.jpg",
+    "portrait": "jardinier_nain_m_tama01.webp",
     "description": "Jardinier de la lisière, neveu de Moana.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -3918,7 +3918,7 @@
     "type": "pnj",
     "nom": "Ana Hereheretue",
     "race": "elfe",
-    "portrait": "architecte_elfe_f_institut_de_mu01.jpg",
+    "portrait": "architecte_elfe_f_institut_de_mu01.webp",
     "description": "Architecte de l'Institut de Mu, sous qui travaille Aélis.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -4209,7 +4209,7 @@
     "type": "pnj",
     "nom": "Koro Hapai",
     "race": "ogre",
-    "portrait": "souffleur_ogre_m_atelier_de_mu01.jpg",
+    "portrait": "souffleur_ogre_m_atelier_de_mu01.webp",
     "description": "Souffleur de vasques, près du marché du Dôme.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -4430,7 +4430,7 @@
       {
         "character": "pnj:koro_hapai_souffleur",
         "nom": "Koro Hapai",
-        "portrait": "souffleur_ogre_m_atelier_de_mu01.jpg",
+        "portrait": "souffleur_ogre_m_atelier_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un ogre penché sur son four, qui tourne une boule de verre au bout d'une canne."
@@ -5629,7 +5629,7 @@
     "type": "pnj",
     "nom": "Hine Matarau",
     "race": "humain",
-    "portrait": "chanteuse_humain_f_fare_des_marees01.jpg",
+    "portrait": "chanteuse_humain_f_fare_des_marees01.webp",
     "description": "Vieille chanteuse, au fare des Marées.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -5793,7 +5793,7 @@
     "type": "pnj",
     "nom": "Rawiri Tane",
     "race": "hobbit",
-    "portrait": "archiviste_hobbit_m_institut_de_mu01.jpg",
+    "portrait": "archiviste_hobbit_m_institut_de_mu01.webp",
     "description": "Archiviste de l'Institut, au sanctuaire noyé.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -6025,7 +6025,7 @@
       {
         "character": "pnj:rawiri_tane_sanctuaire",
         "nom": "Rawiri Tane",
-        "portrait": "archiviste_hobbit_m_institut_de_mu01.jpg",
+        "portrait": "archiviste_hobbit_m_institut_de_mu01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -6081,7 +6081,7 @@
     "type": "pnj",
     "nom": "Mere Tapuni",
     "race": "ogre",
-    "portrait": "restauratrice_ogre_f_institut_de_mu01.jpg",
+    "portrait": "restauratrice_ogre_f_institut_de_mu01.webp",
     "description": "Restauratrice de l'Institut de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -6275,7 +6275,7 @@
     "type": "pnj",
     "nom": "Tane Moerai",
     "race": "nain",
-    "portrait": "marchand_nain_m_marche_du_dome01.jpg",
+    "portrait": "marchand_nain_m_marche_du_dome01.webp",
     "description": "Marchand d'objets anciens, au marché du Dôme.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -6364,7 +6364,7 @@
     "type": "pnj",
     "nom": "Piripi Ngata",
     "race": "humain",
-    "portrait": "intermediaire_humain_m_depot_de_mu01.jpg",
+    "portrait": "intermediaire_humain_m_depot_de_mu01.webp",
     "description": "Intermédiaire, au dépôt de maintenance condamné.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -6601,7 +6601,7 @@
       {
         "character": "pnj:piripi_ngata",
         "nom": "Piripi Ngata",
-        "portrait": "intermediaire_humain_m_depot_de_mu01.jpg",
+        "portrait": "intermediaire_humain_m_depot_de_mu01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -6631,7 +6631,7 @@
     "type": "pnj",
     "nom": "Ataahua Paora",
     "race": "elfe",
-    "portrait": "soigneuse_elfe_f_fare_des_marees01.jpg",
+    "portrait": "soigneuse_elfe_f_fare_des_marees01.webp",
     "description": "Soigneuse des enfants du quartier des bassins.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -6795,7 +6795,7 @@
     "type": "pnj",
     "nom": "Mahina Rehu",
     "race": "humain",
-    "portrait": "linguiste_humain_f_institut_de_mu01.jpg",
+    "portrait": "linguiste_humain_f_institut_de_mu01.webp",
     "description": "Vieille linguiste de l'Institut, dans la chambre hydraulique.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7027,7 +7027,7 @@
       {
         "character": "pnj:mahina_rehu_bassin",
         "nom": "Mahina Rehu",
-        "portrait": "linguiste_humain_f_institut_de_mu01.jpg",
+        "portrait": "linguiste_humain_f_institut_de_mu01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -7057,7 +7057,7 @@
     "type": "pnj",
     "nom": "Tamatoa Paepae",
     "race": "ogre",
-    "portrait": "pecheur_ogre_m_quai_de_mu01.jpg",
+    "portrait": "pecheur_ogre_m_quai_de_mu01.webp",
     "description": "Pêcheur, sur le quai de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7251,7 +7251,7 @@
     "type": "pnj",
     "nom": "Te Rangi Huatahi",
     "race": "elfe",
-    "portrait": "officiant_elfe_m_quai_de_mu01.jpg",
+    "portrait": "officiant_elfe_m_quai_de_mu01.webp",
     "description": "Officiant de Tangaroa, sur le quai de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7330,7 +7330,7 @@
     "type": "pnj",
     "nom": "Ngaire Koroneho",
     "race": "hobbit",
-    "portrait": "naturaliste_hobbit_f_quai_de_mu01.jpg",
+    "portrait": "naturaliste_hobbit_f_quai_de_mu01.webp",
     "description": "Naturaliste, sur le quai de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7419,7 +7419,7 @@
     "type": "pnj",
     "nom": "Ngaire Koroneho",
     "race": "hobbit",
-    "portrait": "naturaliste_hobbit_f_quai_de_mu01.jpg",
+    "portrait": "naturaliste_hobbit_f_quai_de_mu01.webp",
     "description": "Naturaliste, dans la chambre extérieure de la structure.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7622,7 +7622,7 @@
       {
         "character": "pnj:tamatoa_paepae",
         "nom": "Tamatoa Paepae",
-        "portrait": "pecheur_ogre_m_quai_de_mu01.jpg",
+        "portrait": "pecheur_ogre_m_quai_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un ogre qui ravaude un filet, un tatouage de noms sur l'épaule."
@@ -7630,7 +7630,7 @@
       {
         "character": "pnj:te_rangi_huatahi",
         "nom": "Te Rangi Huatahi",
-        "portrait": "officiant_elfe_m_quai_de_mu01.jpg",
+        "portrait": "officiant_elfe_m_quai_de_mu01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un elfe en manteau d'algues tressées, qui jette du sel dans l'eau."
@@ -7638,7 +7638,7 @@
       {
         "character": "pnj:ngaire_koroneho",
         "nom": "Ngaire Koroneho",
-        "portrait": "naturaliste_hobbit_f_quai_de_mu01.jpg",
+        "portrait": "naturaliste_hobbit_f_quai_de_mu01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -7690,7 +7690,7 @@
       {
         "character": "pnj:ngaire_koroneho_structure",
         "nom": "Ngaire Koroneho",
-        "portrait": "naturaliste_hobbit_f_quai_de_mu01.jpg",
+        "portrait": "naturaliste_hobbit_f_quai_de_mu01.webp",
         "probabilite": 1,
         "conditions": [
           {
@@ -7746,7 +7746,7 @@
     "type": "pnj",
     "nom": "Kauri Tipene",
     "race": "humain",
-    "portrait": "cartographe_humain_m_salle_des_cartes01.jpg",
+    "portrait": "cartographe_humain_m_salle_des_cartes01.webp",
     "description": "Cartographe de Mu, à la salle des cartes.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -7910,7 +7910,7 @@
     "type": "pnj",
     "nom": "Roimata",
     "race": "hobbit",
-    "portrait": "apprentie_hobbit_f_salle_des_cartes01.jpg",
+    "portrait": "apprentie_hobbit_f_salle_des_cartes01.webp",
     "description": "Apprentie cartographe, à la salle des cartes.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -8198,7 +8198,7 @@
       {
         "character": "pnj:kauri_tipene",
         "nom": "Kauri Tipene",
-        "portrait": "cartographe_humain_m_salle_des_cartes01.jpg",
+        "portrait": "cartographe_humain_m_salle_des_cartes01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Un homme aux doigts tachés d'encre, entre deux cartes presque pareilles."
@@ -8206,7 +8206,7 @@
       {
         "character": "pnj:roimata_apprentie",
         "nom": "Roimata",
-        "portrait": "apprentie_hobbit_f_salle_des_cartes01.jpg",
+        "portrait": "apprentie_hobbit_f_salle_des_cartes01.webp",
         "probabilite": 1,
         "conditions": [],
         "description": "Une jeune hobbit qui recopie une très vieille carte."
@@ -8304,7 +8304,7 @@
     "type": "pnj",
     "nom": "Mahina Rehu",
     "race": "humain",
-    "portrait": "linguiste_humain_f_institut_de_mu01.jpg",
+    "portrait": "linguiste_humain_f_institut_de_mu_anime01.webp",
     "description": "Vieille linguiste de l'Institut de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
@@ -8739,7 +8739,7 @@
     "type": "pnj",
     "nom": "Rawiri Tane",
     "race": "hobbit",
-    "portrait": "archiviste_hobbit_m_institut_de_mu01.jpg",
+    "portrait": "archiviste_hobbit_m_institut_de_mu01.webp",
     "description": "Archiviste de l'Institut de Mu.",
     "dialogue": {
       "noeud_depart": "accueil",
