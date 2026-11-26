@@ -193,6 +193,10 @@ XP_VOC_COEFF: int = 5
 # Plafond du niveau de VOCATION (principal comme compagnon) : `spend_xp_vocation` refuse
 # au-delà, la fiche masque le bouton « Monter ». 10 = le contenu des compétences (1 → 10).
 VOC_NIVEAU_MAX: int = 10
+# PALIER de vocation (utils/palier_vocation.py) : talents (compétences de la vocation + sorts
+# de son école native) du niveau n à avoir appris pour monter de n à n+1 — plafonné au
+# contenu du palier (un palier qui en offre moins n'exige que ce qu'il offre).
+VOC_TALENTS_MIN: int = 2
 # CHANGEMENT DE VOCATION (utils/vocations.py). Vers une vocation NOUVELLE :
 # round(BASE × FACTEUR^(n + k)), n = niveau de la vocation quittée, k = vocations déjà
 # pratiquées hors la courante (le correctif contre le papillonnage). Vers une vocation déjà
@@ -1160,6 +1164,7 @@ def current_world_variables() -> dict:
 		"XP_COEFF": dict(XP_COEFF),
 		"XP_VOC_COEFF": XP_VOC_COEFF,
 		"VOC_NIVEAU_MAX": VOC_NIVEAU_MAX,
+		"VOC_TALENTS_MIN": VOC_TALENTS_MIN,
 		"VOC_CHANGEMENT_BASE": VOC_CHANGEMENT_BASE,
 		"VOC_CHANGEMENT_FACTEUR": VOC_CHANGEMENT_FACTEUR,
 		"VOC_RETOUR_COUT": VOC_RETOUR_COUT,
@@ -1377,7 +1382,7 @@ def load_world_variables() -> dict:
 	global RENCONTRE_BRUIT_CHARGE, RENCONTRE_BRUIT_FREQ_MIN, RENCONTRE_BRUIT_FREQ_MAX, RENCONTRE_BRUIT_SECOND_MAX
 	global RENCONTRE_BRUIT_SILENCIEUX
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND, VOC_NIVEAU_MAX
+	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND, VOC_NIVEAU_MAX, VOC_TALENTS_MIN
 	global VOC_CHANGEMENT_BASE, VOC_CHANGEMENT_FACTEUR, VOC_RETOUR_COUT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global NEGOCE_COMMISSION_MIN, NEGOCE_COMMISSION_MAX, NEGOCE_SEUIL_REVENTE_CUIVRE, NEGOCE_BONUS_CONVERSION
@@ -1475,6 +1480,7 @@ def load_world_variables() -> dict:
 	TOWN_PROFIL_NIVEAU_MAX     = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
 	XP_VOC_COEFF               = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
 	VOC_NIVEAU_MAX             = max(0, int(v.get("VOC_NIVEAU_MAX", VOC_NIVEAU_MAX)))
+	VOC_TALENTS_MIN            = max(0, int(v.get("VOC_TALENTS_MIN", VOC_TALENTS_MIN)))
 	VOC_CHANGEMENT_BASE        = max(0, int(v.get("VOC_CHANGEMENT_BASE", VOC_CHANGEMENT_BASE)))
 	# Plancher à 1 : un facteur < 1 rendrait le changement MOINS cher en montant de niveau.
 	VOC_CHANGEMENT_FACTEUR     = max(1.0, float(v.get("VOC_CHANGEMENT_FACTEUR", VOC_CHANGEMENT_FACTEUR)))

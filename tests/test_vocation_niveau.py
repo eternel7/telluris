@@ -33,6 +33,9 @@ def monter(monkeypatch):
 	docs = {}
 	monkeypatch.setattr(user_router, "save_doc", lambda doc: docs.__setitem__(doc["_id"], doc) or doc)
 	monkeypatch.setattr(user_router, "_fiche_payload", lambda character: {"id": character["_id"]})
+	# Palier (utils/palier_vocation.py) : aucun contenu ⇒ rien d'exigé — testé à part.
+	monkeypatch.setattr(user_router, "find_docs", lambda sel: [])
+	monkeypatch.setattr(user_router, "get_doc", lambda doc_id: None)
 
 	def appeler(character):
 		monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (character, character))

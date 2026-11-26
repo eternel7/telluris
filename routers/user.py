@@ -12,6 +12,7 @@ from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
 from utils import pouvoirs_objets
 from utils import exigence_arme
 from utils import exigence_caract
+from utils import palier_vocation
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -1914,6 +1915,8 @@ def apprendre_sort(
 		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations, proprietes.refs_bibliotheque(character, get_doc)),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"appris": {"nom": sort["nom"], "icon": sort["icon"]},
+		# Un talent appris peut ouvrir la montée de vocation (palier) : resync (§10).
+		"voc_palier": palier_vocation.etat_palier(character, find_docs, vocations),
 	}
 
 
@@ -2050,6 +2053,8 @@ def apprendre_competence(
 		"vitals": _vitals_payload(character),
 		"caracts_detail": _caracts_payload(character),
 		"appris": {"nom": comp["nom"], "icon": comp["icon"]},
+		# Un talent appris peut ouvrir la montée de vocation (palier) : resync (§10).
+		"voc_palier": palier_vocation.etat_palier(character, find_docs, vocations),
 		"slots": slots_actions.slots_payload(character, get_doc),
 	}
 
@@ -2797,6 +2802,11 @@ def spend_xp_vocation(
 	attribute_points = character.get("attribute_points", 0)
 	if attribute_points < cout:
 		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
+
+	# Palier : au moins VOC_TALENTS_MIN talents du niveau courant appris (utils/palier_vocation.py).
+	motif = palier_vocation.motif_refus(palier_vocation.etat_palier(character, find_docs, get_doc("rules:vocations")))
+	if motif:
+		raise HTTPException(status_code=422, detail=motif)
 
 	vocations_niveaux[voc] = voc_niveau + 1
 	character["vocations_niveaux"] = vocations_niveaux
