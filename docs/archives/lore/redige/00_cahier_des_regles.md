@@ -181,3 +181,7 @@ Constats présentés : 13 cités sur 28 réduites en jeu aux quatre lieux de gui
 | Implantation abandonnée | **Déclin paresseux en ruine** après **60 jours** sans présence ; présence = fondateur, associé **ou soutien** ; la ruine **libère le site** |
 | Fabrication par le joueur | **Trois exceptions reformulées** : rien qui demande un savoir d'artisan ; écrire, débiter du bois avec un outil (récolte), poser un piège acheté (combat) |
 | Correctifs | Accord neutre ; rattraper les synthèses ; textes guerriers « à orienter envers les monstres. Une armée de monstres peut exister. » |
+
+## ✍️ Auteur — 26/11/2026 (objets d'une implantation en ruine)
+
+« On détruit les objets des implantations ruinés. »

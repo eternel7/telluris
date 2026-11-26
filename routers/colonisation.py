@@ -123,12 +123,21 @@ def suivre_modele_ici(imp: dict, reg: dict) -> None:
 		save_doc(d)
 
 
+def _refuser_ruine(imp: dict) -> None:
+	"""Une ruine est perdue avec tout ce qu'on y avait laissé (Auteur, 26/11/2026) : réserves,
+	rangements, coffre de guilde et caisse ne se rouvrent plus, même pour qui s'y trouve."""
+	ok, raison = colonisation.implantation_ouverte(imp, colonisation.regles(get_doc))
+	if not ok:
+		raise HTTPException(status_code=403, detail=raison)
+
+
 def _ici(current_user: dict) -> tuple[dict, dict, dict, str]:
 	"""(personnage, implantation, règles, rôle) : il faut être DANS l'implantation."""
 	character = _personnage(current_user)
 	imp = get_doc(character.get("lieu", ""))
 	if not imp or not colonisation.est_implantation(imp):
 		raise HTTPException(status_code=403, detail="Vous n'êtes dans aucune implantation.")
+	_refuser_ruine(imp)
 	if colonisation.synchroniser_association(character, get_doc):
 		save_doc(character)
 	reg, role = colonisation.regles(get_doc), colonisation.role_de(character, imp)
@@ -917,6 +926,7 @@ def _ici_guilde(current_user: dict) -> tuple[dict, dict, dict, str]:
 		imp = get_doc(lieu["colonie"])
 		if not imp:
 			raise HTTPException(status_code=404, detail="Implantation introuvable.")
+		_refuser_ruine(imp)
 		return character, imp, colonisation.regles(get_doc), colonisation.role_de(character, imp)
 	return _ici(current_user)
 
