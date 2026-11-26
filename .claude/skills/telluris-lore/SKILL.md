@@ -176,6 +176,15 @@ Arbitrage de l'Auteur (02/11, huit questionnaires) — `docs/lore/monde/20261102
 - Règles : **inventaire séparé** ; **aucun être vivant** ; **aucun contenant magique dans un autre** (anomalie en récit).
 - Récit seulement : **Manannán** lui-même, piège de Rhiannon, grenier dogon, Igbá Odù, nkisi, Skíðblaðnir. **Sac sans fond** (D&D) hors du jeu. Treize Trésors : reportés.
 
+### Reliques interdites
+Arbitrage de l'Auteur (26/11, trois questionnaires) — `docs/lore/monde/20261126_reliques_interdites.md` ; rien en jeu.
+
+- **Famille distincte** des reliques-contenants : **compteur séparé** (une relique-contenant ; les interdites **se collectionnent** — les réunir recompose un savoir fragmenté). Nom : « Reliques interdites ».
+- Livres : **Necronomicon** (Abdul al-Hazred ; fictions **gardées** par décision, avec **Eibon** et le **Roi en jaune**), **Livre d'Hénoch** (Grigori, hénochien ; Nephilim toujours exclus), Clavicule, Picatrix, Codex Gigas (sceau de confinement), Voynich, **Soyga** (copie du relevé d'Uanna = **théorie disputée**). **Livre de Thot = fragment akashique, rang S+ seulement.**
+- Objets : Pierre philosophale, Miroir de Dee, Anneau de Salomon, Table d'émeraude — l'Anneau et la Pierre sont **indépendants** de `sort:anneau_de_salomon` / `competence:pierre_philosophale`. **Arche** : reste au donjon d'**Aksoum**, consultée, jamais emportée, usage inconnu. **Pas de Graal.**
+- **Quatre degrés** : légendaires **B** · interdites **A** (Templiers) · vestiges des Révélateurs **S** · artefacts méta **S+**. Altération mentale = **récit seulement**. Le Necronomicon **suggère** que les dieux n'ont pas créé Telluris, sans trancher.
+- Propositions : classement par nature, renvois croisés, Miroir qui observe à l'insu, priorités ; rang et lieu de chaque relique à trancher.
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 
