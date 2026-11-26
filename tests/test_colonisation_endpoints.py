@@ -747,3 +747,24 @@ def test_les_colons_se_trouvent_a_l_auberge_d_une_cite(monde):
 	assert rep["recrutes"] == offre["nombre"] and fondateur["colons"]["implantation"] == imp_id
 	assert _refus(monde, fondateur, rc.colons_recruter, None, {"implantation": imp_id}) == 409
 	assert _refus(monde, _perso(lieu=imp_id), rc.colons, None) == 403            # pas dans une auberge de cité
+
+
+def test_une_ruine_perd_tout_ce_qu_on_y_avait_laisse(monde):
+	"""Auteur, 26/11/2026 : les objets d'une implantation en ruine sont détruits — ni l'entrepôt,
+	ni le petit coffre, ni le coffre de guilde ne se rouvrent, même pour qui s'y trouve."""
+	rc = monde["rc"]
+	reg = col.regles(monde["get"])
+	fondateur = _perso(inventaire=["item:pain"])
+	imp_id = _fonder(monde, fondateur)
+	imp = monde["docs"][imp_id]
+	imp["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [1, 1]}]
+	_appel(monde, fondateur, rc.rangements_deposer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain"})
+	imp = monde["docs"][imp_id]
+	imp["guilde"] = {"echelon": next(e["id"] for e in col.echelons(reg) if "coffre" in e["fonctions"]), "nom": "G",
+					 "membres": {fondateur["_id"]: {"nom": "Greta", "titre": col.MAITRE}}, "coffre": ["item:pain"],
+					 "expeditions": []}
+	imp["vu_at"] = imp["rattrape_at"] = 1000          # plus de soixante jours sans personne
+	assert _refus(monde, fondateur, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0}) == 403
+	assert _refus(monde, fondateur, rc.guilde_coffre_retirer, None, {"index": 0}) == 403
+	assert _refus(monde, fondateur, rc.ici, None) == 403
+	assert fondateur["inventaire"] == [] and monde["docs"][imp_id]["vu_at"] == 1000    # la ruine ne se relève pas

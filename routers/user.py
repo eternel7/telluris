@@ -911,6 +911,11 @@ def move_character(
 							ok, raison = colonisation.sous_lieu_ouvert(lieu_doc, get_doc)
 							if not ok:
 								raise HTTPException(status_code=403, detail=raison)
+							# Implantation abandonnée : on n'entre pas dans une ruine.
+							if colonisation.est_implantation(lieu_doc):
+								ok, raison = colonisation.implantation_ouverte(lieu_doc, colonisation.regles(get_doc))
+								if not ok:
+									raise HTTPException(status_code=403, detail=raison)
 						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
 						# la descente — un combat dont il ne sort que par un passage vers la
 						# surface. Son `lieu` reste celui d'où il est descendu.

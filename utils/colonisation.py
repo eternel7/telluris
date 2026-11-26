@@ -67,6 +67,10 @@ OR = 10000
 
 DEFAUTS = {
 	"temps": {"passe_s": 3600},
+	# Abandon (cahier des règles du monde, Auteur 26/11/2026) : sans visite du fondateur, d'un
+	# associé ou d'un soutien depuis `apres_s`, l'implantation tombe en ruine et libère son site ;
+	# passé `delaissee_part` de ce délai, un visiteur la voit délaissée.
+	"ruine": {"apres_s": 60 * 86400, "delaissee_part": 0.5},
 	# Icône de l'implantation sur la carte du pays : facultative avant ce palier, imposée ensuite.
 	"icones": {"obligatoire_des": "bourg"},
 	"stocks_depart": {"nourriture": 12, "bois": 12, "materiaux": 0, "medicaments": 0},
@@ -498,9 +502,14 @@ def implantations_de(character: dict) -> list:
 
 
 def peut_fonder(character: dict, pays_doc: dict, position, relies: list, implantations: list,
-				reg: dict) -> tuple[bool, str]:
+				reg: dict, now: int | None = None) -> tuple[bool, str]:
 	"""Les règles du § 2, dans l'ordre où on les dit au joueur. `implantations` = docs des
-	implantations déjà posées sur CE pays (tous fondateurs)."""
+	implantations déjà posées sur CE pays (tous fondateurs). Une implantation EN RUINE ne
+	compte plus : ni dans les distances, ni comme point de connexion, ni pour son fondateur."""
+	ruines = {i.get("_id") for i in implantations or [] if en_ruine(i, reg, now)}
+	if ruines:
+		relies = [l for l in relies or [] if l.get("id") not in ruines]
+		implantations = [i for i in implantations if i.get("_id") not in ruines]
 	r = reg.get("reglages") or {}
 	if not paliers(reg):
 		return False, "La colonisation n'est pas ouverte."
@@ -917,11 +926,14 @@ def choisir_icone(imp: dict, reg: dict, fichiers, fichier, regions: dict | None 
 	return True, ""
 
 
-def icones_carte(implantations, reg: dict, fichiers, regions: dict | None = None) -> list[dict]:
+def icones_carte(implantations, reg: dict, fichiers, regions: dict | None = None,
+				 now: int | None = None) -> list[dict]:
 	"""Icônes à poser sur la carte d'un pays : `[{x, y, fichier, label}]`, une par implantation
 	qui en montre une, à sa case d'origine. Vues de TOUS (le lien l'est déjà dès le Campement)."""
 	out = []
 	for imp in implantations or []:
+		if en_ruine(imp, reg, now):
+			continue
 		pos = list(((imp or {}).get("origine") or {}).get("pos") or [])
 		fichier = icone_affichee(imp, reg, fichiers, regions)
 		if fichier and len(pos) >= 2:
@@ -975,6 +987,7 @@ def creer_implantation(character: dict, pays_doc: dict, position, modele: dict, 
 		"attaques": [],
 		"morts": [],
 		"rattrape_at": now,
+		"vu_at": now,
 		"journal": [],
 		"soutiens": {},
 		"associes": [],
@@ -1021,6 +1034,59 @@ def role_de(character: dict, imp: dict) -> str:
 	if cid in (imp.get("soutiens") or {}):
 		return SOUTIEN
 	return VISITEUR
+
+
+# ── Abandon et ruine (cahier des règles du monde) ─────────────────────────────────────
+# Rien n'est écrit : la ruine se DÉDUIT de la dernière présence, à chaque lecture.
+ABANDON_DELAISSEE = "delaissee"
+ABANDON_RUINE = "ruine"
+
+
+def derniere_presence(imp: dict) -> int:
+	"""Dernière visite du fondateur, d'un associé ou d'un soutien (`vu_at`). Absent ⇒ repli
+	sur `rattrape_at` (posé à la fondation, avancé par la présence du fondateur ou d'un associé)."""
+	return max(_int((imp or {}).get("vu_at")), _int((imp or {}).get("rattrape_at")))
+
+
+def etat_abandon(imp: dict, reg: dict, now: int | None = None) -> str:
+	"""`""` (habitée), `ABANDON_DELAISSEE` ou `ABANDON_RUINE`. Sans dernière présence connue :
+	habitée (aucun doc ne tombe en ruine faute de date)."""
+	conf = (reg or {}).get("ruine") or {}
+	apres = _int(conf.get("apres_s"))
+	vu = derniere_presence(imp)
+	if apres <= 0 or not vu:
+		return ""
+	absence = (now_epoch() if now is None else now) - vu
+	if absence >= apres:
+		return ABANDON_RUINE
+	if absence >= apres * _num(conf.get("delaissee_part"), 1):
+		return ABANDON_DELAISSEE
+	return ""
+
+
+def en_ruine(imp: dict, reg: dict, now: int | None = None) -> bool:
+	return est_implantation(imp) and etat_abandon(imp, reg, now) == ABANDON_RUINE
+
+
+def marquer_presence(imp: dict, role: str, reg: dict, now: int | None = None) -> bool:
+	"""Fondateur, associé ou soutien sur place : `vu_at` avance (au plus une écriture par
+	passe, pour ne pas sauver le lieu à chaque `/play`). Une ruine ne se relève pas. True si
+	le doc a changé (l'appelant le sauve)."""
+	if role not in (FONDATEUR, ASSOCIE, SOUTIEN) or en_ruine(imp, reg, now):
+		return False
+	now = now_epoch() if now is None else now
+	pas = max(60, _int((reg.get("temps") or {}).get("passe_s"), 3600))
+	if now - _int(imp.get("vu_at")) < pas:
+		return False
+	imp["vu_at"] = now
+	return True
+
+
+def implantation_ouverte(imp: dict, reg: dict, now: int | None = None) -> tuple[bool, str]:
+	"""Garde d'ENTRÉE (`move_character`) : on n'entre pas dans une ruine."""
+	if en_ruine(imp, reg, now):
+		return False, "Il ne reste qu'une ruine : le lieu a été abandonné."
+	return True, ""
 
 
 def vaut_presence(role: str) -> bool:
@@ -3008,6 +3074,8 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"places_associes": max(0, places_associes(imp, reg) - len(imp.get("associes") or [])),
 		"demande_en_attente": False,
 		"attaque_en_cours": bool(imp.get("attaque_en_cours")),
+		# Déclin visible avant la ruine (la présence d'un gérant ou d'un soutien le remet à zéro).
+		"abandon": etat_abandon(imp, reg, now) == ABANDON_DELAISSEE,
 		"sous_lieux": [{"label": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
 						"metier": libelle_metier(b.get("categorie")), "pos": b.get("pos"),
 						"ouvert": not b.get("endommage") and (

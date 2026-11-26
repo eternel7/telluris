@@ -102,6 +102,6 @@ ENTREES = [
 	P(10, "Légende des champs de bataille", "🏆", "p_carac", "On raconte ses batailles aux recrues ; lui ne les compte plus.", stats=("F",)),
 	A(10, "Coup du seigneur de guerre", "👑", "frappe", "coup_lourd", "Le coup qui termine les batailles."),
 	A(10, "Tempête de lames", "🌪️", "zone_carre", "balayage", "Une tourmente de fer qui ne laisse rien debout autour de lui.", rayon=2),
-	A(10, "Inébranlable", "⛰️", "posture", "garde", "Une montagne n'a pas besoin de bouger pour arrêter l'armée.", stats=("R", "Vol")),
+	A(10, "Inébranlable", "⛰️", "posture", "garde", "Une montagne n'a pas besoin de bouger pour arrêter la horde.", stats=("R", "Vol")),
 	A(10, "Saut du conquérant", "🦅", "saut", "saut", "Il tombe au cœur des rangs ennemis comme un aigle sur sa proie."),
 ]

@@ -157,7 +157,7 @@ DESCRIPTIONS = {
 	"Kpinga": "Couteau de jet à trois lames rayonnantes, insigne du guerrier qui le porte.",
 	"Kunai": "Outil de maçon devenu arme : une pointe à tout faire, qu'on plante ou qu'on lance.",
 	"Lame_courte": "Lame courte sans garde, discrète sous un manteau.",
-	"Lance_rituelle": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer.",
+	"Lance_rituelle": "Lance gravée de signes rituels, plus faite pour l'office que pour la chasse aux monstres — mais qui sait piquer.",
 	"Lancelette": "Petite lance de jet, légère et pointue.",
 	"Mambele": "Fer de jet en forme de faucille à crochet, venu des forêts du sud.",
 	"Masse_a_brides": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient.",

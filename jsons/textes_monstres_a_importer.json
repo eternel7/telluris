@@ -1,0 +1,678 @@
+[
+  {
+    "_id": "competence:avatar_de_la_rage",
+    "type": "competence",
+    "nom": "Avatar de la rage",
+    "icon": "👹",
+    "description": "Les clans le croient habité par l'esprit de la bataille, qui referme ses plaies.",
+    "vocation": "barbare",
+    "niveau": 10,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "F": 5,
+        "R": 5
+      },
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "competence:conjurateur",
+    "type": "competence",
+    "nom": "Conjurateur",
+    "icon": "🎴",
+    "description": "Manipulateur de perceptions. Ses illusions ont déjà détourné des hordes entières, et il en parle peu.",
+    "vocation": "illusionniste",
+    "niveau": 6,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Int": 5,
+        "Ag": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:inebranlable",
+    "type": "competence",
+    "nom": "Inébranlable",
+    "icon": "⛰️",
+    "animation": "animation:capa_garde",
+    "description": "Une montagne n'a pas besoin de bouger pour arrêter la horde.",
+    "vocation": "guerrier",
+    "niveau": 10,
+    "mode": "active",
+    "cout_pm": 18,
+    "maintien": 6,
+    "sensibilite_charge": 0,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "R": "11+{Vol/6}",
+        "Vol": 11
+      }
+    }
+  },
+  {
+    "_id": "competence:lame_enchantee",
+    "type": "competence",
+    "nom": "Lame enchantée",
+    "icon": "✨",
+    "animation": "animation:capa_aura_bataille",
+    "description": "La magie au service du combat, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
+    "vocation": "mage",
+    "niveau": 6,
+    "mode": "active",
+    "cout_pm": 25,
+    "cible": "soi",
+    "arme": {
+      "mode": "cac"
+    },
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "F": 16,
+        "Ag": 8
+      },
+      "duree": 5
+    },
+    "exigences": {
+      "F": 50,
+      "Ag": 35
+    }
+  },
+  {
+    "_id": "espece:cheval_normand",
+    "type": "espece",
+    "nom": "Cheval Normand",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cheval_normand_transparent.webp",
+    "description": "Race de combat réputée pour sa robustesse, capable de porter un cavalier en armure complète.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 4500
+    },
+    "animation": "animation:son_bete_01",
+    "effectif": [
+      2,
+      3
+    ]
+  },
+  {
+    "_id": "espece:grand_sanglier",
+    "type": "espece",
+    "nom": "Grand Sanglier",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "grand_sanglier_transparent.webp",
+    "description": "Sanglier de combat aux défenses acérées, monture brutale prisée pour charger les monstres de front.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 65
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.35,
+      "prix_cuivre": 4000
+    },
+    "animation": "animation:son_bete_04",
+    "effectif": [
+      2,
+      3
+    ]
+  },
+  {
+    "_id": "espece:prince_demon",
+    "type": "espece",
+    "nom": "Prince Demon",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "prince_demon_transparent.webp",
+    "description": "Souverain des enfers, son autorité s'étend sur des légions entières et sa seule volonté peut lancer ses hordes sur un monde.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 85,
+        "max": 130
+      },
+      "R": {
+        "min": 85,
+        "max": 130
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_demonologie_9",
+      "chef"
+    ],
+    "items": [
+      "item:Da_dao",
+      "item:Morgenstern",
+      "item:Talwar",
+      "item:Pavois",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_acier_gravees",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Bottes_de_plates"
+    ],
+    "proprietes": {},
+    "armure_naturelle": 4,
+    "effectif": [
+      1,
+      1
+    ]
+  },
+  {
+    "_id": "item:Doloire",
+    "type": "item",
+    "nom": "Doloire",
+    "description": "Large hache de charpentier emmanchée long, détournée pour le combat.",
+    "icon": "🪓",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Lance_rituelle",
+    "type": "item",
+    "nom": "Lance rituelle",
+    "sous_categorie": "",
+    "icon": "🔱",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la chasse aux monstres — mais qui sait piquer.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 2,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Int": 2,
+      "Vol": 1
+    }
+  },
+  {
+    "_id": "item:Lance_rituelle_26b48628",
+    "type": "item",
+    "nom": "Lance rituelle des Sépultures en adamantite vivante",
+    "icon": "🔱",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la chasse aux monstres — mais qui sait piquer. Façonné sur mesure : Sel des sépultures, Lingot d'adamantite, Débris animés.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "bonus_degats": 3,
+    "bonus_degats_dice": "1D3+1D8+1D6",
+    "portee": 2,
+    "bonus_cc": 2,
+    "bonus_cd": 1,
+    "bonus": {
+      "Int": 2,
+      "Vol": 3,
+      "R": 3,
+      "Ag": 1
+    },
+    "effets": {
+      "buffs": {
+        "R": -1
+      },
+      "duree": 2
+    },
+    "restriction": {
+      "Int": 15,
+      "Vol": 10
+    },
+    "rarete": "legendaire",
+    "poids": 2.4,
+    "valeur": [
+      {
+        "cu": 203016
+      },
+      {
+        "cu": 625788
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Lance_rituelle",
+      "matieres": [
+        {
+          "item": "item:Sel_des_sepultures",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        },
+        {
+          "item": "item:debris_anime",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Lance_rituelle_26b48628",
+      "cree_at": 1790458613,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Lance_rituelle_e6cf4b19",
+    "type": "item",
+    "nom": "Lance rituelle aux ferrures d'argent",
+    "icon": "🔱",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la chasse aux monstres — mais qui sait piquer. Façonné sur mesure : Lingot d'argent.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "portee": 2,
+    "bonus": {
+      "Int": 3,
+      "Vol": 1
+    },
+    "restriction": {
+      "Int": 15,
+      "Vol": 10
+    },
+    "rarete": "peu_commun",
+    "poids": 2.0,
+    "valeur": [
+      {
+        "cu": 4250
+      },
+      {
+        "cu": 18150
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Lance_rituelle",
+      "matieres": [
+        {
+          "item": "item:argent",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Lance_rituelle_e6cf4b19",
+      "cree_at": 1789915958,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "rules:vocations",
+    "type": "rules",
+    "value": [
+      {
+        "id": "guerrier",
+        "label": "Guerrier",
+        "icon": "⚔️",
+        "img": "",
+        "magie": "",
+        "blurb": "Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.",
+        "equipement_de_base": [
+          "item:Epee_courte"
+        ]
+      },
+      {
+        "id": "barbare",
+        "label": "Barbare",
+        "icon": "🪓",
+        "img": "",
+        "magie": "",
+        "blurb": "Guerrier des steppes, mu par la rage. Sa furie est une ressource redoutable.",
+        "equipement_de_base": [
+          "item:Hache_de_guerre"
+        ]
+      },
+      {
+        "id": "forestier",
+        "label": "Forestier",
+        "icon": "🏹",
+        "img": "",
+        "magie": "",
+        "blurb": "Chasseur et éclaireur hors pair. Il connaît les routes que les cartes n'indiquent pas.",
+        "equipement_de_base": [
+          "item:Arc_court",
+          "item:Couteau_de_chasse"
+        ]
+      },
+      {
+        "id": "duelliste",
+        "label": "Duelliste",
+        "icon": "🤺",
+        "img": "",
+        "magie": "",
+        "blurb": "Escrimeur élégant. Sa précision chirurgicale compense l'absence de robustesse.",
+        "equipement_de_base": [
+          "item:Rapiere"
+        ]
+      },
+      {
+        "id": "moine",
+        "label": "Moine",
+        "icon": "🥋",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Corps comme arme, esprit comme bouclier. Énergie intérieure rare.",
+        "equipement_de_base": [
+          "item:Baton_de_combat"
+        ]
+      },
+      {
+        "id": "elementaliste",
+        "label": "Élémentaliste",
+        "icon": "🔥",
+        "img": "",
+        "magie": "Élémentaire",
+        "blurb": "Maître du feu, glace, foudre. Ses sorts exigent des composants physiques puissants.",
+        "equipement_de_base": [
+          "item:Canne_ferree"
+        ]
+      },
+      {
+        "id": "mage",
+        "label": "Magicien de combat",
+        "icon": "🌀",
+        "img": "",
+        "magie": "Bataille",
+        "blurb": "La magie au service du combat. Enchantements d'armes, boucliers arcaniques.",
+        "equipement_de_base": [
+          "item:Baton_canalisateur"
+        ]
+      },
+      {
+        "id": "illusionniste",
+        "label": "Illusionniste",
+        "icon": "🎭",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Manipulateur de perceptions. Ses illusions peuvent détourner des hordes.",
+        "equipement_de_base": [
+          "item:Baton_canalisateur"
+        ]
+      },
+      {
+        "id": "lettre",
+        "label": "Lettré",
+        "icon": "📜",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Érudit universel capable d'apprendre n'importe quel type de magie.",
+        "equipement_de_base": [
+          "item:Canne_ferree"
+        ]
+      },
+      {
+        "id": "druide",
+        "label": "Druide",
+        "icon": "🌳",
+        "img": "",
+        "magie": "Nature",
+        "blurb": "Gardien des cycles naturels. Les animaux lui obéissent, les plantes l'écoutent.",
+        "equipement_de_base": [
+          "item:Baton_bois_vivant"
+        ]
+      },
+      {
+        "id": "chaman",
+        "label": "Chaman",
+        "icon": "🐺",
+        "img": "",
+        "magie": "Nature",
+        "blurb": "Se métamorphose en esprit totem: Ours, Loup, Sanglier, Chat sauvage ou Faucon.",
+        "equipement_de_base": [
+          "item:Baton_bois_vivant"
+        ]
+      },
+      {
+        "id": "pretre",
+        "label": "Prêtre",
+        "icon": "✝",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Guérisseur indispensable. Peut ressusciter les tombés au combat.",
+        "equipement_de_base": [
+          "item:Lance_rituelle"
+        ]
+      },
+      {
+        "id": "paladin",
+        "label": "Paladin",
+        "icon": "🛡",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Guerrier protecteurs aux delà des remparts. Son arme brûle d'une lumière que les monstres redoutent.",
+        "equipement_de_base": [
+          "item:Masse_benie"
+        ]
+      },
+      {
+        "id": "templier",
+        "label": "Templier",
+        "icon": "⚜️",
+        "img": "",
+        "magie": "Bataille",
+        "blurb": "Défenseur de la cité, gardien des temples. L'épée de l'institution autant que celle des dieux.",
+        "equipement_de_base": [
+          "item:Epee_longue_ordre"
+        ]
+      },
+      {
+        "id": "repurgateur",
+        "label": "Répurgateur",
+        "icon": "🔱",
+        "img": "",
+        "magie": "Démonologie",
+        "blurb": "Chasseur de créatures maudites. Il combat le mal par le mal : sa magie est noire, mais il n'appelle jamais ce qu'il passe sa vie à abattre.",
+        "equipement_de_base": [
+          "item:Epee_argent"
+        ],
+        "familles_exclues": [
+          "invocation"
+        ]
+      },
+      {
+        "id": "necromancien",
+        "label": "Nécromancien",
+        "icon": "💀",
+        "img": "",
+        "magie": "Nécromancie",
+        "blurb": "Maître de la nécromancie. Sa voie ultime mène vers la Liche.",
+        "equipement_de_base": [
+          "item:Sceptre_os"
+        ]
+      },
+      {
+        "id": "assassin",
+        "label": "Assassin",
+        "icon": "🗡",
+        "img": "",
+        "magie": "",
+        "blurb": "L'ombre faite chair. Spécialiste de l'élimination silencieuse et des poisons.",
+        "equipement_de_base": [
+          "item:Dague",
+          "item:Lame_courte"
+        ]
+      },
+      {
+        "id": "voleur",
+        "label": "Voleur",
+        "icon": "🔑",
+        "img": "",
+        "magie": "",
+        "blurb": "Doigts légers, esprit plus léger encore. Son réseau d'informateurs vaut une armée.",
+        "equipement_de_base": [
+          "item:Lame_courte"
+        ]
+      },
+      {
+        "id": "menestrel",
+        "label": "Ménestrel",
+        "icon": "🎶",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.",
+        "equipement_de_base": [
+          "item:Dague_de_scene"
+        ]
+      },
+      {
+        "id": "demoniste",
+        "label": "Démoniste",
+        "icon": "😈",
+        "img": "",
+        "magie": "Démonologie",
+        "blurb": "Invocateur de créatures infernales. Chaque pacte consume une part de son âme.",
+        "equipement_de_base": [
+          "item:Baton_cornu"
+        ]
+      }
+    ]
+  }
+]

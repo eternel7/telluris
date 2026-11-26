@@ -2,6 +2,7 @@
 	"_doc": "Parcours guidé « Découvrir Telluris » de /admin/lore (Auteur, 20/11/2026 : rédigé puis thématique). Étapes dans l'ordre : `cle` = clé de /admin/lore, `pourquoi` = une ligne affichée dans le parcours. Éditable à la main ; tests/test_lore.py vérifie que chaque clé existe.",
 	"titre": "Découvrir Telluris",
 	"etapes": [
+		{"cle": "redige/00_cahier_des_regles.md", "pourquoi": "Les règles qui tiennent le monde : ce qui ne change jamais."},
 		{"cle": "redige/01_le_monde_et_ses_eres.md", "pourquoi": "Le cadre : géographie réelle, remparts, quatre ères."},
 		{"cle": "redige/02_anthropes_et_lignees.md", "pourquoi": "Qui vit derrière les murs."},
 		{"cle": "redige/03_portails_vague_donjons.md", "pourquoi": "Le cœur du monde : portails, Vague, donjons, cristaux."},

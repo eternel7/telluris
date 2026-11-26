@@ -380,6 +380,78 @@ def test_icones_du_palier_generique_en_tete_un_format_par_nom():
 	assert col.icones_du_palier("village", fichiers) == []
 
 
+# ── Abandon et ruine (cahier des règles du monde, Auteur 26/11/2026) ──────────────────
+
+def _abandonnee(reg, part, **champs):
+	"""Implantation fondée à t=1000 (`vu_at`), relue après `part` du délai de ruine."""
+	imp = _imp(reg, **champs)
+	return imp, 1000 + int(reg["ruine"]["apres_s"] * part)
+
+
+def test_le_delai_de_ruine_est_de_soixante_jours_et_delaissee_a_mi_chemin():
+	reg = _reg()
+	assert reg["ruine"]["apres_s"] == 60 * col.JOUR_S        # décision de l'Auteur
+	imp, t = _abandonnee(reg, 0.25)
+	assert col.etat_abandon(imp, reg, t) == ""
+	imp, t = _abandonnee(reg, reg["ruine"]["delaissee_part"])
+	assert col.etat_abandon(imp, reg, t) == col.ABANDON_DELAISSEE and not col.en_ruine(imp, reg, t)
+	imp, t = _abandonnee(reg, 1)
+	assert col.en_ruine(imp, reg, t)
+	assert col.implantation_ouverte(imp, reg, t)[0] is False
+	# sans date de présence (doc ancien sans `vu_at` ni `rattrape_at`) : jamais en ruine
+	assert col.etat_abandon({"type": "implantation"}, reg, t) == ""
+	# doc ancien sans `vu_at` : la dernière présence se relit dans `rattrape_at`
+	ancien = {"type": "implantation", "rattrape_at": 1000}
+	assert col.en_ruine(ancien, reg, t)
+
+
+def test_fondateur_associe_et_soutien_tiennent_le_lieu_le_visiteur_non():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	for role in (col.FONDATEUR, col.ASSOCIE, col.SOUTIEN):
+		imp, t = _abandonnee(reg, 0.9)
+		assert col.marquer_presence(imp, role, reg, t) and imp["vu_at"] == t
+		assert not col.marquer_presence(imp, role, reg, t + pas - 1)     # une écriture par passe au plus
+		assert col.etat_abandon(imp, reg, t + 1) == ""
+	imp, t = _abandonnee(reg, 0.9)
+	assert not col.marquer_presence(imp, col.VISITEUR, reg, t) and imp["vu_at"] == 1000
+	# une ruine ne se relève pas
+	imp, t = _abandonnee(reg, 1)
+	assert not col.marquer_presence(imp, col.FONDATEUR, reg, t) and col.en_ruine(imp, reg, t + 1)
+
+
+def test_la_ruine_libere_le_site_pour_tous_et_pour_son_fondateur():
+	reg = _reg()
+	d_imp = reg["reglages"]["distance_implantation_min"]
+	ruine, t = _abandonnee(reg, 1)
+	ruine["origine"]["pos"] = [SITE_POS["x"] + d_imp - 1, SITE_POS["y"]]
+	relies = RELIES + [{"id": ruine["_id"], "label": "Ruine", "categorie": col.TYPE_DOC, "pos": list(ruine["origine"]["pos"])}]
+	vivante = copy.deepcopy(ruine)
+	vivante["vu_at"] = t
+	autre = _perso(_id="character:b")
+	assert "autre implantation" in col.peut_fonder(autre, _pays(), SITE_POS, relies, [vivante], reg, now=t)[1]
+	assert col.peut_fonder(autre, _pays(), SITE_POS, relies, [ruine], reg, now=t) == (True, "")
+	# sa case n'est plus un point de connexion, et son fondateur peut refonder dans le pays
+	case = {"x": ruine["origine"]["pos"][0], "y": ruine["origine"]["pos"][1]}
+	assert "point de connexion" in col.peut_fonder(autre, _pays(), case, relies, [vivante], reg, now=t)[1]
+	assert "point de connexion" not in col.peut_fonder(autre, _pays(), case, relies, [ruine], reg, now=t)[1]
+	assert "déjà une implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, relies, [vivante], reg, now=t)[1]
+	assert col.peut_fonder(_perso(), _pays(), SITE_POS, relies, [ruine], reg, now=t) == (True, "")
+	# plus d'icône sur la carte du pays
+	for imp in (ruine, vivante):
+		imp["icone_carte"] = "campement_icon.webp"
+	fichiers = ["campement_icon.webp"]
+	assert col.icones_carte([ruine], reg, fichiers, now=t) == []
+	assert len(col.icones_carte([vivante], reg, fichiers, now=t)) == 1
+
+
+def test_le_visiteur_voit_le_lieu_delaisse():
+	reg = _reg()
+	imp, t = _abandonnee(reg, reg["ruine"]["delaissee_part"])
+	assert col.vue(imp, reg, col.VISITEUR, _site(reg), [], now=t)["abandon"] is True
+	assert col.vue(imp, reg, col.VISITEUR, _site(reg), [], now=1001)["abandon"] is False
+
+
 def test_icone_facultative_avant_le_bourg_imposee_ensuite():
 	reg = _reg()
 	ids = [p["id"] for p in col.paliers(reg)]
@@ -1692,3 +1764,16 @@ def test_l_image_definitive_d_un_modele_remplace_la_provisoire(monkeypatch):
 	assert maj["cells"] == dump[maj["_id"]]["cells"]                         # seul le champ `image` change
 	dump[maj["_id"]]["image"] = "retouchee.jpg"                              # posée à la main : on n'y touche pas
 	assert gen.generer(dump) == []
+
+
+def test_une_ruine_n_a_plus_ni_bouton_ni_marqueur_sauf_pour_qui_s_y_trouve():
+	from utils import lieux
+	reg = _reg()
+	ruine, _t = _abandonnee(reg, 1)          # vu_at = 1000 : en ruine à l'heure réelle
+	vivante = copy.deepcopy(ruine)
+	vivante["vu_at"] = col.now_epoch()
+	docs = {col.REGLES_ID: copy.deepcopy(REGLES_DOC)}
+	perso = _perso()
+	assert lieux.noeud_ferme(perso, "lieu:pays", ruine["_id"], ruine, docs.get) is True
+	assert lieux.noeud_ferme(perso, "lieu:pays", vivante["_id"], vivante, docs.get) is False
+	assert lieux.noeud_ferme(perso, ruine["_id"], ruine["_id"], ruine, docs.get) is False   # on ne s'expulse pas

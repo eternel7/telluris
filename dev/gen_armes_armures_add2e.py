@@ -188,7 +188,7 @@ PIECES = [
 		 deg=4, malus_depl=-1, r={"F": 14}, deux_mains=True),
 	arme("Doloire", "Doloire", "🪓", "commun", 3.5, AMB, ["cac", "hast", "tranchant"], 2, 8, ARM,
 		 [("fer", 3), ("hampe", 1)],
-		 "Large hache de charpentier emmanchée long, détournée pour la guerre.",
+		 "Large hache de charpentier emmanchée long, détournée pour le combat.",
 		 deg=4, malus_depl=-1, r={"F": 15}, deux_mains=True),
 	arme("Glaive", "Glaive", "🗡️", "commun", 3.4, AMB, ["cac", "hast", "tranchant"], 2, 6, ARM,
 		 [("fer", 2), ("hampe", 1), ("peaux", 1)],
