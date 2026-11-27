@@ -227,7 +227,7 @@ def test_la_copie_du_releve_ne_se_vend_pas():
 def test_les_conduites_ne_portent_que_des_naga_tant_que_la_preuve_n_est_pas_remise():
 	d = DOCS[G.D_CONDUITES]["battle_maps"][0]
 	assert d["especes"] == [G.E_NAGA] and d["composition"] == {G.E_NAGA: 3}
-	assert DOCS[G.NAGA]["source_espece"] == G.E_NAGA
+	assert _get(G.NAGA)["source_espece"] == G.E_NAGA
 	cond = DOCS[G.CONDUITES]["acces"]["conditions"]
 	assert _ok(_perso(actives=[(G.Q_EAUX, {"type": "collect", "cible": G.NAGA, "quantite": 1})]), cond)
 	assert not _ok(_perso(reussies=[G.Q_EAUX]), cond)
@@ -312,8 +312,8 @@ def test_echidna_trois_etats_et_le_releve_sur_la_voie_de_la_parole():
 
 
 def test_echidna_fuit_et_laisse_sa_mue():
-	assert DOCS["item:echidna"]["nom"] == "Mue d'Échidna"
-	assert DOCS[G.E_ECHIDNA].get("nom_propre") is True and DOCS[G.E_ECHIDNA]["genre"] == "f"
+	assert _get("item:echidna")["nom"] == "Mue d'Échidna"
+	assert _get(G.E_ECHIDNA).get("nom_propre") is True and _get(G.E_ECHIDNA)["genre"] == "f"
 
 
 # ── Calibrage (potentiel mesuré sur le dump augmenté des espèces neuves) ────────
@@ -344,8 +344,9 @@ def test_toutes_les_images_livrees_sont_presentes():
 			assert os.path.exists(os.path.join(RESSOURCES, "pnj", d["portrait"])), d["_id"]
 		if d.get("categorie") == "battle_map":
 			assert os.path.exists(os.path.join(RESSOURCES, "battle_maps", d["image"])), d["_id"]
-		if d.get("type") == "espece":
-			assert os.path.exists(os.path.join(RESSOURCES, "monsters", d["image"])), d["_id"]
+	# Espèces lues dans la sortie du générateur OU au dump : une fois importées, il ne les réémet plus.
+	for eid in (G.E_NAGA, G.E_MURENE, G.E_ECHIDNA):
+		assert os.path.exists(os.path.join(RESSOURCES, "monsters", _get(eid)["image"])), eid
 
 
 @pytest.mark.parametrize("salle_id", [G.CONDUITES, G.LISIERE, G.COMBAT_ANTRE])
