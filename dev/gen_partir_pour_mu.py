@@ -17,6 +17,10 @@
 #   ⚠️ Mu est sous la mer : aucune route n'en sort. Le marché vend donc le cristal jaune (proposé,
 #   non tranché par l'Auteur) — sans lui, un personnage arrivé sans cristal de réserve y resterait.
 #
+# ⚠️ NE PLUS REJOUER après l'import de jsons/quetes_de_mu_a_importer.json (dev/gen_quetes_de_mu.py) :
+# le fare, le marché, Moana, Kahu, Hemi et l'Aélis de Mu sont écrits ici DE ZÉRO et perdraient les
+# choix, services et présences que les quêtes de Mu leur ajoutent.
+#
 # ⚠️ UN SEUL FICHIER À IMPORTER : jsons/partir_pour_mu_a_importer.json, DELTA seul (CLAUDE.md §18).
 # PNJ et lieux déjà en base RELUS du dernier dump (seuls les choix, nœuds, services et présences
 # ajoutés changent : régénération idempotente) + docs neufs COMPLETS (PUT, CLAUDE.md §11).
@@ -81,7 +85,7 @@ PORTRAIT_MARCHANDE = "marchande_hobbit_f_marche_du_dome01.jpg"
 # dorée au centre du dôme, les canaux du sud-ouest, les quais de l'est. Cases praticables vérifiées
 # sur la grille du dump (⚠️ grille à repeindre : elle ne suit pas encore le dôme).
 POS_SEUIL = (45, 24)
-POS_AUBERGE = (30, 28)
+POS_AUBERGE = (29, 28)   # (30, 28) avant la grille repeinte du 26/11, devenue un mur
 POS_MARCHE = (54, 28)
 
 # Mu vend le cristal du retour : 1 or (10 000 cu), le prix de ce qui ne se trouve nulle part
