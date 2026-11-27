@@ -671,9 +671,12 @@ importLint.addEventListener('click', async () => {
 			headers: { 'Content-Type': 'application/json' },
 			body: importEditor.value.trim(),
 		});
-		const bilan = await r.json();
-		if (!r.ok) {
-			setStatusOn(importStatus, 'Échec : ' + (bilan.detail || r.status), 'err');
+		// Une page HTML (proxy en 502/504 pendant un redémarrage, 413 d'un corps refusé) n'est
+		// pas du JSON : on dit le code HTTP au lieu de « Unexpected token '<' ».
+		const bilan = await r.json().catch(() => null);
+		if (!r.ok || !bilan) {
+			setStatusOn(importStatus, 'Échec : ' + ((bilan && bilan.detail)
+				|| ('HTTP ' + r.status + (bilan ? '' : ' — réponse non JSON (serveur indisponible ou requête refusée en amont)'))), 'err');
 			return;
 		}
 		lintRender(bilan);
