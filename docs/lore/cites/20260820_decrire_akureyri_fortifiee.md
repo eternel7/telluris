@@ -16,6 +16,18 @@ Au sud de l'île, loin d'Akureyri, sous le volcan, les grottes profondes de l'He
 
 ?{La Hallgrímskirkja est une porte faite pour relier Reykjavik au reste du monde ; l'Hekla est une porte qu'il faut empêcher de relier quoi que ce soit. Les dirigeants de Reykjavik financent discrètement sa surveillance ; dans les tavernes, on raconte que les Templiers gardent sous la montagne un dragon ancien, une armée de démons ou un trésor sans fin, et aucune de ces histoires n'est tout à fait fausse. Pour Akureyri, l'Hekla est surtout une frontière : quand les Templiers ferment les routes du volcan, les caravanes attendent dans les auberges fortifiées, et la cité fournit guides, éclaireurs et chasseurs aux rares expéditions autorisées.}?
 
+## La descente de l'Hekla
+
+Ceux qui reviennent de Mu avec la copie du relevé des seuils d'Uanna y trouvent l'Hekla marquée « demeure ». Ils viennent à Akureyri vérifier si celle-là aussi est vide. La copie prouve aux Templiers que le voyageur sait déjà ce qu'ils taisent ; elle ne suffit pas à ouvrir le gouffre. L'ordre exige une épreuve, au choix du voyageur. Il peut **chasser** ce qui s'échappe parfois des profondeurs et rôde sur les routes du volcan, puis rapporter sa dépouille. Il peut aussi **ruser** avec un démon mineur que la forteresse tient captif, comme Sæmundr le Savant berna jadis le diable, à ce que racontent les Islandais. Sæmundr, lui, dit que ce n'était qu'un démon mineur, et pas si bête. Une seule épreuve suffit.
+
+**Aélis de Montfaucon** vient jusqu'au seuil et pas plus loin. Elle étudie le gouffre depuis la forteresse, en architecte, et attend le retour pour qu'on lui raconte ce qu'il y a derrière.
+
+Derrière, l'Enfer descend en **neuf cercles**, tels que Dante les a décrits, mais le récit est parvenu déformé et le lieu ne lui obéit pas tout à fait : les Limbes, la Luxure, la Gourmandise, l'Avarice, la Colère et le Styx, la cité de Dité et ses hérétiques, la Violence, Malebolge, et enfin le Cocyte. Au fond, **Lucifer** est pris dans la glace. On ne le combat pas : il est enchaîné, hors d'atteinte, et l'on ne peut que lui parler. Ceux qui se battent dans l'Enfer affrontent ses geôliers et sa cohorte.
+
+À la question « qui jette ? », l'Ange déchu répond qu'il a été jeté là par **ceux qui étaient avant** : plus anciens que les dieux. Peut-être est-ce de l'orgueil, peut-être un mensonge. Sa parole ne s'accorde pas avec celle d'Échidna, et rien ne permet de dire lequel des deux se trompe.
+
+?{Restent à écrire : la créature de l'épreuve de chasse et le démon de l'épreuve de ruse ; les êtres de chaque cercle (passeur, gardiens, détenus) ; les quêtes facultatives d'Akureyri ; ce qu'Aélis tire du récit au retour.}?
+
 ## La cité du fjord
 
 ?{La ville s'étage en amphithéâtre autour de son port, dominée par une citadelle sur les hauteurs ; ses maisons ont des murs épais et des toits très inclinés. Akureyri est connue pour ses **serres fortifiées**, et pour ses botanistes, ses herboristes et ses soigneurs.}?
@@ -27,7 +39,7 @@ Au sud de l'île, loin d'Akureyri, sous le volcan, les grottes profondes de l'He
 ## 🗂 Échanges de travail
 
 - **Source :** [conversation ChatGPT](https://chatgpt.com/g/g-p-6a836af71c6c8191a84e3d2ec701c896/c/6a8764e0-20d8-83ed-8a89-ae2cf6be9400)
-- **Créée :** 20/08/2026 · **mise à jour :** 21/08/2026
+- **Créée :** 20/08/2026 · **mise à jour :** 27/11/2026 (arc de l'Hekla arbitré, deux questionnaires)
 - **Messages :** 2
 - **Séance complète :** archivée dans `docs/archives/lore/cites/20260820_decrire_akureyri_fortifiee.md`.
 - **Fusion (24/11/2026) :** reprend « Portail des profondeurs » (21/08/2026), archivée dans `docs/archives/lore/monde/20260821_portail_des_profondeurs.md`.

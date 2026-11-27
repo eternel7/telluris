@@ -220,3 +220,16 @@ Ils transportent une partie du Nord vers la capitale — et rapportent en retour
 :::
 
 ---
+
+## Arbitrage de l'Auteur — l'arc de l'Hekla (27/11/2026, deux questionnaires)
+
+| Point | Décision |
+|---|---|
+| Forme de l'arc | **Arc court comme Mu** ; l'Enfer est un **donjon à étages** fondé sur les cercles de Dante. |
+| Accès au gouffre | **Copie du relevé d'Uanna + une épreuve** exigée par les Templiers d'Akureyri. |
+| Épreuve | **Deux au choix, une suffit** : chasser ce qui sort du gouffre (combat, dépouille rapportée) ou ruser avec un démon mineur captif, à la manière de Sæmundr le Savant (énigme). |
+| Enfer de Lucifer | **Cercles de Dante, récit déformé.** |
+| Nombre de cercles | **Neuf**, Lucifer au fond (Cocyte), un étage court par cercle. |
+| Lucifer | **On lui parle, jamais de combat** ; les combats viennent des geôliers et de la cohorte. |
+| « Qui jette ? » | Lucifer répond **« ceux qui étaient avant »**, plus anciens que les dieux ; orgueil ou mensonge possibles, contredit Échidna, rien tranché (prépare le rang S+). |
+| Aélis | **Jusqu'au seuil seulement** : elle étudie le gouffre depuis la forteresse et attend le récit. |
