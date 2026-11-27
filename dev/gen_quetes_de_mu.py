@@ -33,7 +33,7 @@
 #   les éligibles (utils/offres.py) sans voir les prérequis écrits dans le dialogue — d'où un donneur par quête.
 #
 #   Images : cartes de combat de l'Auteur, grilles relevées à l'œil (CARTES_COMBAT),
-#   lieux et portraits À LIVRER par l'Auteur (noms ci-dessous ; prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md).
+#   lieux, portraits et monstres de l'Auteur, tous en WebP (prompts : docs/archives/lore/cites/20261126_prompts_quetes_de_mu.md).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER : jsons/quetes_de_mu_a_importer.json, DELTA seul (CLAUDE.md §18) : espèces
 # (dev/gen_monstres_mu.py), PNJ et lieux de Mu RELUS du dump (choix, nœuds, services, présences ajoutés :
@@ -245,16 +245,16 @@ CARTES_COMBAT = {
 	COMBAT_ANTRE: ("antre_d_echidna.webp", grille_antre),
 }
 
-# ── Images à livrer (Auteur) ──
+# ── Images des lieux (Auteur, 27/11, en WebP) ──
 IMG = {
-	OUVRAGES: "ouvrages_de_la_peripherie01.jpg", JARDINS: "jardins_de_la_paroi01.jpg",
-	SAS: "sas_des_jardiniers01.jpg", INSTITUT: "institut_de_mu01.jpg", ATELIER: "atelier_du_souffleur01.jpg",
-	RESEAU: "reseau_ancien_de_mu01.jpg", CHAMBRE: "chambre_du_sceau01.jpg", ANTRE: "antre_d_echidna01.jpg",
-	QUAI: "quai_des_pecheurs_de_mu01.jpg", SANCTUAIRE: "sanctuaire_noye_de_tangaroa01.jpg",
-	DEPOT: "depot_de_maintenance01.jpg", CHAMBRE_HYDRAULIQUE: "chambre_hydraulique01.jpg",
-	STRUCTURE: "chambre_exterieure_de_la_structure01.jpg", CARTES: "salle_des_cartes_de_mu01.jpg",
-	RELEVES: "ancienne_salle_des_releves01.jpg", PORTE_CONDAMNEE: "porte_condamnee01.jpg",
-	RESERVE: "reserve_des_registres01.jpg",
+	OUVRAGES: "ouvrages_de_la_peripherie01.webp", JARDINS: "jardins_de_la_paroi01.webp",
+	SAS: "sas_des_jardiniers01.webp", INSTITUT: "institut_de_mu01.webp", ATELIER: "atelier_du_souffleur01.webp",
+	RESEAU: "reseau_ancien_de_mu01.webp", CHAMBRE: "chambre_du_sceau01.webp", ANTRE: "antre_d_echidna01.webp",
+	QUAI: "quai_des_pecheurs_de_mu01.webp", SANCTUAIRE: "sanctuaire_noye_de_tangaroa01.webp",
+	DEPOT: "depot_de_maintenance01.webp", CHAMBRE_HYDRAULIQUE: "chambre_hydraulique01.webp",
+	STRUCTURE: "chambre_exterieure_de_la_structure01.webp", CARTES: "salle_des_cartes_de_mu01.webp",
+	RELEVES: "ancienne_salle_des_releves01.webp", PORTE_CONDAMNEE: "porte_condamnee01.webp",
+	RESERVE: "reserve_des_registres01.webp",
 }
 PORTRAITS = {
 	RANGI: "technicien_nain_m_ouvrages_de_mu01.webp", NGAIO: "jardiniere_hobbit_f_jardins_de_mu01.webp",

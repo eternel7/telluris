@@ -335,9 +335,11 @@ def test_trois_naga_passent_le_rang_a_et_echidna_le_rang_s():
 RESSOURCES = os.path.join(RACINE, "templates", "resources")
 
 
-def test_portraits_cartes_et_monstres_livres_sont_presents():
-	"""Les lieux restent à livrer ; tout le reste est sur disque sous le nom que porte la donnée."""
+def test_toutes_les_images_livrees_sont_presentes():
+	"""Lieux, portraits, cartes de combat et monstres : sur disque sous le nom que porte la donnée."""
 	for d in DOCS.values():
+		if d.get("type") == "lieu" and d.get("categorie") != "battle_map" and d["_id"] not in BASE:
+			assert os.path.exists(os.path.join(RESSOURCES, "towns", d["image"])), d["_id"]
 		if d.get("type") == "pnj" and d["_id"] not in BASE:
 			assert os.path.exists(os.path.join(RESSOURCES, "pnj", d["portrait"])), d["_id"]
 		if d.get("categorie") == "battle_map":
