@@ -247,6 +247,7 @@ Le 28/11, l'Auteur a remis un document de conception consolidé (copié ci-desso
 | Aélis | **Jusqu'au seuil** ; elle **vouvoie** (comme partout en jeu). |
 | Retour | **Conclusion par voie** de Mu : comparaison vue (parole) ou hypothèse (combat). |
 | Origines du personnage | La raison du départ choisie à l'intro (`intro.raison` : pillage, famine, exil, secret) est remise en question : **Minos ouvre** au 2ᵉ cercle, puis **chaque raison a son cercle** (pillage → Violence, famine → Ciacco, exil → Minos, secret → Lucifer ; aucune raison → Minos ne trouve aucune ligne). Doute **par touches** : fidélité du souvenir pour tous, culpabilité pour l'exil, frôlement méta pour qui n'a rien d'inscrit. La **voix tutoyante de l'intro revient** (seule exception au « vous »). **Dialogue + entrée de carnet** ; Aélis sent un changement au retour ; aucune mécanique (28/11). |
+| Peuplement des cercles | Détail dans `docs/hekla_neuf_cercles.md`. Les **trois bêtes du chant I** gardées (Lonza II, Louve maigre IV, Lion VII) ; **Nemrod** nommé au puits des Géants par **rumeur** seulement ; **Furies** = une espèce, trois exemplaires nommés, chacune son kit ; **Cacus absent** ; on ne combat que geôliers et cohorte, jamais les détenus (sauf Ciacco) (28/11). |
 
 ## Document remis par l'Auteur (28/11/2026)
 
