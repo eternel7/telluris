@@ -402,8 +402,8 @@
 			"quand": {"moment": {"ere": "antediluvien", "inconnu": true}, "autorite": "auteur", "note": "Non daté (Auteur, 11/10) : placé dans l'antédiluvien faute de mieux, l'incertitude couvre toute l'ère."},
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
 			"origine": ["scandinavie"],
-			"tags": {"peuples": ["islandais", "anges_demons"], "lieux": ["akureyri", "reykjavik", "enfer"], "themes": ["portails", "mondes_divins", "mystere"]},
-			"sources": [{"fichier": "cites/20260820_decrire_akureyri_fortifiee.md", "date": "2026-08-21", "citation": "Le portail des grottes de Helka est un gouffre ouvert vers les entrailles de l'Enfer de l'ange de lumière, Lucifer.", "archive": "monde/20260821_portail_des_profondeurs.md"}]
+			"tags": {"peuples": ["islandais", "anges_demons"], "lieux": ["reykjavik", "enfer"], "themes": ["portails", "mondes_divins", "mystere"]},
+			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_reykjavik.md", "date": "2026-08-21", "citation": "Le portail des grottes de Helka est un gouffre ouvert vers les entrailles de l'Enfer de l'ange de lumière, Lucifer.", "archive": "monde/20260821_portail_des_profondeurs.md"}]
 		},
 		{
 			"id": "breche_cordoue",
@@ -1617,11 +1617,11 @@
 			"id": "trame_hekla",
 			"titre": "L'Hekla → l'Enfer de Lucifer",
 			"titre_court": "L'Hekla",
-			"resume": "Après Mu, le relevé des seuils « demeure » du siège d'Uanna mène à l'Hekla, par Notre-Dame, le réseau jusqu'à Reykjavik puis la route jusqu'à Akureyri. Derrière, l'Enfer de Lucifer est habité, en contrepoint des Enfers vides d'Hadès : une prison, pas une demeure. Pourquoi certains partent-ils quand d'autres restent ? Et qui jette ?",
+			"resume": "Après Mu, le relevé des seuils « demeure » du siège d'Uanna mène à l'Hekla, par Notre-Dame, le réseau jusqu'à Reykjavik puis la route jusqu'à la forteresse templière du volcan. Derrière, l'Enfer de Lucifer est habité, en contrepoint des Enfers vides d'Hadès : une prison, pas une demeure. Pourquoi certains partent-ils quand d'autres restent ? Et qui jette ?",
 			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["scandinavie", "au_dela"],
-			"tags": {"peuples": ["anges_demons"], "lieux": ["akureyri", "enfer"], "themes": ["mondes_divins", "mythes"]},
+			"tags": {"peuples": ["anges_demons"], "lieux": ["reykjavik", "enfer"], "themes": ["mondes_divins", "mythes"]},
 			"sources": [{"fichier": "cites/20261124_de_mu_aux_mondes_divins.md", "date": "2026-11-24", "citation": "Enfer de Lucifer, un monde infernal", "archive": "cites/20261124_mu_colere_contre_les_dieux.md"}],
 			"apres": ["trame_a"]
 		},
