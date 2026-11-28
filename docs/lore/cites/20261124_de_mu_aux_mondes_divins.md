@@ -10,7 +10,7 @@ Chaque passage de rang, du D au S+, a sa grande quête. Jusqu'au rang B, elles r
 | C | **La route de Saint-Denis** | la route du nord |
 | B | **La porte qui ne devait pas s'ouvrir** | un temple templier près de Lutecia |
 | A | **Le serpent sous la cité** | Mu |
-| A | **L'Hekla** | Akureyri, puis l'Enfer de Lucifer |
+| A | **L'Hekla** | Reykjavik, la forteresse du volcan, puis l'Enfer de Lucifer |
 | S | **Rome, vers le Paradis** | Rome |
 | S | **Yggdrasil** | une cité du Nord |
 | S+ | **Celui qui était avant** | hors de toute mythologie |
@@ -130,7 +130,7 @@ Le siège d'**Uanna**, celui des Sages qui veille sur les seuils naturels, tient
 
 ## Après Mu, les mondes divins
 
-**L'Hekla.** Toujours au rang A, on y va comme on revient de Mu : par Notre-Dame, puis le réseau des portails jusqu'à Reykjavik, puis la route jusqu'à Akureyri, dont les Templiers gardent le gouffre, sous le volcan, au sud de l'île. Derrière s'étend l'**Enfer de Lucifer**. Ce monde n'a rien à voir avec les Enfers d'Hadès, et il est **habité**. L'Ange de lumière déchu n'est pas parti : on l'a jeté là. L'Enfer est une prison, pas une demeure. Les demeures divines ne sont donc pas toutes vides. Mais pourquoi certains partent-ils quand d'autres restent ? Et qui jette ? L'épreuve des Templiers, les neuf cercles et la parole de Lucifer : [Akureyri et l'Hekla](20260820_decrire_akureyri_fortifiee.md).
+**L'Hekla.** Toujours au rang A, on y va comme on revient de Mu : par Notre-Dame, puis le réseau des portails jusqu'à Reykjavik, puis la route vers le sud, jusqu'à la forteresse que les Templiers de Reykjavik tiennent sous le volcan. Derrière s'étend l'**Enfer de Lucifer**. Ce monde n'a rien à voir avec les Enfers d'Hadès, et il est **habité**. L'Ange de lumière déchu n'est pas parti : on l'a jeté là. L'Enfer est une prison, pas une demeure. Les demeures divines ne sont donc pas toutes vides. Mais pourquoi certains partent-ils quand d'autres restent ? Et qui jette ? L'épreuve des Templiers, les neuf cercles et la parole de Lucifer : [Reykjavik et l'Hekla](20260820_decrire_l_histoire_de_reykjavik.md).
 
 **Rome, vers le Paradis.** Au rang S, le portail de Saint-Pierre ouvre sur un monde divin. ?{Les habitants de Telluris ne savent même pas si c'est vraiment le Paradis : ils l'appellent ainsi faute d'un autre mot. Beauté surnaturelle, êtres semblables à des anges, gardiens, paysages impossibles, peut-être une cité céleste. Les anges répondent de façon ambiguë : « Nous servons celui qui nous a donné notre existence », « Votre monde n'est pas notre monde », « Vos dieux vous ont menti. » Est-ce vrai ? Ces êtres semblent pourtant protéger sincèrement leur monde. À Rome, les Templiers veulent tenir l'expédition, les autorités religieuses veulent l'empêcher, la Guilde veut savoir.}?
 

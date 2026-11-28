@@ -100,9 +100,9 @@ La **Chapelle Palatine** abrite cinq portails en pentagramme, l'œuvre d'un des 
 
 ### Reykjavik et Akureyri, l'Islande des dragons
 
-L'Islande regorge de dragons et de grands monstres volants. Reykjavik est guidée en secret par un **dragon empereur**, plus ancien que les premiers Anthropes. Il souffle des prémonitions aux gouverneurs dans leurs rêves et arrange leurs rencontres. Ses motifs sont inconnus, mais il agit toujours au profit des Islandais. Le maître de la guilde est en contact constant avec lui. La **Hallgrímskirkja** abrite le portail vers le reste du monde, qui mène à Nidaros, sur le continent ; elle est partagée entre les Templiers et les Paladins.
+L'Islande regorge de dragons et de grands monstres volants. Reykjavik est guidée en secret par un **dragon empereur**, plus ancien que les premiers Anthropes. Il souffle des prémonitions aux gouverneurs dans leurs rêves et arrange leurs rencontres. Ses motifs sont inconnus, mais il agit toujours au profit des Islandais. Le maître de la guilde est en contact constant avec lui. La **Hallgrímskirkja** abrite le portail vers le reste du monde, qui mène à Nidaros, sur le continent ; elle est partagée entre les Templiers et les Paladins. Les Templiers de Reykjavik gardent aussi, depuis une forteresse bâtie sous le volcan, le gouffre de l'**Hekla**, au sud de l'île : le pendant de Saint-Pierre, une porte vers l'**Enfer de Lucifer**, l'ancien ange de lumière.
 
-**Akureyri**, cité fortifiée, commerce avec Reykjavik par un portail que la Vague a altéré. Ses Templiers gardent aussi l'accès au gouffre de l'**Hekla**, sous le volcan, au sud de l'île : le pendant de Saint-Pierre, une porte vers l'**Enfer de Lucifer**, l'ancien ange de lumière.
+**Akureyri**, cité fortifiée, commerce avec Reykjavik par un portail que la Vague a altéré.
 
 ### Camelot, la cité de la Table ronde
 

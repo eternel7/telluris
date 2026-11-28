@@ -69,7 +69,7 @@ Séance `docs/lore/monde/20261125_archives_akashiques.md`.
 	- ils enseignent une magie dangereuse comme une **épreuve** (« Nous ne sommes qu'une épreuve. Ne renonce pas à ta sagesse. ») ;
 	- origine des écoles de magie et de la responsabilité du lanceur ;
 	- question laissée ouverte : qui les a envoyés ?
-- **Gouffre de l'Hekla** (21/08) : son histoire, sa garde, le secret partagé entre Reykjavik et Akureyri.
+- **Gouffre de l'Hekla** (21/08) : son histoire, sa garde et son secret, tenus par les Templiers de Reykjavik (Auteur, 28/11).
 - **Séance fondatrice** (12/08) :
 	- trois natures de portail : **Traversée / Profondeur / Transcendance** ;
 	- « les monstres ne devraient pas tous être mauvais » ;

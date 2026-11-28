@@ -147,11 +147,11 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 ## Akureyri — `lieu:akureyri` · [cites/20260820_decrire_akureyri_fortifiee.md], [cites/20260820_decrire_akureyri_fortifiee.md]
 **Auteur**
 - Cité fortifiée qui commerce avec Reykjavik.
-- Le gouffre de l'**Hekla**, dans les grottes profondes **sous le volcan, au sud de l'île** (géographie réelle, arbitré 24/11), est le **pendant** de Saint-Pierre : une porte ouverte vers l'**Enfer de Lucifer**, l'ange de lumière. Akureyri n'est pas bâtie dessus : ses **Templiers en gardent l'accès** (24/11).
+- Le gouffre de l'**Hekla**, dans les grottes profondes **sous le volcan, au sud de l'île** (géographie réelle, arbitré 24/11), est le **pendant** de Saint-Pierre : une porte ouverte vers l'**Enfer de Lucifer**, l'ange de lumière. Ce sont les **Templiers de Reykjavik** qui le gardent, pas ceux d'Akureyri (Auteur, 28/11) : le gouffre est raconté dans la séance de Reykjavik.
 
 **Tableau de l'Auteur (26/08)** : Akureyri → Reykjavik, forteresse-portail des Templiers, active mais altérée, passages instables scellés.
 
-**Proposé** : garde du gouffre, rapports Reykjavik/Akureyri au secret — voir le fichier.
+**Proposé** : serres fortifiées, avant-poste du Nord, donjons septentrionaux — voir le fichier.
 
 ## Camelot — [cites/20261021_camelot_winchester.md]
 **Auteur (21/10, trois questionnaires)**
