@@ -1,0 +1,257 @@
+{
+	"modele": "gemini-3.1-flash-lite-image",
+	"batch": null,
+	"lots": [
+		"batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5",
+		"batches/c7hkmir6c8m1aj4txeya58nkle7uaodv4m1g",
+		"batches/dxjge9bo9holy7x8vqkru2ik3aqlq2la5m56",
+		"batches/j78soomlzs57vqrjecx1py40kcxkq6sxjz16"
+	],
+	"images": {
+		"charon": "charon_transparent.webp",
+		"minos": "minos_transparent.webp",
+		"ciacco": "ciacco_transparent.webp",
+		"plutus": "plutus_transparent.webp",
+		"phlegyas": "phlegyas_transparent.webp",
+		"furie_alecto": "furie_alecto_transparent.webp",
+		"furie_megere": "furie_megere_transparent.webp",
+		"furie_tisiphone": "furie_tisiphone_transparent.webp",
+		"geryon": "geryon_transparent.webp",
+		"malacoda": "malacoda_transparent.webp",
+		"antee": "antee_transparent.webp",
+		"malebranche": "malebranche_transparent.webp",
+		"ange_dechu": "ange_dechu_transparent.webp",
+		"lonza": "lonza_transparent.webp",
+		"louve_maigre": "louve_maigre_transparent.webp",
+		"chienne_noire": "chienne_noire_transparent.webp",
+		"bm_cavite_du_malebranche": "cavite_du_malebranche01.webp",
+		"bm_arene_de_l_avarice": "arene_de_l_avarice01.webp",
+		"bm_tour_des_furies": "tour_des_furies01.webp",
+		"bm_foret_des_suicides": "foret_des_suicides01.webp",
+		"bm_fosse_des_serpents": "fosse_des_serpents01.webp",
+		"bm_bord_du_puits": "bord_du_puits_d_antee01.webp",
+		"lieu_forteresse": "forteresse_de_l_hekla01.webp",
+		"lieu_cour": "cour_de_la_forteresse_de_l_hekla01.webp",
+		"lieu_cellules": "cellules_de_la_forteresse_de_l_hekla01.webp",
+		"lieu_seuil": "seuil_de_l_hekla01.webp",
+		"lieu_porte_du_festin": "porte_du_festin01.webp",
+		"pnj_gizurr": "commandeur_elfe_m_forteresse_de_l_hekla01.webp",
+		"pnj_demon_captif": "demon_captif_forteresse_de_l_hekla01.webp",
+		"pnj_vieillard_des_limbes": "vieillard_des_limbes01.webp",
+		"pnj_femme_du_tombeau": "femme_du_tombeau_dite01.webp",
+		"pnj_prisonnier_cornu": "prisonnier_cornu_malebolge01.webp",
+		"pnj_gardien_enchaine": "gardien_enchaine_malebolge01.webp",
+		"lion": "lion_des_enfers_transparent.webp",
+		"bm_rive_de_l_acheron": "rive_de_l_acheron01.webp",
+		"bm_corniches_du_vent": "corniches_du_vent01.webp",
+		"bm_fange_de_la_gourmandise": "fange_de_la_gourmandise01.webp",
+		"bm_salle_du_festin": "salle_du_festin01.webp",
+		"bm_passerelles_du_styx": "passerelles_du_styx01.webp",
+		"bm_portes_de_dite": "portes_de_dite01.webp",
+		"bm_champ_des_tombeaux": "champ_des_tombeaux01.webp",
+		"bm_rive_du_phlegethon": "rive_du_phlegethon01.webp",
+		"bm_desert_de_feu": "desert_de_feu01.webp",
+		"bm_fosse_de_poix": "fosse_de_poix01.webp",
+		"bm_ponts_des_flammes": "ponts_des_flammes01.webp",
+		"lieu_commanderie": "commanderie_de_reykjavik01.webp",
+		"lieu_haut_enfer": "entree_du_haut_enfer01.webp",
+		"lieu_porte_des_tombeaux": "porte_des_tombeaux02.webp",
+		"lieu_puits_des_geants": "puits_des_geants01.webp",
+		"lieu_cocyte": "coeur_du_cocyte02.webp",
+		"pnj_lucifer": "lucifer_cocyte03.webp"
+	},
+	"echecs": [
+		{
+			"cle": "louve_maigre",
+			"fichier": null,
+			"motif": "détourage par défaut (fond magenta terne) : pelage rongé / teinte virée ; re-détouré dur=30 doux=60",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "geryon",
+			"fichier": null,
+			"motif": "détourage par défaut (fond magenta terne) : pelage rongé / teinte virée ; re-détouré dur=30 doux=60",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_rive_de_l_acheron",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_corniches_du_vent",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_fange_de_la_gourmandise",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_salle_du_festin",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_passerelles_du_styx",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_portes_de_dite",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_champ_des_tombeaux",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_rive_du_phlegethon",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_desert_de_feu",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_fosse_de_poix",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "bm_ponts_des_flammes",
+			"fichier": null,
+			"motif": "carte en vue oblique/panorama : grille illisible",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "lion",
+			"fichier": null,
+			"motif": "halo magenta dessiné autour de la crinière (prompt « l'air tremble »)",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "lieu_commanderie",
+			"fichier": null,
+			"motif": "un personnage à la peau verte (règle des ogres)",
+			"lot": "batches/cxr7qojcey8vb3qc5i81fh4gw94tojn9gnd5"
+		},
+		{
+			"cle": "lion",
+			"fichier": null,
+			"motif": "liseré magenta sur la crinière au détourage par défaut ; re-détouré dur=90 doux=160",
+			"lot": "batches/c7hkmir6c8m1aj4txeya58nkle7uaodv4m1g"
+		}
+	],
+	"remplacees": [
+		{
+			"cle": "bm_rive_de_l_acheron",
+			"fichier": "rive_de_l_acheron01.jpg"
+		},
+		{
+			"cle": "bm_corniches_du_vent",
+			"fichier": "corniches_du_vent01.jpg"
+		},
+		{
+			"cle": "bm_fange_de_la_gourmandise",
+			"fichier": "fange_de_la_gourmandise01.jpg"
+		},
+		{
+			"cle": "bm_salle_du_festin",
+			"fichier": "salle_du_festin01.jpg"
+		},
+		{
+			"cle": "bm_passerelles_du_styx",
+			"fichier": "passerelles_du_styx01.jpg"
+		},
+		{
+			"cle": "bm_portes_de_dite",
+			"fichier": "portes_de_dite01.jpg"
+		},
+		{
+			"cle": "bm_champ_des_tombeaux",
+			"fichier": "champ_des_tombeaux01.jpg"
+		},
+		{
+			"cle": "bm_rive_du_phlegethon",
+			"fichier": "rive_du_phlegethon01.jpg"
+		},
+		{
+			"cle": "bm_desert_de_feu",
+			"fichier": "desert_de_feu01.jpg"
+		},
+		{
+			"cle": "bm_fosse_de_poix",
+			"fichier": "fosse_de_poix01.jpg"
+		},
+		{
+			"cle": "bm_ponts_des_flammes",
+			"fichier": "ponts_des_flammes01.jpg"
+		},
+		{
+			"cle": "lion",
+			"fichier": "lion_des_enfers_transparent.webp"
+		},
+		{
+			"cle": "lieu_commanderie",
+			"fichier": "commanderie_de_reykjavik01.jpg"
+		},
+		{
+			"cle": "lieu_haut_enfer",
+			"fichier": "entree_du_haut_enfer01.jpg"
+		},
+		{
+			"cle": "lieu_porte_des_tombeaux",
+			"fichier": "porte_des_tombeaux01.jpg"
+		},
+		{
+			"cle": "lieu_puits_des_geants",
+			"fichier": "puits_des_geants01.jpg"
+		},
+		{
+			"cle": "lieu_cocyte",
+			"fichier": "coeur_du_cocyte01.jpg"
+		},
+		{
+			"cle": "pnj_lucifer",
+			"fichier": "lucifer_cocyte01.jpg"
+		},
+		{
+			"cle": "pnj_lucifer",
+			"fichier": "lucifer_cocyte02.jpg"
+		}
+	],
+	"retenues": {
+		"lieu_cocyte": "coeur_du_cocyte02.webp",
+		"lieu_haut_enfer": "entree_du_haut_enfer01.webp",
+		"lieu_porte_des_tombeaux": "porte_des_tombeaux02.webp",
+		"lieu_puits_des_geants": "puits_des_geants01.webp",
+		"bm_desert_de_feu": "desert_de_feu01.webp",
+		"bm_portes_de_dite": "portes_de_dite01.webp",
+		"pnj_lucifer": "lucifer_cocyte03.webp"
+	},
+	"non_retenues": [
+		"dev/batch/hekla/originaux/coeur_du_cocyte01.webp",
+		"dev/batch/hekla/originaux/entree_du_haut_enfer02.webp",
+		"dev/batch/hekla/originaux/porte_des_tombeaux01.webp",
+		"dev/batch/hekla/originaux/puits_des_geants02.webp",
+		"dev/batch/hekla/originaux/lucifer_cocyte01.webp",
+		"dev/batch/hekla/originaux/lucifer_cocyte02.webp"
+	],
+	"note": "brutes/ et echecs/ supprimés à la demande de l'Auteur (28/11/2026) ; les motifs d'échec restent dans `echecs`."
+}
