@@ -326,6 +326,24 @@ TABLE = {
 	"naga": ("1x2", "ellipse"),
 	"murene_geante": ("1x2", "capsule"),
 	"echidna": ("4x3", "capsule"),
+	# L'Hekla (dev/gen_monstres_hekla.py, 28/11).
+	"charon": None,
+	"minos": ("2x2", "rectangle"),
+	"ciacco": None,
+	"plutus": None,
+	"phlegyas": None,
+	"furie_alecto": None,
+	"furie_megere": None,
+	"furie_tisiphone": None,
+	"geryon": ("3x2", "capsule"),
+	"malacoda": None,
+	"antee": ("4x3", "rectangle"),
+	"malebranche": None,
+	"ange_dechu": None,
+	"lonza": ("1x2", "ellipse"),
+	"lion_des_enfers": ("1x2", "ellipse"),
+	"louve_maigre": None,
+	"chienne_noire": None,
 }
 
 

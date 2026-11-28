@@ -50,6 +50,8 @@ FEMININS = {
 	"lilitu", "umu_dabrutu",
 	# Mu (dev/gen_monstres_mu.py, 26/11).
 	"murene_geante", "echidna",
+	# L'Hekla (dev/gen_monstres_hekla.py, 28/11) : les trois Furies et les bêtes de Dante.
+	"furie_alecto", "furie_megere", "furie_tisiphone", "lonza", "louve_maigre", "chienne_noire",
 }
 
 MASCULINS = {
@@ -95,6 +97,9 @@ MASCULINS = {
 	"kalanoro", "fanany", "songomby", "lalomena", "tokantongotra", "trimobe",
 	# Mu (dev/gen_monstres_mu.py, 26/11).
 	"naga",
+	# L'Hekla (dev/gen_monstres_hekla.py, 28/11) : gardiens, geôliers et le Lion.
+	"charon", "minos", "ciacco", "plutus", "phlegyas", "geryon", "malacoda", "antee", "malebranche",
+	"ange_dechu", "lion_des_enfers",
 }
 
 PLURIELS = {
@@ -115,7 +120,10 @@ PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupido
 		   # Madagascar (dev/gen_monstres_madagascar.py, 24/11) : l'ogre des contes.
 		   "trimobe",
 		   # Mu (dev/gen_monstres_mu.py, 26/11) : la mère des serpents.
-		   "echidna"}
+		   "echidna",
+		   # L'Hekla (dev/gen_monstres_hekla.py, 28/11) : les gardiens des neuf cercles, chacun nommé.
+		   "charon", "minos", "ciacco", "plutus", "phlegyas", "furie_alecto", "furie_megere", "furie_tisiphone",
+		   "geryon", "malacoda", "antee"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

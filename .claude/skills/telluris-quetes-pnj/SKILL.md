@@ -243,6 +243,17 @@ Contenu : `dev/gen_quetes_de_mu.py` (+ espèces `dev/gen_monstres_mu.py` : Naga,
 
 Verrouillé par `tests/test_quetes_de_mu.py`.
 
+#### L'Hekla — l'arc de rang A après Mu
+Contenu : `dev/gen_quetes_de_l_hekla.py` (+ espèces `dev/gen_monstres_hekla.py`, images `dev/gen_images_hekla.py`) → **un seul** `jsons/quetes_de_l_hekla_a_importer.json`. Conception : `docs/plan_hekla.md`, `docs/hekla_neuf_cercles.md`.
+- **Chemin** : Aélis de Mu (scellement compris) donne rendez-vous ; Notre-Dame tire Hallgrímskirkja, Nidaros ou Bruges (liens portail Hallgrímskirkja ↔ Nidaros ↔ Bruges, Nidaros = son seul portail) ; forteresse (Islande (41,38)) ouverte à la copie du relevé **ou** à l'épreuve.
+- **Épreuve** : deux apports EXCLUSIFS (`libre_de_l_autre`), un donneur chacun — chasse (Gizurr : déduction des traces au bouton 🔍 de l'Islande, puis cavité à `combat_arrivee`, Malebranche `ia_fuyard_30`) · ruse (Sæmundr : déduction du registre aux cellules, aveu = `don` du démon). Seuil ouvert par `ou` des deux.
+- ⚠️ **Une salle classique ne s'ouvre QUE par le service `acces` d'un PNJ** (un par salle) : chaque espace des cercles est un LIEU EXPLORABLE (carte + grille) à `combat_arrivee` pour les geôliers secondaires, le gardien y est un PNJ POSTÉ (`cases`) qui ouvre sa salle gardée (même carte) ; `combat_gagne` ouvre le passage suivant pour toujours. Un donjon à étages ne note aucune victoire : jamais pour une chaîne de gardiens.
+- **Furies** = trois espèces, rôle porté par le KIT (le profil est tiré au hasard ; les profils universels restent compatibles) : Tisiphone sans tag `magique`/`distance`, Mégère `magie_demonologie_5` sans suffixe, Alecto `distance` + crachat de feu.
+- **Registre des entrées** : condition de dialogue `intro_raison` (`None` = aucune raison inscrite). Descente = apport d'Aélis, 800 XP (600 + 200, une seule quête), preuve = givre remis par Lucifer ; issue du Cocyte à sens unique (`bouton: false` côté seuil).
+- Grilles des 17 cartes relevées à l'œil (une composante gardée par `_principale`), à retoucher dans l'éditeur.
+
+Verrouillé par `tests/test_quetes_de_l_hekla.py`.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.

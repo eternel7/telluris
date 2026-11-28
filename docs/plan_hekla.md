@@ -212,3 +212,11 @@ Ce que l'expérience établit à coup sûr : l'Enfer de Lucifer est une prison q
 - **Épreuve de ruse** : une énigme de déduction de **3 gardes × 3 postes** (couloir de garde, cellules, porte extérieure) **× 3 tranches de nuit**. Le registre donne quelques cases, les dires du démon le reste ; la seule solution est celle où il ment.
 - **Images** : générées **en local avec l'API Gemini**. Je livre les prompts au format du lot `dev/batch/*/prompts.json`, complets, commençant par « Réalise l'image de… » ; les battlemaps finissent par « La vue est aérienne. C'est une battlemap. » Les grilles des cartes de combat se relèvent une fois les images déposées.
 - **Générateur** : unique, `dev/gen_quetes_de_l_hekla.py` → **un seul** `jsons/quetes_de_l_hekla_a_importer.json`.
+
+## 13. Mise en jeu (décisions du 28/11/2026)
+
+- **Accès** : la Hallgrímskirkja (sous-lieu de Reykjavik) et un sanctuaire-portail à Nidaros, reliés par un lien portail ; un second lien Nidaros ↔ Bruges, pour rentrer par Bruges puis la route. Notre-Dame tire ces seuils comme les autres.
+- **Neuf cercles en salles gardées enchaînées** : chaque espace est un lieu où l'on marche ; les geôliers secondaires attaquent à l'arrivée et reprennent leur poste ; chaque gardien est posté sur sa carte, parle, puis ouvre son combat. Vaincu, il ne revient pas, et le passage suivant reste ouvert. Les quatre seuils entre donjons restent ceux du § 7.
+- **Furies** : trois espèces, une par sœur ; Tisiphone au fouet, Mégère qui maudit, Alecto qui crache le feu de loin.
+- **XP de la descente** : une seule quête d'Aélis, 800 XP (l'entretien et le récit) ; Lucifer remet un éclat de givre du Cocyte qui ne fond pas, qu'on rapporte au seuil.
+- **Images provisoires** : la Hallgrímskirkja et Nidaros portent des portails génériques en attendant les leurs.

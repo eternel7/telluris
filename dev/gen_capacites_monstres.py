@@ -269,6 +269,23 @@ for _c, _especes in {
 }.items():
 	for _e in _especes:
 		ATTRIBUTION.setdefault(_e, []).append(_c)
+# L'Hekla (dev/gen_monstres_hekla.py, 28/11) : les rôles des trois Furies tiennent dans leur KIT (le profil
+# est tiré au hasard) — Tisiphone saisit de son fouet de serpents au contact, Mégère maudit, Alecto crache le
+# feu de loin ; Géryon frappe de sa queue de scorpion, Minos enroule la sienne, Antée étouffe.
+for _c, _especes in {
+	"etreinte": ["furie_tisiphone", "minos", "antee"],
+	"venin": ["furie_tisiphone", "geryon"],
+	"malediction_du_tombeau": ["furie_megere"],
+	"crachat_de_feu": ["furie_alecto"],
+	"embrasement": ["furie_alecto"],
+	"dard_caudal": ["geryon"],
+	"charme": ["geryon", "lonza"],
+	"hurlement_terrifiant": ["minos", "plutus", "lion_des_enfers"],
+	"regeneration": ["ciacco", "antee"],
+	"hurlement_de_meute": ["chienne_noire"],
+}.items():
+	for _e in _especes:
+		ATTRIBUTION.setdefault(_e, []).append(_c)
 
 # Tags de magie (sorts tirés) — repères : apprenti 2 · mage 5 · héros mage 8 · seigneur mage 10.
 MAGIE = {
@@ -344,6 +361,15 @@ MAGIE = {
 	# Mu (dev/gen_monstres_mu.py, 26/11) : les Naga savent l'eau, Échidna la mer entière.
 	"naga": ["magie_elementaire_3"],
 	"echidna": ["magie_elementaire_6"],
+	# L'Hekla (dev/gen_monstres_hekla.py, 28/11). Mégère : SANS suffixe de profil, elle maudit quel que soit
+	# le profil tiré ; Malacoda ment (illusions) ; Charon tient le passage des morts ; Phlégyas allume le
+	# feu de la tour ; les anges déchus gardent les portes de Dité.
+	"furie_megere": ["magie_demonologie_5"],
+	"malacoda": ["magie_illusoire_4"],
+	"charon": ["magie_necromancie_3"],
+	"phlegyas": ["magie_elementaire_3"],
+	"minos": ["magie_demonologie_4"],
+	"ange_dechu": ["magie_demonologie_3"],
 }
 
 # Tags d'IA.
@@ -439,6 +465,19 @@ for _tag, _especes in {
 	"ia_hit_and_run": ["naga"],
 	"ia_embuscade": ["murene_geante"],
 	"ia_predateur": ["echidna"],
+}.items():
+	for _e in _especes:
+		IA.setdefault(_e, []).append(_tag)
+# L'Hekla (dev/gen_monstres_hekla.py, 28/11). Le Malebranche fugitif observe, tire de loin et FUIT à 30 %
+# de ses PV (docs/plan_hekla.md § 12) ; Alecto garde ses distances ; Tisiphone garde ses sœurs.
+for _tag, _especes in {
+	"ia_fuyard_30": ["malebranche"],
+	"ia_artilleur": ["malebranche", "furie_alecto"],
+	"ia_protecteur": ["furie_tisiphone", "ange_dechu"],
+	"ia_berserker": ["plutus", "phlegyas", "antee"],
+	"ia_predateur": ["geryon", "lion_des_enfers", "louve_maigre"],
+	"ia_hit_and_run": ["lonza", "malacoda"],
+	"ia_meute": ["chienne_noire"],
 }.items():
 	for _e in _especes:
 		IA.setdefault(_e, []).append(_tag)
