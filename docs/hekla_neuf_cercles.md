@@ -4,7 +4,7 @@ Proposition arbitrée le 28/11/2026, préalable à `dev/gen_quetes_de_l_hekla.py
 
 **Règle de peuplement** : on ne combat **que les geôliers et la cohorte**, jamais les détenus. Les damnés de Dante restent du **décor ou des dialogues**.
 
-**Grades** (le rang A couvre les niveaux 51 à 60 ; Échidna, au grade 5-6, dépasse un groupe de rang A) : la difficulté monte d'un segment à l'autre. Combats secondaires de grade 3-4. Gardiens de grade 4 dans le donjon 1, de 4 à 5 dans le donjon 2, de grade 5 dans le donjon 3, Antée de grade 5. Chiffres définitifs au générateur.
+**Grades** (décidés le 28/11) : gardiens de grade 4 dans le donjon 1, de 4 à 5 dans le donjon 2, de grade 5 dans le donjon 3, Antée de grade 5 ; combats secondaires de grade 3-4. Tous restent sous Échidna (grade 5-6). Un gardien vaincu ne revient pas ; les geôliers secondaires reprennent leur poste.
 
 ---
 

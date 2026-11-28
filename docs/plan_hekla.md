@@ -38,7 +38,7 @@
 
 | Personnage | Rôle |
 |---|---|
-| **Commandeur** (elfe, pragmatique, nom islandais ancien à choisir) | Sécurité, autorisations, confinement. Il n'est l'ennemi de personne. « Je ne suis pas ici pour comprendre ce qui se trouve derrière cette porte. Je suis ici pour m'assurer que cela y reste. » |
+| **Gizurr Þórvaldsson**, commandeur (elfe, pragmatique ; nom repris d'un homme de pouvoir islandais réel) | Sécurité, autorisations, confinement. Il n'est l'ennemi de personne. « Je ne suis pas ici pour comprendre ce qui se trouve derrière cette porte. Je suis ici pour m'assurer que cela y reste. » |
 | **Sæmundr** (`pnj:saemundr_d_akureyri`, humain élémentaliste) | Natif d'Akureyri, il en garde le nom ; affecté à la forteresse. Expert des démons et des manifestations du seuil. « Seulement un démon mineur, et pas si bête. » |
 | **Aélis de Montfaucon** | Vient jusqu'au seuil, **ne le franchit pas**. Elle étudie le portail et attend le récit. Elle **vouvoie** l'aventurier, comme partout en jeu. |
 | **Aventurier** | Fait l'épreuve d'accès, descend seul, rapporte ce qu'il a vu. |
@@ -198,13 +198,17 @@ Ce que l'expérience établit à coup sûr : l'Enfer de Lucifer est une prison q
 - **Présentation** : le joueur est désigné au neutre, au « vous ». Lucifer est un être d'un autre monde, « l'ancien ange de lumière », sans lien avec une religion des Cités-États. L'arc reste court : accès, descente, entretien.
 - **Aucune trace des décisions remplacées** dans le lore.
 
-## 12. Reste à concevoir (production)
+## 12. Production (décisions du 28/11/2026)
 
-- **Nom du commandeur** (islandais ancien).
-- **Chaque cercle** : apparence, déformation de sa faute, obstacles, carte de combat, éventuels dialogues, combat du gardien, transition vers le cercle suivant.
-- **Grades et niveaux** des neuf gardiens, du Malebranche et du démon captif (rang A).
-- **Grille de l'énigme de déduction** (gardes, postes, tranches de nuit, indices).
-- **Dialogues** : commandeur, Sæmundr, Aélis à l'aller, Aélis au retour en deux versions, les quatre détenus, Lucifer.
-- **Lieux** : commanderie à Reykjavik, route du volcan, forteresse, seuil, les quatre donjons.
-- **Production** : un générateur unique `dev/gen_quetes_de_l_hekla.py` → **un seul** `jsons/quetes_de_l_hekla_a_importer.json`.
-- **Images** : portraits et battlemaps des neuf cercles. Chaque prompt est complet, commence par « Réalise l'image de… » ; les battlemaps finissent par « La vue est aérienne. C'est une battlemap. »
+- **Peuplement des cercles et monstres à créer** : `docs/hekla_neuf_cercles.md`.
+- **Grades** : donjon 1 au grade 4, donjon 2 de 4 à 5, donjon 3 au grade 5, Antée au grade 5 ; combats secondaires de grade 3-4. Tous restent sous Échidna (grade 5-6).
+- **Gardiens vaincus** : ils **ne reviennent pas** pour ce personnage (`combat_gagne`, seuils ouverts pour toujours). Les **geôliers secondaires reprennent leur poste**, car la prison fonctionne.
+- **XP** : épreuve d'accès **400**, entretien avec Lucifer **600**, récit à Aélis au retour **200** ; les gardiens donnent leur XP de monstre.
+- **Lieux de surface** :
+  - la **commanderie**, sous-lieu de Reykjavik ;
+  - la **forteresse**, posée au sud sur la carte de l'Islande (`lieu:islande`), avec trois sous-lieux : la cour, les cellules, le seuil ;
+  - la **cavité du Malebranche**, une salle de combat sur la route du volcan.
+- **Épreuve de chasse** : Sæmundr décrit le fugitif. On relève **trois indices** sur la route du volcan (griffures, résidus sombres, restes d'animaux), puis on combat dans la cavité. Le Malebranche **fuit à 30 % de ses PV** : il faut l'en empêcher ou le rattraper.
+- **Épreuve de ruse** : une énigme de déduction de **3 gardes × 3 postes** (couloir de garde, cellules, porte extérieure) **× 3 tranches de nuit**. Le registre donne quelques cases, les dires du démon le reste ; la seule solution est celle où il ment.
+- **Images** : générées **en local avec l'API Gemini**. Je livre les prompts au format du lot `dev/batch/*/prompts.json`, complets, commençant par « Réalise l'image de… » ; les battlemaps finissent par « La vue est aérienne. C'est une battlemap. » Les grilles des cartes de combat se relèvent une fois les images déposées.
+- **Générateur** : unique, `dev/gen_quetes_de_l_hekla.py` → **un seul** `jsons/quetes_de_l_hekla_a_importer.json`.
