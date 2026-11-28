@@ -246,6 +246,7 @@ Le 28/11, l'Auteur a remis un document de conception consolidé (copié ci-desso
 | Raccourci du Cocyte | **Sens unique, du dedans**, pour qui a parlé à Lucifer et n'est pas détenu ; le commandeur, averti, le fait garder. |
 | Aélis | **Jusqu'au seuil** ; elle **vouvoie** (comme partout en jeu). |
 | Retour | **Conclusion par voie** de Mu : comparaison vue (parole) ou hypothèse (combat). |
+| Origines du personnage | La raison du départ choisie à l'intro (`intro.raison` : pillage, famine, exil, secret) est remise en question : **Minos ouvre** au 2ᵉ cercle, puis **chaque raison a son cercle** (pillage → Violence, famine → Ciacco, exil → Minos, secret → Lucifer ; aucune raison → Minos ne trouve aucune ligne). Doute **par touches** : fidélité du souvenir pour tous, culpabilité pour l'exil, frôlement méta pour qui n'a rien d'inscrit. La **voix tutoyante de l'intro revient** (seule exception au « vous »). **Dialogue + entrée de carnet** ; Aélis sent un changement au retour ; aucune mécanique (28/11). |
 
 ## Document remis par l'Auteur (28/11/2026)
 

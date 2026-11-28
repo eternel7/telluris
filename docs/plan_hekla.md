@@ -127,6 +127,31 @@ Le moteur fait de toute la descente d'un donjon à étages **un seul combat**, q
 
 Ces rencontres ne doivent jamais former une chronologie cohérente.
 
+## 8 bis. Le registre des entrées : les origines du personnage
+
+À l'intro, le personnage a répondu à « Pourquoi avoir quitté les tiens ? ». Le moteur garde sa réponse dans `character.intro.raison` : `pillage`, `famine`, `exil` ou `secret`. Aucun contenu ne s'en servait encore ; la condition de dialogue `intro_raison` existe déjà dans `utils/pnj.py`. L'Enfer est le premier lieu où ce choix revient, parce que la prison **juge** et qu'elle **tient registre**.
+
+**Ouverture, la même pour tous** : au 2ᵉ cercle, Minos enroule sa queue pour assigner un cercle au vivant, puis s'arrête. « Tu n'es pas entré ici pour la première fois aujourd'hui. Tu es entré quand tu as quitté les tiens. » Comment le sait-il ? Le jeu ne le dit jamais.
+
+**La voix de l'intro revient** : c'est le « tu » du tout début (« Tu n'avais jamais imaginé quitter ton village… »). C'est la seule exception au « vous » du jeu, et elle est voulue.
+
+**Chaque raison a son cercle.** La prison ne dément rien, elle fissure le souvenir :
+
+| Raison à l'intro | Cercle | Scène | Doute |
+|---|---|---|---|
+| `pillage` | VII · Violence | Un détenu décrit l'incendie, sans y voir d'hommes : « Des pillards ? Ceux qui n'ont rien vu disent toujours des pillards. » | **Fidélité du souvenir** : des pillards, ou un débordement ? |
+| `famine` | III · chez Ciacco | « La terre ne refuse jamais. Le grain va toujours quelque part. » | **Fidélité du souvenir** : une disette, ou du grain détourné ? |
+| `exil` | II · chez Minos | Minos propose de dire si la sentence était juste. On peut **refuser d'entendre**. S'il parle, il ne nomme qu'un cercle, jamais un acte. | **Culpabilité**, sans preuve : un juge peut se tromper, et la loi de la prison a dérivé. |
+| `secret` | IX · chez Lucifer | « Tu as refusé de le dire. Même à toi ? » On peut se taire encore. | **Fidélité du souvenir** : ce qu'on tait, on finit par l'oublier. |
+| aucune (personnage ancien, ou cité sans intro) | II · chez Minos | Minos ne trouve aucune ligne : « Tu n'es entré nulle part. Ton passé tient en peu de mots. Qui les a écrits ? » | **Frôlement méta**, le seul de l'arc. |
+
+**Le lien avec « qui jette ? »** : au Cocyte, après « Ceux qui étaient avant », Lucifer ajoute « Et toi, qui t'a jeté sur la route ? ». L'aventurier se découvre lui aussi jeté.
+
+**Conséquences** : **aucune mécanique**.
+- Une entrée de carnet garde ce que la prison a dit.
+- Au retour, Aélis remarque que quelque chose a changé, sans savoir quoi.
+- Le souvenir n'est jamais tranché.
+
 ## 9. Le Cocyte et Lucifer
 
 - Lucifer est pris dans la glace, enchaîné, hors d'atteinte. **Ce n'est pas un boss** : on vient lui parler. La scène est calme, presque immobile.
